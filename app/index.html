@@ -3281,7 +3281,7 @@ function graphEngine(wrap,cv,opts){
   const hexA=(hex,a)=>{ const h=hex.replace('#',''); const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; };
   function wrapLines(text,maxW){ const out=[]; for(const para of String(text||'').replace(/\[\/?(c(=[#\w]+)?|b|i|u)\]/g,'').split('\n')){ let line=''; for(const w of para.split(' ')){ const t=line?line+' '+w:w; if(ctx.measureText(t).width>maxW&&line){ out.push(line); line=w; } else line=t; } out.push(line); } return out; }
   function drawNotes(k){ for(const n of notes()){ const p=toScreen(n.x,n.y); const w=(n.w||220)*k, h=(n.h||140)*k, x=p.x-w/2, y=p.y-h/2; const col=n.color||'#ffd166';
-      ctx.save(); ctx.fillStyle=hexA(col,.10); ctx.strokeStyle=col; ctx.lineWidth=1.2; roundRect(ctx,x,y,w,h,8*k); ctx.fill(); ctx.globalAlpha=.55; ctx.stroke(); ctx.globalAlpha=1;
+      ctx.save(); const nsel=!!(opts.noteSel&&opts.noteSel(n)); ctx.fillStyle=hexA(col,nsel?.18:.10); ctx.strokeStyle=col; ctx.lineWidth=nsel?2.4:1.2; roundRect(ctx,x,y,w,h,8*k); ctx.fill(); ctx.globalAlpha=nsel?1:.55; if(nsel){ ctx.shadowColor=col; ctx.shadowBlur=14; } ctx.stroke(); ctx.shadowBlur=0; ctx.globalAlpha=1;
       ctx.beginPath(); ctx.rect(x+2,y+2,w-4,h-4); ctx.clip(); ctx.textAlign='left'; ctx.textBaseline='top'; let ty=y+9*k;
       if(n.title){ ctx.font=`700 ${Math.max(9,13*k)}px Segoe UI`; ctx.fillStyle=col; ctx.fillText(n.title,x+10*k,ty); ty+=19*k; }
       ctx.font=`${Math.max(8,12*k)}px Segoe UI`; ctx.fillStyle='#e4e6f0'; const lh=15*k; for(const ln of wrapLines(n.text,w-20*k)){ if(ty>y+h-lh) break; ctx.fillText(ln,x+10*k,ty); ty+=lh; }
@@ -3325,7 +3325,7 @@ function graphEngine(wrap,cv,opts){
     if(!ns.length&&!notes().length){ ctx.fillStyle='rgba(228,230,240,.3)'; ctx.font='14px Segoe UI'; ctx.textAlign='center'; ctx.fillText(opts.emptyText||'Пусто',W()/2,H()/2); return; }
     ctx.font=`${Math.max(9,11*k)}px Segoe UI`; ctx.textAlign='center'; ctx.textBaseline='middle';
     /* блоки (локации-области) — под всем остальным */
-    for(const n of ns){ const b=blk(n.e); if(!b) continue; const e=n.e, pp=opts.pos(e), p=toScreen(pp.x,pp.y); const w=b.w*k, h=b.h*k, x=p.x-w/2, y=p.y-h/2; const sel=G.sel===e.id; const col=typeColor[n.t];
+    for(const n of ns){ const b=blk(n.e); if(!b) continue; const e=n.e, pp=opts.pos(e), p=toScreen(pp.x,pp.y); const w=b.w*k, h=b.h*k, x=p.x-w/2, y=p.y-h/2; const sel=G.sel===e.id||!!(opts.isSel&&opts.isSel(e.id)); const col=typeColor[n.t];
       ctx.save(); ctx.globalAlpha=1; ctx.fillStyle=hexA(col,sel?.10:.055); ctx.strokeStyle=col; ctx.globalAlpha=sel?.9:.5; ctx.lineWidth=sel?2:1.5; ctx.setLineDash([8*k,6*k]); roundRect(ctx,x,y,w,h,14*k); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
       if(sel){ ctx.shadowColor=col; ctx.shadowBlur=18; ctx.stroke(); ctx.shadowBlur=0; }
       const im=imgs.get(e.id); const r=14*k; ctx.globalAlpha=1;
@@ -3363,7 +3363,7 @@ function graphEngine(wrap,cv,opts){
     const conn=new Set(); if(G.sel) for(const ed of opts.edges()){ if(ed.a===G.sel) conn.add(ed.b); if(ed.b===G.sel) conn.add(ed.a); }
     for(const n of ns){
       if(blk(n.e)) continue;
-      const e=n.e, pp=opts.pos(e), p=toScreen(pp.x,pp.y), r=NODE_R[n.t]*k, col=typeColor[n.t]; const sel=G.sel===e.id; const dim=G.sel&&!sel&&!conn.has(e.id);
+      const e=n.e, pp=opts.pos(e), p=toScreen(pp.x,pp.y), r=NODE_R[n.t]*k, col=typeColor[n.t]; const sel=G.sel===e.id||!!(opts.isSel&&opts.isSel(e.id)); const dim=G.sel&&!sel&&!conn.has(e.id);
       ctx.save(); ctx.globalAlpha=dim?.35:1;
       ctx.shadowColor=col; ctx.shadowBlur=sel?26:12; ctx.fillStyle='#0d1020'; ctx.beginPath(); ctx.arc(p.x,p.y,r,0,7); ctx.fill(); ctx.shadowBlur=0;
       const im=imgs.get(e.id); if(im){ ctx.save(); ctx.beginPath(); ctx.arc(p.x,p.y,r-1,0,7); ctx.clip(); const s=Math.max(2*r/im.width,2*r/im.height); ctx.drawImage(im,p.x-im.width*s/2,p.y-im.height*s/2,im.width*s,im.height*s); ctx.restore(); }
@@ -3384,29 +3384,32 @@ function graphEngine(wrap,cv,opts){
     /* связь поверх блоков и заметок: клик по линии/подписи внутри блока открывает связь (тянуть — двигает вид) */
     if(!n0&&!(opts.onLink&&(e.shiftKey||G.linkMode))&&hitLabel(x,y)){ pan={x,y,cx:cam.x,cy:cam.y}; return; }
     if(!n0){ const nh=hitNoteHandle(x,y); if(nh){ noteResize={n:nh,ox:x,oy:y,w:nh.w||220,h:nh.h||140}; return; }
-      const nt=hitNote(x,y); if(nt){ if(opts.setNote) noteDrag={n:nt,ox:x,oy:y,sx:nt.x,sy:nt.y}; else if(opts.onNote) opts.onNote(nt); return; } }
+      const nt=hitNote(x,y); if(nt){ if(opts.setNote) noteDrag={n:nt,ox:x,oy:y,sx:nt.x,sy:nt.y}; else if(opts.onNoteClick) opts.onNoteClick(nt,e); else if(opts.onNote) opts.onNote(nt); return; } }
     const n=n0||hit(x,y,true);
     if(n&&opts.onLink&&(e.shiftKey||G.linkMode)){ linkDrag={from:n.id,x,y}; return; }
-    if(n&&opts.setPos){ const b=blk(n); const bp=opts.pos(n); const kids=b?opts.nodes().filter(m=>m.e!==n&&!blk(m.e)&&inside(m.e,b,bp)).map(m=>({e:m.e,...opts.pos(m.e)})):[]; drag={e:n,ox:x,oy:y,sx:bp.x,sy:bp.y,kids}; return; }
-    if(n){ opts.onSelect(n.id); return; }
+    if(n&&opts.setPos){ const b=blk(n); const bp=opts.pos(n); const kids=b?opts.nodes().filter(m=>m.e!==n&&!blk(m.e)&&inside(m.e,b,bp)).map(m=>({e:m.e,...opts.pos(m.e)})):[]; let nk=[];
+      if(opts.isSel&&opts.isSel(n.id)){ const has=e_=>e_===n||kids.some(q=>q.e===e_); for(const m of opts.nodes()){ if(!opts.isSel(m.e.id)||has(m.e)) continue; kids.push({e:m.e,...opts.pos(m.e)}); const mb=blk(m.e); if(mb){ const mp_=opts.pos(m.e); for(const q of opts.nodes()) if(!blk(q.e)&&!has(q.e)&&inside(q.e,mb,mp_)) kids.push({e:q.e,...opts.pos(q.e)}); } }
+        if(opts.noteSel&&opts.setNote) nk=notes().filter(q=>opts.noteSel(q)).map(q=>({n:q,x:q.x,y:q.y})); }
+      drag={e:n,ox:x,oy:y,sx:bp.x,sy:bp.y,kids,nk}; return; }
+    if(n){ opts.onSelect(n.id,e); return; }
     pan={x,y,cx:cam.x,cy:cam.y}; cv.style.cursor='grabbing'; };
   const onMove=e=>{ if(!cv.isConnected){ window.removeEventListener('mousemove',onMove); return; } const r=cv.getBoundingClientRect(); const x=e.clientX-r.left, y=e.clientY-r.top;
     if(linkDrag){ linkDrag.x=x; linkDrag.y=y; draw(); return; }
     if(resize){ moved=true; opts.setBlock(resize.e,{w:Math.max(140,resize.w+(x-resize.ox)/cam.k),h:Math.max(90,resize.h+(y-resize.oy)/cam.k)},true); draw(); return; }
     if(noteResize){ moved=true; opts.setNote(noteResize.n,{w:Math.max(120,noteResize.w+(x-noteResize.ox)/cam.k),h:Math.max(60,noteResize.h+(y-noteResize.oy)/cam.k)},true); draw(); return; }
     if(noteDrag){ moved=true; opts.setNote(noteDrag.n,{x:noteDrag.sx+(x-noteDrag.ox)/cam.k,y:noteDrag.sy+(y-noteDrag.oy)/cam.k},true); draw(); return; }
-    if(drag){ moved=true; const ddx=(x-drag.ox)/cam.k, ddy=(y-drag.oy)/cam.k; opts.setPos(drag.e,{x:drag.sx+ddx,y:drag.sy+ddy},true); for(const kd of drag.kids) opts.setPos(kd.e,{x:kd.x+ddx,y:kd.y+ddy},true); draw(); return; }
+    if(drag){ moved=true; const ddx=(x-drag.ox)/cam.k, ddy=(y-drag.oy)/cam.k; opts.setPos(drag.e,{x:drag.sx+ddx,y:drag.sy+ddy},true); for(const kd of drag.kids) opts.setPos(kd.e,{x:kd.x+ddx,y:kd.y+ddy},true); for(const q of drag.nk||[]) opts.setNote(q.n,{x:q.x+ddx,y:q.y+ddy},true); draw(); return; }
     if(pan){ moved=true; cam.x=pan.cx+(x-pan.x)/cam.k; cam.y=pan.cy+(y-pan.y)/cam.k; draw(); return; }
     cv.style.cursor=(hitHandle(x,y)||hitNoteHandle(x,y))?'nwse-resize':((hit(x,y,false)||hitNote(x,y)||hit(x,y,true))?'pointer':(hitLabel(x,y)?'pointer':(G.linkMode?'crosshair':'grab'))); };
   const onUp=e=>{ if(!cv.isConnected){ window.removeEventListener('mouseup',onUp); return; } const r=cv.getBoundingClientRect(); const x=e.clientX-r.left, y=e.clientY-r.top;
     if(linkDrag){ const target=hit(x,y); const from=linkDrag.from; linkDrag=null; if(target&&target.id!==from) opts.onLink(from,target.id); else draw(); return; }
     if(resize){ const b=blk(resize.e); opts.setBlock(resize.e,{w:Math.round(b.w),h:Math.round(b.h)},false); resize=null; return; }
     if(noteResize){ const n=noteResize.n; opts.setNote(n,{w:Math.round(n.w),h:Math.round(n.h)},false); noteResize=null; return; }
-    if(noteDrag){ const n=noteDrag.n; if(moved) opts.setNote(n,{x:Math.round(n.x),y:Math.round(n.y)},false); else if(opts.onNote) opts.onNote(n); noteDrag=null; return; }
-    if(drag){ if(moved){ const p=opts.pos(drag.e); opts.setPos(drag.e,{x:Math.round(p.x),y:Math.round(p.y)},false); for(const kd of drag.kids){ const q=opts.pos(kd.e); opts.setPos(kd.e,{x:Math.round(q.x),y:Math.round(q.y)},true); } } else opts.onSelect(drag.e.id); drag=null; return; }
+    if(noteDrag){ const n=noteDrag.n; if(moved) opts.setNote(n,{x:Math.round(n.x),y:Math.round(n.y)},false); else if(opts.onNoteClick) opts.onNoteClick(n,e); else if(opts.onNote) opts.onNote(n); noteDrag=null; return; }
+    if(drag){ if(moved){ const p=opts.pos(drag.e); opts.setPos(drag.e,{x:Math.round(p.x),y:Math.round(p.y)},false); for(const kd of drag.kids){ const q=opts.pos(kd.e); opts.setPos(kd.e,{x:Math.round(q.x),y:Math.round(q.y)},true); } for(const q of drag.nk||[]) opts.setNote(q.n,{x:Math.round(q.n.x),y:Math.round(q.n.y)},true); } else opts.onSelect(drag.e.id,e); drag=null; return; }
     if(pan){ cv.style.cursor='grab'; if(!moved){ const ref=hitLabel(x,y); if(ref&&opts.onLabel) opts.onLabel(ref); else opts.onSelect(null); } pan=null; } };
   window.addEventListener('mousemove',onMove); window.addEventListener('mouseup',onUp);
-  cv.ondblclick=e=>{ const n=hit(e.offsetX,e.offsetY,false); if(n){ open(eid_(n)); return; } const ref=hitLabel(e.offsetX,e.offsetY); if(ref&&opts.onLabel){ opts.onLabel(ref); return; } const nb=hit(e.offsetX,e.offsetY,true); if(nb) open(eid_(nb)); };
+  cv.ondblclick=e=>{ const n=hit(e.offsetX,e.offsetY,false); if(n){ open(eid_(n)); return; } if(opts.onNoteClick&&opts.onNote){ const nt=hitNote(e.offsetX,e.offsetY); if(nt){ opts.onNote(nt); return; } } const ref=hitLabel(e.offsetX,e.offsetY); if(ref&&opts.onLabel){ opts.onLabel(ref); return; } const nb=hit(e.offsetX,e.offsetY,true); if(nb) open(eid_(nb)); };
   cv.onwheel=e=>{ e.preventDefault(); const f=e.deltaY<0?1.12:1/1.12; const before=toWorld(e.offsetX,e.offsetY); cam.k=Math.max(.2,Math.min(3,cam.k*f)); const after=toWorld(e.offsetX,e.offsetY); cam.x+=after.x-before.x; cam.y+=after.y-before.y; draw(); };
   new ResizeObserver(()=>draw()).observe(wrap);
   cv.classList.toggle('linking',G.linkMode);
@@ -3453,7 +3456,7 @@ function renderMap(m,mp){
       <div class="group"><label title="Показывать членства, локации и общие связи персонажей между элементами карты"><input type="checkbox" id="showData" ${mp.showData!==false?'checked':''} ${ed?'':'disabled'}>известные связи</label>${ed?'<button class="btn sm" id="layoutBtn">⟲ Разложить</button>':''}<button class="btn sm" id="fitBtn">⛶ Вписать</button>${ed?'<button class="btn sm danger" id="delMap">Удалить карту</button>':''}</div>
     </div>
     <div id="ginfo"></div>
-    <div id="ghint">${ed?'Тяни элементы · колесо — масштаб · двойной клик — открыть · <b>Shift+тянуть</b> — связь · клик по линии, подписи или заметке — изменить · локацию или организацию можно сделать блоком':'Колесо — масштаб · двойной клик — открыть · клик по заметке — прочитать'}</div>
+    <div id="ghint">${ed?'Тяни элементы · колесо — масштаб · двойной клик — открыть · <b>Shift+тянуть</b> — связь · клик по линии или подписи — изменить, двойной по заметке — изменить · <b>Ctrl+клик</b> — выделить несколько · <b>Ctrl+C / Ctrl+V</b> — копировать и вставить (в т.ч. на другую карту) · <b>Del</b> — убрать с карты · <b>Ctrl+Z</b> — вернуть':'Колесо — масштаб · двойной клик — открыть · клик по заметке — прочитать'}</div>
   </div></div>`);
   m.append(page);
   const wrap=$('#graphWrap',page), cv=$('#graph',page), info=$('#ginfo',page);
@@ -3472,6 +3475,11 @@ function renderMap(m,mp){
     return out; };
   const edges=()=>[...dataEdges(),...(mp.edges||[]).map(e=>({a:e.from,b:e.to,color:e.color||'#e9c2ff',label:e.label||'',directed:!!e.directed,both:!!e.both,ref:{kind:'map',obj:e}}))];
   let opts_onSelect=null;
+  /* выделение: G.sel — главный (панель справа), G.msel — все выделенные ключи узлов, G.nsel — id заметок */
+  if(G.selMap!==mp.id){ G.selMap=mp.id; G.msel=new Set(); G.nsel=new Set(); G.sel=null; } G.msel??=new Set(); G.nsel??=new Set();
+  const selKeys=()=>{ const nm=nodeMap(); const out=new Set([...G.msel].filter(k=>nm.has(k))); if(G.sel&&nm.has(G.sel)) out.add(G.sel); return [...out]; };
+  const selNotes=()=>(mp.notes||[]).filter(n=>G.nsel.has(n.id));
+  const selInfo=()=>{ const n=selKeys().length+selNotes().length; $('#gmulti',info)?.remove(); if(n>1){ info.classList.add('on'); info.append(el(`<div id="gmulti" class="faint" style="font-size:12px;margin-top:8px">Выделено: <b>${n}</b> · Ctrl+C — копировать${ed?' · Del — убрать с карты':''}</div>`)); } };
   /* положить элемент на карту; если он уже есть — ещё одним экземпляром (копией) */
   const addNode=(id,at)=>{ if(!id||!ed) return null; const c=at||eng.center(); const n=(mp.nodes||[]).length; const dup=(mp.nodes||[]).some(x=>x.id===id); const k=dup?uid():null;
     (mp.nodes??=[]).push({id,...(k?{k}:{}),x:Math.round(c.x+(at?0:Math.cos(n*2.4)*60)),y:Math.round(c.y+(at?0:Math.sin(n*2.4)*60))}); touch(mp); eng.draw(); return k||id; };
@@ -3482,19 +3490,24 @@ function renderMap(m,mp){
     notes:()=>mp.notes||[],
     setNote:ed?(n,patch,live)=>{ Object.assign(n,patch); if(!live) touch(mp); }:null,
     onNote:n=>noteDialog(mp,n,ed,()=>eng.draw()),
+    onNoteClick:(n,ev)=>{ if(ev&&(ev.ctrlKey||ev.metaKey)){ G.nsel.has(n.id)?G.nsel.delete(n.id):G.nsel.add(n.id); eng.draw(); selInfo(); return; } G.nsel=new Set([n.id]); G.msel=new Set(); infoPanel(info,null); eng.draw(); if(!ed) noteDialog(mp,n,false,()=>eng.draw()); },
+    isSel:k=>!!G.msel&&G.msel.has(k), noteSel:n=>!!G.nsel&&G.nsel.has(n.id),
     badges:e=>{ const n=nodeMap().get(e.id); return (n?.statuses||[]).map(id=>byId(world.settings.statusIcons||[],id)).filter(Boolean); },
     setBlock:ed?(e,b,live)=>{ const n=nodeMap().get(e.id); if(n){ n.block=b; if(!live) touch(mp); } }:null,
     setPos:ed?(e,p,live)=>{ const n=nodeMap().get(e.id); if(n){ n.x=p.x; n.y=p.y; if(!live) touch(mp); } }:null,
     onLink:ed?(from,to)=>{ const t=G.tpl?byId(world.settings.relTemplates,G.tpl):null; if(t){ (mp.edges??=[]).push({id:uid(),from,to,label:t.label,color:t.color,directed:!!t.directed,both:!!t.both}); touch(mp); eng.draw(); toast(`«${t.label}» добавлено на карту`); } else mapEdgeDialog(mp,{from,to},()=>eng.draw()); }:null,
     onLabel:ref=>{ const cb=()=>eng.draw(); if(ref.kind==='map'){ if(ed) mapEdgeDialog(mp,ref.obj,cb); } else if(ref.kind==='rel') editRelDialog(ref.obj,cb); else editEdgeDialog(ref.kind,ref.obj,cb); },
-    onSelect:id=>{ const nd=nodeMap().get(id); const eid=nd?nd.id:id; const tt=typeOf(eid); const canBlk=tt==='l'||tt==='o'; const nCopies=(mp.nodes||[]).filter(n=>n.id===eid).length; infoPanel(info,id,ed?`<button class="btn sm" id="ilink">+ Связь</button>${canBlk?`<button class="btn sm" id="iblk" title="Блок — область на карте, внутрь которой можно перетаскивать персонажей${tt==='l'?' и организации':''}">${nd?.block?'▢ Сделать точкой':'▣ Сделать блоком'}</button>`:''}<button class="btn sm" id="icopy" title="Положить на карту ещё один экземпляр этого же элемента">⧉ Копия${nCopies>1?' ('+nCopies+')':''}</button><button class="btn sm danger" id="irm">Убрать с карты</button>`:(nCopies>1?`<span class="faint" style="font-size:12px">на карте ${nCopies} раза</span>`:''),b=>{ const ib=$('#iblk',b); if(ib) ib.onclick=()=>{ if(nd.block) delete nd.block; else nd.block={w:340,h:240}; touch(mp); render(); };
+    onSelect:(id,ev)=>{ /* Ctrl+клик — добавить/убрать из выделения; простой клик — выделить один */
+      if(ev&&(ev.ctrlKey||ev.metaKey)&&id){ const cur=new Set(selKeys()); if(cur.has(id)) cur.delete(id); else cur.add(id); G.msel=cur; eng._opts.onSelect1([...cur].pop()||null); selInfo(); eng.draw(); return; }
+      G.msel=new Set(id?[id]:[]); G.nsel=new Set(); eng._opts.onSelect1(id); },
+    onSelect1:id=>{ const nd=nodeMap().get(id); const eid=nd?nd.id:id; const tt=typeOf(eid); const canBlk=tt==='l'||tt==='o'; const nCopies=(mp.nodes||[]).filter(n=>n.id===eid).length; infoPanel(info,id,ed?`<button class="btn sm" id="ilink">+ Связь</button>${canBlk?`<button class="btn sm" id="iblk" title="Блок — область на карте, внутрь которой можно перетаскивать персонажей${tt==='l'?' и организации':''}">${nd?.block?'▢ Сделать точкой':'▣ Сделать блоком'}</button>`:''}<button class="btn sm" id="icopy" title="Положить на карту ещё один экземпляр этого же элемента">⧉ Копия${nCopies>1?' ('+nCopies+')':''}</button><button class="btn sm danger" id="irm">Убрать с карты</button>`:(nCopies>1?`<span class="faint" style="font-size:12px">на карте ${nCopies} раза</span>`:''),b=>{ const ib=$('#iblk',b); if(ib) ib.onclick=()=>{ if(nd.block) delete nd.block; else nd.block={w:340,h:240}; touch(mp); render(); };
       const ic=$('#icopy',b); if(ic) ic.onclick=()=>{ const k=addNode(eid,{x:nd.x+(nd.block?nd.block.w/2+80:90),y:nd.y+40}); if(k){ G.sel=k; opts_onSelect(k); } };
       /* статусы */
       const icons=world.settings.statusIcons||[]; const act=new Set(nd?.statuses||[]); const shown=ed?icons:icons.filter(i=>act.has(i.id));
       if(shown.length||ed){ const st=el(`<div style="margin-top:10px"><div class="tiny" style="margin-bottom:6px">Статусы</div><div class="chips">${shown.map(i=>`<span class="chip st ${act.has(i.id)?'on':''}" data-s="${i.id}" style="${act.has(i.id)?`border-color:${i.color};color:${i.color}`:''};cursor:${ed?'pointer':'default'}">${i.icon} ${esc(i.label)}</span>`).join('')||'<span class="faint">нет</span>'}</div></div>`);
         if(ed) $$('.chip.st',st).forEach(c=>c.onclick=()=>{ if(!nd) return; nd.statuses=nd.statuses||[]; const i=nd.statuses.indexOf(c.dataset.s); if(i>=0) nd.statuses.splice(i,1); else nd.statuses.push(c.dataset.s); touch(mp); eng.draw(); infoPanelRefresh(); }); b.append(st); }
       const infoPanelRefresh=()=>{ const cur=G.sel; opts_onSelect(cur); }; const il=$('#ilink',b); if(il) il.onclick=()=>{ const others=nodes().filter(n=>n.e.id!==id); if(!others.length){ toast('На карте больше никого'); return; } mapEdgeDialog(mp,{from:id,to:null},()=>eng.draw()); }; const rm=$('#irm',b); if(rm) rm.onclick=()=>{ mp.nodes=(mp.nodes||[]).filter(n=>nKey(n)!==id); mp.edges=(mp.edges||[]).filter(e=>e.from!==id&&e.to!==id); G.sel=null; touch(mp); render(); }; },eid); eng.draw(); } });
-  opts_onSelect=id=>{ /* повторный вызов панели после изменения статусов */ const o=eng._opts; if(o) o.onSelect(id); };
+  opts_onSelect=id=>{ /* повторный вызов панели после изменения статусов */ const o=eng._opts; if(o) o.onSelect1(id); };
   if(ed){
     $('#addBtn',page).onclick=()=>mapAddDialog(mp,id=>addNode(id));
     $('#addNote',page).onclick=()=>{ const c=eng.center(); const n={id:uid(),x:Math.round(c.x),y:Math.round(c.y),w:240,h:140,title:'',text:'',color:'#ffd166'}; (mp.notes??=[]).push(n); touch(mp); eng.draw(); noteDialog(mp,n,true,()=>eng.draw()); };
@@ -3505,6 +3518,41 @@ function renderMap(m,mp){
     $('#showData',page).onchange=e=>{ mp.showData=e.target.checked; touch(mp); eng.draw(); };
   }
   $('#fitBtn',page).onclick=()=>eng.fit();
+  /* классические бинды: Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D, Del, Ctrl+A, Ctrl+Z, Esc. Буфер — в localStorage (relmap.clip), поэтому вставлять можно и на другой карте связей и в другой вкладке */
+  let mouseW=null; cv.addEventListener('mousemove',e=>{ mouseW=eng.toWorld(e.offsetX,e.offsetY); }); cv.addEventListener('mouseleave',()=>{ mouseW=null; });
+  const UNDO=(G.undo??={}); const snap=()=>{ const u=(UNDO[mp.id]??=[]); u.push(JSON.stringify({nodes:mp.nodes||[],edges:mp.edges||[],notes:mp.notes||[]})); if(u.length>30) u.shift(); };
+  const clearSel=()=>{ G.msel=new Set(); G.nsel=new Set(); infoPanel(info,null); eng.draw(); };
+  const copySel=()=>{ const nm=nodeMap(); const keys=new Set(selKeys());
+    for(const k of [...keys]){ const n=nm.get(k); if(n&&n.block) for(const m of (mp.nodes||[])) if(!m.block&&Math.abs(m.x-n.x)<=n.block.w/2&&Math.abs(m.y-n.y)<=n.block.h/2) keys.add(nKey(m)); } // блок копируется вместе с содержимым
+    const ns=[...keys].map(k=>nm.get(k)).filter(n=>n&&visibleEnt(findEntity(n.id))), nts=selNotes(); if(!ns.length&&!nts.length) return false;
+    const ks=new Set(ns.map(nKey)); const clip={v:1,from:mp.id,at:Date.now(),nodes:JSON.parse(JSON.stringify(ns)),notes:JSON.parse(JSON.stringify(nts)),edges:(mp.edges||[]).filter(e=>ks.has(e.from)&&ks.has(e.to)).map(e=>({...e}))};
+    try{ localStorage.setItem('relmap.clip',JSON.stringify(clip)); }catch{ toast('Не удалось скопировать',true); return false; }
+    toast(`Скопировано: ${ns.length+nts.length}${clip.edges.length?`, связей ${clip.edges.length}`:''} — Ctrl+V на этой или другой карте связей`); return true; };
+  const delSel=(quiet)=>{ if(!ed) return false; const ks=new Set(selKeys()), nts=new Set(selNotes().map(n=>n.id)); if(!ks.size&&!nts.size) return false; snap();
+    mp.nodes=(mp.nodes||[]).filter(n=>!ks.has(nKey(n))); mp.edges=(mp.edges||[]).filter(e=>!ks.has(e.from)&&!ks.has(e.to)); mp.notes=(mp.notes||[]).filter(n=>!nts.has(n.id));
+    G.sel=null; G.msel=new Set(); G.nsel=new Set(); touch(mp); render(); if(!quiet) toast(`Убрано с карты: ${ks.size+nts.size} · Ctrl+Z — вернуть`); return true; };
+  const pasteClip=(clip)=>{ if(!ed) return; let c=clip; if(!c){ try{ c=JSON.parse(localStorage.getItem('relmap.clip')||'null'); }catch{} } if(!c||(!(c.nodes||[]).length&&!(c.notes||[]).length)){ toast('Буфер пуст — выдели элементы и нажми Ctrl+C'); return; }
+    const all=[...(c.nodes||[]),...(c.notes||[])]; const cx=all.reduce((a,n)=>a+n.x,0)/all.length, cy=all.reduce((a,n)=>a+n.y,0)/all.length;
+    let at=mouseW; if(!at){ at=eng.center(); if(c.from===mp.id){ at={x:cx+40,y:cy+40}; } } const dx=at.x-cx, dy=at.y-cy;
+    snap(); const km={}, added=[], nids=[]; let skip=0;
+    for(const n of (c.nodes||[])){ const ent=findEntity(n.id); if(!ent||!visibleEnt(ent)){ skip++; continue; } const nn=JSON.parse(JSON.stringify(n)); delete nn.k; nn.x=Math.round(n.x+dx); nn.y=Math.round(n.y+dy); if((mp.nodes||[]).some(x=>x.id===n.id)) nn.k=uid(); (mp.nodes??=[]).push(nn); km[n.k||n.id]=nKey(nn); added.push(nKey(nn)); }
+    for(const n of (c.notes||[])){ const nn={...JSON.parse(JSON.stringify(n)),id:uid(),x:Math.round(n.x+dx),y:Math.round(n.y+dy)}; (mp.notes??=[]).push(nn); nids.push(nn.id); }
+    let ne=0; for(const e of (c.edges||[])) if(km[e.from]&&km[e.to]){ (mp.edges??=[]).push({...e,id:uid(),from:km[e.from],to:km[e.to]}); ne++; }
+    G.msel=new Set(added); G.nsel=new Set(nids); touch(mp); eng.draw(); eng._opts.onSelect1(added[added.length-1]||null); selInfo(); eng.draw();
+    toast(`Вставлено: ${added.length+nids.length}${ne?`, связей ${ne}`:''}${skip?` · пропущено ${skip} (удалены или скрыты)`:''}`); };
+  const undo=()=>{ const u=UNDO[mp.id]; if(!u||!u.length){ toast('Нечего отменять'); return; } const o=JSON.parse(u.pop()); mp.nodes=o.nodes; mp.edges=o.edges; mp.notes=o.notes; G.sel=null; G.msel=new Set(); G.nsel=new Set(); touch(mp); render(); toast('Отменено'); };
+  const onKey=e=>{ if(!cv.isConnected){ document.removeEventListener('keydown',onKey); return; } if(state.view!=='graph'||$('#modal').classList.contains('on')) return;
+    const a=document.activeElement; if(a&&(/INPUT|TEXTAREA|SELECT/.test(a.tagName)||a.isContentEditable)) return;
+    const c=e.ctrlKey||e.metaKey, code=e.code;
+    if(c&&code==='KeyC'){ if(String(window.getSelection()||'')) return; if(copySel()) e.preventDefault(); }
+    else if(c&&code==='KeyX'&&ed){ e.preventDefault(); if(copySel()) delSel(true); }
+    else if(c&&code==='KeyV'&&ed){ e.preventDefault(); pasteClip(); }
+    else if(c&&code==='KeyD'&&ed){ e.preventDefault(); const nm=nodeMap(); const ns=selKeys().map(k=>nm.get(k)).filter(Boolean), nts=selNotes(); if(ns.length||nts.length){ const ks=new Set(ns.map(nKey)); pasteClip({from:mp.id,nodes:JSON.parse(JSON.stringify(ns)),notes:JSON.parse(JSON.stringify(nts)),edges:(mp.edges||[]).filter(x=>ks.has(x.from)&&ks.has(x.to))}); } }
+    else if(c&&code==='KeyA'){ e.preventDefault(); G.msel=new Set(nodes().map(n=>n.e.id)); G.nsel=new Set((mp.notes||[]).map(n=>n.id)); G.sel=null; info.classList.remove('on'); selInfo(); eng.draw(); }
+    else if(c&&code==='KeyZ'&&!e.shiftKey&&ed){ e.preventDefault(); undo(); }
+    else if((e.key==='Delete'||code==='Delete')&&ed){ if(delSel()) e.preventDefault(); }
+    else if(e.key==='Escape'&&(selKeys().length||G.nsel.size)) clearSel(); };
+  document.addEventListener('keydown',onKey);
   if(G.sel&&!nodes().some(n=>n.e.id===G.sel)) G.sel=null;
   const cam=G.cams[mp.id]; if(!cam.fitted){ cam.fitted=true; eng.fit(); } else eng.draw();
 }
