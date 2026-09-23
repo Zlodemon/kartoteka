@@ -992,10 +992,11 @@ const chLabel=c=>{ if(!c) return '?'; const n=c.name||'без имени'; retur
 function visibleEnt(e){ if(!e) return false; if(isDM()) return true; if(visOf(e)==='hidden') return ownsOrPlays(e); return true; }
 function briefOnly(e){ if(!e||isDM()) return false; if(ownsOrPlays(e)) return false; return visOf(e)==='brief'; }
 function memVisible(mm){ if(isDM()) return true; if(mm.revealed!==false) return true; const c=byId(world.characters,mm.charId); return !!c&&(c.players||[]).includes(effUid()); }
+function locVisible(x){ if(isDM()) return true; if(x.revealed!==false) return true; return ownsOrPlays(findEntity(x.entityId)); }
 function visRel(r){ if(!(isDM()||r.owner===effUid()||r.shared)) return false; return visibleEnt(findEntity(r.from))&&visibleEnt(findEntity(r.to)); }
 const V={ chars:()=>world.characters.filter(c=>visibleEnt(c)&&!isClone(c)), orgs:()=>world.orgs.filter(visibleEnt), locs:()=>world.locations.filter(visibleEnt),
   mems:()=>world.memberships.filter(mm=>memVisible(mm)&&visibleEnt(byId(world.characters,mm.charId))&&visibleEnt(byId(world.orgs,mm.orgId))),
-  locLinks:()=>world.locLinks.filter(x=>visibleEnt(findEntity(x.entityId))&&visibleEnt(byId(world.locations,x.locId))),
+  locLinks:()=>world.locLinks.filter(x=>locVisible(x)&&visibleEnt(findEntity(x.entityId))&&visibleEnt(byId(world.locations,x.locId))),
   rels:()=>world.relations.filter(visRel) };
 function canEditEdge(e){ // membership / locLink
   if(isDM()) return true; if(!isPlayer()) return false;
@@ -2382,11 +2383,12 @@ function relationsBlock(ent){
     for(const r of rels){
       const other=r.from===ent.id?r.to:r.from; const outgoing=r.from===ent.id; const ed=canEditRel(r); const foreign=r.owner!==effUid();
       const row=el(`<div class="linkrow ${ed?'':'ro'} ${foreign?'foreign':''}"><span class="arrow" title="${ {none:'без стрелки',one:'в одну сторону',both:'в обе стороны'}[arrowsOf(r)] }">${r.both?'⇄':(r.directed?(outgoing?'→':'←'):'↔')}</span>
-        <div>${entityChip(other)}${foreign?`<div class="faint" style="font-size:11px;margin-top:2px">${esc(userName(r.owner))}</div>`:''}</div><input value="${esc(r.label)}" placeholder="подпись"><input type="color" value="${r.color||'#e9c2ff'}" title="цвет"><button class="btn icon sm dir w" title="стрелки: без / в одну / в обе">${r.both?'⇄':(r.directed?'⇢':'⇔')}</button><span class="shared ${r.shared?'on':''}" title="${r.shared?'общая — видна всем':'личная — видна тебе и мастеру'}">${r.shared?'☀':'☾'}</span><button class="x-btn w" title="удалить">×</button></div>`);
+        <div>${entityChip(other)}${foreign?`<div class="faint" style="font-size:11px;margin-top:2px">${esc(userName(r.owner))}</div>`:''}</div><input value="${esc(r.label)}" placeholder="подпись"><input type="color" value="${r.color||'#e9c2ff'}" title="цвет"><button class="btn icon sm dir w" title="стрелки: без / в одну / в обе">${r.both?'⇄':(r.directed?'⇢':'⇔')}</button>${r.hidden&&isDM()?'<span class="shared" title="скрыта от игроков (мастер: откройте связь на карте или снимите «скрыто» кнопкой)" style="cursor:pointer">🙈</span>':`<span class="shared ${r.shared?'on':''}" title="${r.shared?'общая — видна всем':'личная — видна тебе и мастеру'}">${r.shared?'☀':'☾'}</span>`}${isDM()&&!r.hidden?'<span class="hidb" title="скрыть от игроков" style="cursor:pointer;opacity:.45;padding:0 4px">🙈</span>':''}<button class="x-btn w" title="удалить">×</button></div>`);
       $('input:not([type=color])',row).oninput=e=>{ r.label=e.target.value; touch(r); };
       $('input[type=color]',row).oninput=e=>{ r.color=e.target.value; touch(r); };
       $('.dir',row).onclick=()=>{ const v=arrowsOf(r); Object.assign(r,dirFields(v==='none'?'one':v==='one'?'both':'none')); touch(r); drawRels(); };
-      $('.shared',row).onclick=()=>{ if(!ed) return; r.shared=!r.shared; touch(r); drawRels(); };
+      $('.shared',row).onclick=()=>{ if(!ed) return; if(r.hidden){ r.hidden=false; r.shared=!!r.hidShared; r.hidShared=false; } else r.shared=!r.shared; touch(r); drawRels(); };
+      const hb=$('.hidb',row); if(hb) hb.onclick=()=>{ r.hidden=true; r.hidShared=!!r.shared; r.shared=false; touch(r); drawRels(); };
       $('.x-btn',row).onclick=()=>removeDoc('relations',r).then(drawRels);
       bindOpen(row); list.append(row);
     }
@@ -2403,8 +2405,8 @@ function locLinksBlock(ent){
   const draw=()=>{
     list.innerHTML=''; const ls=V.locLinks().filter(x=>x.entityId===ent.id);
     if(!ls.length){ list.innerHTML='<div class="faint" style="padding:6px 0">Не привязан ни к одной локации.</div>'; return; }
-    for(const l of ls){ const row=el(`<div class="memrow ${canEditEdge(l)?'':'ro'}"><div>${entityChip(l.locId)}</div><input value="${esc(l.note||'')}" placeholder="заметка"><button class="x-btn w">×</button></div>`);
-      $('input',row).oninput=e=>{ l.note=e.target.value; touch(l); }; $('.x-btn',row).onclick=()=>removeDoc('locLinks',l).then(draw); bindOpen(row); list.append(row); }
+    for(const l of ls){ const row=el(`<div class="memrow ${canEditEdge(l)?'':'ro'}"><div>${entityChip(l.locId)}</div><input value="${esc(l.note||'')}" placeholder="заметка"><div class="row" style="gap:0">${eyeBtn(l)}<button class="x-btn w">×</button></div></div>`);
+      $('input',row).oninput=e=>{ l.note=e.target.value; touch(l); }; $('.x-btn',row).onclick=()=>removeDoc('locLinks',l).then(draw); bindEye(row,l,draw); bindOpen(row); list.append(row); }
   };
   draw(); return p;
 }
@@ -3188,8 +3190,8 @@ function renderLocation(m,l){
   const draw=()=>{
     list.innerHTML=''; const ls=V.locLinks().filter(x=>x.locId===l.id);
     if(!ls.length){ list.innerHTML='<div class="faint" style="padding:6px 0">Никто не привязан.</div>'; return; }
-    for(const x of ls){ const row=el(`<div class="memrow ${canEditEdge(x)?'':'ro'}"><div>${entityChip(x.entityId)}</div><input value="${esc(x.note||'')}" placeholder="заметка"><button class="x-btn w">×</button></div>`);
-      $('input',row).oninput=e=>{ x.note=e.target.value; touch(x); }; $('.x-btn',row).onclick=()=>removeDoc('locLinks',x).then(draw); bindOpen(row); list.append(row); }
+    for(const x of ls){ const row=el(`<div class="memrow ${canEditEdge(x)?'':'ro'}"><div>${entityChip(x.entityId)}</div><input value="${esc(x.note||'')}" placeholder="заметка"><div class="row" style="gap:0">${eyeBtn(x)}<button class="x-btn w">×</button></div></div>`);
+      $('input',row).oninput=e=>{ x.note=e.target.value; touch(x); }; $('.x-btn',row).onclick=()=>removeDoc('locLinks',x).then(draw); bindEye(row,x,draw); bindOpen(row); list.append(row); }
   };
   draw(); B.who=who; B.relations=relationsBlock(l);
   arrangeBlocks(d,l,B,DEF);
@@ -3239,25 +3241,30 @@ function linkDialog(aId,bId,onDone){
     }catch{}
   };
 }
+const HID_TXT='🙈 скрыто от игроков';
+const mapHidDoc=mp=>(world._dm||[]).find(x=>x.id==='medges_'+mp.id);
+const mapHidEdges=mp=>isDM()?(mapHidDoc(mp)?.edges||[]):[];
+function mapHidPut(mp,list){ const doc={id:'medges_'+mp.id,map:mp.id,edges:JSON.parse(JSON.stringify(list))}; world._dm=[...(world._dm||[]).filter(x=>x.id!==doc.id),doc];
+  DB.set('dm',doc.id,{map:doc.map,edges:doc.edges}).catch(err=>toast('Не удалось сохранить скрытую связь: '+(err.code||err.message),true)); }
 function editRelDialog(r,onDone){
   const ed=canEditRel(r);
   const b=openModal(`<h2>Связь ${r.owner!==me.uid?`<span class="faint" style="font-size:12px;font-weight:400">· ${esc(userName(r.owner))}</span>`:''}</h2><div class="row" style="margin-bottom:14px">${entityChip(r.from)}<span class="faint">${arrowSym(r)}</span>${entityChip(r.to)}</div>
     <div class="${ed?'':'ro'}"><div class="field"><label>Подпись</label><input id="lbl" value="${esc(r.label)}"></div>
-    <div class="row wrap" style="gap:14px"><label class="row" style="gap:8px"><input type="color" id="col" value="${r.color||'#e9c2ff'}">цвет</label>${dirCtl('dirseg',arrowsOf(r))}<label class="row" style="gap:8px"><input type="checkbox" id="shr" ${r.shared?'checked':''}>общая</label><button class="btn sm w" id="swap">поменять направление</button></div></div>
+    <div class="row wrap" style="gap:14px"><label class="row" style="gap:8px"><input type="color" id="col" value="${r.color||'#e9c2ff'}">цвет</label>${dirCtl('dirseg',arrowsOf(r))}<label class="row" style="gap:8px"><input type="checkbox" id="shr" ${(r.hidden?r.hidShared:r.shared)?'checked':''}>общая</label>${isDM()?`<label class="row" style="gap:8px" title="Игроки не увидят эту связь нигде: ни на листе, ни на картах связей. Мастер видит её с пометкой 🙈"><input type="checkbox" id="hid" ${r.hidden?'checked':''}>${HID_TXT}</label>`:''}<button class="btn sm w" id="swap">поменять направление</button></div></div>
     <div class="modal-actions">${ed?'<button class="btn danger" id="del">Удалить</button>':''}<span class="grow"></span><button class="btn" id="cancel">${ed?'Отмена':'Закрыть'}</button>${ed?'<button class="btn primary" id="ok">Сохранить</button>':''}</div>`);
   $('#cancel',b).onclick=closeModal; bindOpen(b);
   if(!ed) return; bindDir(b,'dirseg');
   $('#swap',b).onclick=()=>{ [r.from,r.to]=[r.to,r.from]; touch(r); closeModal(); editRelDialog(r,onDone); };
   $('#del',b).onclick=()=>{ removeDoc('relations',r); closeModal(); onDone&&onDone(); };
-  $('#ok',b).onclick=()=>{ r.label=$('#lbl',b).value.trim(); r.color=$('#col',b).value; Object.assign(r,dirFields(dirVal(b,'dirseg'))); r.shared=$('#shr',b).checked; touch(r); closeModal(); onDone&&onDone(); };
+  $('#ok',b).onclick=()=>{ r.label=$('#lbl',b).value.trim(); r.color=$('#col',b).value; Object.assign(r,dirFields(dirVal(b,'dirseg'))); const S=$('#shr',b).checked, H=isDM()&&!!$('#hid',b)?.checked; if(H){ r.hidden=true; r.hidShared=S; r.shared=false; } else { if(r.hidden){ r.hidden=false; r.hidShared=false; } r.shared=S; } touch(r); closeModal(); onDone&&onDone(); };
 }
 function editEdgeDialog(kind,x,onDone){
   const ed=canEditEdge(x); const isMem=kind==='mem';
-  const b=openModal(`<h2>${isMem?'Членство':'Привязка к локации'}</h2><div class="row" style="margin-bottom:14px">${entityChip(isMem?x.charId:x.entityId)}<span class="faint">${isMem?'∈':'@'}</span>${entityChip(isMem?x.orgId:x.locId)}</div><div class="${ed?'':'ro'}"><div class="field"><label>${isMem?'Роль':'Заметка'}</label><input id="v" value="${esc(isMem?x.role:x.note)||''}"></div></div>
+  const b=openModal(`<h2>${isMem?'Членство':'Привязка к локации'}</h2><div class="row" style="margin-bottom:14px">${entityChip(isMem?x.charId:x.entityId)}<span class="faint">${isMem?'∈':'@'}</span>${entityChip(isMem?x.orgId:x.locId)}</div><div class="${ed?'':'ro'}"><div class="field"><label>${isMem?'Роль':'Заметка'}</label><input id="v" value="${esc(isMem?x.role:x.note)||''}"></div>${isDM()?`<label class="row" style="gap:8px" title="Игроки не увидят эту связь (кроме игроков самого персонажа). Мастер видит её с пометкой 🙈"><input type="checkbox" id="hid" ${x.revealed===false?'checked':''}>${HID_TXT}</label>`:''}</div>
     <div class="modal-actions">${ed?'<button class="btn danger" id="del">Удалить</button>':''}<span class="grow"></span><button class="btn" id="cancel">${ed?'Отмена':'Закрыть'}</button>${ed?'<button class="btn primary" id="ok">Сохранить</button>':''}</div>`);
   $('#cancel',b).onclick=closeModal; bindOpen(b); if(!ed) return;
   $('#del',b).onclick=()=>{ removeDoc(isMem?'memberships':'locLinks',x); closeModal(); onDone&&onDone(); };
-  $('#ok',b).onclick=()=>{ if(isMem) x.role=$('#v',b).value; else x.note=$('#v',b).value; touch(x); closeModal(); onDone&&onDone(); };
+  $('#ok',b).onclick=()=>{ if(isMem) x.role=$('#v',b).value; else x.note=$('#v',b).value; if(isDM()&&$('#hid',b)) x.revealed=!$('#hid',b).checked; touch(x); closeModal(); onDone&&onDone(); };
 }
 
 /* ============================================================
@@ -3339,7 +3346,7 @@ function graphEngine(wrap,cv,opts){
     const pairTotal=new Map(); for(const ed of allEdges){ const pk=[ed.a,ed.b].sort().join('|'); pairTotal.set(pk,(pairTotal.get(pk)||0)+1); }
     const pairCount=new Map();
     for(const ed of allEdges){
-      const {a:aId,b:bId,color,label,directed,both,dash,priv,ref}=ed;
+      const {a:aId,b:bId,color,directed,both,dash,priv,ref,hid}=ed; const label=hid?('🙈'+(ed.label?' '+ed.label:'')):ed.label;
       const pk=[aId,bId].sort().join('|'); const pi=pairCount.get(pk)||0; pairCount.set(pk,pi+1); const pn=pairTotal.get(pk)||1;
       const A=F_(aId), B=F_(bId); if(!A||!B) continue; const a=toScreen(opts.pos(A).x,opts.pos(A).y), b=toScreen(opts.pos(B).x,opts.pos(B).y);
       const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy)||1; const ux=dx/d, uy=dy/d; const ra=anchor(A,ux,uy,k,both?6*k:0), rb=anchor(B,ux,uy,k,(directed||both)?6*k:0);
@@ -3348,7 +3355,7 @@ function graphEngine(wrap,cv,opts){
       const sgn=aId<bId?1:-1; const lo=(pi-(pn-1)/2)*20*k*sgn;
       const x1=a.x+ux*ra-uy*lo, y1=a.y+uy*ra+ux*lo, x2=b.x-ux*rb-uy*lo, y2=b.y-uy*rb+ux*lo;
       const hl=G.sel&&(G.sel===aId||G.sel===bId);
-      ctx.save(); ctx.strokeStyle=color; ctx.globalAlpha=G.sel&&!hl?.25:(priv?.55:.85); ctx.lineWidth=(hl?2.5:1.6)*Math.max(.6,k); if(dash) ctx.setLineDash([6*k,5*k]); else if(priv) ctx.setLineDash([2*k,4*k]);
+      ctx.save(); ctx.strokeStyle=color; ctx.globalAlpha=(G.sel&&!hl?.25:(priv?.55:.85))*(hid?.6:1); ctx.lineWidth=(hl?2.5:1.6)*Math.max(.6,k); if(hid) ctx.setLineDash([2*k,5*k]); else if(dash) ctx.setLineDash([6*k,5*k]); else if(priv) ctx.setLineDash([2*k,4*k]);
       if(hl){ ctx.shadowColor=color; ctx.shadowBlur=10; }
       ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.setLineDash([]);
       if(directed||both){ ctx.fillStyle=color; const s=8*k; ctx.beginPath(); ctx.moveTo(x2+ux*6*k,y2+uy*6*k); ctx.lineTo(x2-uy*s/2,y2+ux*s/2); ctx.lineTo(x2+uy*s/2,y2-ux*s/2); ctx.closePath(); ctx.fill(); }
@@ -3469,11 +3476,11 @@ function renderMap(m,mp){
   const nodes=()=>(mp.nodes||[]).map(wrapN).filter(e=>e&&visibleEnt(e._ent||e)).map(e=>({e,t:e._t||typeOf(e.id)}));
   const dataEdges=()=>{ if(mp.showData===false) return []; const inst=new Map(); for(const n of (mp.nodes||[])) (inst.get(n.id)||inst.set(n.id,[]).get(n.id)).push(nKey(n)); const out=[];
     const add=(a,b,o)=>{ for(const ka of (inst.get(a)||[])) for(const kb of (inst.get(b)||[])) out.push({a:ka,b:kb,...o}); };
-    for(const x of V.mems()) add(x.charId,x.orgId,{color:'#4fd0ff',label:x.role||'',dash:true,ref:{kind:'mem',obj:x}});
-    for(const x of V.locLinks()) add(x.entityId,x.locId,{color:'#8ef7c1',label:x.note||'',dash:true,ref:{kind:'loc',obj:x}});
-    for(const r of V.rels()) if(r.shared||r.owner===effUid()) add(r.from,r.to,{color:r.color||'#e9c2ff',label:(r.shared?'':'☾ ')+(r.label||''),directed:r.directed,both:!!r.both,priv:!r.shared,dash:true,ref:{kind:'rel',obj:r}});
+    for(const x of V.mems()) add(x.charId,x.orgId,{color:'#4fd0ff',label:x.role||'',dash:true,hid:isDM()&&x.revealed===false,ref:{kind:'mem',obj:x}});
+    for(const x of V.locLinks()) add(x.entityId,x.locId,{color:'#8ef7c1',label:x.note||'',dash:true,hid:isDM()&&x.revealed===false,ref:{kind:'loc',obj:x}});
+    for(const r of V.rels()) if(r.shared||r.owner===effUid()||(isDM()&&r.hidden)) add(r.from,r.to,{color:r.color||'#e9c2ff',label:(r.shared||r.hidden?'':'☾ ')+(r.label||''),directed:r.directed,both:!!r.both,priv:!r.shared&&!r.hidden,hid:isDM()&&!!r.hidden,dash:true,ref:{kind:'rel',obj:r}});
     return out; };
-  const edges=()=>[...dataEdges(),...(mp.edges||[]).map(e=>({a:e.from,b:e.to,color:e.color||'#e9c2ff',label:e.label||'',directed:!!e.directed,both:!!e.both,ref:{kind:'map',obj:e}}))];
+  const edges=()=>[...dataEdges(),...(mp.edges||[]).map(e=>({a:e.from,b:e.to,color:e.color||'#e9c2ff',label:e.label||'',directed:!!e.directed,both:!!e.both,ref:{kind:'map',obj:e}})),...mapHidEdges(mp).map(e=>({a:e.from,b:e.to,color:e.color||'#e9c2ff',label:e.label||'',directed:!!e.directed,both:!!e.both,hid:true,ref:{kind:'map',obj:e}}))];
   let opts_onSelect=null;
   /* выделение: G.sel — главный (панель справа), G.msel — все выделенные ключи узлов, G.nsel — id заметок */
   if(G.selMap!==mp.id){ G.selMap=mp.id; G.msel=new Set(); G.nsel=new Set(); G.sel=null; } G.msel??=new Set(); G.nsel??=new Set();
@@ -3580,22 +3587,24 @@ function mapAddDialog(mp,onAdd){ let tab=localStorage.getItem('mapAddTab')||'', 
   $('#maq',b).oninput=e=>{ q=e.target.value; draw(); }; $$('#mat span',b).forEach(x=>x.onclick=()=>{ tab=x.dataset.t; try{ localStorage.setItem('mapAddTab',tab); }catch{} draw(); });
   $('#cancel',b).onclick=closeModal; draw(); setTimeout(()=>$('#maq',b)?.focus(),0); }
 function mapEdgeDialog(mp,e,onDone){
-  const isNew=!e.id; const tpls=world.settings.relTemplates||[];
+  const isNew=!e.id; const wasHid=!isNew&&mapHidEdges(mp).includes(e); const tpls=world.settings.relTemplates||[];
   const b=openModal(`<h2>${isNew?'Связь на карте':'Связь на карте'}</h2>
     <div class="row" style="margin-bottom:14px">${entityChip(mapEid(mp,e.from))}<span class="faint">→</span><span>${e.to?entityChip(mapEid(mp,e.to)):`<select id="to"><option value="">— с кем —</option>${(mp.nodes||[]).filter(n=>(n.k||n.id)!==e.from&&visibleEnt(findEntity(n.id))).map(n=>`<option value="${n.k||n.id}">${esc(findEntity(n.id).name)||'без имени'}${n.k?' (копия)':''}</option>`).join('')}</select>`}</span></div>
     <div class="field"><label>Шаблоны</label><div class="chips">${tpls.map(t=>`<span class="tpl" data-id="${t.id}"><span class="sw" style="color:${t.color};background:${t.color}"></span>${esc(t.label)}</span>`).join('')||'<span class="faint">шаблонов нет</span>'}</div></div>
     <div class="field"><label>Подпись</label><input id="lbl" value="${esc(e.label||'')}" placeholder="финансирует, подозреваю, был здесь в ночь убийства…"></div>
-    <div class="row wrap" style="gap:14px"><label class="row" style="gap:8px"><input type="color" id="col" value="${e.color||'#e9c2ff'}">цвет</label>${dirCtl('dirseg',arrowsOf(e))}${isNew?'':'<button class="btn sm" id="swap">поменять направление</button>'}</div>
+    <div class="row wrap" style="gap:14px"><label class="row" style="gap:8px"><input type="color" id="col" value="${e.color||'#e9c2ff'}">цвет</label>${dirCtl('dirseg',arrowsOf(e))}${isNew?'':'<button class="btn sm" id="swap">поменять направление</button>'}${isDM()?`<label class="row" style="gap:8px" title="Связь видна только мастеру (хранится отдельно от карты, игроки её не получают). На карте — с пометкой 🙈"><input type="checkbox" id="hid" ${wasHid?'checked':''}>${HID_TXT}</label>`:''}</div>
     <div class="modal-actions">${isNew?'':'<button class="btn danger" id="del">Удалить</button>'}<span class="grow"></span><button class="btn" id="cancel">Отмена</button><button class="btn primary" id="ok">${isNew?'Добавить':'Сохранить'}</button></div>`);
   $('#cancel',b).onclick=closeModal; bindOpen(b);
   bindDir(b,'dirseg');
   $$('.tpl',b).forEach(c=>c.onclick=()=>{ const t=byId(tpls,c.dataset.id); $('#lbl',b).value=t.label; $('#col',b).value=t.color; setDir(b,'dirseg',arrowsOf(t)); $$('.tpl',b).forEach(x=>x.classList.toggle('on',x===c)); });
-  const sw=$('#swap',b); if(sw) sw.onclick=()=>{ [e.from,e.to]=[e.to,e.from]; touch(mp); closeModal(); mapEdgeDialog(mp,e,onDone); };
-  const del=$('#del',b); if(del) del.onclick=()=>{ mp.edges=(mp.edges||[]).filter(x=>x!==e); touch(mp); closeModal(); onDone&&onDone(); };
+  const sw=$('#swap',b); if(sw) sw.onclick=()=>{ [e.from,e.to]=[e.to,e.from]; if(wasHid){ mapHidPut(mp,mapHidEdges(mp)); e=mapHidEdges(mp).find(x=>x.id===e.id)||e; } else touch(mp); closeModal(); mapEdgeDialog(mp,e,onDone); };
+  const del=$('#del',b); if(del) del.onclick=()=>{ if(wasHid) mapHidPut(mp,mapHidEdges(mp).filter(x=>x!==e)); else { mp.edges=(mp.edges||[]).filter(x=>x!==e); touch(mp); } closeModal(); onDone&&onDone(); };
   $('#ok',b).onclick=()=>{ const to=e.to||$('#to',b)?.value; if(!to){ toast('Выбери, с кем связать'); return; }
     const data={label:$('#lbl',b).value.trim(),color:$('#col',b).value,...dirFields(dirVal(b,'dirseg'))};
-    if(isNew) (mp.edges??=[]).push({id:uid(),from:e.from,to,...data}); else Object.assign(e,data);
-    touch(mp); closeModal(); onDone&&onDone(); };
+    const H=isDM()&&!!$('#hid',b)?.checked; const obj=isNew?{id:uid(),from:e.from,to,...data}:Object.assign(e,data);
+    if(H){ if(!isNew&&!wasHid){ mp.edges=(mp.edges||[]).filter(x=>x!==obj); touch(mp); } mapHidPut(mp,[...mapHidEdges(mp).filter(x=>x!==obj&&x.id!==obj.id),obj]); }
+    else { if(wasHid) mapHidPut(mp,mapHidEdges(mp).filter(x=>x!==obj&&x.id!==obj.id)); if(isNew||wasHid) (mp.edges??=[]).push(obj); touch(mp); }
+    closeModal(); onDone&&onDone(); };
 }
 
 /* ============================================================
@@ -3621,10 +3630,10 @@ function renderOverview(m){
   $('#others',page).onchange=e=>{ G.others=e.target.checked; eng.draw(); };
   $('#orgF',page).onchange=e=>{ G.org=e.target.value; eng.draw(); };
   const posOf=e=>e.pos||(e._pos??=(()=>{ const i=[...world.characters,...world.orgs,...world.locations].indexOf(e); const ang=i*2.4; return {x:Math.cos(ang)*(120+i*14),y:Math.sin(ang)*(120+i*14)}; })());
-  const visRels=()=>V.rels().filter(r=>G.others||r.owner===effUid()||r.shared);
+  const visRels=()=>V.rels().filter(r=>G.others||r.owner===effUid()||r.shared||r.hidden);
   const nodes=()=>{ let arr=[]; if(G.show.c) arr.push(...V.chars().map(e=>({e,t:'c'}))); if(G.show.o) arr.push(...V.orgs().map(e=>({e,t:'o'}))); if(G.show.l) arr.push(...V.locs().map(e=>({e,t:'l'})));
     if(G.org){ const mem=new Set(V.mems().filter(x=>x.orgId===G.org).map(x=>x.charId)); const locs=new Set(V.locLinks().filter(x=>x.entityId===G.org||mem.has(x.entityId)).map(x=>x.locId)); arr=arr.filter(n=>n.e.id===G.org||mem.has(n.e.id)||locs.has(n.e.id)); } return arr; };
-  const edges=()=>[...V.mems().map(x=>({a:x.charId,b:x.orgId,color:'#4fd0ff',label:x.role||'',dash:true,ref:{kind:'mem',obj:x}})),...V.locLinks().map(x=>({a:x.entityId,b:x.locId,color:'#8ef7c1',label:x.note||'',dash:true,ref:{kind:'loc',obj:x}})),...visRels().map(r=>({a:r.from,b:r.to,color:r.color||'#e9c2ff',label:(r.shared?'':'☾ ')+(r.label||''),directed:r.directed,both:!!r.both,priv:!r.shared,ref:{kind:'rel',obj:r}}))];
+  const edges=()=>[...V.mems().map(x=>({a:x.charId,b:x.orgId,color:'#4fd0ff',label:x.role||'',dash:true,hid:x.revealed===false,ref:{kind:'mem',obj:x}})),...V.locLinks().map(x=>({a:x.entityId,b:x.locId,color:'#8ef7c1',label:x.note||'',dash:true,hid:x.revealed===false,ref:{kind:'loc',obj:x}})),...visRels().map(r=>({a:r.from,b:r.to,color:r.color||'#e9c2ff',label:(r.shared||r.hidden?'':'☾ ')+(r.label||''),directed:r.directed,both:!!r.both,priv:!r.shared&&!r.hidden,hid:!!r.hidden,ref:{kind:'rel',obj:r}}))];
   const eng=graphEngine(wrap,cv,{ camKey:'__all__', emptyText:'Нет сущностей для отображения', nodes, edges, pos:posOf,
     setPos:viewAs?null:(e,p,live)=>{ e.pos=p; if(!live) touch(e); },
     onLink:viewAs?null:(from,to)=>{ const t=G.tpl?byId(world.settings.relTemplates,G.tpl):null; const ta=typeOf(from), tb=typeOf(to);
@@ -5820,7 +5829,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK) Object.assign(window,{world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK) Object.assign(window,{mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
