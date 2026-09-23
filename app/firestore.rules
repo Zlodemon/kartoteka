@@ -20,7 +20,7 @@ service cloud.firestore {
     function st() { return get(/databases/$(database)/documents/meta/settings).data; }
     // помощник мастера — игрок с отметкой helper в users; у него свой столбец прав h_<ключ> (по умолчанию всё можно), замок карт на него не действует
     function isHelper() { return isPlayer() && get(userPath()).data.get('helper', false) == true; }
-    function can(k) { return isHelper() ? st().get('h_' + k, true) != false : st().get(k, !(k in ['plMoveAll', 'plInit'])) != false; }
+    function can(k) { return isHelper() ? st().get('h_' + k, true) != false : st().get(k, !(k in ['plMoveAll', 'plInit', 'plDocMove'])) != false; }
     function plOn(k) { return can(k); }
     // разметка карты: к какому праву относится рисунок; loot/card — предметы и карточки своих способностей
     function drawPerm(d) { return d.get('t', '') in ['path', 'area'] ? (d.get('kind', '') in ['line', 'shape'] ? 'plDraw' : 'plAreas') : (d.get('t', '') in ['place', 'label'] ? 'plPlaces' : (d.get('t', '') == 'note' ? 'plNotes' : (d.get('t', '') == 'img' ? 'plImages' : 'plOther'))); }
@@ -146,7 +146,9 @@ service cloud.firestore {
       allow read: if signedIn();
       // что игрок может класть и менять — по правам разметки (drawOk); выложенный предмет подбирает любой, если разрешено
       allow create: if isDM() || (isPlayer() && request.resource.data.owner == uid() && drawOk(request.resource.data));
-      allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && drawOk(resource.data));
+      allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && drawOk(resource.data))
+        // право «двигать все документы»: у документа на карте игрок меняет только координаты
+        || (isPlayer() && can('plDocMove') && resource.data.get('t', '') == 'note' && resource.data.get('layer', 'normal') == 'normal' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['x','y','updatedAt','updatedBy']));
       allow delete: if isDM() || (isPlayer() && resource.data.owner == uid() && drawOk(resource.data)) || (isPlayer() && can('plPick') && resource.data.get('t', '') == 'loot' && resource.data.get('drop', false) == true);
     }
 
@@ -164,6 +166,9 @@ service cloud.firestore {
       allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid())
         || (isPlayer() && can('plDocTake') && resource.data.pub == true && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['given','updatedAt','updatedBy'])
             && request.resource.data.given.hasAll(resource.data.given) && request.resource.data.given.size() == resource.data.given.size() + 1 && uid() in request.resource.data.given)
+        // выданный документ игрок может убрать из своего списка (только себя из given)
+        || (isPlayer() && uid() in resource.data.given && !(uid() in request.resource.data.given) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['given','updatedAt','updatedBy'])
+            && resource.data.given.hasAll(request.resource.data.given) && request.resource.data.given.size() == resource.data.given.size() - 1)
         // тот, у кого документ есть, может открыть его всем (только pub → true)
         || (isPlayer() && can('plDocShow') && uid() in resource.data.given && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pub','updatedAt','updatedBy']) && request.resource.data.pub == true);
       allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
