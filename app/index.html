@@ -995,12 +995,13 @@ const visOf=e=>e?.visibility||'full';
 const isClone=c=>!!(c&&c.cloneOf); const cloneRoot=c=>c&&c.cloneOf?(byId(world.characters,c.cloneOf)||c):c;
 /* подпись персонажа: у клона «#N» видит мастер (и все — если мастер включил показ на клоне) */
 const chLabel=c=>{ if(!c) return '?'; const n=c.name||'без имени'; return isClone(c)&&c.cloneN&&(isDM()||c.cloneShow)?n+' #'+c.cloneN:n; };
+const EYE_OFF='<svg class="eyeoff" viewBox="0 0 24 24" width="1.05em" height="1.05em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-.16em" aria-label="скрыто"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 /* мастер прячет разделы персонажа от игроков: ch.plHide={stats,bars,effects,abilities}. Видят по-прежнему мастер и игроки самого персонажа.
    Это скрытие в интерфейсе (лист, списки, карта); сам документ персонажа игрокам доступен, как и раньше */
-const PLHIDE=[['stats','Характеристики'],['bars','Полоски'],['effects','Эффекты'],['abilities','Способности']];
+const PLHIDE=[['desc','Описание'],['stats','Характеристики'],['bars','Полоски'],['effects','Эффекты'],['abilities','Способности']];
 function plHid(ch,k){ if(!ch||isDM()) return false; const r=typeof cloneRoot==='function'?cloneRoot(ch):ch; return !!(r.plHide&&r.plHide[k])&&!ownsOrPlays(r); }
 function plHideBtn(panel,ch,k,name){ const h=panel&&$('h3',panel); if(!h) return; const r=cloneRoot(ch); const on=!!(r.plHide||{})[k];
-  const b=el(`<button class="btn sm icon keep plh ${on?'on':''}" title="${on?`«${name}» скрыты от игроков (кроме игрока этого персонажа) — нажми, чтобы показать`:`Скрыть «${name}» от игроков (игрок этого персонажа будет видеть)`}">${on?'🙈':'👁'}</button>`);
+  const b=el(`<button class="btn sm icon keep plh ${on?'on':''}" title="${on?`«${name}» скрыты от игроков (кроме игрока этого персонажа) — нажми, чтобы показать`:`Скрыть «${name}» от игроков (игрок этого персонажа будет видеть)`}">${on?EYE_OFF:'👁'}</button>`);
   b.onclick=ev=>{ ev.stopPropagation(); r.plHide={...(r.plHide||{})}; if(r.plHide[k]) delete r.plHide[k]; else r.plHide[k]=1; touch(r); toast(r.plHide[k]?`«${name}» скрыты от игроков`:`«${name}» снова видны игрокам`); render(); }; h.append(b); }
 function visibleEnt(e){ if(!e) return false; if(isDM()) return true; if(visOf(e)==='hidden') return ownsOrPlays(e); return true; }
 function briefOnly(e){ if(!e||isDM()) return false; if(ownsOrPlays(e)) return false; return visOf(e)==='brief'; }
@@ -1446,7 +1447,7 @@ function renderList(m,t){
   rebuildBar();
   const draw=()=>{
     const q=state.q.trim().toLowerCase(); const F=FB.F;
-    let arr=cfg.arr.filter(e=>{ if(F.active==='__none'&&F.map[e.id]) return false; if(F.active&&F.active!=='__none'&&F.map[e.id]!==F.active) return false; if(!q) return true; let hay=[e.name,e.title,e.description,...(e.tags||[])].join(' ').toLowerCase();
+    let arr=cfg.arr.filter(e=>{ if(F.active==='__none'&&F.map[e.id]) return false; if(F.active&&F.active!=='__none'&&F.map[e.id]!==F.active) return false; if(!q) return true; let hay=[e.name,e.title,plHid(e,'desc')?'':e.description,...(e.tags||[])].join(' ').toLowerCase();
       if(t==='c') hay+=' '+world.memberships.filter(x=>x.charId===e.id).map(x=>byId(world.orgs,x.orgId)?.name||'').join(' ').toLowerCase(); return hay.includes(q); });
     if(t==='c'&&isPlayer()) arr=[...arr].sort((a,b)=>(canEdit(b)?1:0)-(canEdit(a)?1:0));
     grid.innerHTML='';
@@ -1480,10 +1481,10 @@ function renderList(m,t){
    ============================================================ */
 function galleryBlock(ent,wide=false){
   const ed=canEdit(ent)&&!ent.imgHidden; const mainOnly=briefOnly(ent); const hidBtn=realDM()&&!viewAs&&typeOf(ent.id)==='c';
-  const p=el(`<div class="panel gal ${ed?'':'ro'}" style="padding:0;background:none;border:none"><h3 style="margin:0 0 6px 4px;display:flex;align-items:center;gap:6px">Картинки<span class="grow"></span>${ed&&ent.mainImage&&ent.mainImage!==SIL_ID?'<button class="btn sm" id="imgCrop" title="Выбрать, какая часть картинки видна на токене, в портрете и в списках (для очень высоких или широких картинок)">⛶ кадр</button>':''}${hidBtn?`<button class="btn sm" id="imgHid" title="${ent.imgHidden?'Вернуть настоящие картинки':'Спрятать картинки от всех: вместо портрета будет силуэт (и на токене, и в списках). Настоящие картинки хранятся у мастера'}">${ent.imgHidden?'👁 показать':'🙈 скрыть'}</button>`:''}</h3><div class="portrait ${wide?'wide':''}" title="${ed?'Клик — добавить картинки. Можно перетащить или вставить из буфера (Ctrl+V)':''}">
+  const p=el(`<div class="panel gal ${ed?'':'ro'}" style="padding:0;background:none;border:none"><h3 style="margin:0 0 6px 4px;display:flex;align-items:center;gap:6px">Картинки<span class="grow"></span>${ed&&ent.mainImage&&ent.mainImage!==SIL_ID?'<button class="btn sm" id="imgCrop" title="Выбрать, какая часть картинки видна на токене, в портрете и в списках (для очень высоких или широких картинок)">⛶ кадр</button>':''}${hidBtn?`<button class="btn sm" id="imgHid" title="${ent.imgHidden?'Вернуть настоящие картинки':'Спрятать картинки от всех: вместо портрета будет силуэт (и на токене, и в списках). Настоящие картинки хранятся у мастера'}">${ent.imgHidden?'👁 показать':EYE_OFF+' скрыть'}</button>`:''}</h3><div class="portrait ${wide?'wide':''}" title="${ed?'Клик — добавить картинки. Можно перетащить или вставить из буфера (Ctrl+V)':''}">
       <div class="hint">${ent.mainImage?'':(ed?'Перетащи картинки сюда,<br>кликни для выбора<br>или вставь из буфера <kbd>Ctrl+V</kbd>':'Нет картинки')}</div>
       ${ent.mainImage?`<img data-img="${ent.mainImage}" style="display:none;${wide?'':cropCss(ent)}">`:''}</div>
-    <div class="gallery"></div>${ent.imgHidden&&hidBtn?`<div class="faint" style="font-size:11.5px;margin:6px 4px 0">🙈 Настоящие картинки (${(imgStash(cloneRoot(ent))?.images||[]).length}) спрятаны — игроки видят силуэт. Чтобы менять картинки, сначала «показать».</div>`:''}</div>`);
+    <div class="gallery"></div>${ent.imgHidden&&hidBtn?`<div class="faint" style="font-size:11.5px;margin:6px 4px 0">${EYE_OFF} Настоящие картинки (${(imgStash(cloneRoot(ent))?.images||[]).length}) спрятаны — игроки видят силуэт. Чтобы менять картинки, сначала «показать».</div>`:''}</div>`);
   const port=$('.portrait',p), gal=$('.gallery',p); { const hb=$('#imgHid',p); if(hb) hb.onclick=e=>{ e.stopPropagation(); ent.imgHidden?imgShow(ent):imgHide(ent); }; const cb=$('#imgCrop',p); if(cb) cb.onclick=e=>{ e.stopPropagation(); cropDialog(ent); }; }
   /* старые миниатюры (220px, без кадра) пересобираем один раз, когда их открывает тот, кто может править */
   if(ed&&!viewAs&&ent.mainImage&&ent.mainImage!==SIL_ID&&(ent.tv||'')[0]!==String(THUMB_V)&&!THUMB_UP.has(ent.id)){ THUMB_UP.add(ent.id); refreshThumb(ent); }
@@ -2417,7 +2418,7 @@ function relationsBlock(ent){
     for(const r of rels){
       const other=r.from===ent.id?r.to:r.from; const outgoing=r.from===ent.id; const ed=canEditRel(r); const foreign=r.owner!==effUid();
       const row=el(`<div class="linkrow ${ed?'':'ro'} ${foreign?'foreign':''}"><span class="arrow" title="${ {none:'без стрелки',one:'в одну сторону',both:'в обе стороны'}[arrowsOf(r)] }">${r.both?'⇄':(r.directed?(outgoing?'→':'←'):'↔')}</span>
-        <div>${entityChip(other)}${foreign?`<div class="faint" style="font-size:11px;margin-top:2px">${esc(userName(r.owner))}</div>`:''}</div><input value="${esc(r.label)}" placeholder="подпись"><input type="color" value="${r.color||'#e9c2ff'}" title="цвет"><button class="btn icon sm dir w" title="стрелки: без / в одну / в обе">${r.both?'⇄':(r.directed?'⇢':'⇔')}</button>${r.hidden&&isDM()?'<span class="shared" title="скрыта от игроков (мастер: откройте связь на карте или снимите «скрыто» кнопкой)" style="cursor:pointer">🙈</span>':`<span class="shared ${r.shared?'on':''}" title="${r.shared?'общая — видна всем':'личная — видна тебе и мастеру'}">${r.shared?'☀':'☾'}</span>`}${isDM()&&!r.hidden?'<span class="hidb" title="скрыть от игроков" style="cursor:pointer;opacity:.45;padding:0 4px">🙈</span>':''}<button class="x-btn w" title="удалить">×</button></div>`);
+        <div>${entityChip(other)}${foreign?`<div class="faint" style="font-size:11px;margin-top:2px">${esc(userName(r.owner))}</div>`:''}</div><input value="${esc(r.label)}" placeholder="подпись"><input type="color" value="${r.color||'#e9c2ff'}" title="цвет"><button class="btn icon sm dir w" title="стрелки: без / в одну / в обе">${r.both?'⇄':(r.directed?'⇢':'⇔')}</button>${r.hidden&&isDM()?'<span class="shared" title="скрыта от игроков (мастер: откройте связь на карте или снимите «скрыто» кнопкой)" style="cursor:pointer">'+EYE_OFF+'</span>':`<span class="shared ${r.shared?'on':''}" title="${r.shared?'общая — видна всем':'личная — видна тебе и мастеру'}">${r.shared?'☀':'☾'}</span>`}${isDM()&&!r.hidden?'<span class="hidb" title="скрыть от игроков" style="cursor:pointer;opacity:.45;padding:0 4px">'+EYE_OFF+'</span>':''}<button class="x-btn w" title="удалить">×</button></div>`);
       $('input:not([type=color])',row).oninput=e=>{ r.label=e.target.value; touch(r); };
       $('input[type=color]',row).oninput=e=>{ r.color=e.target.value; touch(r); };
       $('.dir',row).onclick=()=>{ const v=arrowsOf(r); Object.assign(r,dirFields(v==='none'?'one':v==='one'?'both':'none')); touch(r); drawRels(); };
@@ -3276,7 +3277,7 @@ function linkDialog(aId,bId,onDone){
     }catch{}
   };
 }
-const HID_TXT='🙈 скрыто от игроков';
+const HID_TXT=EYE_OFF+' скрыто от игроков';
 const mapHidDoc=mp=>(world._dm||[]).find(x=>x.id==='medges_'+mp.id);
 const mapHidEdges=mp=>isDM()?(mapHidDoc(mp)?.edges||[]):[];
 function mapHidPut(mp,list){ const doc={id:'medges_'+mp.id,map:mp.id,edges:JSON.parse(JSON.stringify(list))}; world._dm=[...(world._dm||[]).filter(x=>x.id!==doc.id),doc];
@@ -3285,7 +3286,7 @@ function editRelDialog(r,onDone){
   const ed=canEditRel(r);
   const b=openModal(`<h2>Связь ${r.owner!==me.uid?`<span class="faint" style="font-size:12px;font-weight:400">· ${esc(userName(r.owner))}</span>`:''}</h2><div class="row" style="margin-bottom:14px">${entityChip(r.from)}<span class="faint">${arrowSym(r)}</span>${entityChip(r.to)}</div>
     <div class="${ed?'':'ro'}"><div class="field"><label>Подпись</label><input id="lbl" value="${esc(r.label)}"></div>
-    <div class="row wrap" style="gap:14px"><label class="row" style="gap:8px"><input type="color" id="col" value="${r.color||'#e9c2ff'}">цвет</label>${dirCtl('dirseg',arrowsOf(r))}<label class="row" style="gap:8px"><input type="checkbox" id="shr" ${(r.hidden?r.hidShared:r.shared)?'checked':''}>общая</label>${isDM()?`<label class="row" style="gap:8px" title="Игроки не увидят эту связь нигде: ни на листе, ни на картах связей. Мастер видит её с пометкой 🙈"><input type="checkbox" id="hid" ${r.hidden?'checked':''}>${HID_TXT}</label>`:''}<button class="btn sm w" id="swap">поменять направление</button></div></div>
+    <div class="row wrap" style="gap:14px"><label class="row" style="gap:8px"><input type="color" id="col" value="${r.color||'#e9c2ff'}">цвет</label>${dirCtl('dirseg',arrowsOf(r))}<label class="row" style="gap:8px"><input type="checkbox" id="shr" ${(r.hidden?r.hidShared:r.shared)?'checked':''}>общая</label>${isDM()?`<label class="row" style="gap:8px" title="Игроки не увидят эту связь нигде: ни на листе, ни на картах связей. Мастер видит её с пометкой ⊘"><input type="checkbox" id="hid" ${r.hidden?'checked':''}>${HID_TXT}</label>`:''}<button class="btn sm w" id="swap">поменять направление</button></div></div>
     <div class="modal-actions">${ed?'<button class="btn danger" id="del">Удалить</button>':''}<span class="grow"></span><button class="btn" id="cancel">${ed?'Отмена':'Закрыть'}</button>${ed?'<button class="btn primary" id="ok">Сохранить</button>':''}</div>`);
   $('#cancel',b).onclick=closeModal; bindOpen(b);
   if(!ed) return; bindDir(b,'dirseg');
@@ -3295,7 +3296,7 @@ function editRelDialog(r,onDone){
 }
 function editEdgeDialog(kind,x,onDone){
   const ed=canEditEdge(x); const isMem=kind==='mem';
-  const b=openModal(`<h2>${isMem?'Членство':'Привязка к локации'}</h2><div class="row" style="margin-bottom:14px">${entityChip(isMem?x.charId:x.entityId)}<span class="faint">${isMem?'∈':'@'}</span>${entityChip(isMem?x.orgId:x.locId)}</div><div class="${ed?'':'ro'}"><div class="field"><label>${isMem?'Роль':'Заметка'}</label><input id="v" value="${esc(isMem?x.role:x.note)||''}"></div>${isDM()?`<label class="row" style="gap:8px" title="Игроки не увидят эту связь (кроме игроков самого персонажа). Мастер видит её с пометкой 🙈"><input type="checkbox" id="hid" ${x.revealed===false?'checked':''}>${HID_TXT}</label>`:''}</div>
+  const b=openModal(`<h2>${isMem?'Членство':'Привязка к локации'}</h2><div class="row" style="margin-bottom:14px">${entityChip(isMem?x.charId:x.entityId)}<span class="faint">${isMem?'∈':'@'}</span>${entityChip(isMem?x.orgId:x.locId)}</div><div class="${ed?'':'ro'}"><div class="field"><label>${isMem?'Роль':'Заметка'}</label><input id="v" value="${esc(isMem?x.role:x.note)||''}"></div>${isDM()?`<label class="row" style="gap:8px" title="Игроки не увидят эту связь (кроме игроков самого персонажа). Мастер видит её с пометкой ⊘"><input type="checkbox" id="hid" ${x.revealed===false?'checked':''}>${HID_TXT}</label>`:''}</div>
     <div class="modal-actions">${ed?'<button class="btn danger" id="del">Удалить</button>':''}<span class="grow"></span><button class="btn" id="cancel">${ed?'Отмена':'Закрыть'}</button>${ed?'<button class="btn primary" id="ok">Сохранить</button>':''}</div>`);
   $('#cancel',b).onclick=closeModal; bindOpen(b); if(!ed) return;
   $('#del',b).onclick=()=>{ removeDoc(isMem?'memberships':'locLinks',x); closeModal(); onDone&&onDone(); };
@@ -3381,7 +3382,7 @@ function graphEngine(wrap,cv,opts){
     const pairTotal=new Map(); for(const ed of allEdges){ const pk=[ed.a,ed.b].sort().join('|'); pairTotal.set(pk,(pairTotal.get(pk)||0)+1); }
     const pairCount=new Map();
     for(const ed of allEdges){
-      const {a:aId,b:bId,color,directed,both,dash,priv,ref,hid}=ed; const label=hid?('🙈'+(ed.label?' '+ed.label:'')):ed.label;
+      const {a:aId,b:bId,color,directed,both,dash,priv,ref,hid}=ed; const label=hid?('⊘'+(ed.label?' '+ed.label:'')):ed.label;
       const pk=[aId,bId].sort().join('|'); const pi=pairCount.get(pk)||0; pairCount.set(pk,pi+1); const pn=pairTotal.get(pk)||1;
       const A=F_(aId), B=F_(bId); if(!A||!B) continue; const a=toScreen(opts.pos(A).x,opts.pos(A).y), b=toScreen(opts.pos(B).x,opts.pos(B).y);
       const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy)||1; const ux=dx/d, uy=dy/d; const ra=anchor(A,ux,uy,k,both?6*k:0), rb=anchor(B,ux,uy,k,(directed||both)?6*k:0);
@@ -3627,7 +3628,7 @@ function mapEdgeDialog(mp,e,onDone){
     <div class="row" style="margin-bottom:14px">${entityChip(mapEid(mp,e.from))}<span class="faint">→</span><span>${e.to?entityChip(mapEid(mp,e.to)):`<select id="to"><option value="">— с кем —</option>${(mp.nodes||[]).filter(n=>(n.k||n.id)!==e.from&&visibleEnt(findEntity(n.id))).map(n=>`<option value="${n.k||n.id}">${esc(findEntity(n.id).name)||'без имени'}${n.k?' (копия)':''}</option>`).join('')}</select>`}</span></div>
     <div class="field"><label>Шаблоны</label><div class="chips">${tpls.map(t=>`<span class="tpl" data-id="${t.id}"><span class="sw" style="color:${t.color};background:${t.color}"></span>${esc(t.label)}</span>`).join('')||'<span class="faint">шаблонов нет</span>'}</div></div>
     <div class="field"><label>Подпись</label><input id="lbl" value="${esc(e.label||'')}" placeholder="финансирует, подозреваю, был здесь в ночь убийства…"></div>
-    <div class="row wrap" style="gap:14px"><label class="row" style="gap:8px"><input type="color" id="col" value="${e.color||'#e9c2ff'}">цвет</label>${dirCtl('dirseg',arrowsOf(e))}${isNew?'':'<button class="btn sm" id="swap">поменять направление</button>'}${isDM()?`<label class="row" style="gap:8px" title="Связь видна только мастеру (хранится отдельно от карты, игроки её не получают). На карте — с пометкой 🙈"><input type="checkbox" id="hid" ${wasHid?'checked':''}>${HID_TXT}</label>`:''}</div>
+    <div class="row wrap" style="gap:14px"><label class="row" style="gap:8px"><input type="color" id="col" value="${e.color||'#e9c2ff'}">цвет</label>${dirCtl('dirseg',arrowsOf(e))}${isNew?'':'<button class="btn sm" id="swap">поменять направление</button>'}${isDM()?`<label class="row" style="gap:8px" title="Связь видна только мастеру (хранится отдельно от карты, игроки её не получают). На карте — с пометкой ⊘"><input type="checkbox" id="hid" ${wasHid?'checked':''}>${HID_TXT}</label>`:''}</div>
     <div class="modal-actions">${isNew?'':'<button class="btn danger" id="del">Удалить</button>'}<span class="grow"></span><button class="btn" id="cancel">Отмена</button><button class="btn primary" id="ok">${isNew?'Добавить':'Сохранить'}</button></div>`);
   $('#cancel',b).onclick=closeModal; bindOpen(b);
   bindDir(b,'dirseg');
@@ -4366,7 +4367,7 @@ function wmBase(mp){ const b=+mp.tokenBase; if(mp.tokenBaseSet) return b||WM_TOK
 function wmTokenR(mp,it,k){ const s=it.size||1; if(mp.tokenMode==='fixed') return 8*s; const g=wmGrid(mp); const base=mp.tokenMode==='grid'&&g.type!=='none'?g.size*.5:wmBase(mp); return Math.max(3,base*k*s); }
 function wmPlaceS(mp,it,k){ const s=it.size||1; if(mp.tokenMode==='fixed') return 15*s; const g=wmGrid(mp); const base=mp.tokenMode==='grid'&&g.type!=='none'?g.size*.42:(mp.placeBase||34); return Math.max(3,base*k*s); }
 const WM_CARD_W=140; function wmCardW(it){ return it.fs&&it.w?it.w:((it.w&&it.w!==260)?it.w:WM_CARD_W); }
-const wmBarsOf=(e,mine)=>{ if(typeOf(e.id)==='c') fxSyncBars(e); if(!mine&&plHid(e,'bars')) return []; return (e.bars||[]).filter(b=>(!b.hidden||mine)&&!woundHidesBar(b)); };
+const wmBarsOf=(e,mine)=>{ if(typeOf(e.id)==='c') fxSyncBars(e); if(plHid(e,'bars')) return []; return (e.bars||[]).filter(b=>(!b.hidden||mine)&&!woundHidesBar(b)); };
 /* --- отрисовка сцены (используется и картой, и превью в списке) --- */
 const IMG_H=[['nw',0,0],['n',.5,0],['ne',1,0],['w',0,.5],['e',1,.5],['sw',0,1],['s',.5,1],['se',1,1]];
 function wmDrawScene(ctx,mp,items,cam,W,H,o={}){
