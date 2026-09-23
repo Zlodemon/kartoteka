@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Картотека DnD — установка</title>
+<style>
+:root{--bg:#f6f4ef;--card:#ffffff;--text:#1f1d1a;--muted:#6b665d;--line:#e3ded3;--acc:#8a4b12;--accbg:#fbeedf;--ok:#1e7a45;--okbg:#e5f4ea;--warn:#8a5a00;--warnbg:#fff4d6;--code:#f1ede4}
+@media (prefers-color-scheme:dark){:root{--bg:#14151a;--card:#1c1e25;--text:#ecebe7;--muted:#a19d95;--line:#2d3039;--acc:#f0a35e;--accbg:#2b2117;--ok:#6fd49b;--okbg:#15291e;--warn:#f3c56b;--warnbg:#2c2513;--code:#262932}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px}
+h2{font-size:22px;margin:42px 0 12px;padding-top:6px;border-top:1px solid var(--line)}
+h3{font-size:17px;margin:22px 0 8px}
+p{margin:8px 0}
+.lead{color:var(--muted);font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin:14px 0}
+.step{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.num{width:44px;height:44px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px}
+.ok{background:var(--okbg);border-color:transparent}
+.warn{background:var(--warnbg);border-color:transparent}
+.acc{background:var(--accbg);border-color:transparent}
+code,kbd{font-family:Consolas,monospace;background:var(--code);padding:1px 6px;border-radius:6px;font-size:14px}
+kbd{border:1px solid var(--line)}
+ol,ul{padding-left:22px;margin:6px 0}
+li{margin:4px 0}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td,th{border-top:1px solid var(--line);padding:8px 6px;vertical-align:top;text-align:left}
+th{color:var(--muted);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.5px;border-top:none}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin:8px 0}
+summary{cursor:pointer;font-weight:600}
+.toc{columns:2;column-gap:28px}
+a{color:var(--acc)}.toc a{text-decoration:none}
+.small{font-size:14px;color:var(--muted)}
+b.t{color:var(--acc)}
+@media (max-width:600px){.toc{columns:1}.step{grid-template-columns:36px 1fr}.num{width:36px;height:36px;font-size:17px}}
+</style>
+</head>
+<body>
+<main>
+<h1>Картотека DnD — свой сервер за 20 минут</h1>
+<p class="lead">Эта инструкция поможет поставить картотеку для <b>своей</b> игры: свой сайт, свои персонажи и карты, свои игроки. Программировать не нужно — почти всё сделает скрипт, от вас нужно несколько кликов.</p>
+
+<div class="card acc">
+<b>Что понадобится</b>
+<ul>
+<li>Компьютер с <b>Windows 10 или 11</b> (для Mac — см. раздел <a href="#mac">в конце</a>).</li>
+<li><b>Аккаунт Google</b> (обычная почта Gmail). На нём будет ваш сервер, и через него вы будете входить на сайт мастером.</li>
+<li>Интернет и 15–20 минут.</li>
+<li><b>Деньги не нужны.</b> Сервер — бесплатный тариф Google Firebase («Spark»), банковская карта не нужна и её не просят.</li>
+</ul>
+</div>
+
+<div class="toc">
+<a href="#s1">1. Распаковать архив</a><br>
+<a href="#s2">2. Запустить установку</a><br>
+<a href="#s3">3. Что будет спрашивать скрипт</a><br>
+<a href="#s4">4. Включить вход через Google</a><br>
+<a href="#s5">5. Первый вход на сайт</a><br>
+<a href="#s6">6. Пригласить игроков</a><br>
+<a href="#s7">7. Обновления системы</a><br>
+<a href="#s8">8. Резервные копии</a><br>
+<a href="#s9">9. Лимиты бесплатного тарифа</a><br>
+<a href="#faq">10. Если что-то пошло не так</a><br>
+<a href="#files">11. Что лежит в папке</a><br>
+<a href="#mac">12. Если у вас Mac</a>
+</div>
+
+<h2 id="s1">1. Распакуйте архив</h2>
+<div class="card step"><div class="num">1</div><div>
+<ol>
+<li>Найдите скачанный архив <code>kartoteka.zip</code> (обычно в папке «Загрузки»).</li>
+<li>Нажмите на него <b>правой кнопкой мыши</b> → <b>«Извлечь всё…»</b> → выберите место, например папку «Документы» → <b>«Извлечь»</b>.</li>
+<li>Откроется папка <code>kartoteka</code>. <b>Храните её</b> — она понадобится для обновлений. В ней появится файл с вашими настройками.</li>
+</ol>
+<p class="small">Важно: запускайте файлы из распакованной папки, а не прямо из архива — из архива скрипт не сработает.</p>
+</div></div>
+
+<h2 id="s2">2. Запустите установку</h2>
+<div class="card step"><div class="num">2</div><div>
+<p>В папке <code>kartoteka</code> дважды щёлкните по файлу <b class="t">1_USTANOVKA.cmd</b>. Откроется чёрное окно — это и есть установщик. Читайте, что он пишет, и делайте, что просит.</p>
+<div class="card warn" style="margin:10px 0 0">
+<b>Если Windows покажет синее окно «Windows защитил ваш компьютер»</b> — это обычное предупреждение для файлов из интернета. Нажмите <b>«Подробнее»</b> → <b>«Выполнить в любом случае»</b>.
+</div>
+<p class="small">Окно не закрывайте, пока не появится надпись <b>ГОТОВО</b>. Если что-то прервалось — просто запустите <code>1_USTANOVKA.cmd</code> ещё раз: всё уже сделанное скрипт пропустит.</p>
+</div></div>
+
+<h2 id="s3">3. Что будет спрашивать скрипт</h2>
+<p>Скрипт идёт по шагам. В таблице — что он делает сам и где нужны вы.</p>
+<div class="card">
+<table>
+<tr><th style="width:34%">Что происходит</th><th>Что делать вам</th></tr>
+<tr><td><b>Шаг 1. Node.js</b><br><span class="small">служебная программа, через которую скрипт общается с Firebase</span></td><td>Если Node.js нет, скрипт поставит его сам. Windows может спросить «Разрешить этому приложению вносить изменения?» — нажмите <b>«Да»</b>.<br>Если не вышло — откроется сайт <b>nodejs.org</b>: скачайте большую кнопку <b>LTS</b>, установите (везде «Next»), закройте чёрное окно и снова запустите <code>1_USTANOVKA.cmd</code>.</td></tr>
+<tr><td><b>Шаг 2. Вход в Google</b></td><td>Откроется браузер. Выберите свой аккаунт Google → <b>«Разрешить»</b>. Увидите «Firebase CLI Login Successful» — вернитесь в чёрное окно.<br>Если в окне спросят <code>Enable Gemini…?</code> или <code>Allow Firebase to collect…?</code> — напечатайте <kbd>n</kbd> и нажмите <kbd>Enter</kbd>.<br><span class="small">Первый раз скрипт может минуту-две что-то скачивать — это нормально.</span></td></tr>
+<tr><td><b>Шаг 3. Кто мастер</b></td><td>Скрипт подставит вашу почту — просто нажмите <kbd>Enter</kbd>. Можно указать несколько почт через запятую.</td></tr>
+<tr><td><b>Шаг 4. Имя проекта</b><br><span class="small">станет адресом сайта: <code>имя.web.app</code></span></td><td>Придумайте имя латиницей (например <code>dnd-dragon-table</code>) или нажмите <kbd>Enter</kbd> — будет случайное.<br>На вопрос «У вас УЖЕ есть проект…?» ответьте <kbd>Enter</kbd> (нет).<br>Если скрипт напишет, что создать проект не получилось, — см. <a href="#faq">раздел 10</a>: обычно нужно один раз зайти в консоль Firebase и принять условия.</td></tr>
+<tr><td><b>Шаги 5–7. Регистрация сайта и базы данных</b></td><td>Обычно всё само. Если скрипт попросит нажать кнопки в консоли Firebase — он откроет нужную страницу и напишет, что нажать (подробно — ниже в <a href="#faq">разделе 10</a>).</td></tr>
+<tr><td><b>Шаг 8. Вход через Google</b></td><td><b>Обязательно руками</b> — см. <a href="#s4">раздел 4</a>. Скрипт откроет нужную страницу и будет ждать.</td></tr>
+<tr><td><b>Шаг 9. Выкладка сайта</b></td><td>Ничего. В конце появится <b>ГОТОВО</b> и адрес сайта. Он откроется в браузере и сохранится в файле <code>MOI-SAIT.txt</code>.</td></tr>
+</table>
+</div>
+
+<h2 id="s4">4. Включите вход на сайт через Google</h2>
+<div class="card step"><div class="num">4</div><div>
+<p>Это единственное, что нельзя сделать скриптом. Скрипт сам откроет страницу <b>Authentication → Sign-in method</b> («Способ входа») вашего проекта в консоли Firebase.</p>
+<ol>
+<li>Если видите кнопку <b>«Начать» / «Get started»</b> — нажмите её.</li>
+<li>В списке «Поставщики» (Sign-in providers) выберите <b>Google</b>.</li>
+<li>Включите переключатель <b>«Включить» / «Enable»</b>.</li>
+<li>В поле <b>«Адрес электронной почты службы поддержки»</b> (Support email) выберите свою почту.</li>
+<li>Нажмите <b>«Сохранить» / «Save»</b>. Напротив Google появится <b>«Включено» / «Enabled»</b>.</li>
+<li>Вернитесь в чёрное окно и нажмите <kbd>Enter</kbd>.</li>
+</ol>
+</div></div>
+
+<h2 id="s5">5. Первый вход на сайт</h2>
+<div class="card step ok"><div class="num">5</div><div>
+<ol>
+<li>Откройте адрес из файла <code>MOI-SAIT.txt</code> (вида <code>https://имя.web.app</code>).</li>
+<li>Нажмите «Войти через Google» и войдите <b>той почтой, которую указали мастером</b>.</li>
+<li>Слева под вашим именем должна быть плашка <b>МАСТЕР</b>. Всё — сервер работает, можно создавать персонажей, карты и документы.</li>
+</ol>
+<p class="small">Подробное описание всех возможностей — в папке <code>docs</code> (файлы открываются любым текстовым редактором или браузером).</p>
+</div></div>
+
+<h2 id="s6">6. Пригласите игроков</h2>
+<div class="card">
+<ol>
+<li>Отправьте игрокам адрес сайта. Им ничего устанавливать не нужно — только браузер и аккаунт Google.</li>
+<li>Когда игрок войдёт, он появится у вас в разделе <b>«Участники»</b> как «наблюдатель».</li>
+<li>Поставьте ему роль <b>«игрок»</b> и в «+ персонаж» прикрепите его персонажа — он сможет его редактировать.</li>
+<li>Если игрок помогает вести игру — поставьте галочку <b>«🛡 помощник»</b>. Что можно игрокам и помощникам, настраивается в <b>Настройки → Права игроков</b>.</li>
+</ol>
+</div>
+
+<h2 id="s7">7. Обновления системы</h2>
+<div class="card">
+<p>Дважды щёлкните <b class="t">2_OBNOVIT_SAIT.cmd</b> — и всё. Скрипт сам:</p>
+<ol>
+<li>скачает последнюю версию с GitHub (<a href="https://github.com/Zlodemon/kartoteka">https://github.com/Zlodemon/kartoteka</a>) — если она новее вашей;</li>
+<li>сделает <b>полный бэкап ваших данных</b> в папку <code>backups</code> (хранятся 20 последних);</li>
+<li>соберёт сайт с вашими настройками и выложит его. Игрокам достаточно нажать F5.</li>
+</ol>
+<p class="small">Ваши данные — персонажи, карты, документы, чат — при обновлении <b>не трогаются</b>: они хранятся в базе, а обновляется только сам сайт. Ничего заново настраивать не нужно: <code>moi-nastroyki.json</code> (адрес и ключи вашего сервера) скрипт не трогает — просто не удаляйте его.</p>
+<p class="small"><b>Если ваша папка <code>kartoteka</code> старая</b> (скрипт обновления не пишет «Проверяю, есть ли новая версия»): один раз скачайте <a href="https://github.com/Zlodemon/kartoteka/archive/refs/heads/main.zip">архив с GitHub</a>, откройте его и скопируйте <b>всё содержимое</b> папки <code>kartoteka-main</code> в свою папку <code>kartoteka</code> с заменой файлов. Ваш <code>moi-nastroyki.json</code> в архиве нет, он останется. Дальше обновляйтесь только через <b class="t">2_OBNOVIT_SAIT.cmd</b>.</p>
+<p>Чтобы поменять, чьи почты всегда становятся мастерами, запустите <b class="t">3_SMENIT_MASTEROV.cmd</b>.</p>
+</div>
+
+<h2 id="s8">8. Резервные копии</h2>
+<div class="card">
+<p>Перед каждым обновлением скрипт сам кладёт полный бэкап в папку <code>backups</code>. Вручную: на сайте <b>Настройки → Данные → «Полный бэкап»</b> — скачается один файл со всем миром (персонажи, карты, картинки, чат, документы). Делайте так раз в несколько сессий и храните файлы у себя.</p>
+<p>Восстановить любой из этих файлов: <b>Настройки → Данные → «Восстановить из бэкапа…»</b> (зайти мастером). Документы из файла записываются поверх текущих с теми же id; то, чего в файле нет, не удаляется.</p>
+</div>
+
+<h2 id="s9">9. Лимиты бесплатного тарифа</h2>
+<div class="card">
+<p>Бесплатно Firebase даёт в сутки примерно <b>50 000 чтений</b> и <b>20 000 записей</b> в базу и <b>1 ГБ</b> места. Для группы из 4–6 игроков и еженедельных сессий этого с запасом. Картинки при загрузке сжимаются.</p>
+<p>Если лимит на сегодня закончился, сайт перестанет сохранять изменения до следующих суток (сброс — около 10–11 утра по Москве). Расход виден в <b>Настройки → Данные</b>.</p>
+<p class="small">Не переходите на платный тариф «Blaze» и не привязывайте карту, если не уверены, что это нужно.</p>
+</div>
+
+<h2 id="faq">10. Если что-то пошло не так</h2>
+<details><summary>Чёрное окно сразу закрылось или пишет «выполнение сценариев отключено»</summary><p>Запускайте именно файлы <code>.cmd</code> (<code>1_USTANOVKA.cmd</code>), а не <code>.ps1</code> из папки <code>scripts</code>. Если окно всё равно закрывается — нажмите правой кнопкой по <code>1_USTANOVKA.cmd</code> → «Запуск от имени администратора».</p></details>
+<details><summary>«Создать проект не получилось»</summary>
+<ol>
+<li>Откройте <a href="https://console.firebase.google.com/">console.firebase.google.com</a> и войдите тем же аккаунтом Google. Если Firebase предложит принять условия — примите.</li>
+<li>Вернитесь в чёрное окно и введите другое имя проекта (возможно, имя занято).</li>
+<li>Если опять не выходит — создайте проект в консоли сами: <b>«Создать проект» / «Create a project»</b>, введите имя, Google Analytics можно выключить, дождитесь создания. Под названием проекта будет его <b>ID</b> (например <code>my-dnd-1a2b3</code>). Запустите установку ещё раз, введите этот ID и на вопрос «У вас УЖЕ есть проект…?» ответьте <kbd>да</kbd>.</li>
+</ol></details>
+<details><summary>Скрипт просит создать базу Firestore вручную</summary><p>Откроется страница Firestore Database. Нажмите <b>«Создать базу данных» / «Create database»</b>: выпуск <b>Standard</b> → Далее → расположение <b>eur3 (Europe)</b> → Далее → <b>«Начать в рабочем режиме» / «Start in production mode»</b> → Создать. Вернитесь в окно и нажмите <kbd>Enter</kbd>.</p></details>
+<details><summary>Скрипт просит создать Realtime Database вручную</summary><p>Откроется страница Realtime Database. Нажмите <b>«Создать базу данных» / «Create Database»</b>: расположение <b>«Бельгия (europe-west1)»</b> → Далее → <b>«Начать в заблокированном режиме» / «Start in locked mode»</b> → Включить. Вернитесь в окно и нажмите <kbd>Enter</kbd>.</p></details>
+<details><summary>На сайте при входе: «auth/operation-not-allowed» или «auth/configuration-not-found»</summary><p>Не включён вход через Google — сделайте <a href="#s4">раздел 4</a>. Сайт перевыкладывать не нужно.</p></details>
+<details><summary>На сайте при входе: «auth/unauthorized-domain»</summary><p>Открывайте сайт по адресу из <code>MOI-SAIT.txt</code> (<code>…web.app</code> или <code>…firebaseapp.com</code>). Если хотите свой домен — добавьте его в консоли Firebase: Authentication → Settings → Authorized domains.</p></details>
+<details><summary>Окно входа не появляется</summary><p>Браузер заблокировал всплывающее окно — разрешите всплывающие окна для сайта (значок в адресной строке) и нажмите «Войти» ещё раз.</p></details>
+<details><summary>Я вошёл, но я не мастер</summary><p>Вы вошли не той почтой, что указали мастером. Выйдите и войдите нужной — или запустите <code>3_SMENIT_MASTEROV.cmd</code> и добавьте эту почту.</p></details>
+<details><summary>Игрок вошёл, но ничего не может</summary><p>Новички — «наблюдатели». Мастер в разделе «Участники» ставит роль «игрок» и прикрепляет персонажа.</p></details>
+<details><summary>Ошибка при выкладке сайта (шаг 9)</summary><p>Запустите <code>2_OBNOVIT_SAIT.cmd</code> — иногда серверы Google отвечают ошибкой, и вторая попытка проходит. Если в тексте ошибки есть «Firestore» или «database» — проверьте, что обе базы созданы (два пункта выше).</p></details>
+
+<h2 id="files">11. Что лежит в папке</h2>
+<div class="card"><table>
+<tr><td><code>1_USTANOVKA.cmd</code></td><td>установка сервера (один раз)</td></tr>
+<tr><td><code>2_OBNOVIT_SAIT.cmd</code></td><td>обновление: скачать новую версию с GitHub, сделать бэкап данных, выложить сайт</td></tr>
+<tr><td><code>3_SMENIT_MASTEROV.cmd</code></td><td>поменять, чьи почты всегда мастера</td></tr>
+<tr><td><code>app/</code></td><td>сама система (заменяется при обновлении)</td></tr>
+<tr><td><code>docs/</code></td><td>подробное описание всех возможностей</td></tr>
+<tr><td><code>scripts/</code></td><td>скрипты установки — трогать не нужно</td></tr>
+<tr><td><code>moi-nastroyki.json</code></td><td>появится после установки: ваш проект и ключи. <b>Не удаляйте.</b></td></tr>
+<tr><td><code>site/</code></td><td>появится после установки: собранный сайт (пересобирается сам)</td></tr>
+<tr><td><code>backups/</code></td><td>появится после первого обновления: бэкапы данных (20 последних)</td></tr>
+<tr><td><code>MOI-SAIT.txt</code></td><td>появится после установки: адрес вашего сайта</td></tr>
+</table>
+<p class="small">Ключи в <code>moi-nastroyki.json</code> не секретные (браузер всё равно видит их на сайте), а данные защищены правилами доступа. Но папку целиком никуда не выкладывайте.</p></div>
+
+<h2 id="mac">12. Если у вас Mac</h2>
+<div class="card">
+<p>Скрипты рассчитаны на Windows. На Mac проще всего один раз поставить сервер с любого Windows-компьютера (например, у друга) — потом играть и управлять можно с чего угодно, это обычный сайт.</p>
+<details><summary>Ручная установка для продвинутых (Mac / Linux)</summary>
+<ol>
+<li>Установите Node.js LTS с nodejs.org. В Терминале: <code>npx firebase-tools login</code>.</li>
+<li>В консоли Firebase создайте проект, в нём: веб-приложение (значок «&lt;/&gt;»), Firestore (eur3, production), Realtime Database (europe-west1, locked), Authentication → Google.</li>
+<li>Скопируйте папку <code>app</code> в новую папку <code>site</code>, файлы <code>index.html</code> и <code>techniques-base.js</code> положите в <code>site/public</code>.</li>
+<li>В <code>site/public/index.html</code> замените <code>{"__FIREBASE__":1}</code> на объект настроек веб-приложения из консоли (с полем <code>databaseURL</code>), а <code>"__DM_EMAILS__"</code> — на свою почту в кавычках. В <code>site/firestore.rules</code> замените <code>'__DM_EMAILS__'</code> на свою почту в одинарных кавычках.</li>
+<li>Создайте <code>site/.firebaserc</code>: <code>{ "projects": { "default": "ID-проекта" } }</code> и в папке <code>site</code> выполните <code>npx firebase-tools deploy --only hosting,firestore:rules,database</code>.</li>
+</ol></details>
+</div>
+</main>
+</body>
+</html>
