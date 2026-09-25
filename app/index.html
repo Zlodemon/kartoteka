@@ -1076,7 +1076,7 @@ function subscribeAll(){
   world._chat=[]; sub('chat','_chat',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); if(realDM()){ world._chatdm=[]; sub('chatdm','_chatdm',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); }
   if(realDM()) sub('docs','docs');
   else { world._docsA=[]; world._docsB=[]; world._docsC=[]; const md=()=>mergeSrc('docs'); sub('docs','_docsA',{where:[['pub','==',true]]},md); sub('docs','_docsB',{where:[['given','array-contains',me.uid]]},md); if(myRole==='player') sub('docs','_docsC',{where:[['owner','==',me.uid]]},md); }
-  if(realDM()){ sub('characters','characters'); sub('orgs','orgs'); sub('locations','locations'); sub('relations','relations'); sub('maps','maps'); sub('log','log',{orderBy:'at',limit:300});
+  if(realDM()){ sub('characters','characters'); sub('orgs','orgs'); sub('locations','locations'); sub('relations','relations'); sub('maps','maps'); sub('log','log',{orderBy:'at',limit:500});
     sub('wmaps','wmaps'); sub('wmpriv','wmpriv',null,()=>{ for(const d of world.wmpriv) if(!Array.isArray(d.uids)&&d.uid&&!pending.has(d.id)){ d.uids=[d.uid]; touch(d); } });
     sub('dm','_dm',null,()=>{ const t=world._dm.find(x=>x.id==='dmtimeline'); if(!pending.has('dmtimeline')) world.dmTimeline=t?t:{id:'dmtimeline',nodes:[]}; for(const d of world._dm) if(d.id.startsWith('wm_')&&!pending.has(d.id)) WM.secrets.set(d.id.slice(3),d); }); }
   else {
@@ -3548,6 +3548,7 @@ function graphEngine(wrap,cv,opts){
     const ns=opts.nodes(); const ids=new Set(ns.map(n=>n.e.id)); const k=cam.k; labelHits=[]; edgeHits=[];
     if(!ns.length&&!notes().length){ ctx.fillStyle='rgba(228,230,240,.3)'; ctx.font='14px Segoe UI'; ctx.textAlign='center'; ctx.fillText(opts.emptyText||'Пусто',W()/2,H()/2); return; }
     ctx.font=`${Math.max(9,11*k)}px Segoe UI`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    if(opts.underlay) opts.underlay(ctx,{toScreen,k});
     /* блоки (локации-области) — под всем остальным */
     for(const n of ns){ const b=blk(n.e); if(!b) continue; const e=n.e, pp=opts.pos(e), p=toScreen(pp.x,pp.y); const w=b.w*k, h=b.h*k, x=p.x-w/2, y=p.y-h/2; const sel=selB(e); const col=typeColor[n.t]; const rc=blkRect(b);
       ctx.save(); ctx.globalAlpha=1; ctx.fillStyle=hexA(col,sel?.10:.055); ctx.strokeStyle=col; ctx.globalAlpha=sel?.9:.5; ctx.lineWidth=sel?2:1.5; ctx.setLineDash([8*k,6*k]); if(rc) roundRect(ctx,x,y,w,h,14*k); else { const q=blkPts(b); ctx.beginPath(); for(let i=0;i<q.length;i+=2) ctx.lineTo(p.x+q[i]*w,p.y+q[i+1]*h); ctx.closePath(); } ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
@@ -3649,7 +3650,7 @@ function graphEngine(wrap,cv,opts){
     if(drag){ if(moved){ const p=opts.pos(drag.e); opts.setPos(drag.e,{x:Math.round(p.x),y:Math.round(p.y)},false); for(const kd of drag.kids){ const q=opts.pos(kd.e); opts.setPos(kd.e,{x:Math.round(q.x),y:Math.round(q.y)},true); } for(const q of drag.nk||[]) opts.setNote(q.n,{x:Math.round(q.n.x),y:Math.round(q.n.y)},true); } else opts.onSelect(drag.e.id,e); drag=null; return; }
     if(pan){ cv.style.cursor='grab'; if(!moved){ const ref=hitLabel(x,y); if(ref&&opts.onLabel) opts.onLabel(ref); else opts.onSelect(null); } pan=null; } };
   window.addEventListener('mousemove',onMove); window.addEventListener('mouseup',onUp);
-  cv.ondblclick=e=>{ const n=hit(e.offsetX,e.offsetY,false); if(n){ open(eid_(n)); return; } if(opts.onNoteClick&&opts.onNote){ const nt=hitNote(e.offsetX,e.offsetY); if(nt){ opts.onNote(nt); return; } } const ref=hitLabel(e.offsetX,e.offsetY); if(ref&&opts.onLabel){ opts.onLabel(ref); return; } const nb=hit(e.offsetX,e.offsetY,true); if(nb) open(eid_(nb)); };
+  cv.ondblclick=e=>{ const n=hit(e.offsetX,e.offsetY,false); if(n){ open(eid_(n)); return; } if(opts.onNoteClick&&opts.onNote){ const nt=hitNote(e.offsetX,e.offsetY); if(nt){ opts.onNote(nt); return; } } const ref=hitLabel(e.offsetX,e.offsetY); if(ref&&opts.onLabel){ opts.onLabel(ref); return; } const nb=hit(e.offsetX,e.offsetY,true); if(nb) open(eid_(nb)); else if(opts.onBgDbl) opts.onBgDbl(toWorld(e.offsetX,e.offsetY)); };
   cv.onwheel=e=>{ e.preventDefault(); const f=e.deltaY<0?1.12:1/1.12; const before=toWorld(e.offsetX,e.offsetY); cam.k=Math.max(.2,Math.min(3,cam.k*f)); const after=toWorld(e.offsetX,e.offsetY); cam.x+=after.x-before.x; cam.y+=after.y-before.y; draw(); };
   new ResizeObserver(()=>draw()).observe(wrap);
   cv.classList.toggle('linking',G.linkMode);
@@ -3683,6 +3684,133 @@ function miniMapSVG(mp){ const ns=(mp.nodes||[]).filter(n=>visibleEnt(findEntity
   return `<svg viewBox="0 0 ${S} ${T}" style="width:100%;height:100%;display:block">${(mp.notes||[]).map(n=>{ const q=P(n); return `<rect x="${q[0]-(n.w||220)*k/2}" y="${q[1]-(n.h||140)*k/2}" width="${(n.w||220)*k}" height="${(n.h||140)*k}" rx="2" fill="${n.color||'#ffd166'}" fill-opacity=".15" stroke="${n.color||'#ffd166'}" stroke-opacity=".5"/>`; }).join('')}${ns.filter(n=>n.block).map(n=>{ const c=typeColor[typeOf(n.id)]||'#8ef7c1'; if(!blkRect(n.block)){ const q=blkPts(n.block,24), P=pos[K(n)]; return `<polygon points="${q.map((v,i)=>i%2?P[1]+v*n.block.h*k:P[0]+v*n.block.w*k).join(' ')}" fill="${c}" fill-opacity=".08" stroke="${c}" stroke-opacity=".5" stroke-dasharray="3 2"/>`; } return `<rect x="${pos[K(n)][0]-n.block.w*k/2}" y="${pos[K(n)][1]-n.block.h*k/2}" width="${n.block.w*k}" height="${n.block.h*k}" rx="4" fill="${c}" fill-opacity=".08" stroke="${c}" stroke-opacity=".5" stroke-dasharray="3 2"/>`; }).join('')}${(mp.edges||[]).filter(e=>ids.has(e.from)&&ids.has(e.to)).map(e=>`<line x1="${pos[e.from][0]}" y1="${pos[e.from][1]}" x2="${pos[e.to][0]}" y2="${pos[e.to][1]}" stroke="${e.color||'#e9c2ff'}" stroke-opacity=".7" stroke-width="1.2"/>`).join('')}${ns.filter(n=>!n.block).map(n=>`<circle cx="${pos[K(n)][0]}" cy="${pos[K(n)][1]}" r="4" fill="#0d1020" stroke="${typeColor[typeOf(n.id)]||'#fff'}" stroke-width="1.5"/>`).join('')}</svg>`; }
 
 /* ============================================================
+   КАРТА СВЯЗЕЙ: «👁 Вид» — настройки ОТОБРАЖЕНИЯ у этого зрителя (localStorage relView.<ключ карты>); сама карта не меняется.
+   lay — своя раскладка (pos: ключ узла → {x,y}; её двигают мышью и «Оптимизировать»), forms — организации рисуются формами под участниками
+   ============================================================ */
+function rvState(key){ const C=(G.rv??={}); if(!C[key]){ let v=null; try{ v=JSON.parse(localStorage.getItem('relView.'+key)||'null'); }catch{} C[key]={lay:!!v?.lay,pos:(v&&v.pos)||{},forms:!!v?.forms}; } return C[key]; }
+function rvSave(key){ try{ localStorage.setItem('relView.'+key,JSON.stringify(rvState(key))); }catch{} }
+function convexHull(P){ if(P.length<3) return P.slice(); const p=P.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]); const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]); const lo=[],up=[];
+  for(const q of p){ while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],q)<=0) lo.pop(); lo.push(q); }
+  for(let i=p.length-1;i>=0;i--){ const q=p[i]; while(up.length>=2&&cr(up[up.length-2],up[up.length-1],q)<=0) up.pop(); up.push(q); }
+  lo.pop(); up.pop(); return lo.concat(up); }
+function ptInPoly(x,y,P){ let r=false; for(let i=0,j=P.length-1;i<P.length;j=i++){ const [xi,yi]=P[i], [xj,yj]=P[j]; if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi) r=!r; } return r; }
+/* организации на карте → [{org, id, keys — узлы самой организации (в режиме форм скрыты), mem — ключ узла → персонаж}]; участники — по членствам и по попаданию внутрь блока организации */
+function rvForms(o){ const ns=o.nodes(); const eid=e=>e._ent?e._ent.id:e.id; const byOrg=new Map(), chars=new Map();
+  for(const n of ns){ const id=eid(n.e); if(n.t==='o'){ let f=byOrg.get(id); if(!f) byOrg.set(id,f={org:n.e._ent||n.e,id,keys:new Set(),mem:new Map()}); f.keys.add(n.e.id); } else if(n.t==='c') (chars.get(id)||chars.set(id,[]).get(id)).push(n.e); }
+  if(!byOrg.size) return [];
+  for(const x of V.mems()){ const f=byOrg.get(x.orgId); if(f) for(const e of chars.get(x.charId)||[]) f.mem.set(e.id,e); }
+  if(o.block) for(const n of ns){ if(n.t!=='o') continue; const b=o.block(n.e); if(!b) continue; const bp=o.pos(n.e), f=byOrg.get(eid(n.e)); for(const [,arr] of chars) for(const e of arr){ const p=o.pos(e); if(blkIn(b,p.x-bp.x,p.y-bp.y)) f.mem.set(e.id,e); } }
+  return [...byOrg.values()].filter(f=>f.mem.size); }
+/* контуры форм в координатах карты: выпуклая оболочка кружков участников; у персонажа в нескольких организациях формы вложены (меньшая — ближе к нему) */
+function rvHulls(fs,pos){ const depth=new Map(), out=[];
+  for(const f of [...fs].sort((a,b)=>a.mem.size-b.mem.size)){ const pts=[]; for(const [k,e] of f.mem){ const d=depth.get(k)||0; depth.set(k,d+1); const p=pos(e), r=NODE_R.c+16+d*13; for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; pts.push([p.x+Math.cos(a)*r,p.y+Math.sin(a)*r]); } } out.push({f,hull:convexHull(pts)}); }
+  return out.reverse(); }
+/* обёртка над опциями graphEngine: подменяет позиции (своя раскладка), прячет организации и рисует формы. Сама карта пишется только когда вид «как на карте» */
+function relView(key,o){ const st=()=>rvState(key); let fc=null, ft=0, hulls=[];
+  const forms=()=>{ const t=performance.now(); if(!fc||t-ft>40){ fc=rvForms(o); ft=t; } return fc; };
+  const w={...o,
+    nodes:()=>{ const ns=o.nodes(); if(!st().forms) return ns; const h=new Set(); for(const f of forms()) for(const k of f.keys) h.add(k); return h.size?ns.filter(n=>!h.has(n.e.id)):ns; },
+    pos:e=>{ const s=st(); return (s.lay&&s.pos[e.id])||o.pos(e); },
+    underlay:(ctx,{toScreen,k})=>{ hulls=[]; if(!st().forms) return; hulls=rvHulls(forms(),w.pos); const lbls=[];
+      for(const h of hulls){ if(h.hull.length<3) continue; const hue=entHue(h.f.org), col=a=>`hsla(${hue},70%,64%,${a})`; const P=h.hull.map(([x,y])=>toScreen(x,y));
+        const sel=G.sel&&h.f.mem.has(G.sel); ctx.save(); ctx.lineJoin='round'; ctx.beginPath(); P.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.closePath();
+        ctx.fillStyle=col(sel?.16:.09); ctx.fill(); ctx.strokeStyle=col(sel?.95:.65); ctx.lineWidth=(sel?2.2:1.5)*Math.max(.6,k); ctx.stroke();
+        if(k>.3){ let top=P[0]; for(const p of P) if(p.y<top.y) top=p; const nm=h.f.org.name||'без имени'; ctx.font=`700 ${Math.max(9,12*k)}px Segoe UI`; const tw=ctx.measureText(nm).width+14*k, th=18*k;
+          top={x:top.x,y:top.y}; for(let t=0;t<12&&lbls.some(l=>Math.abs(l.x-top.x)<(l.w+tw)/2&&Math.abs(l.y-top.y)<th+2);t++) top.y-=th+3; lbls.push({x:top.x,y:top.y,w:tw});
+          ctx.fillStyle='rgba(9,12,22,.92)'; ctx.beginPath(); ctx.roundRect(top.x-tw/2,top.y-th/2,tw,th,th/2); ctx.fill(); ctx.strokeStyle=col(.8); ctx.lineWidth=1; ctx.stroke(); ctx.fillStyle=col(1); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(nm,top.x,top.y+.5); }
+        ctx.restore(); } },
+    onBgDbl:p=>{ for(const h of [...hulls].reverse()) if(h.hull.length>2&&ptInPoly(p.x,p.y,h.hull)){ open(h.f.id); return; } },
+    _rv:{key,base:o,forms} };
+  const lay=(e,p,live)=>{ const s=st(); s.pos[e.id]={x:p.x,y:p.y}; if(!live) rvSave(key); };
+  Object.defineProperty(w,'setPos',{get:()=>st().lay?lay:o.setPos});
+  Object.defineProperty(w,'setBlock',{get:()=>st().lay?null:o.setBlock});
+  Object.defineProperty(w,'setNote',{get:()=>st().lay?null:o.setNote});
+  return w; }
+/* оптимизация раскладки: силовая раскладка с несколькими случайными стартами (берётся лучшая) + доводка перестановками и сдвигами узлов.
+   Цена = пересечения связей + линии, проходящие сквозь чужие узлы (×0.6) + разбросанность участников одной формы + немного длины связей.
+   Элементы внутри блоков едут вместе с блоком. Возвращает {pos: ключ → {x,y}, c0, c1} (пересечений было / стало) */
+function relOptimize(o,groups,budget=2500){
+  const t0=performance.now(); const all=o.nodes(); const blk=e=>o.block?o.block(e):null;
+  const kids=new Map(); for(const n of all){ const b=blk(n.e); if(!b) continue; const bp=o.pos(n.e); for(const m of all){ if(m.e===n.e||blk(m.e)||kids.has(m.e.id)) continue; const mp=o.pos(m.e); if(blkIn(b,mp.x-bp.x,mp.y-bp.y)) kids.set(m.e.id,{e:m.e,host:n.e.id,dx:mp.x-bp.x,dy:mp.y-bp.y}); } }
+  const U=all.filter(n=>!kids.has(n.e.id)); const N=U.length; if(!N) return null;
+  const ix=new Map(U.map((n,i)=>[n.e.id,i])); const hostOf=id=>kids.has(id)?kids.get(id).host:id;
+  const R=U.map(n=>{ const b=blk(n.e); return b?Math.max(b.w,b.h)/2:(NODE_R[n.t]||26); }), isB=U.map(n=>!!blk(n.e));
+  const seen=new Set(), E=[]; for(const x of o.edges()){ const a=ix.get(hostOf(x.a)), b=ix.get(hostOf(x.b)); if(a==null||b==null||a===b) continue; const k=a<b?a+'|'+b:b+'|'+a; if(seen.has(k)) continue; seen.add(k); E.push([a,b]); }
+  const inc=U.map(()=>[]); E.forEach(([a,b],j)=>{ inc[a].push(j); inc[b].push(j); });
+  const nbr=U.map((_,i)=>inc[i].map(j=>E[j][0]===i?E[j][1]:E[j][0]));
+  const Gr=(groups||[]).map(g=>[...new Set(g.map(k=>ix.get(hostOf(k))).filter(i=>i!=null))]).filter(g=>g.length>1); const grOf=U.map(()=>[]); Gr.forEach((g,gi)=>g.forEach(i=>grOf[i].push(gi)));
+  const X=new Float64Array(N), Y=new Float64Array(N); const GAP=Gr.length?64:52; // зазор между кружками: под подписи имён (и под контуры форм)
+  const ori=(p,q,r)=>{ const v=(X[q]-X[p])*(Y[r]-Y[p])-(Y[q]-Y[p])*(X[r]-X[p]); return v>1e-9?1:v<-1e-9?-1:0; };
+  const cross=(a,b,c,d)=>ori(a,b,c)*ori(a,b,d)<0&&ori(c,d,a)*ori(c,d,b)<0;
+  const near=(a,b,i)=>{ const dx=X[b]-X[a], dy=Y[b]-Y[a], L=dx*dx+dy*dy||1; let t=((X[i]-X[a])*dx+(Y[i]-Y[a])*dy)/L; if(t<=0||t>=1) return false; return Math.hypot(X[a]+dx*t-X[i],Y[a]+dy*t-Y[i])<R[i]+10; };
+  const eCross=j=>{ const [a,b]=E[j]; let c=0; for(let m=0;m<E.length;m++){ if(m===j) continue; const [p,q]=E[m]; if(p===a||p===b||q===a||q===b) continue; if(cross(a,b,p,q)) c++; } return c; };
+  const eNear=j=>{ const [a,b]=E[j]; let c=0; if(isB[a]||isB[b]) return 0; for(let i=0;i<N;i++) if(i!==a&&i!==b&&!isB[i]&&near(a,b,i)) c++; return c; };
+  const inG=U.map((_,i)=>new Set(grOf[i]));
+  const grp=i=>{ let c=0; for(const gi of grOf[i]){ const g=Gr[gi]; let sx=0,sy=0; for(const m of g) if(m!==i){ sx+=X[m]; sy+=Y[m]; } const n=g.length-1; c+=Math.hypot(X[i]-sx/n,Y[i]-sy/n)/250*2; }
+    if(Gr.length&&!isB[i]) for(let gi=0;gi<Gr.length;gi++){ if(inG[i].has(gi)) continue; const g=Gr[gi]; let sx=0,sy=0; for(const m of g){ sx+=X[m]; sy+=Y[m]; } sx/=g.length; sy/=g.length; let r=0; for(const m of g) r=Math.max(r,Math.hypot(X[m]-sx,Y[m]-sy)); if(Math.hypot(X[i]-sx,Y[i]-sy)<r+R[i]+40) c+=2.5; } // чужой внутри формы
+    return c; };
+  const len=i=>{ let c=0; for(const m of nbr[i]) c+=Math.hypot(X[i]-X[m],Y[i]-Y[m]); return c/1000*.3; };
+  const nodeCost=i=>{ let c=0; for(const j of inc[i]) c+=eCross(j)+eNear(j)*.6; if(!isB[i]) for(let j=0;j<E.length;j++){ const [a,b]=E[j]; if(a!==i&&b!==i&&!isB[a]&&!isB[b]&&near(a,b,i)) c+=.6; } return c+grp(i)+len(i); };
+  const crossings=()=>{ let c=0; for(let j=0;j<E.length;j++) c+=eCross(j); return c/2; };
+  const total=()=>{ let c=crossings(); for(let j=0;j<E.length;j++) c+=eNear(j)*.6; for(let i=0;i<N;i++) c+=grp(i)/2+len(i)/2; return c; };
+  const sep=(iters)=>{ for(let it=0;it<iters;it++){ let moved=false; for(let i=0;i<N;i++) for(let j=i+1;j<N;j++){ let dx=X[j]-X[i], dy=Y[j]-Y[i]; const d=Math.hypot(dx,dy)||.01, want=R[i]+R[j]+GAP; if(d>=want) continue; if(d<.02){ dx=Math.random()-.5; dy=Math.random()-.5; } const f=(want-d)/2/(Math.hypot(dx,dy)||1); X[i]-=dx*f; Y[i]-=dy*f; X[j]+=dx*f; Y[j]+=dy*f; moved=true; } if(!moved) break; } };
+  const force=(iters)=>{ const vx=new Float64Array(N), vy=new Float64Array(N);
+    for(let it=0;it<iters;it++){ const T=1-it/iters;
+      for(let a=0;a<N;a++) for(let b=a+1;b<N;b++){ let dx=X[b]-X[a], dy=Y[b]-Y[a]; const d=Math.sqrt(dx*dx+dy*dy+.01); const gap=Math.max(0,d-(R[a]+R[b]-60)); let f=22000/(gap*gap+400); if(grOf[a].length&&grOf[b].length&&!grOf[a].some(g=>inG[b].has(g))) f*=2.5; dx/=d; dy/=d; vx[a]-=dx*f; vy[a]-=dy*f; vx[b]+=dx*f; vy[b]+=dy*f; }
+      for(const [a,b] of E){ const dx=X[b]-X[a], dy=Y[b]-Y[a]; const d=Math.sqrt(dx*dx+dy*dy)+.01; const f=(d-(150+R[a]+R[b]))*.02; vx[a]+=dx/d*f; vy[a]+=dy/d*f; vx[b]-=dx/d*f; vy[b]-=dy/d*f; }
+      for(const g of Gr){ let sx=0,sy=0; for(const i of g){ sx+=X[i]; sy+=Y[i]; } sx/=g.length; sy/=g.length; for(const i of g){ vx[i]+=(sx-X[i])*.04; vy[i]+=(sy-Y[i])*.04; } }
+      for(let i=0;i<N;i++){ vx[i]-=X[i]*.003; vy[i]-=Y[i]*.003; X[i]+=vx[i]*T*.5; Y[i]+=vy[i]*T*.5; vx[i]*=.5; vy[i]*=.5; } } };
+  /* исходная раскладка — старт №0 и эталон «было» */
+  let cx0=0, cy0=0; U.forEach((n,i)=>{ const p=o.pos(n.e); X[i]=p.x; Y[i]=p.y; cx0+=p.x; cy0+=p.y; }); cx0/=N; cy0/=N;
+  for(let i=0;i<N;i++){ X[i]-=cx0; Y[i]-=cy0; }
+  const c0=crossings(); let best=null, bestS=Infinity;
+  const tries=N>150?2:N>80?4:8, rad=60*Math.sqrt(N)+200;
+  for(let r=0;r<tries;r++){ if(r&&performance.now()-t0>budget*.5) break;
+    if(r){ for(let i=0;i<N;i++){ const a=Math.random()*Math.PI*2, d=Math.sqrt(Math.random())*rad; X[i]=Math.cos(a)*d; Y[i]=Math.sin(a)*d; } }
+    force(N>150?200:350); sep(60); const s=total(); if(s<bestS){ bestS=s; best=[Float64Array.from(X),Float64Array.from(Y)]; } }
+  X.set(best[0]); Y.set(best[1]);
+  /* доводка: перестановка двух узлов одного размера и сдвиг узла к соседям — если цена падает */
+  const free=(i,x,y)=>{ for(let j=0;j<N;j++) if(j!==i&&Math.hypot(X[j]-x,Y[j]-y)<R[i]+R[j]+GAP) return false; return true; };
+  for(let pass=0;pass<6&&performance.now()-t0<budget;pass++){ let imp=0;
+    for(let i=0;i<N&&performance.now()-t0<budget;i++){ if(isB[i]) continue;
+      for(let j=i+1;j<N;j++){ if(isB[j]||Math.abs(R[i]-R[j])>6) continue; const before=nodeCost(i)+nodeCost(j); let t=X[i]; X[i]=X[j]; X[j]=t; t=Y[i]; Y[i]=Y[j]; Y[j]=t; if(nodeCost(i)+nodeCost(j)<before-1e-6){ imp++; continue; } t=X[i]; X[i]=X[j]; X[j]=t; t=Y[i]; Y[i]=Y[j]; Y[j]=t; } }
+    for(let i=0;i<N&&performance.now()-t0<budget;i++){ if(isB[i]) continue; const ox=X[i], oy=Y[i]; let bx=ox, by=oy, bc=nodeCost(i);
+      const bases=[[ox,oy]]; if(nbr[i].length){ let sx=0,sy=0; for(const m of nbr[i]){ sx+=X[m]; sy+=Y[m]; } bases.push([sx/nbr[i].length,sy/nbr[i].length]); }
+      for(const [qx,qy] of bases) for(const d of [0,80,160,260]) for(let a=0;a<(d?8:1);a++){ const x=qx+Math.cos(a*Math.PI/4)*d, y=qy+Math.sin(a*Math.PI/4)*d; if(!free(i,x,y)) continue; X[i]=x; Y[i]=y; const c=nodeCost(i); if(c<bc-1e-3){ bc=c; bx=x; by=y; } }
+      X[i]=bx; Y[i]=by; if(bx!==ox||by!==oy) imp++; }
+    if(!imp) break; }
+  const c1=crossings(); const pos={};
+  U.forEach((n,i)=>{ pos[n.e.id]={x:Math.round(X[i]+cx0),y:Math.round(Y[i]+cy0)}; });
+  for(const [id,k] of kids){ const h=pos[k.host]; pos[id]={x:Math.round(h.x+k.dx),y:Math.round(h.y+k.dy)}; }
+  return {pos,c0,c1,ms:Math.round(performance.now()-t0)}; }
+/* кнопка «👁 Вид» с панелью. apply — «применить к самой карте» (только редактор), saveAs(pos|null) — сохранить вид как новую карту */
+function rvButton(btn,eng,{apply,saveAs}={}){ if(!btn) return; const w=eng._opts, key=w._rv.key, st=rvState(key);
+  const badge=()=>{ const n=(st.lay?1:0)+(st.forms?1:0); btn.classList.toggle('active',n>0); btn.innerHTML=`👁 Вид${n?` <span class="rfn">${st.lay?'своя раскладка':'формы'}</span>`:''} <span class="faint">▾</span>`; btn.title='Как показывать эту карту у тебя: своя раскладка, организации формами. Саму карту не меняет'; }; badge();
+  btn.onclick=ev=>{ ev.stopPropagation(); if($('.rvpop')){ $$('.rvpop').forEach(x=>x.remove()); return; }
+    const pop=el('<div class="dockpop rfpop rvpop"></div>'); document.body.append(pop);
+    const draw=()=>{ pop.innerHTML=`<b>Вид карты</b><div class="faint" style="font-size:11px;line-height:1.4;margin:-2px 0 4px">Только у тебя и только отображение — сама карта и то, что видят другие, не меняются.</div>
+      <label class="rfr ${st.forms?'':'off'}" title="Организации не рисуются кружками: вместо них — цветная форма под всеми их участниками на карте. Двойной клик по форме — открыть организацию"><input type="checkbox" id="rvF" ${st.forms?'checked':''}><span class="grow">Организации — формами под участниками</span></label>
+      <div class="tiny rfh">Раскладка</div><div class="faint" style="font-size:12px;margin-bottom:6px">${st.lay?'<b style="color:var(--mint)">Своя раскладка</b> — перетаскивание двигает только твой вид.':'Как на карте.'}</div>
+      <div class="stack" style="gap:6px"><button class="btn sm" data-a="opt" title="Разложить так, чтобы связи пересекались как можно меньше (с формами — участники организаций держатся вместе)">✨ Оптимизировать раскладку</button>
+      ${st.lay?'<button class="btn sm" data-a="reset">↺ Вернуть как на карте</button>':''}${st.lay&&apply?'<button class="btn sm" data-a="apply" title="Записать эту раскладку в саму карту — увидят все">⤓ Применить к самой карте</button>':''}${saveAs?'<button class="btn sm" data-a="copy" title="Новая личная карта с этой раскладкой">⧉ Сохранить как новую карту</button>':''}</div>`;
+      $('#rvF',pop).onchange=e=>{ st.forms=e.target.checked; rvSave(key); badge(); draw(); eng.draw(); };
+      $$('[data-a]',pop).forEach(b=>b.onclick=async()=>{ const a=b.dataset.a;
+        if(a==='opt'){ b.disabled=true; b.textContent='⏳ Раскладываю…'; setTimeout(()=>{ const gs=st.forms?w._rv.forms().map(f=>[...f.mem.keys()]):[]; const r=relOptimize(w,gs);
+            if(r){ st.lay=true; st.pos=r.pos; rvSave(key); eng.fit(); toast(`Готово: пересечений связей ${r.c0} → ${r.c1}. Это твой вид — карта не изменилась`); } badge(); draw(); },30); }
+        else if(a==='reset'){ st.lay=false; st.pos={}; rvSave(key); badge(); draw(); eng.draw(); }
+        else if(a==='apply'){ if(!await confirmDlg('Записать твою раскладку в саму карту? Её увидят все, кто смотрит эту карту.','Применить')) return; apply(st.pos); st.lay=false; st.pos={}; rvSave(key); badge(); draw(); eng.draw(); toast('Раскладка записана в карту'); }
+        else if(a==='copy'){ pop.remove(); saveAs(st.lay?st.pos:null); } }); };
+    draw(); const r=btn.getBoundingClientRect(); pop.style.left=Math.max(8,Math.min(innerWidth-pop.offsetWidth-8,r.left))+'px'; pop.style.top=(r.bottom+8)+'px';
+    setTimeout(()=>document.addEventListener('pointerdown',function f(e){ if(!pop.isConnected){ document.removeEventListener('pointerdown',f,true); return; } if(!pop.contains(e.target)&&!e.target.closest('#rvBtn')&&!e.target.closest('#modal')){ pop.remove(); document.removeEventListener('pointerdown',f,true); } },true),0); }; }
+/* копия карты связей: новая личная карта текущего пользователя; pos — подменить позиции (сохранить «вид» как карту) */
+async function mapCopy(mp,pos){ if(!canWrite()){ toast('Копии карт могут делать игроки и мастер',true); return; }
+  const nodes=JSON.parse(JSON.stringify((mp.nodes||[]).filter(n=>visibleEnt(findEntity(n.id))))); if(pos) for(const n of nodes){ const p=pos[n.k||n.id]; if(p){ n.x=Math.round(p.x); n.y=Math.round(p.y); } }
+  const keys=new Set(nodes.map(n=>n.k||n.id));
+  const cp={id:uid(),title:(mp.title||'Без названия')+(pos?' (мой вид)':' (копия)'),owner:effUid(),shared:false,showData:mp.showData!==false,nodes,edges:JSON.parse(JSON.stringify((mp.edges||[]).filter(e=>keys.has(e.from)&&keys.has(e.to)))),notes:JSON.parse(JSON.stringify(mp.notes||[]))};
+  if(mp.relF) cp.relF=JSON.parse(JSON.stringify(mp.relF));
+  try{ const m2=await createDoc('maps',cp); if(isDM()){ const he=mapHidEdges(mp).filter(e=>keys.has(e.from)&&keys.has(e.to)); if(he.length) mapHidPut(m2,he); }
+    toast('Копия создана — она личная'+(isDM()?'':' (видна тебе и мастеру)')+', меняй как хочешь'); go('graph',m2.id); }catch{} }
+/* ============================================================
    КАРТА СВЯЗЕЙ: одна карта
    ============================================================ */
 function renderMap(m,mp){
@@ -3693,7 +3821,7 @@ function renderMap(m,mp){
       <div class="group"><button class="btn sm icon" id="back" title="К списку карт">←</button><input id="mtitle" class="${ed?'':'keep'}" placeholder="Название карты" value="${esc(mp.title)}" style="width:220px;padding:5px 10px;font-weight:700" ${ed?'':'readonly'}><span class="chip ${mp.shared?'l':''}" id="mshared" style="cursor:${ed?'pointer':'default'}" title="${ed?'переключить видимость':''}">${mp.shared?'☀ общая':'☾ личная'}</span>${mp.owner!==effUid()?`<span class="chip u">${esc(userName(mp.owner))}</span>`:''}</div>
       ${ed?`<div class="group"><button class="btn sm primary" id="addBtn" title="Выбрать персонажей, организации и локации (можно одного и того же несколько раз)">+ На карту</button><button class="btn sm" id="addNote" title="Текстовый блок: заголовок и описание">📝 Заметка</button></div>`:''}
       ${ed?`<div class="group"><button class="btn sm ${G.linkMode?'active':''}" id="linkBtn" title="Режим рисования связей (или Shift+тянуть)">✎ Связать</button><span class="faint" style="font-size:12px;padding:0 4px">шаблон:</span><div class="chips" id="tplBar"></div></div>`:''}
-      <div class="group"><button class="btn sm" id="relF">🔗 Связи</button>${ed?'<button class="btn sm" id="layoutBtn">⟲ Разложить</button>':''}<button class="btn sm" id="lblBtn" title="Показывать подписи на связях (скрытые видны при наведении и у выбранного)">🏷 Подписи</button><button class="btn sm" id="fitBtn">⛶ Вписать</button>${ed?'<button class="btn sm danger" id="delMap">Удалить карту</button>':''}</div>
+      <div class="group"><button class="btn sm" id="relF">🔗 Связи</button><button class="btn sm" id="rvBtn">👁 Вид</button>${ed?'<button class="btn sm" id="layoutBtn">⟲ Разложить</button>':''}<button class="btn sm" id="lblBtn" title="Показывать подписи на связях (скрытые видны при наведении и у выбранного)">🏷 Подписи</button><button class="btn sm" id="fitBtn">⛶ Вписать</button>${canWrite()?'<button class="btn sm" id="copyMap" title="Своя копия этой карты: её можно менять, не трогая оригинал">⧉ Копия</button>':''}${ed?'<button class="btn sm danger" id="delMap">Удалить карту</button>':''}</div>
     </div>
     <div id="ginfo"></div><div id="glegend" class="glegend"></div>
     <div id="ghint">${ed?'Тяни элементы · колесо — масштаб · двойной клик — открыть · <b>Shift+тянуть</b> — связь · клик по линии или подписи — изменить, двойной по заметке — изменить · <b>Ctrl+клик</b> — выделить несколько · <b>Ctrl+C / Ctrl+V</b> — копировать и вставить (в т.ч. на другую карту) · <b>Del</b> — убрать с карты · <b>Ctrl+Z</b> — вернуть':'Колесо — масштаб · двойной клик — открыть · клик по заметке — прочитать'}</div>
@@ -3727,7 +3855,7 @@ function renderMap(m,mp){
   /* положить элемент на карту; если он уже есть — ещё одним экземпляром (копией) */
   const addNode=(id,at)=>{ if(!id||!ed) return null; const c=at||eng.center(); const n=(mp.nodes||[]).length; const dup=(mp.nodes||[]).some(x=>x.id===id); const k=dup?uid():null;
     (mp.nodes??=[]).push({id,...(k?{k}:{}),x:Math.round(c.x+(at?0:Math.cos(n*2.4)*60)),y:Math.round(c.y+(at?0:Math.sin(n*2.4)*60))}); touch(mp); eng.draw(); return k||id; };
-  const eng=graphEngine(wrap,cv,{ camKey:mp.id, emptyText:ed?'Карта пуста — добавь элементы через «+ На карту»':'Карта пуста', nodes, edges,
+  const eng=graphEngine(wrap,cv,relView(mp.id,{ camKey:mp.id, emptyText:ed?'Карта пуста — добавь элементы через «+ На карту»':'Карта пуста', nodes, edges,
     find:key=>{ const n=nodeMap().get(key); return n?wrapN(n):findEntity(key); },
     pos:e=>{ const n=nodeMap().get(e.id); return n?{x:n.x,y:n.y}:{x:0,y:0}; },
     block:e=>{ const n=nodeMap().get(e.id); return n&&n.block?n.block:null; },
@@ -3752,7 +3880,7 @@ function renderMap(m,mp){
       /* как у токенов на карте: здесь только повешенные (× — снять), выбор — отдельным окном по «+» */
       if(shown.length||(ed&&nd)){ const st=el(`<div style="margin-top:10px"><div class="tiny row" style="margin-bottom:6px;gap:6px;align-items:center">Статусы${ed&&nd?'<button class="btn sm icon addSt" title="повесить статус">+</button>':''}</div><div class="chips">${shown.map(i=>`<span class="chip st on" data-s="${i.id}" style="border-color:${i.color||'#ffd166'};color:${i.color||'#ffd166'}">${i.image?`<img data-img="${i.image}" data-thumb="1" style="display:none;width:14px;height:14px;border-radius:50%;object-fit:cover;vertical-align:-2px">`:esc(i.icon||'')} ${esc(i.name)}${ed?'<span class="x-btn" title="снять" style="margin-left:4px">×</span>':''}</span>`).join('')||'<span class="faint">нет</span>'}</div></div>`);
         if(ed){ $$('.chip.st .x-btn',st).forEach(x=>x.onclick=ev=>{ ev.stopPropagation(); nd.statuses=(nd.statuses||[]).filter(k=>k!==x.parentNode.dataset.s); touch(mp); eng.draw(); infoPanelRefresh(); }); const as=$('.addSt',st); if(as) as.onclick=()=>mapStatusPicker(nd,()=>{ touch(mp); eng.draw(); infoPanelRefresh(); }); } hydrate(st); b.append(st); }
-      const infoPanelRefresh=()=>{ const cur=G.sel; opts_onSelect(cur); }; const il=$('#ilink',b); if(il) il.onclick=()=>{ const others=nodes().filter(n=>n.e.id!==id); if(!others.length){ toast('На карте больше никого'); return; } mapEdgeDialog(mp,{from:id,to:null},()=>eng.draw()); }; const rm=$('#irm',b); if(rm) rm.onclick=()=>{ mp.nodes=(mp.nodes||[]).filter(n=>nKey(n)!==id); mp.edges=(mp.edges||[]).filter(e=>e.from!==id&&e.to!==id); G.sel=null; touch(mp); render(); }; },eid); eng.draw(); } });
+      const infoPanelRefresh=()=>{ const cur=G.sel; opts_onSelect(cur); }; const il=$('#ilink',b); if(il) il.onclick=()=>{ const others=nodes().filter(n=>n.e.id!==id); if(!others.length){ toast('На карте больше никого'); return; } mapEdgeDialog(mp,{from:id,to:null},()=>eng.draw()); }; const rm=$('#irm',b); if(rm) rm.onclick=()=>{ mp.nodes=(mp.nodes||[]).filter(n=>nKey(n)!==id); mp.edges=(mp.edges||[]).filter(e=>e.from!==id&&e.to!==id); G.sel=null; touch(mp); render(); }; },eid); eng.draw(); } }));
   opts_onSelect=id=>{ /* повторный вызов панели после изменения статусов */ const o=eng._opts; if(o) o.onSelect1(id); };
   if(ed){
     $('#addBtn',page).onclick=()=>mapAddDialog(mp,id=>addNode(id));
@@ -3763,6 +3891,8 @@ function renderMap(m,mp){
     $('#delMap',page).onclick=async()=>{ if(await confirmDlg(`Удалить карту «${mp.title||'без названия'}»?`)) { await removeDoc('maps',mp); go('graph'); } };
   }
   $('#fitBtn',page).onclick=()=>eng.fit(); lblToggle($('#lblBtn',page),eng); relLegend($('#glegend',page));
+  rvButton($('#rvBtn',page),eng,{apply:ed?pos=>{ snap(); for(const n of mp.nodes||[]){ const p=pos[n.k||n.id]; if(p){ n.x=p.x; n.y=p.y; } } touch(mp); }:null,saveAs:canWrite()?pos=>mapCopy(mp,pos):null});
+  { const cm=$('#copyMap',page); if(cm) cm.onclick=()=>mapCopy(mp,null); }
   rfButton($('#relF',page),{get:rfGet,set:rfSet,all:allEdges,kinds:['rel','mem','loc','map'],note:ed?'Настройка карты — так её увидят все':'Только у тебя — на саму карту не влияет'});
   /* классические бинды: Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D, Del, Ctrl+A, Ctrl+Z, Esc. Буфер — в localStorage (relmap.clip), поэтому вставлять можно и на другой карте связей и в другой вкладке */
   let mouseW=null; cv.addEventListener('mousemove',e=>{ mouseW=eng.toWorld(e.offsetX,e.offsetY); }); cv.addEventListener('mouseleave',()=>{ mouseW=null; });
@@ -3865,7 +3995,7 @@ function renderOverview(m){
       <div class="group"><label><input type="checkbox" data-t="c" ${G.show.c?'checked':''}><span style="color:var(--orange)">●</span> персонажи</label><label><input type="checkbox" data-t="o" ${G.show.o?'checked':''}><span style="color:var(--cyan)">●</span> организации</label><label><input type="checkbox" data-t="l" ${G.show.l?'checked':''}><span style="color:var(--mint)">●</span> локации</label><label title="личные связи других участников"><input type="checkbox" id="others" ${G.others?'checked':''}>чужие личные</label></div>
       <div class="group"><select id="orgF" style="padding:5px 26px 5px 9px;font-size:12.5px"><option value="">все организации</option>${V.orgs().map(o=>`<option value="${o.id}" ${G.org===o.id?'selected':''}>${esc(o.name)||'без имени'}</option>`).join('')}</select></div>
       <div class="group"><button class="btn sm ${G.linkMode?'active':''}" id="linkBtn" title="Режим рисования связей персонажей (или Shift+тянуть)">✎ Связать</button><span class="faint" style="font-size:12px;padding:0 4px">шаблон:</span><div class="chips" id="tplBar"></div></div>
-      <div class="group"><button class="btn sm" id="relF">🔗 Связи</button><button class="btn sm" id="layoutBtn">⟲ Разложить</button><button class="btn sm" id="lblBtn" title="Показывать подписи на связях (скрытые видны при наведении и у выбранного)">🏷 Подписи</button><button class="btn sm" id="fitBtn">⛶ Вписать</button></div>
+      <div class="group"><button class="btn sm" id="relF">🔗 Связи</button><button class="btn sm" id="rvBtn">👁 Вид</button><button class="btn sm" id="layoutBtn">⟲ Разложить</button><button class="btn sm" id="lblBtn" title="Показывать подписи на связях (скрытые видны при наведении и у выбранного)">🏷 Подписи</button><button class="btn sm" id="fitBtn">⛶ Вписать</button></div>
     </div>
     <div id="ginfo"></div><div id="glegend" class="glegend"></div>
     <div id="ghint">Все сущности и все известные связи. Тяни узлы · <b>Shift+тянуть</b> — связь персонажей · клик по подписи — изменить</div>
@@ -3884,17 +4014,18 @@ function renderOverview(m){
   const rfSet=f=>{ try{ localStorage.setItem('relF.__all__',JSON.stringify(f)); }catch{} eng.draw(); };
   const edges=()=>{ const f=rfGet(); return allEdges().filter(e=>rfPass(f,e)); };
   const allEdges=()=>[...V.mems().map(x=>({a:x.charId,b:x.orgId,color:'#4fd0ff',label:x.role||'',dash:true,hid:x.revealed===false,ref:{kind:'mem',obj:x}})),...V.locLinks().map(x=>({a:x.entityId,b:x.locId,color:'#8ef7c1',label:x.note||'',dash:true,hid:x.revealed===false,ref:{kind:'loc',obj:x}})),...visRels().map(r=>({a:r.from,b:r.to,color:r.color||'#e9c2ff',label:(r.shared||r.hidden?'':'☾ ')+(r.label||''),directed:r.directed,both:!!r.both,priv:!r.shared&&!r.hidden,hid:!!r.hidden,ref:{kind:'rel',obj:r}}))];
-  const eng=graphEngine(wrap,cv,{ camKey:'__all__', emptyText:'Нет сущностей для отображения', nodes, edges, pos:posOf,
+  const eng=graphEngine(wrap,cv,relView('__all__',{ camKey:'__all__', emptyText:'Нет сущностей для отображения', nodes, edges, pos:posOf,
     setPos:viewAs?null:(e,p,live)=>{ e.pos=p; if(!live) touch(e); },
     onLink:viewAs?null:(from,to)=>{ const t=G.tpl?byId(world.settings.relTemplates,G.tpl):null; const ta=typeOf(from), tb=typeOf(to);
       if(t&&ta==='c'&&tb==='c'){ createDoc('relations',{id:uid(),from,to,label:t.label,color:t.color,directed:!!t.directed,both:!!t.both,shared:false,owner:effUid()}).then(()=>{ eng.draw(); toast(`Связь «${t.label}» создана (личная)`); }).catch(()=>{}); } else linkDialog(from,to,()=>eng.draw()); },
     onLabel:ref=>{ const cb=()=>eng.draw(); if(ref.kind==='rel') editRelDialog(ref.obj,cb); else editEdgeDialog(ref.kind,ref.obj,cb); },
-    onSelect:id=>{ infoPanel(info,id,'<button class="btn sm" id="ilink">+ Связь</button>',b=>{ $('#ilink',b).onclick=()=>linkDialog(id,null,()=>eng.draw()); }); eng.draw(); } });
+    onSelect:id=>{ infoPanel(info,id,'<button class="btn sm" id="ilink">+ Связь</button>',b=>{ $('#ilink',b).onclick=()=>linkDialog(id,null,()=>eng.draw()); }); eng.draw(); } }));
   const lb=$('#linkBtn',page); lb.onclick=()=>{ G.linkMode=!G.linkMode; lb.classList.toggle('active',G.linkMode); cv.classList.toggle('linking',G.linkMode); };
   tplBar($('#tplBar',page));
   $('#layoutBtn',page).onclick=()=>{ eng.layout(true); eng.fit(); };
   $('#fitBtn',page).onclick=()=>eng.fit(); lblToggle($('#lblBtn',page),eng); relLegend($('#glegend',page));
   rfButton($('#relF',page),{get:rfGet,set:rfSet,all:allEdges,kinds:['rel','mem','loc']});
+  rvButton($('#rvBtn',page),eng,{apply:viewAs?null:pos=>{ for(const e of [...world.characters,...world.orgs,...world.locations]){ const p=pos[e.id]; if(p){ e.pos={x:p.x,y:p.y}; touch(e); } } }});
   if(G.sel&&!findEntity(G.sel)) G.sel=null;
   const cam=G.cams['__all__']; if(!cam.fitted){ cam.fitted=true; eng.fit(); } else eng.draw();
 }
@@ -5824,14 +5955,21 @@ function logSummary(e){
   if(typeof b==='object'&&b!==null&&!Array.isArray(b)||typeof a==='object'&&a!==null&&!Array.isArray(a)) return '<span class="faint">изменено (см. подробнее)</span>';
   return `<span class="b">${logVal(b,f)}</span><span class="arr">→</span><span class="a">${logVal(a,f)}</span>`;
 }
+/* «главное» в журнале — правки внутри персонажей: имя, подпись, описания, предыстория, способности и техники, создание/удаление.
+   Остальное (перемещения, полоски, статусы, инвентарь, карты, связи…) видно только с галочкой «мелкие правки» (localStorage log.all) */
+const LOG_MAIN=/^(name|title|brief|description|backstory\w*|abilities|progress)(?![A-Za-z])/;
+function logMain(e){ return e.coll==='characters'&&(e.kind!=='update'||LOG_MAIN.test(e.path||'')); }
+G.logAll=(()=>{ try{ return localStorage.getItem('log.all')==='1'; }catch{ return false; } })();
 function renderLog(m){
-  const page=el(`<div class="page"><div class="head"><h1>Журнал правок игроков</h1><span class="grow"></span><button class="btn sm" id="alldet" title="Показать сырые значения «было / стало» во всех записях">${G.logDetails?'скрыть детали':'показать детали'}</button><button class="btn sm" id="seen">Отметить всё прочитанным</button></div><div class="panel" style="padding:0"><div class="list ${G.logDetails?'alldet':''}"></div></div></div>`);
+  const shown=G.logAll?world.log:world.log.filter(logMain), nMinor=world.log.length-world.log.filter(logMain).length;
+  const page=el(`<div class="page"><div class="head"><h1>Журнал правок игроков</h1><span class="grow"></span><label class="row" style="gap:6px;font-size:12.5px;cursor:pointer" title="Перемещения, полоски, статусы, эффекты, инвентарь, карты, связи и прочие мелкие правки"><input type="checkbox" id="logAll" ${G.logAll?'checked':''}>мелкие правки${nMinor?` <span class="faint">(${nMinor})</span>`:''}</label><button class="btn sm" id="alldet" title="Показать сырые значения «было / стало» во всех записях">${G.logDetails?'скрыть детали':'показать детали'}</button><button class="btn sm" id="seen">Отметить всё прочитанным</button></div><div class="panel" style="padding:0"><div class="list ${G.logDetails?'alldet':''}"></div></div></div>`);
   $('#seen',page).onclick=async()=>{ for(const e of world.log.filter(x=>!x.seen)){ e.seen=true; DB.update('log',e.id,{seen:true}).catch(()=>{}); } render(); };
   $('#alldet',page).onclick=()=>{ G.logDetails=!G.logDetails; render(); };
+  $('#logAll',page).onchange=e=>{ G.logAll=e.target.checked; try{ localStorage.setItem('log.all',G.logAll?'1':'0'); }catch{} render(); };
   const list=$('.list',page);
-  if(!world.log.length) list.innerHTML='<div class="empty" style="border:none">Игроки пока ничего не меняли.</div>';
+  if(!shown.length) list.innerHTML=`<div class="empty" style="border:none">${world.log.length?'Правок персонажей нет. Мелкие правки — по галочке «мелкие правки».':'Игроки пока ничего не меняли.'}</div>`;
   const fmt=v=>v==null||v===''?'—':v===true?'да':v===false?'нет':(typeof v==='object'?JSON.stringify(v,null,1).slice(0,600):String(v));
-  for(const e of world.log){
+  for(const e of shown){
     const ent=(e.coll&&COLLMAP[e.coll]&&byId(world[e.coll],e.docId));
     const sum=logSummary(e);
     const row=el(`<div class="logrow ${e.seen?'':'new'}"><div class="when">${fmtDate(e.at)}<br><span class="who">${esc(e.user||userName(e.uid))}</span></div>
