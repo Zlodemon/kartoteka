@@ -52,9 +52,11 @@ service cloud.firestore {
 
     // ===== персонажи: создаёт/удаляет дм, правит дм или закреплённый игрок (не меняя players/owner)
     // видимость: full | brief — видят все; hidden — только дм и закреплённые игроки / автор
-    function visibleToAll() { return resource.data.visibility == 'full' || resource.data.visibility == 'brief'; }
+    function visibleToAll() { return resource.data.visibility == 'full' || resource.data.visibility == 'brief' || uid() in resource.data.get('visUids', []); }
+    // visFor — своё правило видимости для отдельных игроков, visUids — кому из них можно читать (видна/кратко)
     // видимость меняет только дм (у игрока нет такого переключателя в интерфейсе)
-    function sameVisibility() { return request.resource.data.get('visibility', 'full') == resource.data.get('visibility', 'full'); }
+    function sameVisibility() { return request.resource.data.get('visibility', 'full') == resource.data.get('visibility', 'full')
+      && request.resource.data.get('visFor', {}) == resource.data.get('visFor', {}) && request.resource.data.get('visUids', []) == resource.data.get('visUids', []); }
     // зафиксированную предысторию игрок персонажа может сам вернуть в работу (с 2026-09-24)
     match /characters/{id} {
       allow read: if isDM() || (signedIn() && (visibleToAll() || uid() in resource.data.players));
