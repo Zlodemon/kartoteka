@@ -281,6 +281,12 @@ h1,h2,h3{margin:0;font-weight:700}
 .efflib .hintd{font-size:12.5px;color:var(--muted);line-height:1.55;max-width:860px;margin-bottom:12px}.efflib .hintd summary{cursor:pointer;color:var(--faint);font-size:12px;list-style:none}.efflib .hintd summary::-webkit-details-marker{display:none}.efflib .hintd[open] summary{margin-bottom:6px}
 .effed .ab{margin:0}
 .runav{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+.settings.gs{display:block;max-width:1100px}
+.gstop{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}.gstop input{width:260px;max-width:100%}
+.gsgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px;padding:4px 12px 12px;align-items:start}
+.gsgrid>.panel{margin:0;background:rgba(0,0,0,.18)}.gsgrid>.panel.gshid{display:none}
+.rusec>summary .sub{font-weight:400;font-size:11.5px;color:var(--faint);letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+@media (max-width:700px){.gsgrid{grid-template-columns:1fr}}
 .runav a{font-size:11.5px;padding:3px 10px;border-radius:99px;border:1px solid color-mix(in srgb,var(--sc) 55%,transparent);color:var(--sc);background:color-mix(in srgb,var(--sc) 10%,transparent);text-decoration:none;cursor:pointer}
 .runav a:hover{background:color-mix(in srgb,var(--sc) 22%,transparent)}
 .ruset .ruleg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--faint);margin:-4px 0 10px}
@@ -6226,6 +6232,23 @@ function ruSettingsBeautify(page){ const grid=$('.ruset .rugrid',page); if(!grid
   /* метка «изменено»: значение отличается от состояния по умолчанию (select не на первом варианте / чекбокс снят у включённых по умолчанию / число не пусто и не равно плейсхолдеру) */
   const mark=()=>{ for(const v of wrap.querySelectorAll('.val')){ let set=false; for(const inp of v.querySelectorAll('input,select')){ if(inp.tagName==='SELECT'){ if(inp.selectedIndex>0) set=true; } else if(inp.type==='checkbox'){ if(inp.checked!==(inp.dataset.def!=null?inp.dataset.def==='1':inp.defaultChecked)) set=true; } else if(inp.type==='number'){ const ph=inp.placeholder; if(inp.value!==''&&inp.value!==ph) set=true; } else if(inp.type==='text'||!inp.type||inp.type==='search'){ const ph=inp.placeholder; if(inp.value.trim()!==''&&inp.value.trim()!==ph) set=true; } } v.classList.toggle('set',set); } }; mark(); wrap.addEventListener('change',()=>setTimeout(mark,0));
   grid.replaceWith(wrap); wrap.before(nav); wrap.before(el('<div class="ruleg"><span><i style="background:var(--gold)"></i> золотая метка слева — значение изменено относительно стандартного</span><span>▶ заголовок секции — свернуть/развернуть</span></div>')); }
+/* общие настройки — как у Руины: панели сгруппированы в цветные раскрывающиеся секции (открытые запоминаются), навигация-чипы и поиск по тексту панелей */
+const GEN_SEC=[['char','Персонаж и характеристики','📊','#ffd166',['stats','derived','fxset','letters']],['bars','Полоски, раны, инвентарь','❤','#ff5c6c',['dbars','wndset','invcols']],['rel','Связи и статусы','🔗','#e9c2ff',['tpls','sticons']],['map','Карта и токены','🗺','#d5c6a2',['tokset']],['acc','Игроки и доступ','👥','#4fd0ff',['wmset','sections']],['ui','Интерфейс','🎨','#8ef7c1',['mynav','hblocks']],['data','Данные и резервные копии','💾','#9aa0b4',['__data']]];
+function genSettingsBeautify(page){ const box=$('.settings[data-tab="main"]',page); if(!box||box.dataset.sec) return; box.dataset.sec='1'; box.classList.add('gs');
+  const panels=[...box.children].filter(p=>p.classList.contains('panel')); const keyOf=p=>[...p.classList].find(c=>c!=='panel')||'__data';
+  const opened=(()=>{ try{ return JSON.parse(localStorage.getItem('genSetOpen')||'null'); }catch{ return null; } })();
+  const wrap=el('<div class="rusecs"></div>'), nav=el('<div class="runav" style="margin:0"></div>'); const used=new Set(); const groups=[...GEN_SEC.map(g=>[...g])];
+  const rest=panels.filter(p=>!GEN_SEC.some(g=>g[4].includes(keyOf(p)))); if(rest.length) groups.push(['other','Прочее','▪','#8ef7c1',rest.map(keyOf)]);
+  const save=()=>{ try{ localStorage.setItem('genSetOpen',JSON.stringify([...wrap.querySelectorAll('details.rusec')].filter(d=>d.open).map(d=>d.dataset.g))); }catch{} };
+  for(const [id,title,ic,col,keys] of groups){ const list=panels.filter(p=>keys.includes(keyOf(p))&&!used.has(p)); if(!list.length) continue; list.forEach(p=>used.add(p));
+    const names=list.map(p=>($('h3',p)?.childNodes[0]?.textContent||'').trim()).filter(Boolean);
+    const det=el(`<details class="rusec" data-g="${id}" style="--sc:${col}" ${(opened?opened.includes(id):id==='char')?'open':''}><summary><span class="ic">${ic}</span><span style="flex:none">${esc(title)}</span><span class="sub">${esc(names.join(' · '))}</span><span class="cnt">${list.length} ${plural(list.length,'блок','блока','блоков')}</span><span class="chev">▶</span></summary></details>`);
+    const g=el('<div class="gsgrid"></div>'); list.forEach(p=>g.append(p)); det.append(g); det.ontoggle=save; wrap.append(det);
+    const a=el(`<a style="--sc:${col}">${ic} ${esc(title)}</a>`); a.onclick=()=>{ det.open=true; save(); det.scrollIntoView({behavior:'smooth',block:'start'}); }; nav.append(a); }
+  const top=el('<div class="gstop"><input id="gsQ" type="search" placeholder="🔍 Поиск по настройкам…"><button class="btn sm" data-a="open">развернуть всё</button><button class="btn sm" data-a="close">свернуть всё</button></div>');
+  const q=$('#gsQ',top); q.oninput=()=>{ const t=q.value.trim().toLowerCase(); for(const d of wrap.querySelectorAll('details.rusec')){ let any=false; for(const p of d.querySelectorAll('.gsgrid>.panel')){ const hit=!t||p.textContent.toLowerCase().includes(t); p.classList.toggle('gshid',!hit); any=any||hit; } d.style.display=any?'':'none'; if(t&&any) d.open=true; } };
+  $$('[data-a]',top).forEach(b=>b.onclick=()=>{ const o=b.dataset.a==='open'; wrap.querySelectorAll('details.rusec').forEach(d=>d.open=o); save(); });
+  box.innerHTML=''; box.append(top,nav,wrap); }
 /* вкладка настроек: при каждом входе — «Руина», если она включена, иначе «Общие»; пока страница открыта — выбранная */
 let SET_TAB=null;
 function renderSettings(m){
@@ -6376,7 +6399,7 @@ function renderSettings(m){
   $('#fullExp',page).onclick=()=>fullBackup($('#bkProg',page)); $('#fullImp',page).onclick=()=>{ const fi=$('#jsonIn'); fi.value=''; fi.onchange=()=>{ if(fi.files[0]) fullRestore(fi.files[0],$('#bkProg',page)); }; fi.click(); };
   $('#exp',page).onclick=()=>{ const a=document.createElement('a'); const w={...world}; delete w.users; delete w.log; a.href=URL.createObjectURL(new Blob([JSON.stringify(w,null,2)],{type:'application/json'})); a.download='kartoteka-backup.json'; a.click(); };
   $('#imp',page).onclick=()=>{ const fi=$('#jsonIn'); fi.value=''; fi.onchange=()=>importLocal(fi.files[0]); fi.click(); };
-  ruSettingsBeautify(page);
+  ruSettingsBeautify(page); genSettingsBeautify(page);
   m.append(page);
 }
 async function importLocal(file){
