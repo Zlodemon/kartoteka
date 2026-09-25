@@ -627,7 +627,9 @@ body.nomenu.onmap #app{grid-template-columns:0 1fr}body.nomenu.onmap #side{overf
 .settings{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:1100px}
 .srow{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;margin-bottom:6px}
 .srow.l{grid-template-columns:70px 1fr 30px}
-.srow.t{grid-template-columns:34px 1fr 34px 30px}
+.srow.t{grid-template-columns:34px 1fr 34px 30px}.srow.t.tp{grid-template-columns:34px 1fr 34px 26px 26px 30px}.srow .mv{padding:0;min-width:0;width:26px}.srow .mv:disabled{opacity:.25}
+.palpop{position:fixed;z-index:120;display:flex;flex-direction:column;gap:8px;padding:10px;background:#10142a;border:1px solid var(--line2);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.palg{display:grid;grid-template-columns:repeat(5,26px);gap:7px}.palc{width:26px;height:26px;border-radius:50%;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);transition:transform .1s}.palc:hover{transform:scale(1.15)}.palc.on{box-shadow:0 0 0 2px #10142a,0 0 0 4px #fff}
 .urow{display:grid;grid-template-columns:36px 1.2fr 1.5fr 150px 2.4fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
 .urow:last-child{border-bottom:none}
 .urow img,.urow .av{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
@@ -3763,22 +3765,30 @@ function relOptimize(o,groups,budget=2500){
   /* исходная раскладка — старт №0 и эталон «было» */
   let cx0=0, cy0=0; U.forEach((n,i)=>{ const p=o.pos(n.e); X[i]=p.x; Y[i]=p.y; cx0+=p.x; cy0+=p.y; }); cx0/=N; cy0/=N;
   for(let i=0;i<N;i++){ X[i]-=cx0; Y[i]-=cy0; }
-  const c0=crossings(); let best=null, bestS=Infinity;
-  const tries=N>150?2:N>80?4:8, rad=60*Math.sqrt(N)+200;
-  for(let r=0;r<tries;r++){ if(r&&performance.now()-t0>budget*.5) break;
-    if(r){ for(let i=0;i<N;i++){ const a=Math.random()*Math.PI*2, d=Math.sqrt(Math.random())*rad; X[i]=Math.cos(a)*d; Y[i]=Math.sin(a)*d; } }
-    force(N>150?200:350); sep(60); const s=total(); if(s<bestS){ bestS=s; best=[Float64Array.from(X),Float64Array.from(Y)]; } }
-  X.set(best[0]); Y.set(best[1]);
-  /* доводка: перестановка двух узлов одного размера и сдвиг узла к соседям — если цена падает */
+  const c0=crossings(); const X0=Float64Array.from(X), Y0=Float64Array.from(Y);
+  /* кандидаты: текущая раскладка как есть (повторная оптимизация не сделает хуже), она же после силовой раскладки, и случайные старты; 3 лучших доводятся, берётся лучший после доводки */
+  const cands=[]; const keep=()=>{ const s_=total(); cands.push({s:s_,X:Float64Array.from(X),Y:Float64Array.from(Y)}); cands.sort((p,q)=>p.s-q.s); if(cands.length>3) cands.pop(); };
+  sep(60); keep();
+  const rad=60*Math.sqrt(N)+200, minTries=N>150?2:N>80?4:8;
+  for(let r=0;r<40;r++){ if(r>=minTries&&performance.now()-t0>budget*.35) break;
+    if(r===0){ X.set(X0); Y.set(Y0); } else for(let i=0;i<N;i++){ const a=Math.random()*Math.PI*2, d=Math.sqrt(Math.random())*rad; X[i]=Math.cos(a)*d; Y[i]=Math.sin(a)*d; }
+    force(N>150?200:350); sep(60); keep(); }
+  /* доводка: перестановка двух узлов одного размера, сдвиг узла к соседям и перенос в случайное свободное место — если цена падает */
   const free=(i,x,y)=>{ for(let j=0;j<N;j++) if(j!==i&&Math.hypot(X[j]-x,Y[j]-y)<R[i]+R[j]+GAP) return false; return true; };
-  for(let pass=0;pass<6&&performance.now()-t0<budget;pass++){ let imp=0;
-    for(let i=0;i<N&&performance.now()-t0<budget;i++){ if(isB[i]) continue;
+  const refine=deadline=>{ for(let pass=0;pass<10&&performance.now()<deadline;pass++){ let imp=0;
+    for(let i=0;i<N&&performance.now()<deadline;i++){ if(isB[i]) continue;
       for(let j=i+1;j<N;j++){ if(isB[j]||Math.abs(R[i]-R[j])>6) continue; const before=nodeCost(i)+nodeCost(j); let t=X[i]; X[i]=X[j]; X[j]=t; t=Y[i]; Y[i]=Y[j]; Y[j]=t; if(nodeCost(i)+nodeCost(j)<before-1e-6){ imp++; continue; } t=X[i]; X[i]=X[j]; X[j]=t; t=Y[i]; Y[i]=Y[j]; Y[j]=t; } }
-    for(let i=0;i<N&&performance.now()-t0<budget;i++){ if(isB[i]) continue; const ox=X[i], oy=Y[i]; let bx=ox, by=oy, bc=nodeCost(i);
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for(let j=0;j<N;j++){ x0=Math.min(x0,X[j]); x1=Math.max(x1,X[j]); y0=Math.min(y0,Y[j]); y1=Math.max(y1,Y[j]); }
+    for(let i=0;i<N&&performance.now()<deadline;i++){ if(isB[i]) continue; const ox=X[i], oy=Y[i]; let bx=ox, by=oy, bc=nodeCost(i);
+      const cand=[]; for(let t=0;t<16;t++) cand.push([x0-80+Math.random()*(x1-x0+160),y0-80+Math.random()*(y1-y0+160)]);
       const bases=[[ox,oy]]; if(nbr[i].length){ let sx=0,sy=0; for(const m of nbr[i]){ sx+=X[m]; sy+=Y[m]; } bases.push([sx/nbr[i].length,sy/nbr[i].length]); }
-      for(const [qx,qy] of bases) for(const d of [0,80,160,260]) for(let a=0;a<(d?8:1);a++){ const x=qx+Math.cos(a*Math.PI/4)*d, y=qy+Math.sin(a*Math.PI/4)*d; if(!free(i,x,y)) continue; X[i]=x; Y[i]=y; const c=nodeCost(i); if(c<bc-1e-3){ bc=c; bx=x; by=y; } }
+      for(const [qx,qy] of bases) for(const d of [0,80,160,260]) for(let a=0;a<(d?8:1);a++) cand.push([qx+Math.cos(a*Math.PI/4)*d,qy+Math.sin(a*Math.PI/4)*d]);
+      for(const [x,y] of cand){ if(!free(i,x,y)) continue; X[i]=x; Y[i]=y; const c=nodeCost(i); if(c<bc-1e-3){ bc=c; bx=x; by=y; } }
       X[i]=bx; Y[i]=by; if(bx!==ox||by!==oy) imp++; }
-    if(!imp) break; }
+    if(!imp) break; } };
+  let best=null, bestS=Infinity;
+  cands.forEach((c,ci)=>{ X.set(c.X); Y.set(c.Y); const left=budget-(performance.now()-t0); refine(performance.now()+Math.max(60,left/(cands.length-ci))); const s_=total(); if(s_<bestS){ bestS=s_; best=[Float64Array.from(X),Float64Array.from(Y)]; } });
+  X.set(best[0]); Y.set(best[1]);
   const c1=crossings(); const pos={};
   U.forEach((n,i)=>{ pos[n.e.id]={x:Math.round(X[i]+cx0),y:Math.round(Y[i]+cy0)}; });
   for(const [id,k] of kids){ const h=pos[k.host]; pos[id]={x:Math.round(h.x+k.dx),y:Math.round(h.y+k.dy)}; }
@@ -4946,7 +4956,7 @@ const canMove=it=>ed||(it._doc&&((it.t==='marker'&&(it.layer||'normal')==='norma
       if(pts.length>=4){ const a=toScreen(pts[pts.length-4],pts[pts.length-3]), b=toScreen(pts[pts.length-2],pts[pts.length-1]); const ang=Math.atan2(b.y-a.y,b.x-a.x); const L=Math.hypot(b.x-a.x,b.y-a.y); if(L>4){ const sz=11; ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(b.x-Math.cos(ang-.45)*sz,b.y-Math.sin(ang-.45)*sz); ctx.lineTo(b.x-Math.cos(ang+.45)*sz,b.y-Math.sin(ang+.45)*sz); ctx.closePath(); ctx.fill(); } } else { const p=toScreen(pts[pts.length-2],pts[pts.length-1]); ctx.beginPath(); ctx.arc(p.x,p.y,4,0,7); ctx.fill(); }
       if(name){ const p=toScreen(pts[0],pts[1]); wmText(ctx,name,p.x,p.y-12,11,{bold:true,color:col,haloColor:'rgba(0,0,0,.8)'}); } ctx.restore(); };
     for(const rl of (WM.rulers||[])){ if(!rl.pts||rl.pts.length<2||Date.now()-rl.t>20000) continue; drawRuler(rl.pts,rl.color||'#ffd166',rl.n||''); if(rl.pts.length>=4){ const d=wmDist(mp,rl.pts); const p=toScreen(rl.pts[rl.pts.length-2],rl.pts[rl.pts.length-1]); wmText(ctx,d.text,p.x+12,p.y-8,12,{align:'left',bold:true,color:rl.color||'#ffd166',haloColor:'rgba(0,0,0,.85)'}); } }
-    if(ruler){ const pts=ruler.cur?[...ruler.pts,ruler.cur.x,ruler.cur.y]:ruler.pts; drawRuler(pts,WM.rulerSecret&&ed?'#c04be0':'#4fd0ff',null);
+    if(ruler){ const pts=ruler.cur?[...ruler.pts,ruler.cur.x,ruler.cur.y]:ruler.pts; drawRuler(pts,WM.rulerSecret&&ed?'#c04be0':myColor(),null);
       if(pts.length>=4){ const d=wmDist(mp,pts); const p=toScreen(pts[pts.length-2],pts[pts.length-1]); wmText(ctx,d.text,p.x+12,p.y-8,13,{align:'left',bold:true,color:'#fff',haloColor:'rgba(0,0,0,.85)'}); if(pts.length>=6){ let acc=[]; for(let i=0;i+3<pts.length;i+=2){ const seg=wmDist(mp,pts.slice(i,i+4)); const mx=(pts[i]+pts[i+2])/2,my=(pts[i+1]+pts[i+3])/2; const q=toScreen(mx,my); wmText(ctx,seg.text.split(' · ')[0],q.x,q.y-8,10,{color:'#dfe',haloColor:'rgba(0,0,0,.7)'}); } } } }
     for(const pg of WM.pings){ const p=toScreen(pg.x,pg.y); wmText(ctx,pg.n||'',p.x,p.y+14,11,{bold:true,color:'#fff',haloColor:'rgba(0,0,0,.8)'}); }
     for(const d of (WM.drawPrev||[])){ if(!d.n||d.done) continue; const p=toScreen(d.pts[0],d.pts[1]); wmText(ctx,'✎ '+d.n,p.x,p.y-12,11,{bold:true,color:d.color||'#ffd166',haloColor:'rgba(0,0,0,.8)'}); }
@@ -5660,9 +5670,9 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
     if(faceTm) return; const wait=Math.max(0,66-(Date.now()-faceLast)); faceTm=setTimeout(()=>{ faceTm=null; if(it.facing==null) return; faceLast=Date.now(); faceShown=true; LIVE.volatile(id); LIVE.set(id,{u:me.uid,t:Date.now(),tk:it.id,facing:it.facing}).catch(()=>{}); },wait); }
   const dragIts=list=>list.filter(x=>x.it.t==='marker'&&!x.it._secret&&!x.it._priv).map(x=>({id:x.it.id,x:Math.round(x.it.x),y:Math.round(x.it.y)}));
   function dragPub(end,finalList){ if(viewAs) return; const id='drag_'+mp.id+'_'+me.uid; if(end){ clearTimeout(dragTm); dragTm=null; if(!dragShown) return; dragShown=false; const its=finalList?dragIts(finalList):[]; if(!its.length){ LIVE.remove(id).catch(()=>{}); return; } /* финал держим в живом канале, пока у всех не придёт запись из Firestore; потом убираем */ LIVE.set(id,{u:me.uid,t:Date.now(),its,done:1}).catch(()=>{}); clearTimeout(WM._dragRm); WM._dragRm=setTimeout(()=>LIVE.remove(id).catch(()=>{}),8000); return; } if(!drag) return; if(dragTm) return; const wait=Math.max(0,66-(Date.now()-dragLast)); dragTm=setTimeout(()=>{ dragTm=null; if(!drag) return; dragLast=Date.now(); const its=dragIts(drag.list); if(!its.length) return; dragShown=true; LIVE.volatile(id); LIVE.set(id,{u:me.uid,t:Date.now(),its}).catch(()=>{}); },wait); }
-  function rulerPub(){ if(viewAs) return; const hide=!ruler||(WM.rulerSecret&&ed); const pts=hide?[]:(ruler.cur?[...ruler.pts,ruler.cur.x,ruler.cur.y]:ruler.pts).map(v=>Math.round(v)); if(hide&&!rulerShown) return; const send=()=>{ rulerTm=null; rulerLast=Date.now(); rulerShown=pts.length>0; const id='ruler_'+mp.id+'_'+me.uid; if(!pts.length){ LIVE.remove(id).catch(()=>{}); return; } LIVE.volatile(id); LIVE.set(id,{pts,t:Date.now(),u:me.uid,n:me.name,color:isDM()?'#ffd166':(byId(world.users,me.uid)?.color||'#8ef7c1'),map:mp.id}).catch(()=>{}); }; if(hide){ clearTimeout(rulerTm); rulerTm=null; send(); return; } if(rulerTm) return; const wait=Math.max(0,80-(Date.now()-rulerLast)); rulerTm=setTimeout(send,wait); }
+  function rulerPub(){ if(viewAs) return; const hide=!ruler||(WM.rulerSecret&&ed); const pts=hide?[]:(ruler.cur?[...ruler.pts,ruler.cur.x,ruler.cur.y]:ruler.pts).map(v=>Math.round(v)); if(hide&&!rulerShown) return; const send=()=>{ rulerTm=null; rulerLast=Date.now(); rulerShown=pts.length>0; const id='ruler_'+mp.id+'_'+me.uid; if(!pts.length){ LIVE.remove(id).catch(()=>{}); return; } LIVE.volatile(id); LIVE.set(id,{pts,t:Date.now(),u:me.uid,n:me.name,color:myColor(),map:mp.id}).catch(()=>{}); }; if(hide){ clearTimeout(rulerTm); rulerTm=null; send(); return; } if(rulerTm) return; const wait=Math.max(0,80-(Date.now()-rulerLast)); rulerTm=setTimeout(send,wait); }
   /* пинг: локально + всем через live */
-  function ping(x,y,move){ const col=isDM()?'#ffd166':'#4fd0ff'; WM.pings.push({x,y,t:Date.now(),n:me.name,color:col}); kick(); if(!viewAs) LIVE.set('ping_'+mp.id,{x:Math.round(x),y:Math.round(y),t:Date.now(),u:me.uid,n:me.name,color:col,cam:move?1:0}).catch(()=>{}); }
+  function ping(x,y,move){ const col=myColor(); WM.pings.push({x,y,t:Date.now(),n:me.name,color:col}); kick(); if(!viewAs) LIVE.set('ping_'+mp.id,{x:Math.round(x),y:Math.round(y),t:Date.now(),u:me.uid,n:me.name,color:col,cam:move?1:0}).catch(()=>{}); }
   function centerOn(x,y){ cam.x=x-W()/cam.k/2; cam.y=y-H()/cam.k/2; draw(); }
   function drawOnline(){ const box=$('#wmonline',page); if(!box) return; const now=Date.now(); const list=(world._live||[]).filter(d=>d.id.startsWith('presence_')&&now-d.t<200000&&d.u!==me.uid).sort((a,b)=>(b.map===mp.id)-(a.map===mp.id)); box.innerHTML=list.map(d=>{ const u=byId(world.users,d.u); const here=d.map===mp.id; return `<div class="u ${here?'':'away'} ${ed?'click':''}" data-u="${d.u}" title="${here?'на этой карте':(d.map?'на другой карте':'в картотеке')}${ed?' · клик — позвать сюда':''}"><div class="av">${u&&u.photo?`<img src="${esc(u.photo)}" referrerpolicy="no-referrer">`:esc(initials(d.n||''))}</div><span>${esc(d.n||'')}</span><span class="dot"></span></div>`; }).join(''); if(ed) $$('.u',box).forEach(r=>r.onclick=()=>{ const uidT=r.dataset.u; LIVE.set('goto_'+uidT,{map:mp.id,t:Date.now(),u:me.uid,n:me.name}).catch(()=>{}); toast('Позвал: '+(r.textContent||'').trim()); }); }
   drawOnline();
@@ -5743,7 +5753,7 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
     if(idrag){ const it=idrag.it; idrag=null; cv.style.cursor=''; commitIt(it); showInfo(); draw(); return; }
     if(vdrag){ const it=vdrag.it; vdrag=null; for(let i=0;i<it.pts.length;i++) it.pts[i]=Math.round(it.pts[i]*10)/10; commitIt(it); draw(); return; }
     if(drag){ const d=drag; drag=null; cv.style.cursor='grab'; for(const x of d.list){ delete x.it._vx; delete x.it._vy; } if(!moved){ dragPub(true); WM.undo.pop(); draw(); return; } let pub=false,sec=false; for(const x of d.list){ const it=x.it; if(it.pts){ for(let i=0;i<it.pts.length;i++) it.pts[i]=Math.round(it.pts[i]*10)/10; } else { it.x=Math.round(it.x*10)/10; it.y=Math.round(it.y*10)/10; } if(it._doc) touch(it); else if(it._secret) sec=true; else pub=true; } if(pub) touch(mp); if(sec) touch(wmSecret(mp,true));
-      if(d.trail){ const it=d.list[0].it; const pts=[...d.trail,it.x,it.y].map(v=>Math.round(v)); const tr={pts,t:Date.now(),u:me.uid,ref:it.ref,color:isDM()?'#ffd166':'#4fd0ff'}; WM.trails.push(tr); kick(); if(!viewAs&&!it._secret) LIVE.set('trail_'+mp.id,tr).catch(()=>{}); } dragPub(true,d.list); draw(); return; }
+      if(d.trail){ const it=d.list[0].it; const pts=[...d.trail,it.x,it.y].map(v=>Math.round(v)); const tr={pts,t:Date.now(),u:me.uid,ref:it.ref,color:myColor()}; WM.trails.push(tr); kick(); if(!viewAs&&!it._secret) LIVE.set('trail_'+mp.id,tr).catch(()=>{}); } dragPub(true,d.list); draw(); return; }
     if(pan){ pan=null; cv.style.cursor=WM.tool==='select'?'grab':'crosshair'; if(moved) return; }
     if(moved&&!(lastPt&&Math.hypot(sx-lastPt.sx,sy-lastPt.sy)<=12)) return;
     const w=toWorld(sx,sy); const p=snapP(w.x,w.y,false); const x=Math.round(p.x), y=Math.round(p.y);
@@ -5906,6 +5916,21 @@ function chatSayAs(ch,text){ const m={i:uid(),t:Date.now(),u:me.uid,n:ch?(ch.nam
 function chatFillStats(){ const sel=$('#diceStat'); if(!sel) return; const sp=chatSpeaker(); const c=sp&&findEntity(sp.c); const cur=sel.value; sel.innerHTML='<option value="">+ хар-ка</option>'+(c&&typeOf(c.id)==='c'?allStats(c).map(st=>{ const v=statEff(c,st).v; return v===''?'':`<option value="${v}">+${v} ${esc(st.name)}</option>`; }).join('')+fxDerived(c).filter(x=>x.ok).map(x=>`<option value="${x.v}">+${x.v} ƒ${esc(x.d.name)}</option>`).join(''):''); if([...sel.options].some(o=>o.value===cur)) sel.value=cur; sel.style.display=c&&typeOf(c.id)==='c'?'':'none'; }
 function chatFillSpeakers(){ const sel=$('#chatAs'); if(!sel||!me) return; const cur=sel.value; const mine=world.characters.filter(c=>!isClone(c)&&(isDM()||(c.players||[]).includes(me.uid))); sel.innerHTML=`<option value="">${esc(me.name||'я')}</option>`+mine.map(c=>`<option value="${c.id}">${esc(c.name)||'без имени'}</option>`).join(''); if([...sel.options].some(o=>o.value===cur)) sel.value=cur; /* у игрока один персонаж — сразу пишем от его лица (один раз, дальше выбор за игроком) */ if(!isDM()&&mine.length===1&&!sel.dataset.auto){ sel.dataset.auto='1'; sel.value=mine[0].id; } chatSyncColor(); chatFillStats(); }
 function chatSyncColor(){ const ci=$('#chatCol'); if(ci) ci.value=chatColorOf()||'#e4e6f0'; }
+/* выбор цвета: у любого <input type=color> сначала 10 шаблонных цветов, «Свой цвет…» — обычный RGB-выбор (data-nopal — без палитры) */
+const PAL=['#ff5c6c','#ff8a3d','#ffd166','#8ef7c1','#3ddc84','#4fd0ff','#4f7dff','#c04be0','#e9c2ff','#e4e6f0'];
+document.addEventListener('click',e=>{ const inp=e.target&&e.target.closest&&e.target.closest('input[type=color]'); if(!inp||inp.disabled||inp.readOnly||'nopal' in inp.dataset) return; e.preventDefault(); palOpen(inp); },true);
+function palOpen(inp){ $$('.palpop').forEach(x=>x.remove()); const cur=(inp.value||'').toLowerCase();
+  const pop=el(`<div class="palpop"><div class="palg">${PAL.map(c=>`<span class="palc ${c===cur?'on':''}" data-c="${c}" style="background:${c}" title="${c}"></span>`).join('')}</div><button class="btn sm palx" title="Любой цвет по RGB">🎨 Свой цвет…</button></div>`);
+  document.body.append(pop);
+  const close=()=>{ pop.remove(); document.removeEventListener('pointerdown',out,true); document.removeEventListener('keydown',esc_,true); };
+  const out=e=>{ if(!pop.contains(e.target)&&e.target!==inp) close(); }; const esc_=e=>{ if(e.key==='Escape'){ e.stopPropagation(); close(); } };
+  const set=v=>{ inp.value=v; inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); };
+  $$('.palc',pop).forEach(x=>x.onclick=()=>{ set(x.dataset.c); close(); });
+  $('.palx',pop).onclick=()=>{ close(); try{ inp.showPicker(); }catch{ inp.dataset.nopal=''; inp.click(); delete inp.dataset.nopal; } };
+  const r=inp.getBoundingClientRect(); const h=pop.offsetHeight, w=pop.offsetWidth; pop.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left))+'px'; pop.style.top=(r.bottom+6+h>innerHeight-8?Math.max(8,r.top-h-6):r.bottom+6)+'px';
+  setTimeout(()=>{ document.addEventListener('pointerdown',out,true); document.addEventListener('keydown',esc_,true); },0); }
+/* «мой цвет»: тот, что выбран в чате за себя (users.color); иначе — цвет, с которым пишешь сейчас; иначе стандартный */
+function myColor(){ const u=me&&byId(world.users,me.uid); return (u&&u.color)||(typeof chatColorOf==='function'&&chatColorOf())||(isDM()?'#ffd166':'#4fd0ff'); }
 function chatColorOf(){ const sp=chatSpeaker(); if(sp){ const c=findEntity(sp.c); return c&&c.color||null; } const u=byId(world.users,me.uid); return u&&u.color||null; }
 async function chatSend(text){ text=text.trim(); if(!text) return; const sp=chatSpeaker(); let m={i:uid(),t:Date.now(),u:me.uid,n:sp?sp.n:me.name}; if(sp) m.c=sp.c; const col=chatColorOf(); if(col) m.col=col; let gm=false;
   if(/^\/help/i.test(text)){ const box=$('#chat .msgs'); box.append(el(CHAT_HELP)); box.scrollTop=box.scrollHeight; return; }
@@ -6223,7 +6248,8 @@ function renderSettings(m){
   drawLetters();
   const tl=$('.tpls .list',page);
   const drawTpls=()=>{ tl.innerHTML=''; if(!s.relTemplates.length) tl.innerHTML='<div class="faint">Шаблонов нет.</div>';
-    s.relTemplates.forEach((t,i)=>{ const row=el(`<div class="srow t"><input type="color" value="${t.color}"><input value="${esc(t.label)}" placeholder="подпись"><button class="btn icon sm" title="стрелки: без / в одну / в обе">${t.both?'⇄':(t.directed?'⇢':'⇔')}</button><button class="x-btn">×</button></div>`);
+    s.relTemplates.forEach((t,i)=>{ const row=el(`<div class="srow t tp"><input type="color" value="${t.color}"><input value="${esc(t.label)}" placeholder="подпись"><button class="btn icon sm" title="стрелки: без / в одну / в обе">${t.both?'⇄':(t.directed?'⇢':'⇔')}</button><button class="btn icon sm mv" data-d="-1" title="выше" ${i?'':'disabled'}>↑</button><button class="btn icon sm mv" data-d="1" title="ниже" ${i<s.relTemplates.length-1?'':'disabled'}>↓</button><button class="x-btn">×</button></div>`);
+      $$('.mv',row).forEach(m=>m.onclick=()=>{ const j=i+(+m.dataset.d); if(j<0||j>=s.relTemplates.length) return; const a=s.relTemplates; [a[i],a[j]]=[a[j],a[i]]; touch(s); drawTpls(); });
       const [col,lab]=$$('input',row); col.oninput=()=>{ t.color=col.value; touch(s); }; lab.oninput=()=>{ t.label=lab.value; touch(s); }; $('.btn',row).onclick=e=>{ const v=arrowsOf(t); Object.assign(t,dirFields(v==='none'?'one':v==='one'?'both':'none')); e.target.textContent=t.both?'⇄':(t.directed?'⇢':'⇔'); touch(s); }; $('.x-btn',row).onclick=()=>{ s.relTemplates.splice(i,1); touch(s); drawTpls(); }; tl.append(row); }); };
   $('.tpls h3 .btn',page).onclick=()=>{ s.relTemplates.push({id:uid(),label:'',color:'#e9c2ff',directed:false}); touch(s); drawTpls(); $$('.tpls .list input:not([type=color])',page).pop().focus(); };
   drawTpls();
