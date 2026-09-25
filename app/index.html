@@ -3756,69 +3756,94 @@ function relView(key,o){ const st=()=>rvState(key); let fc=null, ft=0, hulls=[];
   Object.defineProperty(w,'setBlock',{get:()=>st().lay?null:o.setBlock});
   Object.defineProperty(w,'setNote',{get:()=>st().lay?null:o.setNote});
   return w; }
-/* оптимизация раскладки: силовая раскладка с несколькими случайными стартами (берётся лучшая) + доводка перестановками и сдвигами узлов.
-   Цена = пересечения связей + линии, проходящие сквозь чужие узлы (×0.6) + разбросанность участников одной формы + немного длины связей.
-   Элементы внутри блоков едут вместе с блоком. Возвращает {pos: ключ → {x,y}, c0, c1} (пересечений было / стало) */
+/* оптимизация раскладки v2: stress majorization (как neato) по кратчайшим путям с длиной связи под её подпись,
+   размер узла — вместе с подписью имени; наложения раздвигаются; пересечения дочищаются локальными ходами,
+   которые не ломают общую форму (в цене — отклонение расстояний); несвязанные части раскладываются отдельно и укладываются рядом.
+   Элементы внутри блоков едут вместе с блоком. groups — массивы ключей узлов, которые держать вместе (формы организаций).
+   Возвращает {pos: ключ → {x,y}, c0, c1} (пересечений было / стало) */
 function relOptimize(o,groups,budget=2500){
-  const t0=performance.now(); const all=o.nodes(); const blk=e=>o.block?o.block(e):null;
+  const t0=performance.now(), left=()=>budget-(performance.now()-t0); const all=o.nodes(); const blk=e=>o.block?o.block(e):null;
   const kids=new Map(); for(const n of all){ const b=blk(n.e); if(!b) continue; const bp=o.pos(n.e); for(const m of all){ if(m.e===n.e||blk(m.e)||kids.has(m.e.id)) continue; const mp=o.pos(m.e); if(blkIn(b,mp.x-bp.x,mp.y-bp.y)) kids.set(m.e.id,{e:m.e,host:n.e.id,dx:mp.x-bp.x,dy:mp.y-bp.y}); } }
   const U=all.filter(n=>!kids.has(n.e.id)); const N=U.length; if(!N) return null;
   const ix=new Map(U.map((n,i)=>[n.e.id,i])); const hostOf=id=>kids.has(id)?kids.get(id).host:id;
-  const R=U.map(n=>{ const b=blk(n.e); return b?Math.max(b.w,b.h)/2:(NODE_R[n.t]||26); }), isB=U.map(n=>!!blk(n.e));
-  const seen=new Set(), E=[]; for(const x of o.edges()){ const a=ix.get(hostOf(x.a)), b=ix.get(hostOf(x.b)); if(a==null||b==null||a===b) continue; const k=a<b?a+'|'+b:b+'|'+a; if(seen.has(k)) continue; seen.add(k); E.push([a,b]); }
-  const inc=U.map(()=>[]); E.forEach(([a,b],j)=>{ inc[a].push(j); inc[b].push(j); });
-  const nbr=U.map((_,i)=>inc[i].map(j=>E[j][0]===i?E[j][1]:E[j][0]));
-  const Gr=(groups||[]).map(g=>[...new Set(g.map(k=>ix.get(hostOf(k))).filter(i=>i!=null))]).filter(g=>g.length>1); const grOf=U.map(()=>[]); Gr.forEach((g,gi)=>g.forEach(i=>grOf[i].push(gi)));
-  const X=new Float64Array(N), Y=new Float64Array(N); const GAP=Gr.length?64:52; // зазор между кружками: под подписи имён (и под контуры форм)
+  const txtW=t=>Math.min(230,6.3*String(t||'').length+16);
+  const R=U.map(n=>{ const b=blk(n.e); return b?Math.max(b.w,b.h)/2:(NODE_R[n.t]||26); });
+  /* «след» узла: кружок + имя под ним (или рамка блока) */
+  const FW=U.map((n,i)=>{ const b=blk(n.e); return b?b.w+24:Math.max(2*R[i],txtW((n.e._ent||n.e).name))+14; }), FH=U.map((n,i)=>{ const b=blk(n.e); return b?b.h+24:2*R[i]+30; });
+  /* связи: пара → самая широкая подпись; идеальная длина — чтобы влезла подпись и имена не слиплись */
+  const pm=new Map(); for(const x of o.edges()){ const a=ix.get(hostOf(x.a)), b=ix.get(hostOf(x.b)); if(a==null||b==null||a===b) continue; const k=a<b?a+'|'+b:b+'|'+a; const lw=x.label&&!x.noLbl?txtW(x.label):0; const p=pm.get(k); if(p){ p.lw=Math.max(p.lw,lw); p.m++; } else pm.set(k,{a:Math.min(a,b),b:Math.max(a,b),lw,m:1}); }
+  const deg=new Array(N).fill(0); for(const p of pm.values()){ deg[p.a]++; deg[p.b]++; }
+  /* у «узловых» элементов связей много — подписям нужно больше места вокруг */
+  const SC=1.3; const E=[...pm.values()].map(p=>[p.a,p.b,SC*Math.max(170,p.lw+R[p.a]+R[p.b]+36,(FW[p.a]+FW[p.b])/2+40)*(1+.05*Math.max(0,Math.min(deg[p.a],deg[p.b])-2))+(p.m-1)*12,p.lw]);
+  const adj=U.map(()=>[]); E.forEach(([a,b,L],j)=>{ adj[a].push([b,L,j]); adj[b].push([a,L,j]); });
+  const inc=U.map((_,i)=>adj[i].map(x=>x[2])), nbr=U.map((_,i)=>adj[i].map(x=>x[0]));
+  const Gr=(groups||[]).map(g=>[...new Set(g.map(k=>ix.get(hostOf(k))).filter(i=>i!=null))]).filter(g=>g.length>1);
+  /* граф для расстояний: настоящие связи + «резинки» внутри групп (держат форму организации компактной) */
+  const dadj=adj.map(a=>a.map(([b,L])=>[b,L])); for(const g of Gr) for(let i=0;i<g.length;i++) for(let j=i+1;j<g.length;j++){ const a=g[i], b=g[j], L=((FW[a]+FW[b])/2+50)*1.25; dadj[a].push([b,L]); dadj[b].push([a,L]); }
+  /* компоненты связности */
+  const comp=new Int32Array(N).fill(-1), comps=[]; for(let s=0;s<N;s++){ if(comp[s]>=0) continue; const c=[s]; comp[s]=comps.length; for(let h=0;h<c.length;h++) for(const [b] of dadj[c[h]]) if(comp[b]<0){ comp[b]=comps.length; c.push(b); } comps.push(c); }
+  /* кратчайшие пути (Дейкстра на массиве — узлов немного) */
+  const D=new Float64Array(N*N).fill(Infinity);
+  for(const c of comps){ if(c.length<2) continue; for(const s of c){ const dist=D.subarray(s*N,s*N+N); dist[s]=0; const done=new Uint8Array(N); for(;;){ let u=-1, bd=Infinity; for(const v of c) if(!done[v]&&dist[v]<bd){ bd=dist[v]; u=v; } if(u<0) break; done[u]=1; for(const [v,L] of dadj[u]) if(bd+L<dist[v]) dist[v]=bd+L; } } }
+  const X=new Float64Array(N), Y=new Float64Array(N);
+  let cx0=0, cy0=0; U.forEach((n,i)=>{ const p=o.pos(n.e); X[i]=p.x; Y[i]=p.y; cx0+=p.x; cy0+=p.y; }); cx0/=N; cy0/=N;
+  const X0=Float64Array.from(X), Y0=Float64Array.from(Y);
+  /* --- геометрия --- */
   const ori=(p,q,r)=>{ const v=(X[q]-X[p])*(Y[r]-Y[p])-(Y[q]-Y[p])*(X[r]-X[p]); return v>1e-9?1:v<-1e-9?-1:0; };
   const cross=(a,b,c,d)=>ori(a,b,c)*ori(a,b,d)<0&&ori(c,d,a)*ori(c,d,b)<0;
-  const near=(a,b,i)=>{ const dx=X[b]-X[a], dy=Y[b]-Y[a], L=dx*dx+dy*dy||1; let t=((X[i]-X[a])*dx+(Y[i]-Y[a])*dy)/L; if(t<=0||t>=1) return false; return Math.hypot(X[a]+dx*t-X[i],Y[a]+dy*t-Y[i])<R[i]+10; };
+  /* линия a–b проходит сквозь след узла i (прямоугольник, чуть ужатый) */
+  const thru=(a,b,i)=>{ const hw=FW[i]/2-6, hh=FH[i]/2-6; let x1=X[a]-X[i], y1=Y[a]-Y[i], x2=X[b]-X[i], y2=Y[b]-Y[i]; let t0_=0,t1=1; const dx=x2-x1, dy=y2-y1; for(const [p,q] of [[-dx,x1+hw],[dx,hw-x1],[-dy,y1+hh],[dy,hh-y1]]){ if(Math.abs(p)<1e-9){ if(q<0) return false; continue; } const r=q/p; if(p<0){ if(r>t1) return false; if(r>t0_) t0_=r; } else { if(r<t0_) return false; if(r<t1) t1=r; } } return t1-t0_>.02; };
+  const ovl=(i,x,y,j)=>Math.abs(x-X[j])<(FW[i]+FW[j])/2+8&&Math.abs(y-Y[j])<(FH[i]+FH[j])/2+8;
   const eCross=j=>{ const [a,b]=E[j]; let c=0; for(let m=0;m<E.length;m++){ if(m===j) continue; const [p,q]=E[m]; if(p===a||p===b||q===a||q===b) continue; if(cross(a,b,p,q)) c++; } return c; };
-  const eNear=j=>{ const [a,b]=E[j]; let c=0; if(isB[a]||isB[b]) return 0; for(let i=0;i<N;i++) if(i!==a&&i!==b&&!isB[i]&&near(a,b,i)) c++; return c; };
-  const inG=U.map((_,i)=>new Set(grOf[i]));
-  const grp=i=>{ let c=0; for(const gi of grOf[i]){ const g=Gr[gi]; let sx=0,sy=0; for(const m of g) if(m!==i){ sx+=X[m]; sy+=Y[m]; } const n=g.length-1; c+=Math.hypot(X[i]-sx/n,Y[i]-sy/n)/250*2; }
-    if(Gr.length&&!isB[i]) for(let gi=0;gi<Gr.length;gi++){ if(inG[i].has(gi)) continue; const g=Gr[gi]; let sx=0,sy=0; for(const m of g){ sx+=X[m]; sy+=Y[m]; } sx/=g.length; sy/=g.length; let r=0; for(const m of g) r=Math.max(r,Math.hypot(X[m]-sx,Y[m]-sy)); if(Math.hypot(X[i]-sx,Y[i]-sy)<r+R[i]+40) c+=2.5; } // чужой внутри формы
-    return c; };
-  const len=i=>{ let c=0; for(const m of nbr[i]) c+=Math.hypot(X[i]-X[m],Y[i]-Y[m]); return c/1000*.3; };
-  const nodeCost=i=>{ let c=0; for(const j of inc[i]) c+=eCross(j)+eNear(j)*.6; if(!isB[i]) for(let j=0;j<E.length;j++){ const [a,b]=E[j]; if(a!==i&&b!==i&&!isB[a]&&!isB[b]&&near(a,b,i)) c+=.6; } return c+grp(i)+len(i); };
+  /* подпись связи (в середине линии) налезает на чужой узел или на другую подпись */
+  const pillHit=(j,m)=>{ const A=E[j], B=E[m]; if(!A[3]||!B[3]) return false; return Math.abs((X[A[0]]+X[A[1]]-X[B[0]]-X[B[1]])/2)<(A[3]+B[3])/2&&Math.abs((Y[A[0]]+Y[A[1]]-Y[B[0]]-Y[B[1]])/2)<17; };
+  const pillNode=(j,i)=>{ const A=E[j]; if(!A[3]) return false; return Math.abs((X[A[0]]+X[A[1]])/2-X[i])<(A[3]+FW[i])/2-4&&Math.abs((Y[A[0]]+Y[A[1]])/2-Y[i])<(16+FH[i])/2-4; };
+  const ePill=j=>{ let c=0; for(let m=0;m<E.length;m++) if(m!==j&&pillHit(j,m)) c++; const [a,b]=E[j]; for(let i=0;i<N;i++) if(i!==a&&i!==b&&pillNode(j,i)) c++; return c; };
+  const eThru=j=>{ const [a,b]=E[j]; let c=0; for(let i=0;i<N;i++) if(i!==a&&i!==b&&comp[i]===comp[a]&&thru(a,b,i)) c++; return c; };
   const crossings=()=>{ let c=0; for(let j=0;j<E.length;j++) c+=eCross(j); return c/2; };
-  const total=()=>{ let c=crossings(); for(let j=0;j<E.length;j++) c+=eNear(j)*.6; for(let i=0;i<N;i++) c+=grp(i)/2+len(i)/2; return c; };
-  const sep=(iters)=>{ for(let it=0;it<iters;it++){ let moved=false; for(let i=0;i<N;i++) for(let j=i+1;j<N;j++){ let dx=X[j]-X[i], dy=Y[j]-Y[i]; const d=Math.hypot(dx,dy)||.01, want=R[i]+R[j]+GAP; if(d>=want) continue; if(d<.02){ dx=Math.random()-.5; dy=Math.random()-.5; } const f=(want-d)/2/(Math.hypot(dx,dy)||1); X[i]-=dx*f; Y[i]-=dy*f; X[j]+=dx*f; Y[j]+=dy*f; moved=true; } if(!moved) break; } };
-  const force=(iters)=>{ const vx=new Float64Array(N), vy=new Float64Array(N);
-    for(let it=0;it<iters;it++){ const T=1-it/iters;
-      for(let a=0;a<N;a++) for(let b=a+1;b<N;b++){ let dx=X[b]-X[a], dy=Y[b]-Y[a]; const d=Math.sqrt(dx*dx+dy*dy+.01); const gap=Math.max(0,d-(R[a]+R[b]-60)); let f=22000/(gap*gap+400); if(grOf[a].length&&grOf[b].length&&!grOf[a].some(g=>inG[b].has(g))) f*=2.5; dx/=d; dy/=d; vx[a]-=dx*f; vy[a]-=dy*f; vx[b]+=dx*f; vy[b]+=dy*f; }
-      for(const [a,b] of E){ const dx=X[b]-X[a], dy=Y[b]-Y[a]; const d=Math.sqrt(dx*dx+dy*dy)+.01; const f=(d-(150+R[a]+R[b]))*.02; vx[a]+=dx/d*f; vy[a]+=dy/d*f; vx[b]-=dx/d*f; vy[b]-=dy/d*f; }
-      for(const g of Gr){ let sx=0,sy=0; for(const i of g){ sx+=X[i]; sy+=Y[i]; } sx/=g.length; sy/=g.length; for(const i of g){ vx[i]+=(sx-X[i])*.04; vy[i]+=(sy-Y[i])*.04; } }
-      for(let i=0;i<N;i++){ vx[i]-=X[i]*.003; vy[i]-=Y[i]*.003; X[i]+=vx[i]*T*.5; Y[i]+=vy[i]*T*.5; vx[i]*=.5; vy[i]*=.5; } } };
-  /* исходная раскладка — старт №0 и эталон «было» */
-  let cx0=0, cy0=0; U.forEach((n,i)=>{ const p=o.pos(n.e); X[i]=p.x; Y[i]=p.y; cx0+=p.x; cy0+=p.y; }); cx0/=N; cy0/=N;
-  for(let i=0;i<N;i++){ X[i]-=cx0; Y[i]-=cy0; }
-  const c0=crossings(); const X0=Float64Array.from(X), Y0=Float64Array.from(Y);
-  /* кандидаты: текущая раскладка как есть (повторная оптимизация не сделает хуже), она же после силовой раскладки, и случайные старты; 3 лучших доводятся, берётся лучший после доводки */
-  const cands=[]; const keep=()=>{ const s_=total(); cands.push({s:s_,X:Float64Array.from(X),Y:Float64Array.from(Y)}); cands.sort((p,q)=>p.s-q.s); if(cands.length>3) cands.pop(); };
-  sep(60); keep();
-  const rad=60*Math.sqrt(N)+200, minTries=N>150?2:N>80?4:8;
-  for(let r=0;r<40;r++){ if(r>=minTries&&performance.now()-t0>budget*.35) break;
-    if(r===0){ X.set(X0); Y.set(Y0); } else for(let i=0;i<N;i++){ const a=Math.random()*Math.PI*2, d=Math.sqrt(Math.random())*rad; X[i]=Math.cos(a)*d; Y[i]=Math.sin(a)*d; }
-    force(N>150?200:350); sep(60); keep(); }
-  /* доводка: перестановка двух узлов одного размера, сдвиг узла к соседям и перенос в случайное свободное место — если цена падает */
-  const free=(i,x,y)=>{ for(let j=0;j<N;j++) if(j!==i&&Math.hypot(X[j]-x,Y[j]-y)<R[i]+R[j]+GAP) return false; return true; };
-  const refine=deadline=>{ for(let pass=0;pass<10&&performance.now()<deadline;pass++){ let imp=0;
-    for(let i=0;i<N&&performance.now()<deadline;i++){ if(isB[i]) continue;
-      for(let j=i+1;j<N;j++){ if(isB[j]||Math.abs(R[i]-R[j])>6) continue; const before=nodeCost(i)+nodeCost(j); let t=X[i]; X[i]=X[j]; X[j]=t; t=Y[i]; Y[i]=Y[j]; Y[j]=t; if(nodeCost(i)+nodeCost(j)<before-1e-6){ imp++; continue; } t=X[i]; X[i]=X[j]; X[j]=t; t=Y[i]; Y[i]=Y[j]; Y[j]=t; } }
-    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for(let j=0;j<N;j++){ x0=Math.min(x0,X[j]); x1=Math.max(x1,X[j]); y0=Math.min(y0,Y[j]); y1=Math.max(y1,Y[j]); }
-    for(let i=0;i<N&&performance.now()<deadline;i++){ if(isB[i]) continue; const ox=X[i], oy=Y[i]; let bx=ox, by=oy, bc=nodeCost(i);
-      const cand=[]; for(let t=0;t<16;t++) cand.push([x0-80+Math.random()*(x1-x0+160),y0-80+Math.random()*(y1-y0+160)]);
-      const bases=[[ox,oy]]; if(nbr[i].length){ let sx=0,sy=0; for(const m of nbr[i]){ sx+=X[m]; sy+=Y[m]; } bases.push([sx/nbr[i].length,sy/nbr[i].length]); }
-      for(const [qx,qy] of bases) for(const d of [0,80,160,260]) for(let a=0;a<(d?8:1);a++) cand.push([qx+Math.cos(a*Math.PI/4)*d,qy+Math.sin(a*Math.PI/4)*d]);
-      for(const [x,y] of cand){ if(!free(i,x,y)) continue; X[i]=x; Y[i]=y; const c=nodeCost(i); if(c<bc-1e-3){ bc=c; bx=x; by=y; } }
-      X[i]=bx; Y[i]=by; if(bx!==ox||by!==oy) imp++; }
-    if(!imp) break; } };
-  let best=null, bestS=Infinity;
-  cands.forEach((c,ci)=>{ X.set(c.X); Y.set(c.Y); const left=budget-(performance.now()-t0); refine(performance.now()+Math.max(60,left/(cands.length-ci))); const s_=total(); if(s_<bestS){ bestS=s_; best=[Float64Array.from(X),Float64Array.from(Y)]; } });
-  X.set(best[0]); Y.set(best[1]);
-  const c1=crossings(); const pos={};
-  U.forEach((n,i)=>{ pos[n.e.id]={x:Math.round(X[i]+cx0),y:Math.round(Y[i]+cy0)}; });
+  /* отклонение расстояний от идеальных (строка стресса), относительное */
+  const sRow=i=>{ let s=0; const c=comps[comp[i]]; for(const j of c){ if(j===i) continue; const d=D[i*N+j]; if(!isFinite(d)) continue; const l=Math.hypot(X[i]-X[j],Y[i]-Y[j]); const r=(l-d)/d; s+=r*r*(nbr[i].includes(j)?4:1); } return s; };
+  const SW=.3, TW=.9, PW=.9;
+  const nodeCost=i=>{ let c=0; for(const j of inc[i]) c+=eCross(j)+eThru(j)*TW+ePill(j)*PW; for(let j=0;j<E.length;j++) if(pillNode(j,i)&&E[j][0]!==i&&E[j][1]!==i) c+=PW; for(let j=0;j<E.length;j++){ const [a,b]=E[j]; if(a!==i&&b!==i&&comp[a]===comp[i]&&thru(a,b,i)) c+=TW; } return c+SW*sRow(i); };
+  const total=C=>{ let c=0, s=0; const inC=new Set(C); for(let j=0;j<E.length;j++) if(inC.has(E[j][0])){ c+=eCross(j)/2+eThru(j)*TW+ePill(j)*PW/2; } for(const i of C) s+=sRow(i)/2; return c+SW*s; };
+  /* --- stress majorization (Gauss–Seidel) --- */
+  const smacof=(C,iters)=>{ for(let it=0;it<iters;it++){ let mv=0; for(const i of C){ let nx=0,ny=0,sw=0; for(const j of C){ if(j===i) continue; const d=D[i*N+j]; const w=1/(d*d); let dx=X[i]-X[j], dy=Y[i]-Y[j]; let l=Math.hypot(dx,dy); if(l<1e-6){ dx=Math.random()-.5; dy=Math.random()-.5; l=Math.hypot(dx,dy); } nx+=w*(X[j]+d*dx/l); ny+=w*(Y[j]+d*dy/l); sw+=w; } const px=nx/sw, py=ny/sw; mv=Math.max(mv,Math.abs(px-X[i])+Math.abs(py-Y[i])); X[i]=px; Y[i]=py; } if(mv<.3) break; } };
+  /* раздвинуть наложения следов (по оси с меньшим перекрытием) */
+  const deov=(C,iters)=>{ for(let it=0;it<iters;it++){ let any=false; for(let p=0;p<C.length;p++) for(let q=p+1;q<C.length;q++){ const a=C[p], b=C[q]; const ox=(FW[a]+FW[b])/2+8-Math.abs(X[a]-X[b]), oy=(FH[a]+FH[b])/2+8-Math.abs(Y[a]-Y[b]); if(ox<=0||oy<=0) continue; any=true; if(ox*.8<oy){ const s=(X[a]<=X[b]?-1:1)*ox/2; X[a]+=s; X[b]-=s; } else { const s=(Y[a]<=Y[b]?-1:1)*oy/2; Y[a]+=s; Y[b]-=s; } } if(!any) break; } };
+  const refine=(C,deadline)=>{ const inC=new Set(C); const free=(i,x,y)=>{ for(const j of C) if(j!==i&&ovl(i,x,y,j)) return false; return true; };
+    for(let pass=0;pass<8&&performance.now()<deadline;pass++){ let imp=0; let bx0=1e9,by0=1e9,bx1=-1e9,by1=-1e9; for(const i of C){ bx0=Math.min(bx0,X[i]); bx1=Math.max(bx1,X[i]); by0=Math.min(by0,Y[i]); by1=Math.max(by1,Y[i]); }
+      for(const i of C){ if(performance.now()>deadline) break; const ox=X[i], oy=Y[i]; let bc=nodeCost(i), bx=ox, by=oy; const L=nbr[i].length?Math.min(...adj[i].map(x=>x[1])):200; const cand=[];
+        for(let t=0;t<10;t++) cand.push([bx0+Math.random()*(bx1-bx0),by0+Math.random()*(by1-by0)]); // перенос в любое место (распутать перекрученную ветку)
+        for(const r of [.35,.7,1.1]) for(let a=0;a<8;a++) cand.push([ox+Math.cos(a*Math.PI/4)*L*r,oy+Math.sin(a*Math.PI/4)*L*r]);
+        if(nbr[i].length===1){ const m=nbr[i][0]; for(let a=0;a<12;a++) cand.push([X[m]+Math.cos(a*Math.PI/6)*adj[i][0][1],Y[m]+Math.sin(a*Math.PI/6)*adj[i][0][1]]); }
+        else if(nbr[i].length){ let sx=0,sy=0; for(const m of nbr[i]){ sx+=X[m]; sy+=Y[m]; } cand.push([sx/nbr[i].length,sy/nbr[i].length]); }
+        for(const [x,y] of cand){ if(!free(i,x,y)) continue; X[i]=x; Y[i]=y; const c=nodeCost(i); if(c<bc-1e-3){ bc=c; bx=x; by=y; } }
+        X[i]=bx; Y[i]=by; if(bx!==ox||by!==oy) imp++; }
+      /* обмен местами с соседом по картинке похожего размера */
+      for(const i of C){ if(performance.now()>deadline) break; for(const j of C){ if(j<=i||Math.abs(FW[i]-FW[j])>70||Math.abs(FH[i]-FH[j])>40) continue; if(Math.hypot(X[i]-X[j],Y[i]-Y[j])>600) continue; const before=nodeCost(i)+nodeCost(j); let t=X[i]; X[i]=X[j]; X[j]=t; t=Y[i]; Y[i]=Y[j]; Y[j]=t; if(nodeCost(i)+nodeCost(j)<before-1e-3){ imp++; continue; } t=X[i]; X[i]=X[j]; X[j]=t; t=Y[i]; Y[i]=Y[j]; Y[j]=t; } }
+      if(!imp) break; } };
+  const c0=crossings();
+  /* --- каждая компонента: несколько стартов (текущая раскладка + случайные), stress → раздвинуть → доводка; берётся лучший --- */
+  const big=comps.filter(c=>c.length>1).sort((a,b)=>b.length-a.length), single=comps.filter(c=>c.length===1);
+  const totalN=big.reduce((s,c)=>s+c.length,0)||1;
+  for(const C of big){ const share=Math.max(80,left()*C.length/totalN*.9); const dl=performance.now()+share; const cands=[];
+    const minTries=C.length>120?3:C.length>50?5:8;
+    for(let r=0;r<60&&(r<minTries||performance.now()<dl-share*.6);r++){
+      if(r===0){ for(const i of C){ X[i]=X0[i]; Y[i]=Y0[i]; } } else { const rad=Math.sqrt(C.length)*120; for(const i of C){ const a=Math.random()*Math.PI*2, d=Math.sqrt(Math.random())*rad; X[i]=Math.cos(a)*d; Y[i]=Math.sin(a)*d; } }
+      smacof(C,400); deov(C,80); smacof(C,15); deov(C,120); cands.push({s:total(C),X:C.map(i=>X[i]),Y:C.map(i=>Y[i])}); }
+    cands.sort((a,b)=>a.s-b.s); let best=null, bs=Infinity; const top=cands.slice(0,3); const polish=(dl2)=>{ smacof(C,6); deov(C,60); refine(C,dl2); deov(C,60); };
+    top.forEach((c,ci)=>{ C.forEach((i,k)=>{ X[i]=c.X[k]; Y[i]=c.Y[k]; }); refine(C,performance.now()+Math.max(40,(dl-performance.now())*.7/(top.length-ci))); deov(C,60); const s=total(C); if(s<bs){ bs=s; best=C.map(i=>[X[i],Y[i]]); } });
+    /* второй проход с лучшего: чуть «отпустить» (пара шагов stress) и снова дочистить — пока есть время и становится лучше */
+    for(let k=0;k<4&&performance.now()<dl;k++){ C.forEach((i,q)=>{ X[i]=best[q][0]; Y[i]=best[q][1]; }); polish(Math.min(dl,performance.now()+Math.max(60,(dl-performance.now())/2))); const s=total(C); if(s<bs-1e-3){ bs=s; best=C.map(i=>[X[i],Y[i]]); } else break; }
+    C.forEach((i,k)=>{ X[i]=best[k][0]; Y[i]=best[k][1]; });
+    /* экран широкий: главная ось части — по горизонтали (раскладка от поворота не зависит) */
+    { let mx=0,my=0; for(const i of C){ mx+=X[i]; my+=Y[i]; } mx/=C.length; my/=C.length; let sxx=0,syy=0,sxy=0; for(const i of C){ const dx=X[i]-mx, dy=Y[i]-my; sxx+=dx*dx; syy+=dy*dy; sxy+=dx*dy; } const th=-.5*Math.atan2(2*sxy,sxx-syy), co=Math.cos(th), si=Math.sin(th); for(const i of C){ const dx=X[i]-mx, dy=Y[i]-my; X[i]=mx+dx*co-dy*si; Y[i]=my+dx*si+dy*co; } deov(C,60); } }
+  /* --- упаковка частей полками (большие первыми), одиночки — рядами в конце --- */
+  const boxes=[...big,...single].map(C=>{ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for(const i of C){ x0=Math.min(x0,X[i]-FW[i]/2); x1=Math.max(x1,X[i]+FW[i]/2); y0=Math.min(y0,Y[i]-FH[i]/2); y1=Math.max(y1,Y[i]+FH[i]/2); } return {C,x0,y0,w:x1-x0,h:y1-y0}; });
+  const area=boxes.reduce((s,b)=>s+(b.w+60)*(b.h+60),0); const rowW=Math.max(boxes[0]?boxes[0].w:0,Math.sqrt(area*1.7));
+  let cx=0, cy=0, rh=0; for(const b of boxes){ if(cx>0&&cx+b.w>rowW){ cx=0; cy+=rh+60; rh=0; } const dx=cx-b.x0, dy=cy-b.y0; for(const i of b.C){ X[i]+=dx; Y[i]+=dy; } cx+=b.w+60; rh=Math.max(rh,b.h); }
+  const c1=crossings(); let mx=0,my=0; for(let i=0;i<N;i++){ mx+=X[i]; my+=Y[i]; } mx/=N; my/=N;
+  const pos={}; U.forEach((n,i)=>{ pos[n.e.id]={x:Math.round(X[i]-mx+cx0),y:Math.round(Y[i]-my+cy0)}; });
   for(const [id,k] of kids){ const h=pos[k.host]; pos[id]={x:Math.round(h.x+k.dx),y:Math.round(h.y+k.dy)}; }
   return {pos,c0,c1,ms:Math.round(performance.now()-t0)}; }
 /* кнопка «👁 Вид» с панелью. apply — «применить к самой карте» (только редактор), saveAs(pos|null) — сохранить вид как новую карту */
