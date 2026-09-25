@@ -529,6 +529,7 @@ body.nomenu.onmap #app{grid-template-columns:0 1fr}body.nomenu.onmap #side{overf
 #wminit .rdy{font-size:14px;padding:0 3px;color:var(--muted)}#wminit .rdy.on{color:#2ecc71}
 #wminit .ctl.stat{font-size:11px;color:var(--muted);padding:4px 8px;gap:8px}
 #wminit .hd .btn.icon{padding:3px 7px;font-size:12.5px}#initBtn .cnt{font-size:10px;background:var(--panel2);border-radius:99px;padding:0 5px;margin-left:3px;color:var(--muted)}
+.dockpop.rfpop{width:340px;max-height:calc(100vh - 120px);overflow:auto;gap:2px}.rfpop .rfh{margin-top:8px;margin-bottom:2px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-size:10.5px}.rfpop .rfr{display:flex;gap:7px;align-items:center;padding:3px 4px;border-radius:7px;min-width:0}.rfpop .rfr .grow{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rfpop .rfr:hover{background:rgba(255,255,255,.05)}.rfpop .rfr.off{opacity:.45}.rfpop .rfc{font-size:11px;min-width:14px;text-align:right}.rfpop .rfgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 4px;margin-bottom:6px}.rfpop .lnk{cursor:pointer;text-transform:none;letter-spacing:0;padding:0 3px}.rfpop .lnk:hover{color:var(--text,#fff)}.rfn{background:#ff5c6c;color:#fff;border-radius:8px;padding:0 5px;font-size:10.5px;font-weight:700}
 .glegend{position:absolute;left:14px;bottom:52px;max-width:260px;font-size:12px;background:rgba(7,9,15,.8);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:10px;padding:6px 10px;color:var(--text,#e4e6f0)}.glegend:empty{display:none}.glegend .lgh{cursor:pointer;font-weight:700;font-size:11.5px;letter-spacing:.3px;user-select:none}.glegend .lgb{display:flex;flex-direction:column;gap:4px;margin-top:6px}
 #ghint{position:absolute;left:14px;bottom:14px;font-size:12px;color:var(--faint);background:rgba(7,9,15,.6);padding:6px 10px;border-radius:8px;pointer-events:none}
 
@@ -3392,6 +3393,38 @@ function relLegend(box){ if(!box) return; let open=true; try{ open=localStorage.
   if(isDM()) rows.push(['<span style="width:34px;text-align:center;flex:none">⊘</span>','скрыта от игроков']);
   box.innerHTML=`<div class="lgh">Легенда связей <span class="faint">${open?'▾':'▸'}</span></div>${open?`<div class="lgb">${rows.map(([a,b])=>`<div class="row" style="gap:8px;align-items:center">${a}<span>${b}</span></div>`).join('')}</div>`:''}`;
   $('.lgh',box).onclick=()=>{ try{ localStorage.setItem('rel.legend',open?'0':'1'); }catch{} relLegend(box); }; }
+/* фильтр связей на картах связей: какие виды и какие шаблоны показывать.
+   rel — отношения персонажей, mem — членства в организациях, loc — связи с локациями, map — нарисованные на самой карте; tpl[id]=false — шаблон скрыт, free — связи без шаблона */
+const RF_KINDS=[['rel','Отношения персонажей','#e9c2ff',false],['mem','Организации','#4fd0ff',true],['loc','Локации','#8ef7c1',true],['map','Нарисованные на карте','#e9c2ff',false]];
+const rfNorm=(f,legacyOff)=>{ const d={rel:!legacyOff,mem:!legacyOff,loc:!legacyOff,map:true,free:true}; return {...d,...(f||{}),tpl:{...((f&&f.tpl)||{})}}; };
+const rfTplOf=label=>{ const x=(label||'').trim().toLowerCase(); return x?(world.settings.relTemplates||[]).find(t=>t.label&&t.label.trim().toLowerCase()===x)||null:null; };
+/* проходит ли связь графа (объект из edges()) через фильтр */
+function rfPass(f,e){ const k=e.ref?.kind; if(k&&f[k]===false) return false; if(k!=='rel'&&k!=='map') return true; const t=rfTplOf(e.ref.obj.label); return t?f.tpl[t.id]!==false:f.free!==false; }
+const rfOffCount=(f,kinds)=>kinds.filter(k=>f[k]===false).length+(world.settings.relTemplates||[]).filter(t=>t.label&&f.tpl[t.id]===false).length+(f.free===false?1:0);
+/* кнопка «🔗 Связи» с выпадающей панелью. get() — текущий фильтр, set(f) — сохранить, all() — связи без фильтра (для счётчиков) */
+let RF_CUR=null; /* панель одна; перерисовка страницы подменяет RF_CUR, открытая панель продолжает работать с текущей картой */
+function rfButton(btn,{get,set,all,kinds,note}){ if(!btn) return;
+  const badge=()=>{ const n=rfOffCount(get(),kinds); btn.classList.toggle('active',n>0); btn.innerHTML=`🔗 Связи${n?` <span class="rfn">−${n}</span>`:''} <span class="faint">▾</span>`; btn.title=n?'Часть связей скрыта — нажми, чтобы выбрать':'Какие связи показывать на карте'; }; badge(); RF_CUR={get,set,all,kinds,note,badge};
+  btn.onclick=ev=>{ ev.stopPropagation(); if($('.rfpop')){ $$('.rfpop').forEach(x=>x.remove()); return; }
+    const R=()=>RF_CUR; const pop=el('<div class="dockpop rfpop"></div>'); document.body.append(pop);
+    const ln=(col,dash)=>`<svg width="26" height="10" style="flex:none"><line x1="2" y1="5" x2="24" y2="5" stroke="${col}" stroke-width="2.4" ${dash?'stroke-dasharray="5 4"':''}/></svg>`;
+    const draw=()=>{ const f=R().get(); const es=R().all(); const cnt={}; const tc={}; let free=0;
+      for(const e of es){ const k=e.ref?.kind; if(!k) continue; cnt[k]=(cnt[k]||0)+1; if(k==='rel'||k==='map'){ const t=rfTplOf(e.ref.obj.label); if(t) tc[t.id]=(tc[t.id]||0)+1; else free++; } }
+      const tpls=(world.settings.relTemplates||[]).filter(t=>t.label);
+      const row=(attr,on,sw,name,n)=>`<label class="rfr ${on?'':'off'}"><input type="checkbox" ${attr} ${on?'checked':''}>${sw}<span class="grow">${name}</span><span class="faint rfc">${n||''}</span></label>`;
+      pop.innerHTML=`<div class="row" style="align-items:center;gap:6px"><b>Показывать связи</b><span class="grow"></span><button class="btn sm" data-a="all">всё</button><button class="btn sm" data-a="none">ничего</button></div>
+        ${R().note?`<div class="faint" style="font-size:11px;margin:-2px 0 2px">${R().note}</div>`:''}
+        <div class="tiny rfh">Виды</div>${RF_KINDS.filter(([k])=>R().kinds.includes(k)).map(([k,n,c,d])=>row(`data-k="${k}"`,f[k]!==false,ln(c,d),n,cnt[k])).join('')}
+        <div class="tiny rfh row" style="align-items:center">По шаблонам<span class="grow"></span><span class="lnk" data-a="tall">все</span>·<span class="lnk" data-a="tnone">никаких</span></div>
+        <div class="rfgrid">${tpls.map(t=>row(`data-t="${t.id}"`,f.tpl[t.id]!==false,ln(t.color,false),esc(t.label),tc[t.id])).join('')}${row('data-free="1"',f.free!==false,ln('#e9c2ff',false),'без шаблона',free)}</div>
+        <div class="faint" style="font-size:11px;line-height:1.35">Шаблоны относятся к отношениям персонажей${R().kinds.includes('map')?' и связям, нарисованным на карте':''} (узнаются по подписи). <b>Alt+клик</b> — показать только это.</div>`;
+      $$('input',pop).forEach(cb=>{ cb.parentNode.onclick=ev=>{ if(!ev.altKey) return; ev.preventDefault(); const nf=rfNorm(R().get()); const tk=cb.dataset.t, fr=cb.dataset.free, kk=cb.dataset.k;
+          if(kk){ for(const k of R().kinds) nf[k]=k===kk; } else { for(const t of tpls) nf.tpl[t.id]=t.id===tk; nf.free=!!fr; for(const k of R().kinds) nf[k]=k==='rel'||k==='map'; } R().set(nf); draw(); R().badge(); };
+        cb.onchange=()=>{ const nf=rfNorm(R().get()); if(cb.dataset.k) nf[cb.dataset.k]=cb.checked; else if(cb.dataset.t) nf.tpl[cb.dataset.t]=cb.checked; else nf.free=cb.checked; R().set(nf); draw(); R().badge(); }; });
+      $$('[data-a]',pop).forEach(b=>b.onclick=()=>{ const a=b.dataset.a; const nf=rfNorm(R().get()); const on=a==='all'||a==='tall';
+        if(a==='all'||a==='none'){ for(const k of R().kinds) nf[k]=on; } for(const t of tpls) nf.tpl[t.id]=on; nf.free=on; R().set(nf); draw(); R().badge(); }); };
+    draw(); const r=btn.getBoundingClientRect(); pop.style.left=Math.max(8,Math.min(innerWidth-pop.offsetWidth-8,r.left))+'px'; pop.style.top=(r.bottom+8)+'px';
+    setTimeout(()=>document.addEventListener('pointerdown',function f(e){ if(!pop.isConnected){ document.removeEventListener('pointerdown',f,true); return; } if(!pop.contains(e.target)&&!e.target.closest("#relF")){ pop.remove(); document.removeEventListener('pointerdown',f,true); } },true),0); }; }
 /* скрыть подписи на связях (у каждого зрителя своё) */
 G.noLbl=(()=>{ try{ return localStorage.getItem('rel.noLbl')==='1'; }catch{ return false; } })();
 function lblToggle(btn,eng){ if(!btn) return; btn.classList.toggle('active',!G.noLbl); btn.onclick=()=>{ G.noLbl=!G.noLbl; try{ localStorage.setItem('rel.noLbl',G.noLbl?'1':'0'); }catch{} btn.classList.toggle('active',!G.noLbl); eng.draw(); }; }
@@ -3606,7 +3639,7 @@ function renderMap(m,mp){
       <div class="group"><button class="btn sm icon" id="back" title="К списку карт">←</button><input id="mtitle" class="${ed?'':'keep'}" placeholder="Название карты" value="${esc(mp.title)}" style="width:220px;padding:5px 10px;font-weight:700" ${ed?'':'readonly'}><span class="chip ${mp.shared?'l':''}" id="mshared" style="cursor:${ed?'pointer':'default'}" title="${ed?'переключить видимость':''}">${mp.shared?'☀ общая':'☾ личная'}</span>${mp.owner!==effUid()?`<span class="chip u">${esc(userName(mp.owner))}</span>`:''}</div>
       ${ed?`<div class="group"><button class="btn sm primary" id="addBtn" title="Выбрать персонажей, организации и локации (можно одного и того же несколько раз)">+ На карту</button><button class="btn sm" id="addNote" title="Текстовый блок: заголовок и описание">📝 Заметка</button></div>`:''}
       ${ed?`<div class="group"><button class="btn sm ${G.linkMode?'active':''}" id="linkBtn" title="Режим рисования связей (или Shift+тянуть)">✎ Связать</button><span class="faint" style="font-size:12px;padding:0 4px">шаблон:</span><div class="chips" id="tplBar"></div></div>`:''}
-      <div class="group"><label title="Показывать членства, локации и общие связи персонажей между элементами карты"><input type="checkbox" id="showData" ${mp.showData!==false?'checked':''} ${ed?'':'disabled'}>известные связи</label>${ed?'<button class="btn sm" id="layoutBtn">⟲ Разложить</button>':''}<button class="btn sm" id="lblBtn" title="Показывать подписи на связях (скрытые видны при наведении и у выбранного)">🏷 Подписи</button><button class="btn sm" id="fitBtn">⛶ Вписать</button>${ed?'<button class="btn sm danger" id="delMap">Удалить карту</button>':''}</div>
+      <div class="group"><button class="btn sm" id="relF">🔗 Связи</button>${ed?'<button class="btn sm" id="layoutBtn">⟲ Разложить</button>':''}<button class="btn sm" id="lblBtn" title="Показывать подписи на связях (скрытые видны при наведении и у выбранного)">🏷 Подписи</button><button class="btn sm" id="fitBtn">⛶ Вписать</button>${ed?'<button class="btn sm danger" id="delMap">Удалить карту</button>':''}</div>
     </div>
     <div id="ginfo"></div><div id="glegend" class="glegend"></div>
     <div id="ghint">${ed?'Тяни элементы · колесо — масштаб · двойной клик — открыть · <b>Shift+тянуть</b> — связь · клик по линии или подписи — изменить, двойной по заметке — изменить · <b>Ctrl+клик</b> — выделить несколько · <b>Ctrl+C / Ctrl+V</b> — копировать и вставить (в т.ч. на другую карту) · <b>Del</b> — убрать с карты · <b>Ctrl+Z</b> — вернуть':'Колесо — масштаб · двойной клик — открыть · клик по заметке — прочитать'}</div>
@@ -3620,13 +3653,17 @@ function renderMap(m,mp){
   const nodeMap=()=>new Map((mp.nodes||[]).map(n=>[nKey(n),n]));
   const wraps=new Map(); const wrapN=n=>{ const e=findEntity(n.id); if(!e) return null; if(!n.k) return e; let w=wraps.get(n.k); if(!w||w._ent!==e){ w=Object.create(e); Object.defineProperty(w,'id',{value:n.k}); w._ent=e; w._t=typeOf(e.id); wraps.set(n.k,w); } return w; };
   const nodes=()=>(mp.nodes||[]).map(wrapN).filter(e=>e&&visibleEnt(e._ent||e)).map(e=>({e,t:e._t||typeOf(e.id)}));
-  const dataEdges=()=>{ if(mp.showData===false) return []; const inst=new Map(); for(const n of (mp.nodes||[])) (inst.get(n.id)||inst.set(n.id,[]).get(n.id)).push(nKey(n)); const out=[];
+  /* фильтр связей: у редактора — общий для карты (mp.relF), у остальных — свой, в localStorage */
+  const RFK='relF.'+mp.id; const rfGet=()=>{ if(!ed){ try{ const v=localStorage.getItem(RFK); if(v) return rfNorm(JSON.parse(v)); }catch{} } return rfNorm(mp.relF,mp.showData===false&&!mp.relF); };
+  const rfSet=f=>{ if(ed){ mp.relF=f; mp.showData=!!(f.rel||f.mem||f.loc); touch(mp); } else { try{ localStorage.setItem(RFK,JSON.stringify(f)); }catch{} } eng.draw(); };
+  const dataEdges=()=>{ const inst=new Map(); for(const n of (mp.nodes||[])) (inst.get(n.id)||inst.set(n.id,[]).get(n.id)).push(nKey(n)); const out=[];
     const add=(a,b,o)=>{ for(const ka of (inst.get(a)||[])) for(const kb of (inst.get(b)||[])) out.push({a:ka,b:kb,...o}); };
     for(const x of V.mems()) add(x.charId,x.orgId,{color:'#4fd0ff',label:x.role||'',dash:true,hid:isDM()&&x.revealed===false,ref:{kind:'mem',obj:x}});
     for(const x of V.locLinks()) add(x.entityId,x.locId,{color:'#8ef7c1',label:x.note||'',dash:true,hid:isDM()&&x.revealed===false,ref:{kind:'loc',obj:x}});
     for(const r of V.rels()) if(r.shared||r.owner===effUid()||(isDM()&&r.hidden)) add(r.from,r.to,{color:r.color||'#e9c2ff',label:(r.shared||r.hidden?'':'☾ ')+(r.label||''),directed:r.directed,both:!!r.both,priv:!r.shared&&!r.hidden,hid:isDM()&&!!r.hidden,dash:true,ref:{kind:'rel',obj:r}});
     return out; };
-  const edges=()=>[...dataEdges(),...(mp.edges||[]).map(e=>({a:e.from,b:e.to,color:e.color||'#e9c2ff',label:e.label||'',noLbl:!!e.noLbl,directed:!!e.directed,both:!!e.both,ref:{kind:'map',obj:e}})),...mapHidEdges(mp).map(e=>({a:e.from,b:e.to,color:e.color||'#e9c2ff',label:e.label||'',noLbl:!!e.noLbl,directed:!!e.directed,both:!!e.both,hid:true,ref:{kind:'map',obj:e}}))];
+  const allEdges=()=>[...dataEdges(),...(mp.edges||[]).map(e=>({a:e.from,b:e.to,color:e.color||'#e9c2ff',label:e.label||'',noLbl:!!e.noLbl,directed:!!e.directed,both:!!e.both,ref:{kind:'map',obj:e}})),...mapHidEdges(mp).map(e=>({a:e.from,b:e.to,color:e.color||'#e9c2ff',label:e.label||'',noLbl:!!e.noLbl,directed:!!e.directed,both:!!e.both,hid:true,ref:{kind:'map',obj:e}}))];
+  const edges=()=>{ const f=rfGet(); return allEdges().filter(e=>rfPass(f,e)); };
   let opts_onSelect=null;
   /* выделение: G.sel — главный (панель справа), G.msel — все выделенные ключи узлов, G.nsel — id заметок */
   if(G.selMap!==mp.id){ G.selMap=mp.id; G.msel=new Set(); G.nsel=new Set(); G.sel=null; } G.msel??=new Set(); G.nsel??=new Set();
@@ -3670,9 +3707,9 @@ function renderMap(m,mp){
     tplBar($('#tplBar',page));
     $('#layoutBtn',page).onclick=()=>{ eng.layout(true); touch(mp); eng.fit(); };
     $('#delMap',page).onclick=async()=>{ if(await confirmDlg(`Удалить карту «${mp.title||'без названия'}»?`)) { await removeDoc('maps',mp); go('graph'); } };
-    $('#showData',page).onchange=e=>{ mp.showData=e.target.checked; touch(mp); eng.draw(); };
   }
   $('#fitBtn',page).onclick=()=>eng.fit(); lblToggle($('#lblBtn',page),eng); relLegend($('#glegend',page));
+  rfButton($('#relF',page),{get:rfGet,set:rfSet,all:allEdges,kinds:['rel','mem','loc','map'],note:ed?'Настройка карты — так её увидят все':'Только у тебя — на саму карту не влияет'});
   /* классические бинды: Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D, Del, Ctrl+A, Ctrl+Z, Esc. Буфер — в localStorage (relmap.clip), поэтому вставлять можно и на другой карте связей и в другой вкладке */
   let mouseW=null; cv.addEventListener('mousemove',e=>{ mouseW=eng.toWorld(e.offsetX,e.offsetY); }); cv.addEventListener('mouseleave',()=>{ mouseW=null; });
   const UNDO=(G.undo??={}); const snap=()=>{ const u=(UNDO[mp.id]??=[]); u.push(JSON.stringify({nodes:mp.nodes||[],edges:mp.edges||[],notes:mp.notes||[]})); if(u.length>30) u.shift(); };
@@ -3774,7 +3811,7 @@ function renderOverview(m){
       <div class="group"><label><input type="checkbox" data-t="c" ${G.show.c?'checked':''}><span style="color:var(--orange)">●</span> персонажи</label><label><input type="checkbox" data-t="o" ${G.show.o?'checked':''}><span style="color:var(--cyan)">●</span> организации</label><label><input type="checkbox" data-t="l" ${G.show.l?'checked':''}><span style="color:var(--mint)">●</span> локации</label><label title="личные связи других участников"><input type="checkbox" id="others" ${G.others?'checked':''}>чужие личные</label></div>
       <div class="group"><select id="orgF" style="padding:5px 26px 5px 9px;font-size:12.5px"><option value="">все организации</option>${V.orgs().map(o=>`<option value="${o.id}" ${G.org===o.id?'selected':''}>${esc(o.name)||'без имени'}</option>`).join('')}</select></div>
       <div class="group"><button class="btn sm ${G.linkMode?'active':''}" id="linkBtn" title="Режим рисования связей персонажей (или Shift+тянуть)">✎ Связать</button><span class="faint" style="font-size:12px;padding:0 4px">шаблон:</span><div class="chips" id="tplBar"></div></div>
-      <div class="group"><button class="btn sm" id="layoutBtn">⟲ Разложить</button><button class="btn sm" id="lblBtn" title="Показывать подписи на связях (скрытые видны при наведении и у выбранного)">🏷 Подписи</button><button class="btn sm" id="fitBtn">⛶ Вписать</button></div>
+      <div class="group"><button class="btn sm" id="relF">🔗 Связи</button><button class="btn sm" id="layoutBtn">⟲ Разложить</button><button class="btn sm" id="lblBtn" title="Показывать подписи на связях (скрытые видны при наведении и у выбранного)">🏷 Подписи</button><button class="btn sm" id="fitBtn">⛶ Вписать</button></div>
     </div>
     <div id="ginfo"></div><div id="glegend" class="glegend"></div>
     <div id="ghint">Все сущности и все известные связи. Тяни узлы · <b>Shift+тянуть</b> — связь персонажей · клик по подписи — изменить</div>
@@ -3789,7 +3826,10 @@ function renderOverview(m){
   const visRels=()=>V.rels().filter(r=>G.others||r.owner===effUid()||r.shared||r.hidden);
   const nodes=()=>{ let arr=[]; if(G.show.c) arr.push(...V.chars().map(e=>({e,t:'c'}))); if(G.show.o) arr.push(...V.orgs().map(e=>({e,t:'o'}))); if(G.show.l) arr.push(...V.locs().map(e=>({e,t:'l'})));
     if(G.org){ const mem=new Set(V.mems().filter(x=>x.orgId===G.org).map(x=>x.charId)); const locs=new Set(V.locLinks().filter(x=>x.entityId===G.org||mem.has(x.entityId)).map(x=>x.locId)); arr=arr.filter(n=>n.e.id===G.org||mem.has(n.e.id)||locs.has(n.e.id)); } return arr; };
-  const edges=()=>[...V.mems().map(x=>({a:x.charId,b:x.orgId,color:'#4fd0ff',label:x.role||'',dash:true,hid:x.revealed===false,ref:{kind:'mem',obj:x}})),...V.locLinks().map(x=>({a:x.entityId,b:x.locId,color:'#8ef7c1',label:x.note||'',dash:true,hid:x.revealed===false,ref:{kind:'loc',obj:x}})),...visRels().map(r=>({a:r.from,b:r.to,color:r.color||'#e9c2ff',label:(r.shared||r.hidden?'':'☾ ')+(r.label||''),directed:r.directed,both:!!r.both,priv:!r.shared&&!r.hidden,hid:!!r.hidden,ref:{kind:'rel',obj:r}}))];
+  const rfGet=()=>{ try{ return rfNorm(JSON.parse(localStorage.getItem('relF.__all__')||'null')); }catch{ return rfNorm(); } };
+  const rfSet=f=>{ try{ localStorage.setItem('relF.__all__',JSON.stringify(f)); }catch{} eng.draw(); };
+  const edges=()=>{ const f=rfGet(); return allEdges().filter(e=>rfPass(f,e)); };
+  const allEdges=()=>[...V.mems().map(x=>({a:x.charId,b:x.orgId,color:'#4fd0ff',label:x.role||'',dash:true,hid:x.revealed===false,ref:{kind:'mem',obj:x}})),...V.locLinks().map(x=>({a:x.entityId,b:x.locId,color:'#8ef7c1',label:x.note||'',dash:true,hid:x.revealed===false,ref:{kind:'loc',obj:x}})),...visRels().map(r=>({a:r.from,b:r.to,color:r.color||'#e9c2ff',label:(r.shared||r.hidden?'':'☾ ')+(r.label||''),directed:r.directed,both:!!r.both,priv:!r.shared&&!r.hidden,hid:!!r.hidden,ref:{kind:'rel',obj:r}}))];
   const eng=graphEngine(wrap,cv,{ camKey:'__all__', emptyText:'Нет сущностей для отображения', nodes, edges, pos:posOf,
     setPos:viewAs?null:(e,p,live)=>{ e.pos=p; if(!live) touch(e); },
     onLink:viewAs?null:(from,to)=>{ const t=G.tpl?byId(world.settings.relTemplates,G.tpl):null; const ta=typeOf(from), tb=typeOf(to);
@@ -3800,6 +3840,7 @@ function renderOverview(m){
   tplBar($('#tplBar',page));
   $('#layoutBtn',page).onclick=()=>{ eng.layout(true); eng.fit(); };
   $('#fitBtn',page).onclick=()=>eng.fit(); lblToggle($('#lblBtn',page),eng); relLegend($('#glegend',page));
+  rfButton($('#relF',page),{get:rfGet,set:rfSet,all:allEdges,kinds:['rel','mem','loc']});
   if(G.sel&&!findEntity(G.sel)) G.sel=null;
   const cam=G.cams['__all__']; if(!cam.fitted){ cam.fitted=true; eng.fit(); } else eng.draw();
 }
