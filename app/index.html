@@ -285,6 +285,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .gstop{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px}.gstop input{width:260px;max-width:100%}
 .gsgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px;padding:4px 12px 12px;align-items:start}
 .gsgrid>.panel{margin:0;background:rgba(0,0,0,.18)}.gsgrid>.panel.gshid{display:none}
+.gsmatch{box-shadow:0 0 0 2px var(--gold);border-radius:6px;background:rgba(255,209,102,.08)}
 .rusec>summary .sub{font-weight:400;font-size:11.5px;color:var(--faint);letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 @media (max-width:700px){.gsgrid{grid-template-columns:1fr}}
 .runav a{font-size:11.5px;padding:3px 10px;border-radius:99px;border:1px solid color-mix(in srgb,var(--sc) 55%,transparent);color:var(--sc);background:color-mix(in srgb,var(--sc) 10%,transparent);text-decoration:none;cursor:pointer}
@@ -6246,7 +6247,16 @@ function genSettingsBeautify(page){ const box=$('.settings[data-tab="main"]',pag
     const g=el('<div class="gsgrid"></div>'); list.forEach(p=>g.append(p)); det.append(g); det.ontoggle=save; wrap.append(det);
     const a=el(`<a style="--sc:${col}">${ic} ${esc(title)}</a>`); a.onclick=()=>{ det.open=true; save(); det.scrollIntoView({behavior:'smooth',block:'start'}); }; nav.append(a); }
   const top=el('<div class="gstop"><input id="gsQ" type="search" placeholder="🔍 Поиск по настройкам…"><button class="btn sm" data-a="open">развернуть всё</button><button class="btn sm" data-a="close">свернуть всё</button></div>');
-  const q=$('#gsQ',top); q.oninput=()=>{ const t=q.value.trim().toLowerCase(); for(const d of wrap.querySelectorAll('details.rusec')){ let any=false; for(const p of d.querySelectorAll('.gsgrid>.panel')){ const hit=!t||p.textContent.toLowerCase().includes(t); p.classList.toggle('gshid',!hit); any=any||hit; } d.style.display=any?'':'none'; if(t&&any) d.open=true; } };
+  /* поиск: каждое слово ищется отдельно и без окончания («размер токена» находит «Размер нового токена», «токены»); учитываются подсказки (title) и заглушки полей. Найденные строки внутри блока подсвечиваются */
+  const norm=x=>String(x||'').toLowerCase().replace(/ё/g,'е');
+  const stems=t=>norm(t).split(/[^a-zа-я0-9]+/i).filter(Boolean).map(w=>w.length>=6?w.slice(0,w.length-2):w.length===5?w.slice(0,4):w);
+  const textOf=e=>norm(e.textContent+' '+[...e.querySelectorAll('[title],[placeholder]')].concat(e.title||e.placeholder?[e]:[]).map(x=>(x.title||'')+' '+(x.placeholder||'')).join(' '));
+  const has=(txt,st)=>st.every(w=>txt.includes(w));
+  const q=$('#gsQ',top); q.oninput=()=>{ const st=stems(q.value); wrap.querySelectorAll('.gsmatch').forEach(x=>x.classList.remove('gsmatch')); let first=null;
+    for(const d of wrap.querySelectorAll('details.rusec')){ let any=false; for(const p of d.querySelectorAll('.gsgrid>.panel')){ const hit=!st.length||has(textOf(p),st); p.classList.toggle('gshid',!hit); any=any||hit;
+        if(hit&&st.length){ const cands=[...p.querySelectorAll('label,.row,.field,.srow,h3,.tiny')].filter(x=>has(textOf(x),st)); for(const c of cands) if(!cands.some(o=>o!==c&&c.contains(o))){ c.classList.add('gsmatch'); first??=c; } } }
+      d.style.display=any?'':'none'; if(st.length&&any) d.open=true; }
+    if(first) first.scrollIntoView({block:'nearest',behavior:'smooth'}); };
   $$('[data-a]',top).forEach(b=>b.onclick=()=>{ const o=b.dataset.a==='open'; wrap.querySelectorAll('details.rusec').forEach(d=>d.open=o); save(); });
   box.innerHTML=''; box.append(top,nav,wrap); }
 /* вкладка настроек: при каждом входе — «Руина», если она включена, иначе «Общие»; пока страница открыта — выбранная */
