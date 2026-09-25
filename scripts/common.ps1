@@ -61,8 +61,13 @@ function Build-Site($cfg) {
 function Deploy-Site($cfg) {
   Push-Location $SiteDir
   try { $ok = FB deploy --only 'hosting,firestore:rules,database' --project $cfg.projectId --non-interactive } finally { Pop-Location }
+  if ($ok) { $v = App-Version; if ($v) { [IO.File]::WriteAllText((Join-Path $SiteDir 'DEPLOYED.txt'), $v, (New-Object System.Text.UTF8Encoding($false))) } }
   return $ok
 }
+
+# версия шаблона в папке app и версия, которая реально выложена на сайт (siteDEPLOYED.txt пишется только после успешной выкладки)
+function App-Version { $f = Join-Path $AppDir 'VERSION.txt'; if (Test-Path $f) { (Get-Content $f -Raw -Encoding UTF8).Trim() } else { '' } }
+function Deployed-Version { $f = Join-Path $SiteDir 'DEPLOYED.txt'; if (Test-Path $f) { (Get-Content $f -Raw -Encoding UTF8).Trim() } else { '' } }
 
 # ===== обновление с GitHub и бэкап данных =====
 $Repo      = 'Zlodemon/kartoteka'                               # владелец/репозиторий на GitHub, откуда берутся обновления
