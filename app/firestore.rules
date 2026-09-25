@@ -32,8 +32,10 @@ service cloud.firestore {
     // игрок может править персонажа, если закреплён за ним
     function playsChar(id) { return isPlayer() && uid() in charDoc(id).players; }
     function ownsDoc(coll, id) { return isPlayer() && ownerOf(coll, id) == uid(); }
+    // редактор — игрок из списка editors (выдаёт мастер): правит, но не удаляет и не меняет видимость/права
+    function editsDoc(coll, id) { return isPlayer() && uid() in get(/databases/$(database)/documents/$(coll)/$(id)).data.get('editors', []); }
     function canEditEntity(type, id) {
-      return isDM() || (type == 'c' && playsChar(id)) || (type == 'o' && ownsDoc('orgs', id)) || (type == 'l' && ownsDoc('locations', id));
+      return isDM() || (type == 'c' && (playsChar(id) || editsDoc('characters', id))) || (type == 'o' && (ownsDoc('orgs', id) || editsDoc('orgs', id))) || (type == 'l' && (ownsDoc('locations', id) || editsDoc('locations', id)));
     }
 
     // ===== участники
@@ -56,15 +58,17 @@ service cloud.firestore {
     // visFor — своё правило видимости для отдельных игроков, visUids — кому из них можно читать (видна/кратко)
     // видимость меняет только дм (у игрока нет такого переключателя в интерфейсе)
     function sameVisibility() { return request.resource.data.get('visibility', 'full') == resource.data.get('visibility', 'full')
-      && request.resource.data.get('visFor', {}) == resource.data.get('visFor', {}) && request.resource.data.get('visUids', []) == resource.data.get('visUids', []); }
+      && request.resource.data.get('visFor', {}) == resource.data.get('visFor', {}) && request.resource.data.get('visUids', []) == resource.data.get('visUids', [])
+      && request.resource.data.get('editors', []) == resource.data.get('editors', []); }
+    function isEditor() { return isPlayer() && uid() in resource.data.get('editors', []); }
     // зафиксированную предысторию игрок персонажа может сам вернуть в работу (с 2026-09-24)
     match /characters/{id} {
-      allow read: if isDM() || (signedIn() && (visibleToAll() || uid() in resource.data.players));
+      allow read: if isDM() || (signedIn() && (visibleToAll() || uid() in resource.data.players || uid() in resource.data.get('editors', [])));
       // игрок создаёт персонажа только на себя (owner и единственный игрок = он), видимым всем; удаляет только созданного им
       allow create: if isDM() || (isPlayer() && can('plCharNew') && request.resource.data.owner == uid()
         && request.resource.data.players == [uid()] && request.resource.data.get('visibility', 'full') == 'full');
       allow delete: if isDM() || (isPlayer() && resource.data.get('owner', '') == uid());
-      allow update: if isDM() || (playsChar(id)
+      allow update: if isDM() || ((playsChar(id) || isEditor())
         && request.resource.data.players == resource.data.players
         && request.resource.data.owner == resource.data.owner
         && sameVisibility())
@@ -74,15 +78,15 @@ service cloud.firestore {
 
     // ===== организации и локации: создаёт дм или игрок (owner = он сам), правит дм или автор
     match /orgs/{id} {
-      allow read: if isDM() || (signedIn() && (visibleToAll() || resource.data.owner == uid()));
+      allow read: if isDM() || (signedIn() && (visibleToAll() || resource.data.owner == uid() || uid() in resource.data.get('editors', [])));
       allow create: if isDM() || (isPlayer() && request.resource.data.owner == uid());
-      allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid() && sameVisibility());
+      allow update: if isDM() || (isPlayer() && (resource.data.owner == uid() || isEditor()) && request.resource.data.owner == resource.data.owner && sameVisibility());
       allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
     }
     match /locations/{id} {
-      allow read: if isDM() || (signedIn() && (visibleToAll() || resource.data.owner == uid()));
+      allow read: if isDM() || (signedIn() && (visibleToAll() || resource.data.owner == uid() || uid() in resource.data.get('editors', [])));
       allow create: if isDM() || (isPlayer() && request.resource.data.owner == uid());
-      allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid() && sameVisibility());
+      allow update: if isDM() || (isPlayer() && (resource.data.owner == uid() || isEditor()) && request.resource.data.owner == resource.data.owner && sameVisibility());
       allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
     }
 
