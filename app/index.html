@@ -1485,7 +1485,7 @@ const SECTIONS=[['orgs','Организации'],['locations','Локации']
 function sectionOn(v){ if(isDM()) return true; const S=world.settings&&world.settings.sections; return !S||S[v]!==false; }
 /* свои скрытые разделы (Настройки → «Моё меню»): users.navHide {view:true}; «Настройки» не прячутся */
 const myNavHide=()=>(realDM()&&!viewAs&&me&&(byId(world.users,me.uid)||{}).navHide)||{};
-function applyNav(){ document.body.classList.toggle('noAbDone',!!(world.settings&&world.settings.noAbDone)); const H=myNavHide(); $$('.nav[data-view]').forEach(n=>{ const v=n.dataset.view; if(H[v]&&v!=='settings'){ n.style.display='none'; return; } if(n.classList.contains('dmonly')){ n.style.display=''; return; } n.style.display=sectionOn(v)?'':'none'; }); }
+function applyNav(){ document.body.classList.toggle('noAbDone',!!(world.settings&&world.settings.noAbDone)); const H=myNavHide(); $$('.nav[data-view]').forEach(n=>{ const v=n.dataset.view; if(H[v]&&v!=='settings'){ n.style.display='none'; return; } if(n.classList.contains('dmonly')){ n.style.display=(isDM()&&(!n.classList.contains('ruonly')||ruOn()))?'':'none'; return; } n.style.display=sectionOn(v)?'':'none'; }); }
 /* ошибка при отрисовке страницы — показать, а не пустой экран */
 window.addEventListener('error',e=>{ try{ if(document.body&&!document.body.dataset.errShown){ document.body.dataset.errShown='1'; setTimeout(()=>{ delete document.body.dataset.errShown; },3000); toast('Ошибка: '+(e.message||'?')+' (строка '+(e.lineno||'?')+')',true); } }catch{} });
 function go(view,id=null,opts={}){ if(!opts.back&&(state.view!==view||state.id!==id)){ navStack.push({view:state.view,id:state.id}); if(navStack.length>50) navStack.shift(); } state.view=view; state.id=id; state.q=''; render(); $('#main').scrollTop=0; }
