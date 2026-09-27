@@ -98,7 +98,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .head h1{font-size:26px;letter-spacing:1px}
 .head .search{min-width:260px}
 @media (max-width:1150px){.detail,.detail.loc{grid-template-columns:minmax(0,1fr)}.settings{grid-template-columns:1fr}}
-@media (max-width:900px){#app{grid-template-columns:64px 1fr}#side .logo,#side .nav .t,#side .nav .n,#side .foot,#side .me .grow,#side .me .out{display:none}.nav{justify-content:center}.me{justify-content:center;padding:6px}}
+@media (max-width:900px){body:not(.phone) #app{grid-template-columns:64px 1fr}body:not(.phone) #side :is(.logo,.nav .t,.nav .n,.foot,.me .grow,.me .out){display:none}body:not(.phone) .nav{justify-content:center}body:not(.phone) .me{justify-content:center;padding:6px}}
 
 /* ===== карточки ===== */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
@@ -588,7 +588,7 @@ input.bexpr{font-variant-numeric:tabular-nums}.barrow .vals input.cur{width:60px
 .dtabs button{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:8px 4px 7px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}.dtabs button:hover{color:var(--text,#fff)}.dtabs button.on{color:var(--text,#fff);border-bottom-color:var(--gold)}.dtabs .dx{flex:none;width:30px;font-weight:400}
 #chat .dpane{display:none;flex:1 1 auto;min-height:0;flex-direction:column;overflow:hidden}
 #chat.dk-me .dpane,#chat.dk-fight .dpane{display:flex}
-#chat.dk-me>:not(.dtabs):not(.dpane):not(.rz),#chat.dk-fight>:not(.dtabs):not(.dpane):not(.rz){display:none!important}
+#chat.dk-me>:not(.dtabs):not(.dpane):not(.rz):not(.sgrip),#chat.dk-fight>:not(.dtabs):not(.dpane):not(.rz):not(.sgrip){display:none!important}
 #chat .dpane>#wmme,#chat .dpane>#wminit{display:none!important;position:static!important;left:auto!important;top:auto!important;width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;flex:1 1 auto;min-height:0;margin:0;border:none!important;border-radius:0!important;background:none!important;box-shadow:none!important;backdrop-filter:none}
 #chat.dk-me .dpane>#wmme,#chat.dk-fight .dpane>#wminit{display:flex!important;flex-direction:column}
 #chat.dk-fight .dpane>#wminit{overflow:auto}
@@ -854,7 +854,7 @@ code{font-family:Consolas,monospace;font-size:12.5px;background:rgba(255,255,255
 .gsbtn{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;cursor:pointer;color:var(--muted);border:1px solid var(--line);background:rgba(255,255,255,.02);margin-bottom:6px;font-size:13px}
 .gsbtn:hover{color:var(--text);background:var(--panel)}
 .gsbtn kbd{margin-left:auto;font-size:10.5px;color:var(--faint);border:1px solid var(--line2);border-radius:5px;padding:0 5px;font-family:inherit}
-@media (max-width:900px){#side .gsbtn .t,#side .gsbtn kbd{display:none}#side .gsbtn{justify-content:center;padding:8px 0}}
+@media (max-width:900px){body:not(.phone) #side :is(.gsbtn .t,.gsbtn kbd){display:none}body:not(.phone) #side .gsbtn{justify-content:center;padding:8px 0}}
 .hlpbtn{margin-top:-2px}
 .hlptabs{display:flex;gap:4px;margin:-6px 0 12px;flex-wrap:wrap}
 .hlptabs .btn.on{background:var(--panel2);border-color:var(--line2);color:var(--text)}
@@ -906,7 +906,7 @@ body.railmenu.onmap:not(.nomenu) #side .hlpbtn :is(.t,kbd){display:none}
 @media (max-width:700px){.lrow .chips,.lrow .letters{display:none}}
 .nav{position:relative}
 .nav .ic{display:none;width:22px;text-align:center;font-size:16px;line-height:1}
-@media (max-width:900px){ .nav .ic{display:block} .nav .dot{display:none} .nav{padding:9px 0} #side{padding:14px 8px} #side .nav .n.alert{display:block;position:absolute;top:2px;right:4px;font-size:9.5px;padding:0 5px;margin:0} }
+@media (max-width:900px){ .nav .ic{display:block} .nav .dot{display:none} body:not(.phone) .nav{padding:9px 0} body:not(.phone) #side{padding:14px 8px} body:not(.phone) #side .nav .n.alert{display:block;position:absolute;top:2px;right:4px;font-size:9.5px;padding:0 5px;margin:0} }
 body.railmenu.onmap:not(.nomenu) #app{grid-template-columns:64px 1fr}
 body.railmenu.onmap:not(.nomenu) #side{padding:14px 8px}
 body.railmenu.onmap:not(.nomenu) #side :is(.logo,.nav .t,.nav .n,.foot,.me .grow,.me .out,.gsbtn .t,.gsbtn kbd){display:none}
@@ -990,6 +990,82 @@ body.onmap.wmBarOn #musBar{bottom:calc(var(--barh,60px) + 26px)}
 .card.map .pres .on{color:var(--mint)}
 .card.map .pres .tok{color:var(--orange)}
 #wmme .mehd .meact{flex:none;padding:3px 8px;font-size:11.5px;white-space:nowrap}
+
+/* ===== Телефон (body.phone: ширина ≤700 px или телефон боком): нижняя панель вместо меню слева, меню — выдвижная шторка,
+   чат и панели карты — шторка снизу поверх карты ===== */
+.sgrip,#pnav,#pscrim{display:none}
+body.phone{--pnavh:calc(56px + env(safe-area-inset-bottom,0px))}
+body.phone #app{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:calc(100vh - var(--pnavh));grid-template-rows:calc(100dvh - var(--pnavh))}
+body.phone #pnav{position:fixed;left:0;right:0;bottom:0;height:var(--pnavh);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;display:flex;z-index:45;background:rgba(9,11,18,.97);backdrop-filter:blur(10px);border-top:1px solid var(--line2)}
+#pnav button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:0;color:var(--muted);font:600 10.5px/1.1 inherit;position:relative;padding:4px 2px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#pnav button i{font-style:normal;font-size:20px;line-height:1;height:22px;display:flex;align-items:center}
+#pnav button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#pnav button.on{color:var(--gold)}
+#pnav button.on::before{content:'';position:absolute;top:0;left:22%;right:22%;height:2px;border-radius:0 0 2px 2px;background:var(--gold)}
+#pnav button:disabled{opacity:.35}
+#pnav .n{position:absolute;top:3px;left:calc(50% + 7px);min-width:16px;height:16px;border-radius:8px;background:var(--orange);color:#111;font-size:10px;font-weight:800;line-height:16px;padding:0 4px;box-sizing:border-box}
+#pnav .n:empty{display:none}
+/* меню — шторка слева */
+body.phone #side{position:fixed;left:0;top:0;bottom:0;width:min(290px,86vw);z-index:47;transform:translateX(-102%);transition:transform .2s ease;background:#0b0e17;overflow-y:auto;padding:14px 12px calc(14px + env(safe-area-inset-bottom,0px));border-right:1px solid var(--line2);visibility:hidden}
+body.phone.pdrawer #side{transform:none;visibility:visible;box-shadow:12px 0 40px rgba(0,0,0,.55)}
+body.phone.pdrawer #pscrim{display:block;position:fixed;inset:0;z-index:46;background:rgba(0,0,0,.55)}
+body.phone #side .nav{padding:11px 10px;font-size:14.5px;gap:12px}
+body.phone #side .nav .ic{font-size:17px}
+body.phone #side .gsbtn{padding:10px}
+body.phone #side .gsbtn kbd{display:none}
+body.phone .page{padding-bottom:28px}
+/* чат: на страницах — во весь экран над нижней панелью, на карте — шторка снизу (ручка: тап — выше/ниже, тянуть — размер) */
+body.phone #chatBtn{display:none!important}
+body.phone #chat{left:0;right:0;width:auto;max-width:none;top:0!important;bottom:var(--pnavh)!important;border:0;border-radius:0;z-index:40;box-shadow:none}
+body.phone #chat .rz{display:none}
+body.phone.onmap #chat{top:auto!important;height:var(--sheeth,56vh);max-height:calc(100% - var(--pnavh) - 8px);border-top:1px solid var(--line2);border-radius:16px 16px 0 0;box-shadow:0 -14px 40px rgba(0,0,0,.55);transition:none}
+body.phone.onmap.sheetFull #chat{height:calc(100% - var(--pnavh) - 8px)}
+body.phone.onmap #chat .sgrip{display:flex;justify-content:center;align-items:center;height:18px;flex:none;touch-action:none;cursor:grab}
+body.phone.onmap #chat .sgrip i{width:42px;height:5px;border-radius:3px;background:rgba(255,255,255,.28)}
+body.phone.onmap #chat .dtabs{padding-top:0}
+body.phone.onmap #chat .dtabs button{font-size:13.5px;padding:9px 4px 9px}
+body.phone #chat .hd{padding:8px 10px}
+body.phone #chat .in input,body.phone #chat .in select,body.phone #chat .in button{font-size:16px}
+body.phone #chat .hd .faint{display:none}
+/* карта */
+body.phone .wmtb{top:6px;left:6px;right:6px}
+body.phone .wmtb .tab{padding:8px 10px}
+body.phone .wmtb .tab i{font-size:16px}
+body.phone .wmtb .tab span{display:none}
+body.phone .wmtb .mname{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.phone #menuBtn,body.phone #dockBtn{display:none}
+body.phone .wmtb .dd{max-width:calc(100vw - 12px)}
+body.phone #wmright{top:62px;right:6px}
+body.phone.chat-open.onmap #wmright,body.phone.chat-open.onmap #ginfo.wminfo{right:6px}
+body.phone .wmzoom{right:8px;bottom:12px}
+body.phone .wmzoom [data-z="in"],body.phone .wmzoom [data-z="out"]{display:none}
+body.phone .wmwrap.barOn .wmzoom{bottom:calc(var(--barh,60px) + 20px)}
+body.phone.chat-open.onmap .wmzoom{right:8px}
+body.phone #wmbarwrap{left:6px;right:6px;bottom:6px}
+body.phone #wmbar{width:100%;box-sizing:border-box;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"who acts" "mid mid";gap:4px 8px;padding:6px 8px}
+body.phone #wmbar .who{grid-area:who;border-right:0;max-width:none;padding-right:0;justify-self:start}
+body.phone #wmbar .who .nm{max-width:none}
+body.phone #wmbar .acts{grid-area:acts;border-left:0;padding-left:0;overflow-x:auto;scrollbar-width:none;max-width:62vw}
+body.phone #wmbar .acts .btn.sm.icon{padding:7px 9px;font-size:15px}
+body.phone #wmbar select.visSel{max-width:84px}
+body.phone #wmbar .mid{grid-area:mid;border-top:1px solid var(--line);padding-top:5px;height:44px}
+body.phone #wmbar .pop{max-width:calc(100vw - 12px);box-sizing:border-box}
+body.phone #wmbar .pop .skl{min-width:0}
+body.phone #ginfo{left:6px;right:6px;width:auto;bottom:6px;max-height:55%;overflow:auto;box-sizing:border-box}
+body.phone #ghint{left:8px;right:56px;bottom:10px;font-size:11.5px}
+body.phone .wmwrap.barOn #ghint,body.phone #ginfo.on~#ghint,body.phone.chat-open.onmap #ghint{display:none}
+@media (max-height:540px){body.phone{--pnavh:calc(46px + env(safe-area-inset-bottom,0px))}body.phone #ghint{display:none}#pnav button{flex-direction:row;gap:6px;font-size:12px}}
+body.phone .istrip{top:58px;max-width:calc(100% - 12px)}
+body.phone #wmleft{left:6px;top:62px;bottom:6px}
+/* всплывашки — над нижней панелью */
+body.phone .toast{bottom:calc(var(--pnavh) + 14px);max-width:calc(100vw - 32px)}
+body.phone #syncChip{bottom:calc(var(--pnavh) + 10px)}
+body.phone #hlpNudge{bottom:calc(var(--pnavh) + 12px);max-width:calc(100vw - 24px);box-sizing:border-box}
+body.phone #musBar{right:10px;bottom:calc(var(--pnavh) + 10px)}
+body.phone.onmap #musBar{bottom:calc(var(--pnavh) + 64px)}
+body.phone.chat-open #musBar{display:none}
+body.phone #modal{padding:10px}
+body.phone #modal .box{max-height:calc(100dvh - 20px)}
 </style>
 </head>
 <body>
@@ -1035,7 +1111,7 @@ body.onmap.wmBarOn #musBar{bottom:calc(var(--barh,60px) + 26px)}
 <div id="handtip"></div>
 <div id="techdrawer"><div id="techdbody"></div></div>
 <div class="toast" id="toast"></div><div id="syncChip" role="status"></div><div id="wmdrag"></div><div id="wmtip"></div>
-<button id="chatBtn" title="Чат и кубики" style="display:none">💬<span class="n"></span></button>
+<nav id="pnav"></nav><div id="pscrim"></div><button id="chatBtn" title="Чат и кубики" style="display:none">💬<span class="n"></span></button>
 <div id="chat"><div class="rz" title="Потяни — изменить ширину чата; двойной клик — сбросить"></div><div class="hd"><b>Чат</b><span class="faint" style="font-size:11px">/roll 2d6+1 · /gm d20</span><span class="grow"></span><button class="btn sm icon" id="chatDice" title="Показать / спрятать панель кубиков">🎲</button><button class="btn sm icon" id="chatHelp" title="Справка по командам">?</button><button class="btn sm icon dmonly" id="chatClear" title="Удалить всю загруженную историю">🗑</button><button class="btn sm icon" id="chatClose" title="Свернуть">✕</button></div><div class="more"><button class="btn sm" id="chatMore" title="Загрузить более ранние сообщения">↑ раньше…</button></div><div class="msgs"></div><div class="dice-row"><span class="faint" style="font-size:11px">🎲</span><button class="btn sm" data-d="4">d4</button><button class="btn sm" data-d="6">d6</button><button class="btn sm" data-d="8">d8</button><button class="btn sm" data-d="10">d10</button><button class="btn sm" data-d="12">d12</button><button class="btn sm" data-d="20">d20</button><button class="btn sm" data-d="100">d100</button><input id="diceN" type="number" min="1" max="20" value="1" title="сколько кубиков"><input id="diceMod" placeholder="+0" title="модификатор, например +3"><select id="diceStat" title="Прибавить характеристику персонажа, от чьего лица пишешь" style="display:none;max-width:120px;font-size:11px;padding:2px 18px 2px 6px"><option value="">+ хар-ка</option></select><label style="display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted)" title="Бросок увидит только мастер"><input type="checkbox" id="diceGM"> GM</label></div><form class="in"><select id="chatAs" title="От чьего лица писать"><option value="">я</option></select><input type="color" id="chatCol" title="Цвет ника (закрепляется за персонажем или за тобой)" style="width:26px;height:30px;padding:0;border:none;background:none;flex:none"><input id="chatText" placeholder="Сообщение или /roll d20" autocomplete="off" maxlength="600"><button class="btn sm primary" type="submit">➤</button></form></div>
 <input type="file" id="fileIn" accept="image/*" multiple hidden>
 <input type="file" id="jsonIn" accept="application/json,.json" hidden>
@@ -1312,7 +1388,7 @@ AUTH.onChange(async u=>{
   bootEnd(false); $('#app').style.display='grid';
   subscribeAll();
   if(localStorage.getItem('nomenu')) document.body.classList.add('nomenu');
-  routeInit(); renderMe(); render(); chatInit(); setTimeout(helpNudge,2500);
+  routeInit(); renderMe(); phoneInit(); render(); chatInit(); pnavRender(); setTimeout(helpNudge,2500);
 });
 function subscribeAll(){
   const sub=(coll,key,opts,post)=>unsubs.push(DB.subscribe(coll,opts,docs=>{ applyDocs(key,coll,docs,post); }));
@@ -1796,6 +1872,14 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-09-27',t:'Картотека на телефоне',items:[
+    'Внизу экрана — панель: Персонажи, Карты, Поиск, Чат, Меню. Полное меню выезжает шторкой слева, полоска значков больше не отнимает место.',
+    'На карте панель внизу — «Мой», «Бой», «Чат», «Меню». Они открываются шторкой снизу, карта остаётся видна сверху. Потяни за ручку — выше или ниже, тап по ручке — на весь экран, вниз до конца — закрыть.',
+    'Чат сам не открывается при входе на карту и не вызывает клавиатуру.',
+    'Карта открывается на твоих токенах (у мастера — на тех, кто в бою, или на всех), а не целиком с токенами по три пикселя. «⛶» — вся карта.',
+    'По токену легче попасть пальцем: тап рядом тоже выбирает ближайший токен.',
+    'Полоска выбранного токена — в две строки и больше не вылезает за край экрана.',
+  ]},
   {d:'2026-09-27',t:'Организации на карточках',items:[
     'Длинное название организации на карточке персонажа больше не вылезает за край — переносится внутри своей плашки.',
     'Много организаций больше не растягивают карточку: не больше двух строк (в виде «список» — одна), остальные сворачиваются в «+N». Наведи на «+N» — увидишь названия, нажми — откроется лист на вкладке «Связи».'
@@ -1864,18 +1948,50 @@ document.addEventListener('keydown',e=>{ if(e.key!=='?'||e.ctrlKey||e.metaKey||e
 function menuMode(){ return document.body.classList.contains('nomenu')?'none':document.body.classList.contains('railmenu')?'rail':'full'; }
 function menuTitle(){ return {rail:'Меню слева — полоска значков. Клик — спрятать совсем',none:'Меню слева спрятано. Клик — показать полностью',full:'Меню слева полностью. Клик — свернуть в полоску значков'}[menuMode()]; }
 function menuApply(mode){ document.body.classList.toggle('nomenu',mode==='none'); document.body.classList.toggle('railmenu',mode==='rail'); }
-function menuOnMap(){ let m=null; try{ m=localStorage.getItem('wm.menu'); if(!m) m=localStorage.getItem('nomenu')?'none':(innerWidth<900?'none':'rail'); }catch{ m='rail'; } menuApply(m); }
+function menuOnMap(){ if(PHONE()){ menuApply('full'); return; } let m=null; try{ m=localStorage.getItem('wm.menu'); if(!m) m=localStorage.getItem('nomenu')?'none':(innerWidth<900?'none':'rail'); }catch{ m='rail'; } menuApply(m); }
 /* В3: устройство с пальцем вместо мыши — подсказки про жесты, а не про колесо и Alt */
 const TOUCH_UI=matchMedia('(pointer:coarse)').matches&&!matchMedia('(hover:hover)').matches;
+/* телефон: экран ≤700 px или телефон боком — нижняя панель вместо меню слева, меню — шторка, на карте чат/«Мой»/бой — шторка снизу поверх карты */
+const PHONE_MQ=matchMedia('(max-width:700px), (pointer:coarse) and (max-height:540px)');
+const PHONE=()=>PHONE_MQ.matches;
+function drawerOpen(v){ document.body.classList.toggle('pdrawer',!!v); }
+function pnavRender(){ const nav=$('#pnav'); if(!nav) return; if(!PHONE()||!me||!world.settings){ nav.innerHTML=''; return; }
+  const chatOk=$('#chatBtn').style.display!=='none', onMap=state.view==='wmap'&&!!state.id, unread=$('#chatBtn .n')?.textContent||'', menuOn=document.body.classList.contains('pdrawer');
+  const B=(k,ic,t,on,dis,n)=>`<button type="button" data-k="${k}" class="${on?'on':''}" ${dis?'disabled':''}><i>${ic}</i><span>${t}</span>${n!=null?`<b class="n">${n}</b>`:''}</button>`;
+  const dk=k=>CHAT.open&&WM.dockTab===k, has=k=>!!(WM.pAct&&WM.pAct.has(k));
+  nav.innerHTML=onMap
+    ? B('me','👤','Мой',dk('me'),!has('me'))+B('fight','⚔','Бой',dk('fight'),!has('fight'))+(chatOk?B('chat','💬','Чат',dk('chat'),false,unread):'')+B('menu','☰','Меню',menuOn)
+    : (sectionOn('characters')?B('characters','👤','Персонажи',!menuOn&&!CHAT.open&&state.view==='characters'):'')+(sectionOn('wmap')?B('wmap','🗺','Карты',!menuOn&&!CHAT.open&&state.view==='wmap'):'')+B('search','🔍','Поиск')+(chatOk?B('chat','💬','Чат',CHAT.open,false,unread):'')+B('menu','☰','Меню',menuOn); }
+function phoneApply(){ const on=PHONE(), was=document.body.classList.contains('phone'); document.body.classList.toggle('phone',on); if(!on) document.body.classList.remove('pdrawer','sheetFull'); if(was!==on&&me&&world.settings&&!RENDER_DEPTH) render(); else pnavRender(); }
+function phoneInit(){ document.body.classList.toggle('phone',PHONE()); try{ PHONE_MQ.addEventListener('change',phoneApply); }catch{ PHONE_MQ.addListener&&PHONE_MQ.addListener(phoneApply); }
+  $('#pnav').onclick=e=>{ const b=e.target.closest('button[data-k]'); if(!b||b.disabled) return; const k=b.dataset.k, onMap=state.view==='wmap'&&!!state.id;
+    if(k==='menu'){ drawerOpen(!document.body.classList.contains('pdrawer')); pnavRender(); return; }
+    drawerOpen(false);
+    if(onMap&&(k==='me'||k==='fight'||k==='chat')){ if(CHAT.open&&WM.dockTab===k) chatOpen(false); else if(WM.pAct) WM.pAct.tab(k); pnavRender(); return; }
+    if(k==='chat'){ chatOpen(!CHAT.open); return; }
+    if(CHAT.open) chatOpen(false);
+    if(k==='search'){ pnavRender(); gsOpen(); return; }
+    go(k); };
+  $('#pscrim').onclick=()=>{ drawerOpen(false); pnavRender(); };
+  $('#side').addEventListener('click',e=>{ if(!PHONE()||!e.target.closest('.nav,.gsbtn')) return; drawerOpen(false); if(CHAT.open) chatOpen(false); pnavRender(); });
+  addEventListener('keydown',e=>{ if(e.key==='Escape'&&document.body.classList.contains('pdrawer')){ drawerOpen(false); pnavRender(); } });
+  /* ручка шторки: тап — развернуть на весь экран / вернуть, тянуть — любая высота, вниз до конца — закрыть */
+  const ch=$('#chat'), g=el('<div class="sgrip" title="Тап — развернуть или вернуть · потяни — выше или ниже"><i></i></div>'); ch.prepend(g); let d=null; const R=document.documentElement;
+  g.onpointerdown=e=>{ e.preventDefault(); try{ g.setPointerCapture(e.pointerId); }catch{} d={y:e.clientY,h:ch.offsetHeight,moved:false}; };
+  g.onpointermove=e=>{ if(!d) return; const dy=e.clientY-d.y; if(Math.abs(dy)>6) d.moved=true; if(!d.moved) return; const max=innerHeight-($('#pnav').offsetHeight||56)-8; document.body.classList.remove('sheetFull'); R.style.setProperty('--sheeth',Math.max(90,Math.min(max,d.h-dy))+'px'); };
+  const up=()=>{ if(!d) return; const dd=d; d=null; if(!dd.moved){ document.body.classList.toggle('sheetFull'); return; } const h=ch.offsetHeight; if(h<150){ R.style.removeProperty('--sheeth'); chatOpen(false); } else if(h>innerHeight*.85){ R.style.removeProperty('--sheeth'); document.body.classList.add('sheetFull'); } };
+  g.onpointerup=up; g.onpointercancel=up; }
 function renderMe(){ const m=$('#me'); const nm=viewAs?viewAs.name:me.name, role=effRole(); m.innerHTML=`${!viewAs&&me.photo?`<img src="${esc(me.photo)}" referrerpolicy="no-referrer">`:`<div class="av">${viewAs?'👁':esc(initials(me.name))}</div>`}<div class="grow"><div class="nm" title="${esc(me.email)}">${esc(nm)}</div><span class="badge ${role}">${roleName(role)}</span></div><button class="out" title="${viewAs?'Выйти из режима просмотра':'Выйти'}">${viewAs?'✕':'⏻'}</button>`; $('.out',m).onclick=()=>viewAs?stopViewAs():AUTH.signOut(); $$('.dmonly').forEach(n=>n.style.display=isDM()?'':'none'); }
 function startViewAs(u){ if(!realDM()) return; viewAs={uid:u.id,role:u.role||'observer',name:u.name||u.email}; G.sel=null; renderMe(); go('characters'); toast(`Смотришь как «${viewAs.name}» (${roleName(viewAs.role)})`); }
 function stopViewAs(){ viewAs=null; G.sel=null; renderMe(); go('users'); }
 function updateCounts(){ { const nd=$('#nDocs'); if(nd) nd.textContent=world.docs.length||''; } { const n=$('#nEff'); if(n) n.textContent=(world.settings&&world.settings.effectLib||[]).length||''; const ne=$('#nEmo'); if(ne){ ne.textContent=(world.settings&&world.settings.effectLib||[]).filter(d=>d.emo).length||''; const nav=ne.closest('.nav'); if(nav) nav.style.display=(isDM()&&ruOn())?'':'none'; } } $('#nWmaps').textContent=world.wmaps.filter(mp=>isDM()||mp.visibility!=='hidden').length||''; $('#nMaps').textContent=world.maps.filter(mp=>isDM()||mp.owner===effUid()||mp.shared).length||''; $('#nChars').textContent=V.chars().length||''; $('#nOrgs').textContent=V.orgs().length||''; $('#nLocs').textContent=V.locs().length||''; $('#nUsers').textContent=world.users.length||''; const nl=world.log.filter(x=>!x.seen).length; const e=$('#nLog'); e.textContent=nl||''; e.classList.toggle('alert',nl>0); }
 
 /* обёртка: адрес страницы (переход по ссылке, адрес после отрисовки) + сама отрисовка */
+let RENDER_KEY='';
 function render(){ if(me&&world.settings&&ROUTE.want&&!routeApplyWant()) return;
+  { const key=state.view+'/'+(state.id||''); if(!RENDER_DEPTH&&RENDER_KEY&&key!==RENDER_KEY&&PHONE()&&CHAT.open) chatOpen(false); if(!RENDER_DEPTH) RENDER_KEY=key; }
   RENDER_DEPTH++; try{ renderPage(); } finally{ RENDER_DEPTH--; }
-  if(!RENDER_DEPTH&&me&&world.settings){ routeSync('replace'); musSync(); } }
+  if(!RENDER_DEPTH&&me&&world.settings){ routeSync('replace'); musSync(); pnavRender(); } }
 function renderPage(){
   if(!me||!world.settings) return;
   const m=$('#main');
@@ -1901,7 +2017,7 @@ function renderPage(){
   else if(v==='settings'&&isDM()) renderSettings(m);
   else if(v==='efflib'&&isDM()) renderEffLib(m); else if(v==='stlib'&&isDM()) renderStLib(m); else if(v==='emocards'&&isDM()) renderEffLib(m);
   else renderList(m,'c');
-  if(v==='wmap'&&state.id&&CHAT.mapAuto&&!CHAT.open&&$('#chatBtn').style.display!=='none') chatOpen(true);
+  if(v==='wmap'&&state.id&&CHAT.mapAuto&&!CHAT.open&&!PHONE()&&$('#chatBtn').style.display!=='none') chatOpen(true);
   hydrate(m);
   m.scrollTop=st;
   if(fi){ const e=$$('input,textarea,select',m)[fi.i]; if(e&&e.tagName===fi.tag){ e.focus({preventScroll:true}); if(sel&&sel[0]!=null) try{ e.setSelectionRange(sel[0],sel[1]); }catch{} } }
@@ -2832,7 +2948,7 @@ const markOk=k=>(isDM()&&!viewAs)||(isPlayer()&&!viewAs&&(isHelper()||!world.set
 const toolOk=t=>!MAP_PERM[t]||markOk(MAP_PERM[t]);
 const itemPerm=it=>['path','area'].includes(it.t)?(['line','shape'].includes(it.kind)?'plDraw':'plAreas'):['place','label'].includes(it.t)?'plPlaces':it.t==='note'?'plNotes':it.t==='img'?'plImages':null;
 /* единая правая панель (опция карты): вкладки в колонке чата; уборка — при выключении опции и при уходе с карты */
-function dockOff(){ document.body.classList.remove('wmdock'); const ch=$('#chat'); if(!ch) return; $('.dtabs',ch)?.remove(); $('.dpane',ch)?.remove(); ch.classList.remove('dk-chat','dk-me','dk-fight'); }
+function dockOff(){ WM.pAct=null; document.body.classList.remove('wmdock'); const ch=$('#chat'); if(!ch) return; $('.dtabs',ch)?.remove(); $('.dpane',ch)?.remove(); ch.classList.remove('dk-chat','dk-me','dk-fight'); }
 /* текст документа: разметка rich + кликабельные http(s)-ссылки (текст уже экранирован, кавычки в href попасть не могут) */
 function noteRich(t){ return rich(t).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'); }
 /* ===== ДОКУМЕНТЫ: отдельная коллекция docs {title,body,icon,color,images,ref,owner,given:[uid],pub}; на карте — элемент {t:'note',doc,x,y,w,mode:'sheet'|'icon'} ===== */
@@ -5465,7 +5581,7 @@ function wmSettings(mp,after,tab){
 function renderWorldMap(m,mp){
   if(!mp||!(isDM()||mp.visibility!=='hidden')){ go('wmap'); return; }
   menuOnMap();
-  WM.cardsCompact??=localStorage.getItem('wm.cardsCompact')!=='0'; if(!WM.dockSet){ let d=null; try{ d=JSON.parse(localStorage.getItem('wm.dockSet')||'null'); }catch{} if(!d&&localStorage.getItem('wm.dock')==='1') d={me:true,fight:true}; WM.dockSet=d?{me:!!d.me,fight:!!d.fight}:(innerWidth<1600?{me:true,fight:true}:{me:false,fight:false}); /* В2: без своего выбора на экранах уже 1600 px «Мой» и бой — вкладками в колонке чата, карте больше места */ } WM.dock=!!(WM.dockSet.me||WM.dockSet.fight); WM.initStrip??=localStorage.getItem('wm.initStrip')!=='0';
+  WM.cardsCompact??=localStorage.getItem('wm.cardsCompact')!=='0'; if(!WM.dockSet){ let d=null; try{ d=JSON.parse(localStorage.getItem('wm.dockSet')||'null'); }catch{} if(!d&&localStorage.getItem('wm.dock')==='1') d={me:true,fight:true}; WM.dockSet=d?{me:!!d.me,fight:!!d.fight}:(innerWidth<1600?{me:true,fight:true}:{me:false,fight:false}); /* В2: без своего выбора на экранах уже 1600 px «Мой» и бой — вкладками в колонке чата, карте больше места */ } if(PHONE()) WM.dockSet={me:true,fight:true}; WM.dock=!!(WM.dockSet.me||WM.dockSet.fight); WM.initStrip??=localStorage.getItem('wm.initStrip')!=='0';
   const ed=isDM()&&!viewAs; const tok=ed||(isPlayer()&&(isHelper()||!world.settings.wmDMOnly)); const edI=ed||(isPlayer()&&!viewAs&&can('plInit')); if(!ed&&!toolOk(WM.tool)) WM.tool='select'; if(!ed&&!(tok?['marker','ruler','select','path','area','place','label','aura','note','arrow']:['ruler','select','aura',...(ed||plOn('plArrows')?['arrow']:[]),...(isPlayer()&&plOn('plTokens')?['marker']:[])]).includes(WM.tool)) WM.tool='select'; if(WM.tool==='aura'&&!WM.auraDraw) WM.tool='select';
   wmGrid(mp); mp.fog||(mp.fog={on:false,holes:[]}); const g=mp.grid;
   const myChars=ch=>isDM()||(ch.players||[]).includes(effUid());
@@ -5585,6 +5701,7 @@ const canMove=it=>ed||(it._doc&&((it.t==='marker'&&(it.layer||'normal')==='norma
   /* попадание: сверху вниз, с учётом слоёв */
   function hit(sx,sy){ const its=items().filter(hittable); const w=toWorld(sx,sy); const k=cam.k;
     for(let i=its.length-1;i>=0;i--){ const it=its[i]; if(it.t==='marker'){ const p=toScreen(it.x,it.y); const r=wmTokenR(mp,it,k); if(Math.hypot(p.x-sx,p.y-sy)<=r+2) return it; } }
+    if(WM._tp){ let best=null, bd=24; for(const it of its) if(it.t==='marker'){ const p=toScreen(it.x,it.y); const dd=Math.hypot(p.x-sx,p.y-sy)-wmTokenR(mp,it,k); if(dd<bd){ bd=dd; best=it; } } if(best) return best; }
     for(let i=its.length-1;i>=0;i--){ const it=its[i]; if(it.t==='loot'){ const p=toScreen(it.x,it.y); const s=wmPlaceS(mp,it,k)*1.15; if(Math.abs(p.x-sx)<=s+2&&Math.abs(p.y-sy)<=s+2) return it; } if(it.t==='note'){ const p=toScreen(it.x,it.y); if(it.doc&&docOf(it)&&it.mode!=='icon'){ const w=(it.w||260)*k, h=(it._h||(it.w||260)*.8)*k; if(sx>=p.x-2&&sx<=p.x+w+2&&sy>=p.y-2&&sy<=p.y+h+2) return it; } else { const ps=wmPlaceS(mp,it,k); if(Math.abs(p.x-sx)<=ps+2&&Math.abs(p.y-sy)<=ps+2) return it; } } if(it.t==='place'){ const p=toScreen(it.x,it.y); const ps=wmPlaceS(mp,it,k); if(Math.abs(p.x-sx)<=ps&&sy>=p.y-ps&&sy<=p.y+ps*1.6) return it; } if(it.t==='label'){ const p=toScreen(it.x,it.y); const px=mp.labelMode==='screen'?Math.max(8,(it.size||28)*.6):Math.max(6,(it.size||28)*k); ctx.font=`${it.bold?'700 ':''}italic ${px}px ${it.font?`"${it.font}",`:''}Georgia,serif`; const lines=String(it.text||'').split('\n'); const tw=Math.max(...lines.map(l=>ctx.measureText(l).width)); const a=-(it.rot||0)*Math.PI/180; const dx=sx-p.x, dy=sy-p.y; const rx=dx*Math.cos(a)-dy*Math.sin(a), ry=dx*Math.sin(a)+dy*Math.cos(a); if(Math.abs(rx)<=tw/2+4&&Math.abs(ry)<=px*.6*lines.length) return it; } }
     for(let i=its.length-1;i>=0;i--){ const it=its[i]; if(it.t==='card'){ const h=it._h||120; if(w.x>=it.x&&w.x<=it.x+wmCardW(it)&&w.y>=it.y&&w.y<=it.y+h) return it; } }
     for(let i=its.length-1;i>=0;i--){ const it=its[i]; if(it.t==='path'&&wmDistPath(w.x,w.y,it.pts)<=((it.w||WM_PATHS[it.kind]?.w||3)/Math.sqrt(k))/2+6/k) return it; }
@@ -6212,9 +6329,10 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
     tabs.innerHTML=[['chat','💬 Чат'],['me','👤 Персонаж'],['fight','⚔ Бой']].filter(([k])=>k==='chat'||(k==='me'&&meBox&&WM.dockSet.me)||(k==='fight'&&WM.dockSet.fight)).map(([k,l])=>`<button data-k="${k}">${l}</button>`).join('')+'<button class="dx" title="Скрыть панель">✕</button>';
     $$('button[data-k]',tabs).forEach(b=>b.onclick=()=>dockTab(b.dataset.k)); $('.dx',tabs).onclick=()=>chatOpen(false);
     if(meBtn&&WM.dockSet.me) meBtn.onclick=()=>{ if(WM.dockTab==='me'&&CHAT.open){ dockTab('chat'); return; } dockTab('me'); };
+    WM.pAct={has:k=>k==='chat'||(k==='me'&&!!meBox&&WM.dockSet.me)||(k==='fight'&&!!WM.dockSet.fight),tab:k=>dockTab(k)};
     dockTab(WM.dockTab,true); }
   function dockTab(k,quiet){ if(k==='me'&&!(meBox&&WM.dockSet.me)) k='chat'; if(k==='fight'&&!WM.dockSet.fight) k='chat'; WM.dockTab=k; localStorage.setItem('wm.dockTab',k); const ch=$('#chat'); if(!ch) return; ch.classList.remove('dk-chat','dk-me','dk-fight'); ch.classList.add('dk-'+k); $$('.dtabs button[data-k]',ch).forEach(b=>b.classList.toggle('on',b.dataset.k===k));
-    if(meBtn&&WM.dockSet.me) meBtn.classList.toggle('active',k==='me'); if(k==='me'&&meBox){ WM.showMe=true; meBox.classList.add('on'); drawMe(); } if(k==='fight') drawInit(); if(!quiet&&!CHAT.open) chatOpen(true); }
+    if(meBtn&&WM.dockSet.me) meBtn.classList.toggle('active',k==='me'); if(k==='me'&&meBox){ WM.showMe=true; meBox.classList.add('on'); drawMe(); } if(k==='fight') drawInit(); if(!quiet&&!CHAT.open) chatOpen(true); pnavRender(); }
   function stripRoll(){ if(viewAs) return; let list=WM.sel.filter(x=>x.t==='marker'&&(canMove(x)||edI)); if(!list.length&&!ed) list=items().filter(x=>x.t==='marker'&&canMove(x)&&x.ref&&(byId(world.characters,x.ref)?.players||[]).includes(me.uid));
     if(!list.length){ toast(ed?'Выдели токены на карте, чтобы бросить им инициативу':'Нет твоих токенов на карте',true); return; }
     const round=INIT().round||1; const reps=[]; let n=0;
@@ -6344,7 +6462,7 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
   { const tp=new Map(), seen=new Set(); let pz=null, lock=false;
     const P=e=>{ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; };
     const pzStart=()=>{ const [a,b]=[...tp.values()]; const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2}; pz={d0:Math.hypot(a.x-b.x,a.y-b.y)||1,k0:cam.k,w:toWorld(m.x,m.y)}; };
-    cv.addEventListener('pointerdown',e=>{ if(e.pointerType!=='touch') return; tp.set(e.pointerId,P(e)); if(tp.size===1&&!lock){ seen.add(e.pointerId); return; } e.stopImmediatePropagation(); e.preventDefault(); try{ cv.setPointerCapture(e.pointerId); }catch{} if(tp.size>=2) pzStart(); },true);
+    cv.addEventListener('pointerdown',e=>{ WM._tp=e.pointerType==='touch'; if(e.pointerType!=='touch') return; tp.set(e.pointerId,P(e)); if(tp.size===1&&!lock){ seen.add(e.pointerId); return; } e.stopImmediatePropagation(); e.preventDefault(); try{ cv.setPointerCapture(e.pointerId); }catch{} if(tp.size>=2) pzStart(); },true);
     cv.addEventListener('pointermove',e=>{ if(e.pointerType!=='touch'||!tp.has(e.pointerId)) return; tp.set(e.pointerId,P(e)); if(!pz&&!lock) return; e.stopImmediatePropagation(); if(!pz||tp.size<2) return; const [a,b]=[...tp.values()]; const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2}; const k=Math.max(.05,Math.min(4,pz.k0*Math.hypot(a.x-b.x,a.y-b.y)/pz.d0)); cam.k=k; cam.x=pz.w.x-m.x/k; cam.y=pz.w.y-m.y/k; draw(); },true);
     const pzEnd=e=>{ if(e.pointerType!=='touch'||!tp.has(e.pointerId)) return; tp.delete(e.pointerId); if(pz){ pz=null; lock=tp.size>0; } if(tp.size>=2) pzStart(); if(!tp.size) lock=false; if(!seen.has(e.pointerId)) e.stopImmediatePropagation(); seen.delete(e.pointerId); };
     cv.addEventListener('pointerup',pzEnd,true); cv.addEventListener('pointercancel',pzEnd,true);
@@ -6505,7 +6623,16 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
   applyLiveDuel();
   const live=items(); WM.sel=WM.sel.map(x=>live.includes(x)?x:live.find(y=>y.id===x.id)).filter(Boolean);
   m.append(page); drawLayers(); setTool(WM.tool); showInfo(); ddRe();
-  if(!cam.fitted||cam.k<=0.05) fit(); else draw(); { const ro2=new ResizeObserver(()=>{ if(!cv.isConnected){ ro2.disconnect(); return; } if(W()>0&&H()>0&&(!cam.fitted||cam.k<=0.05)) fit(); }); ro2.observe(wrap); }
+  /* телефон: камера на свои токены (игрок), иначе на тех, кто в бою, иначе на все; токен не мельче ~16 px */
+  function fitPhone(){ if(!(W()>0&&H()>0)) return; const all=items().filter(x=>x.t==='marker'&&hittable(x)); const mine=all.filter(x=>(byId(world.characters,x.ref)?.players||[]).includes(effUid())), fightL=all.filter(x=>x.inCombat);
+    const L=mine.length?mine:fightL.length?fightL:all; if(!L.length){ fit(); return; }
+    let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity; for(const it of L){ const r=wmTokenR(mp,it,1); x0=Math.min(x0,it.x-r); y0=Math.min(y0,it.y-r); x1=Math.max(x1,it.x+r); y1=Math.max(y1,it.y+r); }
+    const pad=Math.max(120,(mp.grid&&mp.grid.type!=='none'?mp.grid.size:100)*1.5); const kFit=Math.min((W()-24)/(x1-x0+pad*2),(H()-Math.min(190,H()*.3))/(y1-y0+pad*2));
+    const r1=mp.tokenMode==='fixed'?0:Math.max(...L.map(it=>wmTokenR(mp,it,1))); const kTok=r1?12/r1:0;
+    const k=Math.max(.05,Math.min(2.5,Math.max(kFit,kTok))); let c={x:(x0+x1)/2,y:(y0+y1)/2}; if(Math.abs(L[0].x-c.x)*k>W()/2-30||Math.abs(L[0].y-c.y)*k>H()/2-Math.min(110,H()*.2)) c={x:L[0].x,y:L[0].y}; /* всё не влезло — хотя бы первый токен на экране */
+    cam.k=k; cam.x=c.x-W()/2/k; cam.y=c.y-(H()/2+20)/k; cam.fitted=true; draw(); }
+  const fit0=()=>PHONE()?fitPhone():fit();
+  if(!cam.fitted||cam.k<=0.05) fit0(); else draw(); { const ro2=new ResizeObserver(()=>{ if(!cv.isConnected){ ro2.disconnect(); return; } if(W()>0&&H()>0&&(!cam.fitted||cam.k<=0.05)) fit0(); }); ro2.observe(wrap); }
   WM.onMe=()=>{ if(!cv.isConnected){ WM.onMe=null; WM.onHand=null; return; } drawMe(); drawHand(); }; drawHand();
   if(!ed){ $$('.wmtb .tool',page).forEach(b=>{ if(!toolOk(b.dataset.tool)) b.remove(); }); for(const g of ['draw','areas','places']){ const dd=$(`.wmtb .dd[data-g="${g}"]`,page); if(dd&&!$('.tool',dd)){ dd.remove(); $(`.wmtb .tab[data-g="${g}"]`,page)?.remove(); } } }
   dockSetup(); woundsWire(bar); if(meBox) woundsWire(meBox); { const db=$('#dockBtn',page); if(db) db.onclick=ev=>{ ev.stopPropagation(); if($('.dockpop')){ $$('.dockpop').forEach(x=>x.remove()); return; } const r=db.getBoundingClientRect();
@@ -6661,8 +6788,8 @@ function chatRender(){ const box=$('#chat .msgs'); if(!box) return; const all=ch
   hydrate(box); bindOpen(box);
   if(!all.length) box.append(el('<div class="sys">Пока тихо. Напиши что-нибудь или брось кубик: /roll d20</div>'));
   $('#chatMore').style.display=CHAT.noMore?'none':''; if(atBottom||CHAT.open) box.scrollTop=box.scrollHeight;
-  const unread=CHAT.open?0:all.filter(m=>m.t>CHAT.seen&&m.u!==me?.uid).length; const n=$('#chatBtn .n'); n.textContent=unread||''; n.classList.toggle('on',unread>0); if(CHAT.open){ CHAT.seen=Date.now(); localStorage.setItem('chatSeen',CHAT.seen); } }
-function chatOpen(v){ CHAT.open=v; $('#chat').classList.toggle('on',v); document.body.classList.toggle('chat-open',v); setTimeout(chatTall,0); WM.fitChat&&WM.fitChat(); if(state.view==='wmap'&&state.id&&WM.redraw) setTimeout(()=>WM.redraw&&WM.redraw(),80); /* полоса инициативы и кнопки подстраиваются под ширину */ if(v){ CHAT.seen=Date.now(); localStorage.setItem('chatSeen',CHAT.seen); setTimeout(()=>$('#chatText').focus(),50); } chatRender(); }
+  const unread=CHAT.open?0:all.filter(m=>m.t>CHAT.seen&&m.u!==me?.uid).length; const n=$('#chatBtn .n'); n.textContent=unread||''; n.classList.toggle('on',unread>0); { const pn=$('#pnav .n'); if(pn) pn.textContent=unread||''; } if(CHAT.open){ CHAT.seen=Date.now(); localStorage.setItem('chatSeen',CHAT.seen); } }
+function chatOpen(v){ CHAT.open=v; $('#chat').classList.toggle('on',v); document.body.classList.toggle('chat-open',v); setTimeout(chatTall,0); WM.fitChat&&WM.fitChat(); if(state.view==='wmap'&&state.id&&WM.redraw) setTimeout(()=>WM.redraw&&WM.redraw(),80); /* полоса инициативы и кнопки подстраиваются под ширину */ if(v){ CHAT.seen=Date.now(); localStorage.setItem('chatSeen',CHAT.seen); if(!PHONE()) setTimeout(()=>$('#chatText').focus(),50); } chatRender(); pnavRender(); }
 async function chatShare(card){ if(!me||viewAs) return; const m={i:uid(),t:Date.now(),u:me.uid,n:card.n||me.name,k:'card',col:chatColorOf()||null,ti:String(card.title||'').slice(0,120),su:String(card.sub||'').slice(0,160),m:String(card.body||'').slice(0,2000)}; if(card.c) m.c=card.c; const day=dayId(m.t); try{ await chatPut('chat',m); chatOpen(true); toast('Отправлено в чат'); }catch(e){ console.error(e); toast('Не отправилось: '+(e.code||e.message),true); } }
 function techShareCard(it,ch){ const b=techBranch(it.branch); const parts=[]; if(it.desc) parts.push(it.desc); if(it.effect) parts.push('[b]Эффект:[/b] '+it.effect); if(it.fatigue) parts.push('[b]Усталость:[/b] '+it.fatigue); if(it.special) parts.push('[b]Особое условие:[/b] '+it.special); chatShare({title:(it.main?'◆ ':'')+it.name,sub:[b?.name,it.tag,techCost(it)!=null?techCost(it)+' очк.':it.cost].filter(Boolean).join(' · ')+(ch?' · '+(ch.name||'без имени'):''),body:parts.join('\n'),n:ch?.name||me.name,c:ch?.id}); }
 function chatSpeaker(){ const sel=$('#chatAs'); const id=sel&&sel.value; const c=id&&findEntity(id); return c?{c:c.id,n:c.name||'без имени'}:null; }
