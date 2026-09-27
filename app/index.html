@@ -58,8 +58,12 @@ h1,h2,h3{margin:0;font-weight:700}
 .ro .seg span{pointer-events:none}
 
 /* ===== экран входа ===== */
-#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:26px;text-align:center;padding:40px}
-#login .logo{font-size:44px;letter-spacing:10px;font-weight:700;background:linear-gradient(90deg,var(--orange),#e9c2ff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(233,194,255,.35))}
+#login{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:26px;text-align:center;padding:40px}
+#boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:22px;opacity:0;animation:bootIn .3s ease .25s forwards}
+#boot .spin{width:26px;height:26px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:var(--cyan);animation:bootSpin .8s linear infinite}
+#boot .msg{color:var(--muted);font-size:13px;min-height:1em}
+@keyframes bootIn{to{opacity:1}} @keyframes bootSpin{to{transform:rotate(360deg)}}
+#login .logo,#boot .logo{font-size:44px;letter-spacing:10px;font-weight:700;background:linear-gradient(90deg,var(--orange),#e9c2ff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(233,194,255,.35))}
 #login .sub{color:var(--muted);max-width:520px;line-height:1.6}
 #login .btn{padding:12px 22px;font-size:15px}
 #login .gbtn{background:#fff;color:#1f1f1f;border-color:#fff;font-weight:600}
@@ -985,6 +989,7 @@ body.onmap.wmBarOn #musBar{bottom:calc(var(--barh,60px) + 26px)}
 </head>
 <body>
 
+<div id="boot"><div class="logo">DnD COPR</div><div class="spin"></div><div class="msg" id="bootMsg"></div></div>
 <div id="login">
   <div class="logo">DnD COPR</div>
   <div class="sub"><b style="color:var(--text)">Персонажи, организации, способности и связи</b><br>Войди через Google — новые участники становятся наблюдателями, роли выдаёт мастер.</div>
@@ -1053,6 +1058,9 @@ const el = (html) => { const t=document.createElement('template'); t.innerHTML=h
 const stableStr = o => JSON.stringify(o, (k,v)=> (v && typeof v==='object' && !Array.isArray(v)) ? Object.keys(v).sort().reduce((a,kk)=>{a[kk]=v[kk];return a;},{}) : v);
 function clean(o){ return JSON.parse(JSON.stringify(o, (k,v)=> (k.startsWith('_')||v===undefined)?undefined:v)); }
 const MOCK = new URLSearchParams(location.search).get('mock'); // ?mock=dm|player|observer — режим без Firebase для отладки
+/* заставка загрузки: пока Firebase восстанавливает сессию, вместо страницы входа крутится #boot (иначе при F5 мелькает «Войти через Google») */
+function bootEnd(login){ const b=$('#boot'); if(b) b.style.display='none'; $('#login').style.display=login?'flex':'none'; }
+let AUTH_SEEN=false; setTimeout(()=>{ const m=$('#bootMsg'); if(m) m.textContent='Подключаемся к серверу… Если это надолго — обнови страницу.'; },6000); setTimeout(()=>{ if(!AUTH_SEEN&&$('#boot')?.style.display!=='none') bootEnd(true); },12000);
 
 /* ============================================================
    СЛОЙ ДАННЫХ: Firebase или mock
@@ -1107,7 +1115,7 @@ if(MOCK){
   const A = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js');
   const F = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js');
   const R = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js');
-  if(!CONFIG.firebase.projectId){ $('#loginErr').textContent='В файле index.html не заполнен CONFIG.firebase — вставь конфиг своего Firebase-проекта.'; $('#gsign').disabled=true; }
+  if(!CONFIG.firebase.projectId){ $('#loginErr').textContent='В файле index.html не заполнен CONFIG.firebase — вставь конфиг своего Firebase-проекта.'; $('#gsign').disabled=true; bootEnd(true); }
   /* резервный сервер: ?backend=local (или адрес) → эмулятор на компьютере мастера; ?backend=cloud → облако */
   const bp=new URLSearchParams(location.search).get('backend'); if(bp!==null){ if(bp==='cloud'||bp==='') localStorage.removeItem('backend'); else localStorage.setItem('backend',bp); history.replaceState(null,'',location.pathname); }
   let LOCAL=localStorage.getItem('backend')||''; if(!LOCAL&&location.port==='5000') LOCAL='local'; if(LOCAL==='local') LOCAL=location.hostname||'localhost'; window.LOCAL_BACKEND=LOCAL;
@@ -1282,15 +1290,16 @@ if(window.LOCAL_BACKEND){ $('#gsign').style.display='none'; $('#localLogin').sty
 else if(!MOCK) $('#cloudNote').innerHTML='Сервер: облако Firebase. <a href="?backend=local" style="color:var(--faint)">Резервный сервер на компьютере мастера</a>';
 $('#gsign').onclick=async()=>{ $('#loginErr').textContent=''; try{ await AUTH.signIn(); }catch(e){ $('#loginErr').textContent='Не удалось войти: '+(e.code||e.message)+'\n'+(e.code==='auth/unauthorized-domain'?'Добавь этот домен в Firebase → Authentication → Settings → Authorized domains.':''); } };
 AUTH.onChange(async u=>{
+  AUTH_SEEN=true;
   unsubs.forEach(f=>f()); unsubs=[];
-  if(!u){ me=null; $('#app').style.display='none'; $('#login').style.display='flex'; return; }
+  if(!u){ me=null; $('#app').style.display='none'; bootEnd(true); return; }
   me=u;
   // документ пользователя
   let ud=null; try{ ud=await DB.get('users',u.uid); }catch(e){ console.error(e); }
   if(!ud){ const role=CONFIG.dmEmails.includes((u.email||'').toLowerCase())?'dm':'observer'; ud={email:u.email,name:u.name,photo:u.photo,role,createdAt:Date.now()}; try{ await DB.set('users',u.uid,ud); }catch(e){ console.error(e); toast('Не удалось создать профиль: '+(e.code||e.message),true); } }
   else if(ud.name!==u.name||ud.photo!==u.photo){ try{ await DB.update('users',u.uid,{name:u.name,photo:u.photo}); }catch{} }
   myRole=(CONFIG.everyoneDM&&!(MOCK&&new URLSearchParams(location.search).has('strict')))?'dm':(ud.role||'observer');
-  $('#login').style.display='none'; $('#app').style.display='grid';
+  bootEnd(false); $('#app').style.display='grid';
   subscribeAll();
   if(localStorage.getItem('nomenu')) document.body.classList.add('nomenu');
   routeInit(); renderMe(); render(); chatInit(); setTimeout(helpNudge,2500);
@@ -1777,6 +1786,9 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-09-27',t:'Без мигания при обновлении',items:[
+    'При F5 больше не мелькает страница «Войти через Google» — пока сайт восстанавливает вход, показывается заставка с логотипом.'
+  ]},
   {d:'2026-09-27',t:'Музыка сцены: плеер свёрнут',items:[
     'Плеер музыки теперь — маленькая кнопка ♫ в углу, а не полоса на экране. Клик по ней открывает панель с паузой и громкостью, клик мимо — сворачивает.',
     'Громкость: новый крупный слайдер с процентами, а ещё можно просто крутить колесо мыши над кнопкой ♫ (с Shift — точнее).'
