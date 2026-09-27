@@ -980,6 +980,8 @@ body.onmap.wmBarOn #musBar{bottom:calc(var(--barh,60px) + 26px)}
 .mulist{display:flex;gap:6px;flex-wrap:wrap}
 @media (max-width:700px){ #musBar{right:70px;bottom:12px} body.musOn #ghint{display:none} }
 @media (prefers-reduced-motion:reduce){ #musBar.blocked .mbtn,#musBar.playing .eq i{animation:none} }
+/* длинное название (организация на карточке и в строке списка) переносится внутри своего чипа, а не вылезает за край */
+.card .chips .chip,.lrow .chips .chip{max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;border-radius:12px;line-height:1.3;text-align:left}
 #updBar{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 16px;border-radius:12px;background:var(--panel2);border:1px solid rgba(255,209,102,.5);box-shadow:0 10px 30px rgba(0,0,0,.45);font-size:13.5px;max-width:calc(100vw - 24px);flex-wrap:wrap}
 .card.map .pres{display:flex;gap:6px 10px;flex-wrap:wrap;margin-top:6px;font-size:12px;font-weight:600}
 .card.map .pres .on{color:var(--mint)}
@@ -1791,6 +1793,9 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-09-27',t:'Длинные названия на карточках',items:[
+    'Длинное название организации на карточке персонажа (и в строке списка) больше не вылезает за край — переносится внутри своей плашки.'
+  ]},
   {d:'2026-09-27',t:'Своё название сайта',items:[
     'Мастер может переименовать сайт: Настройки → Общие → Интерфейс → «Название сайта». Новое имя видно в меню слева, на вкладке браузера и на странице входа.'
   ]},
@@ -2005,7 +2010,7 @@ function renderList(m,t){
   const mkCard=(e,asRow)=>{ const F=FB.F; const q=state.q.trim().toLowerCase(); {
       let sub='', chips='', letters='', mini='';
       const brief=briefOnly(e);
-      if(t==='c'){ sub=e.title||''; chips=V.mems().filter(x=>x.charId===e.id).map(x=>`<span class="chip o">${esc(byId(world.orgs,x.orgId)?.name||'?')}</span>`).join('');
+      if(t==='c'){ sub=e.title||''; chips=V.mems().filter(x=>x.charId===e.id).map(x=>{ const nm=byId(world.orgs,x.orgId)?.name||'?'; return `<span class="chip o" title="${esc(nm)}">${esc(nm)}</span>`; }).join('');
         if(!brief&&!plHid(e,'stats')){ letters=(world.settings.stats||[]).map(s=>{ const v=statEff(e,s).v; return `<span class="L" data-l="${letterFor(v)}" title="${esc(s.name)}${v!==''?' '+v:''}">${letterFor(v)}</span>`; }).join('');
           if(Object.keys(e.stats||{}).length) mini=`<div class="mini-radar">${radarSVG(e,72,false)}</div>`; } }
       else if(t==='o'){ const n=isDM()?world.memberships.filter(x=>x.orgId===e.id).length:null; sub=e.title||(n==null?'':(n?`${n} ${plural(n,'участник','участника','участников')}`:'нет участников')); }
