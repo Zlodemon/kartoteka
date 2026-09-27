@@ -1,11 +1,15 @@
 // Полный бэкап данных картотеки из Firestore в JSON — тот же формат, что кнопка «⬇ Полный бэкап» в Настройках,
 // поэтому файл можно вернуть кнопкой «⬆ Восстановить из бэкапа…».
-// Запуск:  node backup-data.js <id проекта Firebase> [папка для бэкапов]
+// Запуск:  node backup-data.js <id проекта Firebase> [папка для бэкапов] [--keep N]
+//   --daily  — имя файла kartoteka-daily-… (ежедневный бэкап из Планировщика, tools/backup-task.ps1); обычные бэкапы — kartoteka-full-…
+//   --keep N — оставить только N последних бэкапов с тем же началом имени (daily или full); другие файлы не трогаются
 // Вход берётся из Firebase CLI (тот же, что для firebase deploy); только чтение, в базу ничего не пишет.
 // Коллекции берутся из самой базы (listCollectionIds), так что новые коллекции попадают в бэкап без правки скрипта.
 const fs = require('fs'), path = require('path'), os = require('os');
 
-const project = process.argv[2], outDir = path.resolve(process.argv[3] || 'backups');
+const argv = process.argv.slice(2), ki = argv.indexOf('--keep'), keep = ki >= 0 ? Math.max(1, parseInt(argv[ki + 1], 10) || 30) : 0, daily = argv.includes('--daily');
+const pos = argv.filter((a, i) => !a.startsWith('--') && !(ki >= 0 && i === ki + 1));
+const project = pos[0], outDir = path.resolve(pos[1] || 'backups');
 if (!project) { console.error('Укажите id проекта: node backup-data.js <projectId> [папка]'); process.exit(2); }
 
 // публичный OAuth-клиент Firebase CLI (firebase-tools/lib/api.js) — им CLI обновляет свой токен
@@ -45,7 +49,8 @@ function fields(f) { const o = {}; for (const k of Object.keys(f)) o[k] = val(f[
   colls.sort();
   fs.mkdirSync(outDir, { recursive: true });
   const d0 = new Date(), p2 = n => String(n).padStart(2, '0'); const stamp = `${d0.getFullYear()}-${p2(d0.getMonth() + 1)}-${p2(d0.getDate())}_${p2(d0.getHours())}-${p2(d0.getMinutes())}`; // местное время
-  const file = path.join(outDir, `kartoteka-full-${project}-${stamp}.json`), tmp = file + '.part';
+  const prefix = `kartoteka-${daily ? 'daily' : 'full'}-${project}-`;
+  const file = path.join(outDir, `${prefix}${stamp}.json`), tmp = file + '.part';
   const out = fs.openSync(tmp, 'w'); const w = s => fs.writeSync(out, s);
   const at = Date.now(); w(`{"v":1,"at":${at},"from":"cloud","project":${JSON.stringify(project)},"data":{`);
   const counts = {}; let total = 0;
@@ -61,4 +66,7 @@ function fields(f) { const o = {}; for (const k of Object.keys(f)) o[k] = val(f[
   fs.renameSync(tmp, file);
   const mb = (fs.statSync(file).size / 1048576).toFixed(1);
   console.log(`OK ${total} документов, ${mb} МБ → ${file}`);
+  if (keep) { // старые бэкапы этого проекта сверх N последних — удалить (имя содержит дату, поэтому сортировка по имени = по времени)
+    const mine = fs.readdirSync(outDir).filter(f => f.startsWith(prefix) && f.endsWith('.json')).sort().reverse();
+    for (const f of mine.slice(keep)) { try { fs.unlinkSync(path.join(outDir, f)); console.log('удалён старый бэкап: ' + f); } catch (e) { console.error('не удалось удалить ' + f + ': ' + e.message); } } }
 })().catch(e => { console.error('ОШИБКА бэкапа: ' + e.message); process.exit(1); });

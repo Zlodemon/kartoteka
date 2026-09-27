@@ -829,6 +829,131 @@ code{font-family:Consolas,monospace;font-size:12.5px;background:rgba(255,255,255
 /* --- статусы: чуть компактнее --- */
 .stchip{padding:2px 6px 2px 5px;font-size:12px}.stchip .ic{font-size:15px}
 </style>
+<style>
+/* ===== 2026-09-27: правки по аудиту ===== */
+.srow.s4{grid-template-columns:1fr auto auto auto}
+.urow .urole{display:flex;flex-direction:column;gap:4px;align-items:stretch;min-width:0}
+.card .pic.hasimg .ini{visibility:hidden}
+.effc .tg .dup{color:var(--orange);border-color:rgba(255,138,61,.45)}
+#chat .more{padding:2px 4px;border-bottom:1px solid var(--line)}
+#chat .more .btn{font-size:11.5px;padding:2px 10px}
+#syncChip{position:fixed;left:12px;bottom:12px;z-index:70;padding:4px 12px;border-radius:999px;font-size:12px;background:var(--panel2);border:1px solid var(--line2);color:var(--gold);display:none;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+#syncChip.on{display:block}
+#syncChip.err{color:var(--red)}
+.trrow{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.trrow:last-child{border-bottom:none}
+.trrow .ic{font-size:20px;width:28px;text-align:center;flex:none}
+.trrow .tt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prlist{max-height:52vh;overflow:auto;padding-right:4px}
+.prrow{display:flex;align-items:center;gap:8px;padding:5px 4px;border-bottom:1px solid var(--line);font-size:13.5px;cursor:pointer}
+.prrow .faint{font-size:11.5px;white-space:nowrap}
+.gsbtn{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;cursor:pointer;color:var(--muted);border:1px solid var(--line);background:rgba(255,255,255,.02);margin-bottom:6px;font-size:13px}
+.gsbtn:hover{color:var(--text);background:var(--panel)}
+.gsbtn kbd{margin-left:auto;font-size:10.5px;color:var(--faint);border:1px solid var(--line2);border-radius:5px;padding:0 5px;font-family:inherit}
+@media (max-width:900px){#side .gsbtn .t,#side .gsbtn kbd{display:none}#side .gsbtn{justify-content:center;padding:8px 0}}
+.hlpbtn{margin-top:-2px}
+.hlptabs{display:flex;gap:4px;margin:-6px 0 12px;flex-wrap:wrap}
+.hlptabs .btn.on{background:var(--panel2);border-color:var(--line2);color:var(--text)}
+.hlpbody{max-height:62vh;overflow:auto;line-height:1.55;font-size:13.5px;padding-right:4px}
+.hlpbody ol,.hlpbody ul{padding-left:20px;margin:6px 0}
+.hlpbody li{margin-bottom:8px}
+.hlpbody h4{margin:14px 0 6px;font-size:11.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.hlpbody h4:first-child{margin-top:0}
+.hlpbody table{border-collapse:collapse;width:100%}
+.hlpbody td{padding:4px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.hlpbody td:first-child{white-space:nowrap;color:var(--gold);font-size:12.5px;width:1%}
+#hlpNudge{position:fixed;left:50%;transform:translate(-50%,12px);opacity:0;transition:opacity .25s,transform .25s;bottom:18px;z-index:300;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 16px;border-radius:12px;background:var(--panel2);border:1px solid rgba(255,209,102,.45);box-shadow:0 10px 30px rgba(0,0,0,.45);font-size:13.5px;max-width:calc(100vw - 24px);flex-wrap:wrap}
+#hlpNudge.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:700px){ .hlpbody td:first-child{white-space:normal;width:auto} }
+@media (prefers-reduced-motion:reduce){ #hlpNudge{transition:none} }
+body.railmenu.onmap:not(.nomenu) #side .hlpbtn :is(.t,kbd){display:none}
+#gsearch{position:fixed;inset:0;z-index:400;background:rgba(4,6,12,.55);display:flex;justify-content:center;align-items:flex-start;padding:10vh 16px 16px}
+#gsearch .gsbox{width:min(640px,100%);background:var(--panel);border:1px solid var(--line2);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.55);display:flex;flex-direction:column;max-height:76vh;overflow:hidden}
+#gsearch .gsin{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+#gsearch .gsin input{flex:1;border:none;background:none;font-size:16px;padding:6px 2px;outline:none;box-shadow:none}
+#gsearch .gsres{overflow:auto;padding:6px}
+#gsearch .gsr{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer}
+#gsearch .gsr.on{background:var(--panel2)}
+#gsearch .gsr .ic{width:24px;text-align:center;font-size:17px;flex:none}
+#gsearch .gsr .tt{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#gsearch .gsr .sb{font-size:12px;color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#gsearch .gsr .gk{font-size:11px;color:var(--faint);flex:none}
+#gsearch .gsh{padding:10px 12px;font-size:12px;color:var(--faint)}
+#gsearch .gsfoot{padding:7px 12px;border-top:1px solid var(--line);font-size:11px;color:var(--faint)}
+.fsrow{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.fsrow .fslot{flex:1 1 360px;min-width:0}
+.lvbar{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.lvbar select{padding:4px 26px 4px 8px;font-size:12.5px}
+.lvbar .lvview{display:inline-flex;gap:2px}
+.lvbar .lvview .btn.on{background:var(--panel2);border-color:var(--line2);color:var(--text)}
+.lrows{display:flex;flex-direction:column;gap:5px}
+.lrow{display:flex;align-items:center;gap:12px;padding:6px 10px;border:1px solid var(--line);border-radius:12px;background:var(--panel);cursor:pointer;min-width:0;position:relative}
+.lrow:hover{border-color:var(--line2)}
+.lrow .av{width:40px;height:40px;border-radius:10px;overflow:hidden;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none;color:var(--muted)}
+.lrow .av img{width:100%;height:100%;object-fit:cover}
+.lrow .nm{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrow .sb{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrow .chips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:34%}
+.lrow .letters{margin-top:0;flex:none;flex-wrap:nowrap}
+.lrow .mine{margin-left:8px;font-size:10.5px;padding:1px 7px;border-radius:99px;border:1px solid rgba(255,138,61,.5);color:var(--orange);font-weight:700;vertical-align:1px}
+.lrow .mine.vis{color:var(--gold);border-color:rgba(255,209,102,.5)}
+.lrow .fbtn{position:static;opacity:.35;background:none;color:var(--muted)}
+.lrow:hover .fbtn{opacity:.9}
+@media (max-width:700px){.lrow .chips,.lrow .letters{display:none}}
+.nav{position:relative}
+.nav .ic{display:none;width:22px;text-align:center;font-size:16px;line-height:1}
+@media (max-width:900px){ .nav .ic{display:block} .nav .dot{display:none} .nav{padding:9px 0} #side{padding:14px 8px} #side .nav .n.alert{display:block;position:absolute;top:2px;right:4px;font-size:9.5px;padding:0 5px;margin:0} }
+body.railmenu.onmap:not(.nomenu) #app{grid-template-columns:64px 1fr}
+body.railmenu.onmap:not(.nomenu) #side{padding:14px 8px}
+body.railmenu.onmap:not(.nomenu) #side :is(.logo,.nav .t,.nav .n,.foot,.me .grow,.me .out,.gsbtn .t,.gsbtn kbd){display:none}
+body.railmenu.onmap:not(.nomenu) #side .nav .n.alert{display:block;position:absolute;top:2px;right:4px;font-size:9.5px;padding:0 5px;margin:0}
+body.railmenu.onmap:not(.nomenu) .nav{justify-content:center;padding:9px 0}
+body.railmenu.onmap:not(.nomenu) .nav .ic{display:block}
+body.railmenu.onmap:not(.nomenu) .nav .dot{display:none}
+body.railmenu.onmap:not(.nomenu) .me{justify-content:center;padding:6px}
+body.railmenu.onmap:not(.nomenu) .gsbtn{justify-content:center;padding:8px 0}
+.wmzoom{position:absolute;right:14px;bottom:84px;z-index:6;display:flex;flex-direction:column;gap:4px}
+body.chat-open.onmap .wmzoom{right:calc(min(var(--chatw),100vw - 64px) + 24px)}
+.wmwrap.barOn .wmzoom{bottom:calc(var(--barh,60px) + 76px)}
+.wmtb .bar.fr{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent)}
+.wmtb .bar.fl{-webkit-mask-image:linear-gradient(90deg,transparent,#000 40px);mask-image:linear-gradient(90deg,transparent,#000 40px)}
+.wmtb .bar.fl.fr{-webkit-mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 40px),transparent)}
+@media (max-width:700px){
+  .page{padding:16px 12px 72px}
+  .head{gap:8px;margin-bottom:14px}
+  .head > .grow{flex:1 1 calc(100% - 60px);min-width:0}
+  .head h1{font-size:22px}
+  .head .search{min-width:0;flex:1 1 150px}
+  .title-in{font-size:22px}
+  .tabbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .tabbar::-webkit-scrollbar{display:none}
+  .tabbar span{padding:9px 12px 10px;letter-spacing:1px;white-space:nowrap;flex:none}
+  #ghint{right:74px;left:10px;bottom:10px}
+}
+.wmzoom .btn{width:36px;height:36px;padding:0;font-size:18px;display:flex;align-items:center;justify-content:center;background:rgba(10,13,22,.88);backdrop-filter:blur(6px)}
+#wmme.min .mebody,#wmme.min .mrz{display:none}
+#wmme.min{align-self:flex-start}
+#chat #wmme #meMin{display:none}
+#musBar{position:fixed;right:84px;bottom:16px;z-index:66;display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:12px;background:rgba(10,13,22,.95);border:1px solid var(--line2);box-shadow:0 8px 24px rgba(0,0,0,.45);max-width:min(470px,calc(100vw - 100px));font-size:12.5px}
+body.chat-open #musBar{right:calc(min(var(--chatw),100vw - 64px) + 24px)}
+body.onmap.wmBarOn #musBar{bottom:calc(var(--barh,60px) + 26px)}
+#musBar .mi{color:var(--gold);font-size:15px;padding:0 2px}
+#musBar .mt{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default}
+#musBar .mslot{display:flex}
+#musBar .musfr{width:72px;height:40px;border:0;border-radius:6px;background:#000}
+#musBar .musfr.sc{width:170px;height:40px}
+#musBar .mvol{width:78px}
+#musBar.blocked .mplay{background:var(--orange);color:#111;animation:musPulse 1.2s ease-in-out infinite}
+@keyframes musPulse{50%{box-shadow:0 0 0 4px rgba(255,138,61,.3)}}
+.mulist{display:flex;gap:6px;flex-wrap:wrap}
+@media (max-width:700px){ #musBar{left:10px;right:70px;bottom:12px;max-width:none} #musBar .mt{max-width:90px} #musBar .mvol{width:60px} body.musOn #ghint{display:none} }
+@media (prefers-reduced-motion:reduce){ #musBar.blocked .mplay{animation:none} }
+#updBar{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 16px;border-radius:12px;background:var(--panel2);border:1px solid rgba(255,209,102,.5);box-shadow:0 10px 30px rgba(0,0,0,.45);font-size:13.5px;max-width:calc(100vw - 24px);flex-wrap:wrap}
+.card.map .pres{display:flex;gap:6px 10px;flex-wrap:wrap;margin-top:6px;font-size:12px;font-weight:600}
+.card.map .pres .on{color:var(--mint)}
+.card.map .pres .tok{color:var(--orange)}
+#wmme .mehd .meact{flex:none;padding:3px 8px;font-size:11.5px;white-space:nowrap}
+</style>
 </head>
 <body>
 
@@ -845,6 +970,8 @@ code{font-family:Consolas,monospace;font-size:12.5px;background:rgba(255,255,255
   <aside id="side">
     <div class="logo" title="Персонажи, организации, способности и связи">DnD COPR</div>
     <div class="me" id="me"></div>
+    <div class="gsbtn" id="gsBtn" title="Поиск по всей картотеке — Ctrl+K"><span class="ic">🔍</span><span class="t">Поиск</span><kbd>Ctrl K</kbd></div>
+    <div class="gsbtn hlpbtn" id="helpBtn" title="Справка: первые шаги, клавиши, что нового — клавиша ?"><span class="ic">❔</span><span class="t">Справка</span><kbd>?</kbd></div>
     <div class="nav" data-view="characters"><span class="dot" style="color:var(--orange);background:var(--orange)"></span><span class="t">Персонажи</span><span class="n" id="nChars"></span></div>
     <div class="nav" data-view="orgs"><span class="dot" style="color:var(--cyan);background:var(--cyan)"></span><span class="t">Организации</span><span class="n" id="nOrgs"></span></div>
     <div class="nav" data-view="locations"><span class="dot" style="color:var(--mint);background:var(--mint)"></span><span class="t">Локации</span><span class="n" id="nLocs"></span></div>
@@ -854,6 +981,7 @@ code{font-family:Consolas,monospace;font-size:12.5px;background:rgba(255,255,255
     <div class="nav" data-view="skills"><span class="dot" style="color:var(--gold);background:var(--gold)"></span><span class="t">Техники</span></div>
     <div class="nav" data-view="timeline"><span class="dot" style="color:#f1e6ff;background:#f1e6ff"></span><span class="t">Таймлайн</span></div>
     <div class="nav dmonly" data-view="log"><span class="dot" style="color:var(--gold);background:var(--gold)"></span><span class="t">Журнал</span><span class="n" id="nLog"></span></div>
+    <div class="nav dmonly" data-view="trash" title="Удалённое за последние 30 дней — можно вернуть"><span class="dot" style="color:#9aa3bf;background:#9aa3bf"></span><span class="t">Корзина</span><span class="n" id="nTrash"></span></div>
     <div class="nav dmonly" data-view="users"><span class="dot" style="color:var(--red);background:var(--red)"></span><span class="t">Участники</span><span class="n" id="nUsers"></span></div>
     <div class="nav dmonly" data-view="stlib"><span class="dot" style="color:#ffd166;background:#ffd166"></span><span class="t">Статусы</span></div><div class="nav dmonly" data-view="efflib"><span class="dot" style="color:var(--cyan);background:var(--cyan)"></span><span class="t">Эффекты</span><span class="n" id="nEff"></span></div><div class="nav dmonly ruonly" data-view="emocards"><span class="dot" style="color:#c04be0;background:#c04be0"></span><span class="t">Карты эмоций</span><span class="n" id="nEmo"></span></div>
     <div class="nav dmonly" data-view="settings"><span class="dot" style="color:var(--faint);background:var(--faint)"></span><span class="t">Настройки</span></div>
@@ -867,9 +995,9 @@ code{font-family:Consolas,monospace;font-size:12.5px;background:rgba(255,255,255
 <div id="techtip"></div>
 <div id="handtip"></div>
 <div id="techdrawer"><div id="techdbody"></div></div>
-<div class="toast" id="toast"></div><div id="wmdrag"></div><div id="wmtip"></div>
+<div class="toast" id="toast"></div><div id="syncChip" role="status"></div><div id="wmdrag"></div><div id="wmtip"></div>
 <button id="chatBtn" title="Чат и кубики" style="display:none">💬<span class="n"></span></button>
-<div id="chat"><div class="rz" title="Потяни — изменить ширину чата; двойной клик — сбросить"></div><div class="hd"><b>Чат</b><span class="faint" style="font-size:11px">/roll 2d6+1 · /gm d20</span><span class="grow"></span><button class="btn sm icon" id="chatDice" title="Показать / спрятать панель кубиков">🎲</button><button class="btn sm icon" id="chatHelp" title="Справка по командам">?</button><button class="btn sm icon dmonly" id="chatClear" title="Удалить всю загруженную историю">🗑</button><button class="btn sm icon" id="chatClose" title="Свернуть">✕</button></div><div class="msgs"></div><div class="more"><button class="btn sm" id="chatMore">раньше…</button></div><div class="dice-row"><span class="faint" style="font-size:11px">🎲</span><button class="btn sm" data-d="4">d4</button><button class="btn sm" data-d="6">d6</button><button class="btn sm" data-d="8">d8</button><button class="btn sm" data-d="10">d10</button><button class="btn sm" data-d="12">d12</button><button class="btn sm" data-d="20">d20</button><button class="btn sm" data-d="100">d100</button><input id="diceN" type="number" min="1" max="20" value="1" title="сколько кубиков"><input id="diceMod" placeholder="+0" title="модификатор, например +3"><select id="diceStat" title="Прибавить характеристику персонажа, от чьего лица пишешь" style="display:none;max-width:120px;font-size:11px;padding:2px 18px 2px 6px"><option value="">+ хар-ка</option></select><label style="display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted)" title="Бросок увидит только мастер"><input type="checkbox" id="diceGM"> GM</label></div><form class="in"><select id="chatAs" title="От чьего лица писать"><option value="">я</option></select><input type="color" id="chatCol" title="Цвет ника (закрепляется за персонажем или за тобой)" style="width:26px;height:30px;padding:0;border:none;background:none;flex:none"><input id="chatText" placeholder="Сообщение или /roll d20" autocomplete="off" maxlength="600"><button class="btn sm primary" type="submit">➤</button></form></div>
+<div id="chat"><div class="rz" title="Потяни — изменить ширину чата; двойной клик — сбросить"></div><div class="hd"><b>Чат</b><span class="faint" style="font-size:11px">/roll 2d6+1 · /gm d20</span><span class="grow"></span><button class="btn sm icon" id="chatDice" title="Показать / спрятать панель кубиков">🎲</button><button class="btn sm icon" id="chatHelp" title="Справка по командам">?</button><button class="btn sm icon dmonly" id="chatClear" title="Удалить всю загруженную историю">🗑</button><button class="btn sm icon" id="chatClose" title="Свернуть">✕</button></div><div class="more"><button class="btn sm" id="chatMore" title="Загрузить более ранние сообщения">↑ раньше…</button></div><div class="msgs"></div><div class="dice-row"><span class="faint" style="font-size:11px">🎲</span><button class="btn sm" data-d="4">d4</button><button class="btn sm" data-d="6">d6</button><button class="btn sm" data-d="8">d8</button><button class="btn sm" data-d="10">d10</button><button class="btn sm" data-d="12">d12</button><button class="btn sm" data-d="20">d20</button><button class="btn sm" data-d="100">d100</button><input id="diceN" type="number" min="1" max="20" value="1" title="сколько кубиков"><input id="diceMod" placeholder="+0" title="модификатор, например +3"><select id="diceStat" title="Прибавить характеристику персонажа, от чьего лица пишешь" style="display:none;max-width:120px;font-size:11px;padding:2px 18px 2px 6px"><option value="">+ хар-ка</option></select><label style="display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted)" title="Бросок увидит только мастер"><input type="checkbox" id="diceGM"> GM</label></div><form class="in"><select id="chatAs" title="От чьего лица писать"><option value="">я</option></select><input type="color" id="chatCol" title="Цвет ника (закрепляется за персонажем или за тобой)" style="width:26px;height:30px;padding:0;border:none;background:none;flex:none"><input id="chatText" placeholder="Сообщение или /roll d20" autocomplete="off" maxlength="600"><button class="btn sm primary" type="submit">➤</button></form></div>
 <input type="file" id="fileIn" accept="image/*" multiple hidden>
 <input type="file" id="jsonIn" accept="application/json,.json" hidden>
 
@@ -1137,13 +1265,13 @@ AUTH.onChange(async u=>{
   $('#login').style.display='none'; $('#app').style.display='grid';
   subscribeAll();
   if(localStorage.getItem('nomenu')) document.body.classList.add('nomenu');
-  renderMe(); render(); chatInit();
+  routeInit(); renderMe(); render(); chatInit(); setTimeout(helpNudge,2500);
 });
 function subscribeAll(){
   const sub=(coll,key,opts,post)=>unsubs.push(DB.subscribe(coll,opts,docs=>{ applyDocs(key,coll,docs,post); }));
   sub('meta','_settings',null,()=>{ const s=world._settings.find(x=>x.id==='settings'); const fresh=s?{...defaultSettings(),...s}:{...defaultSettings(),id:'settings'}; if(!world.settings) world.settings=fresh; else if(!pending.has('settings')&&!(s&&s.updatedAt&&s.updatedAt===world.settings.updatedAt)){ for(const k of Object.keys(world.settings)) if(!(k in fresh)) delete world.settings[k]; Object.assign(world.settings,fresh); } const t=world._settings.find(x=>x.id==='timeline'); if(!pending.has('timeline')&&!(t&&world.timeline&&t.updatedAt&&t.updatedAt===world.timeline.updatedAt)) world.timeline=t?t:{id:'timeline',nodes:[]}; const tc=world._settings.find(x=>x.id==='techniques'); if(!pending.has('techniques')&&!(tc&&world.techniques&&tc.updatedAt&&tc.updatedAt===world.techniques.updatedAt)){ world.techniques=tc?tc:(realDM()?techBaseCatalog():{id:'techniques',branches:[],groups:[]}); techLayoutCache={}; } });
   sub('memberships','memberships'); sub('locLinks','locLinks'); sub('users','users'); sub('wmarkers','wmarkers'); sub('wmdraw','wmdraw');
-  world._live=[]; WM.liveStart=Date.now(); LIVE.subscribe(docs=>{ world._live=docs; liveGoto(docs); WM.onLive&&WM.onLive(); }); presenceStart();
+  world._live=[]; WM.liveStart=Date.now(); LIVE.subscribe(docs=>{ world._live=docs; liveGoto(docs); WM.onLive&&WM.onLive(); if(state.view==='wmap'&&!state.id) wmListPresence(); musSync(); }); presenceStart();
   world._chat=[]; sub('chat','_chat',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); if(realDM()){ world._chatdm=[]; sub('chatdm','_chatdm',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); }
   if(realDM()) sub('docs','docs');
   else { world._docsA=[]; world._docsB=[]; world._docsC=[]; const md=()=>mergeSrc('docs'); sub('docs','_docsA',{where:[['pub','==',true]]},md); sub('docs','_docsB',{where:[['given','array-contains',me.uid]]},md); if(myRole==='player') sub('docs','_docsC',{where:[['owner','==',me.uid]]},md); }
@@ -1162,7 +1290,7 @@ function subscribeAll(){
   // роль может поменяться в реальном времени
   unsubs.push(DB.subscribe('users',{where:[['email','==',me.email]]},docs=>{ const d=docs.find(x=>x.id===me.uid); if(!CONFIG.everyoneDM&&d&&d.role&&d.role!==myRole){ myRole=d.role; toast('Твоя роль изменена: '+roleName(myRole)); unsubs.forEach(f=>f()); unsubs=[]; subscribeAll(); renderMe(); render(); } }));
 }
-function mergeSrc(key){ const m=new Map(); for(const r of [...(world['_'+key+'A']||[]),...(world['_'+key+'B']||[]),...(world['_'+key+'C']||[])]) m.set(r.id,r); const prev=new Map((world[key]||[]).map(x=>[x.id,x])); world[key]=[...m.values()].map(d=>{ const o=prev.get(d.id); return o&&(pending.has(d.id)||stableStr(clean(o))===stableStr(clean(d)))?o:d; }); for(const [id,o] of prev) if(pending.has(id)&&!m.has(id)) world[key].push(o); /* только что созданная запись ещё не пришла ни в одну подписку — не выбрасываем, иначе открытый редактор правит уже ненужную копию */ if(key==='characters') chatFillSpeakers(); }
+function mergeSrc(key){ const m=new Map(); for(const r of [...(world['_'+key+'A']||[]),...(world['_'+key+'B']||[]),...(world['_'+key+'C']||[])]) m.set(r.id,r); const prev=new Map((world[key]||[]).map(x=>[x.id,x])); world[key]=[...m.values()].map(d=>{ const o=prev.get(d.id); return o&&(pending.has(d.id)||stableStr(clean(o))===stableStr(clean(d)))?o:d; }); for(const [id,o] of prev) if((pending.has(id)||o._draft)&&!m.has(id)) world[key].push(o); /* только что созданная запись ещё не пришла ни в одну подписку — не выбрасываем, иначе открытый редактор правит уже ненужную копию */ if(key==='characters') chatFillSpeakers(); }
 /* дм: дописать поля видимости старым записям, чтобы они попадали в отфильтрованные запросы игроков */
 let migrated=false;
 function migrateVisibility(){ if(!realDM()||migrated||!world.settings) return; migrated=true; let n=0; effSeedWounds();
@@ -1174,14 +1302,15 @@ const NO_RENDER_KEYS=new Set(['_live','_chat','_chatdm']); // чат и пинг
 const REDRAW_KEYS=new Set(['wmaps','wmarkers','wmdraw','wmpriv','_dm','characters','orgs','locations','docs']); // на открытой карте — только перерисовка холста, без пересборки страницы (иначе рвётся перетаскивание и мигают картинки)
 function applyDocs(key,coll,docs,post){
   const prev=world[key]||[]; const prevMap=new Map(prev.map(x=>[x.id,x]));
-  let changed=prev.length!==docs.length;
+  const drafts=prev.filter(x=>x._draft&&!docs.some(d=>d.id===x.id)); /* черновики (ещё не в базе) не выбрасываем */
+  let changed=prev.length-drafts.length!==docs.length;
   const next=docs.map(d=>{ const old=prevMap.get(d.id); const s=stableStr(clean(d));
     if(pending.has(d.id)){ // локальные правки в полёте: вливаем чужие изменения в локальную копию (трёхстороннее слияние), свои не теряем
       const loc=pending.get(d.id).obj; const baseS=snapshots.get(d.id); if(baseS&&baseS!==s){ if(mergeRemote(loc,JSON.parse(baseS),clean(d))) changed=true; snapshots.set(d.id,s); } return old||loc; }
     if(old&&stableStr(clean(old))===s) return old; changed=true; snapshots.set(d.id,s);
     if(old){ for(const k of Object.keys(old)) if(!k.startsWith('_')) delete old[k]; Object.assign(old,d); return old; } // тот же объект: открытые страницы и поля ввода не теряют ссылку
     return d; });
-  world[key]=next; if(post) post(); if(key==='characters') chatFillSpeakers();
+  world[key]=drafts.length?next.concat(drafts):next; if(post) post(); if(key==='characters') chatFillSpeakers();
   if(changed){ updateCounts(); if(NO_RENDER_KEYS.has(key)){} else if(state.view==='wmap'&&state.id&&WM.redraw&&REDRAW_KEYS.has(key)){ WM.redraw(); if(key==='characters'&&WM.onMe) WM.onMe(); if(['wmaps','wmarkers'].includes(key)&&WM.onInit) WM.onInit(); if(WM.onScene&&['characters','wmaps','wmarkers'].includes(key)) WM.onScene(); } else scheduleRender(); }
   if(realDM()&&world.settings&&world.characters.length+world.orgs.length+world.locations.length) setTimeout(migrateVisibility,1500);
 }
@@ -1217,7 +1346,9 @@ function mergeIdArrays(l,b,r){ const L=new Map(l.map(x=>[x.id,x])), B=new Map(b.
   return out; }
 /* что именно изменилось относительно базы — пишем только эти поля */
 function diffFields(base,data){ const part={}; let n=0; for(const k of new Set([...Object.keys(base),...Object.keys(data)])){ if(k==='id') continue; if(!(k in data)){ part[k]=DB.DEL; n++; } else if(!(k in base)||!sameV(base[k],data[k])){ part[k]=data[k]; n++; } } return n?part:null; }
-function setStatus(txt,cls=''){ const s=$('#status'); s.textContent=txt; s.className=cls; }
+function setStatus(txt,cls=''){ const s=$('#status'); s.textContent=txt; s.className=cls; syncChipUpd(txt,cls); }
+/* статус сохранения, когда меню слева не видно (карта со свёрнутым меню, телефон): маленькая плашка внизу слева, только пока не «синхронизировано» */
+function syncChipUpd(txt,cls){ const c=$('#syncChip'); if(!c) return; if(syncChipUpd.last===txt+'|'+cls) return; syncChipUpd.last=txt+'|'+cls; /* без лишних замеров раскладки на каждое нажатие клавиши */ const s=$('#status'); const r=s?s.getBoundingClientRect():null; const shown=!!(s&&s.offsetParent&&r.width>40&&r.left<window.innerWidth); const busy=txt&&txt!=='синхронизировано'; c.textContent=busy?(cls==='err'?'⚠ ':'⟳ ')+txt:''; c.classList.toggle('err',cls==='err'); c.classList.toggle('on',!!busy&&!shown); }
 function touch(obj){ if(viewAs){ viewAsWarn(); return; } const coll=collOf(obj); if(!coll) return; obj.updatedAt=Date.now(); obj.updatedBy=me.uid; pending.set(obj.id,{coll,obj,dirty:true}); lastInputAt=Date.now(); setStatus('изменено…','dirty'); clearTimeout(saveTimer); saveTimer=setTimeout(flush,700); }
 function collOf(obj){ for(const [k,c] of Object.entries(COLLMAP)) if(world[k].includes(obj)) return c; if(obj===world.settings||obj===world.timeline||obj===world.techniques) return 'meta'; if(obj===world.dmTimeline) return 'dm'; for(const sd of WM.secrets.values()) if(sd===obj) return 'dm'; return null; }
 function touchFast(obj){ touch(obj); if(pending.has(obj.id)){ clearTimeout(saveTimer); saveTimer=setTimeout(flush,60); } }
@@ -1227,9 +1358,11 @@ async function flush(){
      поэтому одна медленная или «повисшая» без сети запись больше не задерживает остальные; ошибки ловит saveFail */
   const items=[...pending.entries()]; const ws=[];
   for(const [id,{coll,obj}] of items){
+    let born=false; if(obj._draft){ if(isBlankDraft(obj,obj._draft)){ pending.delete(id); continue; } delete obj._draft; obj.createdAt=Date.now(); born=true; } /* черновик уходит в базу, только когда в нём появилось что-то непустое */
     const data=clean(obj); const docId=(coll==='meta'||coll==='dm')?(obj.id||'settings'):id;
     const baseS=snapshots.get(docId); const part=baseS?diffFields(JSON.parse(baseS),data):null;
-    if(isPlayer()&&coll!=='maps') logDiff(coll,docId,obj,data).catch(e=>console.error(e));
+    if(born){ if(isPlayer()) addLog({coll,docId,kind:'create',entityName:entityLabel(coll,obj),label:'создал',after:data}); }
+    else if(isPlayer()&&coll!=='maps') logDiff(coll,docId,obj,data).catch(e=>console.error(e));
     pending.delete(id); snapshots.set(docId,stableStr(data));
     const w=baseS?(part?Promise.resolve().then(()=>DB.update(coll,docId,part)).catch(e=>{ if(e.code==='not-found') return DB.set(coll,docId,data); throw e; }):null):Promise.resolve().then(()=>DB.set(coll,docId,data));
     if(!w) continue; inflight++; ws.push(w.catch(e=>saveFail(e,coll,docId,id)).finally(()=>{ inflight--; saveStatus(); }));
@@ -1245,7 +1378,19 @@ const COLLMAP={characters:'characters',orgs:'orgs',locations:'locations',members
 window.addEventListener('beforeunload',e=>{ if(pending.size||inflight){ e.preventDefault(); e.returnValue=''; } });
 document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='s'){ e.preventDefault(); clearTimeout(saveTimer); flush(); } });
 
-async function createDoc(coll,obj){ if(viewAs){ viewAsWarn(); throw new Error('viewAs'); } obj.createdAt=Date.now(); obj.owner=obj.owner||me.uid; const key=Object.keys(COLLMAP).find(k=>COLLMAP[k]===coll); world[key].push(obj); pending.set(obj.id,{coll,obj}); // чтобы снапшот не дублировал
+/* ===== черновики: «+ Добавить» открывает пустую запись, в базу она попадает только после ввода чего-то непустого; пустую при уходе со страницы выбрасываем ===== */
+const DRAFT_KEYS=['characters','orgs','locations','docs'];
+function makeDraft(coll,obj){ if(viewAs){ viewAsWarn(); return null; } obj.owner=obj.owner||me.uid; obj.createdAt=Date.now(); const key=Object.keys(COLLMAP).find(k=>COLLMAP[k]===coll); obj._draft=true; world[key].push(obj);
+  setTimeout(()=>{ if(obj._draft) obj._draft=JSON.parse(JSON.stringify(clean(obj))); },0); /* образец «пусто» снимаем после первой отрисовки: автоподсчёты страницы (полоски по формулам и т.п.) не считаются вводом */
+  return obj; }
+function draftById(id){ if(!id) return null; for(const k of DRAFT_KEYS){ const e=(world[k]||[]).find(x=>x.id===id); if(e) return e._draft?e:null; } return null; }
+/* записать черновик сразу (перед записью, которая на него ссылается: членство, связь, привязка) */
+async function draftSave(e){ if(!e||!e._draft) return; const coll=collOf(e); if(!coll) return; delete e._draft; e.createdAt=Date.now(); pending.delete(e.id); const data=clean(e);
+  await DB.set(coll,e.id,data); snapshots.set(e.id,stableStr(data)); if(isPlayer()) addLog({coll,docId:e.id,kind:'create',entityName:entityLabel(coll,e),label:'создал',after:data}); }
+/* ушли со страницы: пустые черновики выбрасываем, с данными — сохраняем */
+function dropBlankDrafts(keepId){ for(const k of DRAFT_KEYS){ const arr=world[k]||[]; if(!arr.some(x=>x._draft)) continue;
+  world[k]=arr.filter(x=>{ if(!x._draft||x.id===keepId) return true; if(x._draft===true||isBlankDraft(x,x._draft)){ pending.delete(x.id); return false; } touch(x); return true; }); } }
+async function createDoc(coll,obj){ if(viewAs){ viewAsWarn(); throw new Error('viewAs'); } for(const k of ['charId','orgId','entityId','locId','from','to','ref']){ const dr=draftById(obj[k]); if(dr) await draftSave(dr); } obj.createdAt=Date.now(); obj.owner=obj.owner||me.uid; const key=Object.keys(COLLMAP).find(k=>COLLMAP[k]===coll); world[key].push(obj); pending.set(obj.id,{coll,obj}); // чтобы снапшот не дублировал
   try{ await DB.set(coll,obj.id,clean(obj)); pending.delete(obj.id); snapshots.set(obj.id,stableStr(clean(obj))); if(isPlayer()) addLog({coll,docId:obj.id,kind:'create',entityName:entityLabel(coll,obj),label:'создал'+(coll==='relations'?' связь':coll==='maps'?' карту':''),after:clean(obj)}); }
   catch(e){ pending.delete(obj.id); world[key]=world[key].filter(x=>x!==obj); toast('Нет прав: '+(e.code||e.message),true); render(); throw e; }
   return obj;
@@ -1453,19 +1598,103 @@ function statEff(ch,st){ const b=ch.stats?.[st.id]; if(b==null) return {v:'',bas
 function plural(n,a,b,c){ n=Math.abs(n)%100; const n1=n%10; if(n>10&&n<20) return c; if(n1>1&&n1<5) return b; if(n1===1) return a; return c; }
 function fmtDate(t){ const d=new Date(t); return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}); }
 
-async function newCharacter(){ return createDoc('characters',{id:uid(),name:'',title:'',brief:'',visibility:'full',tags:[],description:'',backstory:'',backstoryVisible:false,progress:{pools:{...((world.techniques&&world.techniques.defaultPools)||{common:14})},learned:{},special:{}},inventory:[],effects:[],bars:(world.settings.defaultBars||[]).map(b=>({id:uid(),name:b.name,color:b.color,cur:+b.max||0,max:+b.max||0,...(b.fmax?{fmax:b.fmax}:{})})),inventoryColumns:JSON.parse(JSON.stringify(world.settings.inventoryColumns||[])),images:[],mainImage:null,thumb:null,stats:{},energy:null,abilities:[],pos:null,players:isDM()?[]:[me.uid]}); }
-async function newOrg(){ return createDoc('orgs',{id:uid(),name:'',title:'',brief:'',visibility:'full',description:'',images:[],mainImage:null,thumb:null,pos:null}); }
-async function newLocation(){ return createDoc('locations',{id:uid(),name:'',title:'',brief:'',visibility:'full',description:'',images:[],mainImage:null,thumb:null,pos:null}); }
+/* пустая запись: кроме id/служебных полей в ней только значения по умолчанию (tpl) или пустые строки, нули, пустые списки */
+function blankVal(v){ if(v==null||v===''||v===false||v===0) return true; if(typeof v==='string') return !v.trim(); if(Array.isArray(v)) return v.every(blankVal); if(typeof v==='object') return Object.keys(v).every(k=>blankVal(v[k])); return false; }
+function isBlankDraft(obj,tpl){ if(tpl===true) return true; for(const k of Object.keys(obj)){ if(k==='id'||k.startsWith('_')||SYNC_META.has(k)||k==='createdAt'||k==='owner') continue; if(tpl&&k in tpl&&stableStr(tpl[k])===stableStr(obj[k])) continue; if(!blankVal(obj[k])) return false; } return true; }
+async function newCharacter(){ return makeDraft('characters',{id:uid(),name:'',title:'',brief:'',visibility:'full',tags:[],description:'',backstory:'',backstoryVisible:false,progress:{pools:{...((world.techniques&&world.techniques.defaultPools)||{common:14})},learned:{},special:{}},inventory:[],effects:[],bars:(world.settings.defaultBars||[]).map(b=>({id:uid(),name:b.name,color:b.color,cur:+b.max||0,max:+b.max||0,...(b.fmax?{fmax:b.fmax}:{})})),inventoryColumns:JSON.parse(JSON.stringify(world.settings.inventoryColumns||[])),images:[],mainImage:null,thumb:null,stats:{},energy:null,abilities:[],pos:null,players:isDM()?[]:[me.uid]}); }
+async function newOrg(){ return makeDraft('orgs',{id:uid(),name:'',title:'',brief:'',visibility:'full',description:'',images:[],mainImage:null,thumb:null,pos:null}); }
+async function newLocation(){ return makeDraft('locations',{id:uid(),name:'',title:'',brief:'',visibility:'full',description:'',images:[],mainImage:null,thumb:null,pos:null}); }
 async function deleteEntity(id){
   const e=findEntity(id); if(!e||!canEdit(e)) return; const t=typeOf(id);
-  if(!await confirmDlg(`Удалить «${e.name||'без имени'}»? Все связи тоже удалятся.`)) return;
-  for(const m of world.memberships.filter(m=>m.charId===id||m.orgId===id)) await removeDoc('memberships',m);
-  for(const m of world.locLinks.filter(m=>m.entityId===id||m.locId===id)) await removeDoc('locLinks',m);
-  for(const r of world.relations.filter(r=>r.from===id||r.to===id)) if(canEditRel(r)) await removeDoc('relations',r);
-  if(e.imgHidden&&realDM()&&!isClone(e)){ const s=await DB.get('dm','img_'+id).catch(()=>null); if(s){ for(const im of (s.images||[])) DB.delete('images',im).catch(()=>{}); DB.delete('dm','img_'+id).catch(()=>{}); } }  if(!isClone(e)) for(const im of [...(e.images||[]),...((e.abilities||[]).flatMap(a=>a.images||[])),...((e.inventory||[]).flatMap(a=>a.images||[]))]) DB.delete('images',im).catch(()=>{});
-  for(const mp of world.maps) if(canEditMap(mp)&&(mp.nodes||[]).some(n=>n.id===id)){ const ks=new Set(mp.nodes.filter(n=>n.id===id).map(n=>n.k||n.id)); mp.nodes=mp.nodes.filter(n=>n.id!==id); mp.edges=(mp.edges||[]).filter(x=>!ks.has(x.from)&&!ks.has(x.to)); touch(mp); }
-  await removeDoc(COLL[t],e); state.id=null; render();
+  if(e._draft){ const k=COLL[t]; world[k]=world[k].filter(x=>x!==e); pending.delete(e.id); state.id=null; render(); return; } /* черновик: в базе его нет — просто закрыть */
+  if(!await confirmDlg(`Удалить «${e.name||'без имени'}»? Все связи тоже удалятся. ${realDM()?'Вернуть можно из «Корзины» в течение '+TRASH_DAYS+' дней.':'Мастер сможет вернуть запись из корзины в течение '+TRASH_DAYS+' дней.'}`)) return;
+  /* в корзину: сама запись, её связи и узлы на картах связей; картинки не удаляем, пока запись лежит в корзине */
+  const g=uid(); const imgs=isClone(e)?[]:[...(e.images||[]),...((e.abilities||[]).flatMap(a=>a.images||[])),...((e.inventory||[]).flatMap(a=>a.images||[]))];
+  let stash=null; if(e.imgHidden&&realDM()&&!isClone(e)){ stash=await DB.get('dm','img_'+id).catch(()=>null); if(stash) imgs.push(...(stash.images||[])); }
+  if(!await trashMain(g,COLL[t],e,e.name,t,imgs)) return;
+  if(stash){ await trashPut(g,'dm',{...stash,id:'img_'+id}); DB.delete('dm','img_'+id).catch(()=>{}); }
+  for(const m of world.memberships.filter(m=>m.charId===id||m.orgId===id)){ await trashPut(g,'memberships',m); await removeDoc('memberships',m); }
+  for(const m of world.locLinks.filter(m=>m.entityId===id||m.locId===id)){ await trashPut(g,'locLinks',m); await removeDoc('locLinks',m); }
+  for(const r of world.relations.filter(r=>r.from===id||r.to===id)) if(canEditRel(r)){ await trashPut(g,'relations',r); await removeDoc('relations',r); }
+  for(const mp of world.maps) if(canEditMap(mp)&&(mp.nodes||[]).some(n=>n.id===id)){ const ks=new Set(mp.nodes.filter(n=>n.id===id).map(n=>n.k||n.id)); await trashPut(g,'_mapnodes',{id:mp.id,nodes:mp.nodes.filter(n=>n.id===id),edges:(mp.edges||[]).filter(x=>ks.has(x.from)||ks.has(x.to))}); mp.nodes=mp.nodes.filter(n=>n.id!==id); mp.edges=(mp.edges||[]).filter(x=>!ks.has(x.from)&&!ks.has(x.to)); touch(mp); }
+  await removeDoc(COLL[t],e); state.id=null; render(); toast(realDM()?'Удалено — вернуть можно в «Корзине»':'Удалено');
 }
+
+/* ===== К2: корзина. Удалённые персонажи, организации, локации, карты, карты связей и документы 30 дней лежат в trash/{id}
+   (одна запись корзины на каждый удалённый документ, общий g — «что удалилось вместе»); мастер возвращает их в разделе «Корзина».
+   Картинки удаляются только при очистке корзины (вручную или через 30 дней). ===== */
+const TRASH_DAYS=30; let TRASH=null;
+async function trashPut(g,coll,obj,extra={}){ try{ await DB.set('trash',uid(),{g,coll,oid:obj.id,data:clean(obj),at:Date.now(),by:me.uid,byName:me.name||'',...extra}); if(TRASH) TRASH.at=0; return true; }catch(err){ console.error('trash',coll,obj&&obj.id,err); return false; } }
+/* главный документ удаляемой записи; если в корзину положить не вышло — спросить, удалять ли насовсем */
+async function trashMain(g,coll,obj,title,kind,imgs=[]){ if(await trashPut(g,coll,obj,{main:true,title:title||'',kind,imgs:[...new Set(imgs.filter(x=>x&&typeof x==='string'&&!x.startsWith('bi:')&&x!==SIL_ID))]})) return true;
+  return await confirmDlg(`Не получилось положить «${title||'запись'}» в корзину. Удалить без возможности вернуть?`,'Удалить навсегда'); }
+function trashGroups(docs){ const G=new Map(); for(const t of docs){ if(!G.has(t.g)) G.set(t.g,[]); G.get(t.g).push(t); } return [...G.values()].map(list=>({list,main:list.find(t=>t.main)||list[0]})).sort((a,b)=>(b.main.at||0)-(a.main.at||0)); }
+async function trashFetch(){ if(!realDM()) return; try{ const docs=await (DB.listServer||DB.list)('trash',{}); TRASH={docs,at:Date.now()};
+    const old=trashGroups(docs).filter(gr=>(gr.main.at||0)<Date.now()-TRASH_DAYS*864e5); if(old.length){ for(const gr of old) await trashPurge(gr.list); TRASH.docs=docs.filter(t=>!old.some(gr=>gr.list.includes(t))); } }
+  catch(err){ console.error('trash',err); TRASH={docs:[],at:Date.now(),err:err.code||err.message}; }
+  const n=$('#nTrash'); if(n) n.textContent=trashGroups(TRASH.docs).length||''; if(state.view==='trash') render(); }
+/* вернуть: сначала главный документ, потом связанные; узлы карт связей и предметы карт — обратно в свои карты */
+async function trashRestore(list){ const main=list.find(t=>t.main)||list[0]; if(!main) return false;
+  const now=await DB.get(main.coll,main.oid).catch(()=>null); if(now&&!await confirmDlg(`«${main.title||'запись'}» сейчас есть в картотеке (её уже вернули или создали заново). Заменить версией из корзины?`,'Заменить')) return false;
+  const order=['characters','orgs','locations','docs','maps','wmaps','dm','memberships','locLinks','relations','wmarkers','wmdraw','wmpriv','_mapnodes','_mapitems']; let bad=0;
+  for(const t of [...list].sort((a,b)=>(b.main?1:0)-(a.main?1:0)||order.indexOf(a.coll)-order.indexOf(b.coll))){ try{
+    if(t.coll==='_mapnodes'){ const mp=byId(world.maps,t.oid); if(mp){ const have=new Set((mp.nodes||[]).map(n=>n.k||n.id)); mp.nodes=[...(mp.nodes||[]),...((t.data&&t.data.nodes)||[]).filter(n=>!have.has(n.k||n.id))]; const ek=new Set((mp.edges||[]).map(x=>x.id||x.from+'>'+x.to)); mp.edges=[...(mp.edges||[]),...((t.data&&t.data.edges)||[]).filter(x=>!ek.has(x.id||x.from+'>'+x.to))]; touch(mp); } continue; }
+    if(t.coll==='_mapitems'){ const mp=byId(world.wmaps,t.oid); if(mp){ const its=(t.data&&t.data.items)||[]; if(t.data.secret){ const s=wmSecret(mp,true); s.items=[...(s.items||[]),...its]; wmCommit(mp,true); } else { mp.items=[...(mp.items||[]),...its]; wmCommit(mp,false); } } continue; }
+    await DB.set(t.coll,t.oid,t.data); }catch(err){ bad++; console.error('restore',t.coll,t.oid,err); } }
+  for(const t of list) await DB.delete('trash',t.id).catch(()=>{});
+  if(bad) toast(`Возвращено, но ${bad} ${plural(bad,'часть','части','частей')} записать не удалось — подробности в консоли`,true);
+  return true; }
+/* насовсем: картинки записи и сами записи корзины */
+/* картинка ещё где-то используется (копия карты, клон персонажа, эффект…) — не удалять */
+function imgInUse(id){ const has=a=>Array.isArray(a)&&a.includes(id); const itUse=it=>it&&(it.img===id||it.image===id||has(it.images));
+  for(const e of [...world.characters,...world.orgs,...world.locations]) if(e.mainImage===id||has(e.images)||(e.abilities||[]).some(x=>has(x.images))||(e.inventory||[]).some(x=>has(x.images))) return true;
+  for(const mp of world.wmaps) if(mp.image===id||(mp.items||[]).some(itUse)) return true; for(const s of WM.secrets.values()) if((s.items||[]).some(itUse)) return true; if((world.wmdraw||[]).some(itUse)) return true;
+  for(const d of world.docs) if(has(d.images)) return true; for(const d of (world.settings&&world.settings.effectLib)||[]) if(d.image===id) return true; return false; }
+async function trashPurge(list){ for(const t of list){ for(const im of (t.imgs||[])) if(!imgInUse(im)) await DB.delete('images',im).catch(()=>{}); await DB.delete('trash',t.id).catch(()=>{}); } }
+const TRASH_KIND={c:['👤','персонаж'],o:['🛡','организация'],l:['📍','локация'],wmap:['🗺','карта'],map:['🕸','карта связей'],doc:['📜','документ']};
+function renderTrash(m){
+  const page=el(`<div class="page"><div class="head"><h1>Корзина</h1><span class="grow"></span><button class="btn sm" id="trRe" title="Перечитать корзину">⟳</button><button class="btn sm danger" id="trAll">Очистить корзину</button></div>
+    <div class="faint" style="margin:-10px 0 16px;line-height:1.6;max-width:820px">Удалённые персонажи, организации, локации, карты, карты связей и документы лежат здесь ${TRASH_DAYS} дней — вместе со связями, картинками, токенами и рисунками, — потом удаляются насовсем. «↩ Вернуть» восстанавливает запись со всем, что удалилось вместе с ней. Отдельные записи из старых бэкапов — Настройки → Данные → «Вернуть отдельные записи».</div>
+    <div class="panel"><div class="list trlist"></div></div></div>`);
+  const list=$('.trlist',page);
+  if(!TRASH||Date.now()-TRASH.at>60000){ list.innerHTML='<div class="faint">Загружаю…</div>'; if(!TRASH||!TRASH.loading){ TRASH={...(TRASH||{docs:[],at:0}),loading:true}; trashFetch(); } }
+  else { const gs=trashGroups(TRASH.docs);
+    if(TRASH.err) list.append(el(`<div class="faint" style="color:var(--red)">Не удалось прочитать корзину: ${esc(TRASH.err)}</div>`));
+    if(!gs.length&&!TRASH.err) list.innerHTML='<div class="empty">Корзина пуста.</div>';
+    for(const gr of gs){ const t=gr.main; const [ic,kn]=TRASH_KIND[t.kind]||['🗑','запись']; const left=Math.max(0,Math.ceil(((t.at||0)+TRASH_DAYS*864e5-Date.now())/864e5)); const extra=gr.list.length-1;
+      const row=el(`<div class="trrow"><span class="ic">${ic}</span><div class="grow" style="min-width:0"><div class="tt"><b>${esc(t.title||'без названия')}</b> <span class="faint">${kn}</span></div><div class="faint" style="font-size:12px">удалил${t.byName?' '+esc(t.byName):''} ${fmtDate(t.at)} · осталось ${left} ${plural(left,'день','дня','дней')}${extra?` · +${extra} ${plural(extra,'связанная запись','связанные записи','связанных записей')}`:''}</div></div><button class="btn sm primary rs">↩ Вернуть</button><button class="btn sm icon rm" title="Удалить насовсем">✕</button></div>`);
+      $('.rs',row).onclick=async()=>{ $$('button',row).forEach(b=>b.disabled=true); if(await trashRestore(gr.list)){ toast('Возвращено: '+(t.title||'запись')); TRASH.docs=TRASH.docs.filter(x=>!gr.list.includes(x)); render(); } else $$('button',row).forEach(b=>b.disabled=false); };
+      $('.rm',row).onclick=async()=>{ if(!await confirmDlg(`Удалить «${t.title||'запись'}» насовсем? Вернуть будет нельзя.`,'Удалить навсегда')) return; await trashPurge(gr.list); TRASH.docs=TRASH.docs.filter(x=>!gr.list.includes(x)); render(); };
+      list.append(row); }
+    const n=$('#nTrash'); if(n) n.textContent=gs.length||''; }
+  $('#trRe',page).onclick=()=>{ TRASH=null; render(); };
+  $('#trAll',page).onclick=async()=>{ const gs=TRASH?trashGroups(TRASH.docs):[]; if(!gs.length){ toast('Корзина и так пуста'); return; } if(!await confirmDlg(`Удалить насовсем всё, что лежит в корзине (${gs.length})? Вернуть будет нельзя.`,'Очистить')) return; for(const gr of gs) await trashPurge(gr.list); TRASH.docs=[]; render(); toast('Корзина очищена'); };
+  m.append(page); }
+
+/* ===== К2: вернуть отдельные записи из файла бэкапа (персонажа, карту, документ…) — вместе со связями, картинками, токенами; остальное не трогаем ===== */
+function partRestorePick(){ if(!realDM()) return; const fi=$('#jsonIn'); fi.value=''; fi.onchange=async()=>{ const f=fi.files[0]; if(!f) return; let bk; try{ bk=JSON.parse(await f.text()); }catch{ toast('Это не файл бэкапа',true); return; } if(!bk||!bk.data){ toast('Это не файл бэкапа',true); return; } partRestoreDialog(bk); }; fi.click(); }
+function partRestoreDialog(bk){ const D=bk.data; const kinds=[['characters','👤 Персонажи','name'],['orgs','🛡 Организации','name'],['locations','📍 Локации','name'],['wmaps','🗺 Карты','name'],['maps','🕸 Карты связей','title'],['docs','📜 Документы','title']];
+  const sel=new Set(); const b=openModal(`<h2>Вернуть записи из бэкапа</h2><div class="faint" style="margin:-8px 0 10px;line-height:1.5">Бэкап от ${fmtDate(bk.at)}. Отметь, что вернуть: запись вернётся со своими связями и картинками, карта — с токенами, рисунками и скрытым слоем. Если такая запись есть сейчас, она заменится версией из бэкапа; остальное в картотеке не меняется.</div><input id="prq" placeholder="поиск по названию…" style="width:100%;margin-bottom:8px"><div class="prlist"></div><div class="modal-actions"><span class="faint" id="prn" style="margin-right:auto"></span><button class="btn" id="prx">Отмена</button><button class="btn primary" id="prok" disabled>Вернуть</button></div>`,true);
+  const list=$('.prlist',b); const upd=()=>{ $('#prn',b).textContent=sel.size?'Выбрано: '+sel.size:''; $('#prok',b).disabled=!sel.size; };
+  const drawL=()=>{ const q=$('#prq',b).value.trim().toLowerCase();
+    list.innerHTML=kinds.map(([c,lab,f])=>{ const arr=(D[c]||[]).filter(d=>!isClone(d)&&(!q||String(d[f]||'').toLowerCase().includes(q))).sort((x,y)=>String(x[f]||'').localeCompare(String(y[f]||''),'ru')); if(!arr.length) return '';
+      return `<div class="tiny" style="margin:10px 0 4px">${lab} · ${arr.length}</div>`+arr.map(d=>{ const k=c+':'+d.id; const now=(world[c]||[]).some(x=>x.id===d.id); return `<label class="prrow"><input type="checkbox" data-k="${esc(k)}" ${sel.has(k)?'checked':''}><span class="grow">${esc(d[f]||'без названия')}</span><span class="faint">${now?'есть сейчас — заменится':'сейчас нет'}</span></label>`; }).join(''); }).join('')||'<div class="faint">Ничего не найдено.</div>';
+    $$('input[data-k]',list).forEach(cb=>cb.onchange=()=>{ cb.checked?sel.add(cb.dataset.k):sel.delete(cb.dataset.k); upd(); }); };
+  $('#prq',b).oninput=drawL; drawL(); upd(); $('#prx',b).onclick=closeModal;
+  $('#prok',b).onclick=async()=>{ const btn=$('#prok',b); btn.disabled=true; btn.textContent='Возвращаю…'; const r=await partRestore(bk,[...sel]); closeModal(); toast(`Возвращено: ${r.main} ${plural(r.main,'запись','записи','записей')} (документов в базе: ${r.docs}${r.bad?', с ошибкой: '+r.bad:''})`,!!r.bad); }; }
+async function partRestore(bk,keys){ const D=bk.data; const inBk=(c,id)=>(D[c]||[]).find(d=>d.id===id); const out=new Map(); const add=(c,d)=>{ if(d&&d.id) out.set(c+'/'+d.id,[c,d]); };
+  const addImg=id=>{ if(!id||typeof id!=='string'||id.startsWith('bi:')||id===SIL_ID) return; add('images',inBk('images',id)); };
+  let main=0;
+  for(const k of keys){ const i=k.indexOf(':'); const c=k.slice(0,i), id=k.slice(i+1); const d=inBk(c,id); if(!d) continue; main++; add(c,d);
+    if(c==='characters'||c==='orgs'||c==='locations'){ for(const x of D.memberships||[]) if(x.charId===id||x.orgId===id) add('memberships',x); for(const x of D.locLinks||[]) if(x.entityId===id||x.locId===id) add('locLinks',x); for(const x of D.relations||[]) if(x.from===id||x.to===id) add('relations',x);
+      [d.mainImage,d.thumbRef,...(d.images||[]),...(d.abilities||[]).flatMap(a=>a.images||[]),...(d.inventory||[]).flatMap(a=>a.images||[])].forEach(addImg); const st=inBk('dm','img_'+id); if(st){ add('dm',st); (st.images||[]).forEach(addImg); } }
+    if(c==='wmaps'){ addImg(d.image); const s=inBk('dm','wm_'+id); if(s) add('dm',s); for(const it of [...(d.items||[]),...((s&&s.items)||[])]){ addImg(it.img); addImg(it.image); (it.images||[]).forEach(addImg); }
+      for(const x of D.wmarkers||[]) if(x.mapId===id) add('wmarkers',x); for(const x of D.wmdraw||[]) if(x.mapId===id){ add('wmdraw',x); addImg(x.img); addImg(x.image); (x.images||[]).forEach(addImg); } for(const x of D.wmpriv||[]) if(x.mapId===id){ add('wmpriv',x); for(const it of x.items||[]){ addImg(it.img); addImg(it.image); } }
+      for(const x of D.characters||[]) if(x.cloneMap===id) add('characters',x); }
+    if(c==='docs') (d.images||[]).forEach(addImg); }
+  const order=['images','dm','characters','orgs','locations','docs','maps','wmaps','memberships','locLinks','relations','wmarkers','wmdraw','wmpriv']; let docs=0, bad=0;
+  for(const [c,d] of [...out.values()].sort((a,b)=>order.indexOf(a[0])-order.indexOf(b[0]))){ const body={...d}; delete body._pending; try{ await DB.set(c,d.id,body); docs++; }catch(err){ bad++; console.error('part restore',c,d.id,err); } }
+  return {main,docs,bad}; }
 
 /* ============================================================
    UI: общее
@@ -1488,17 +1717,105 @@ const myNavHide=()=>(realDM()&&!viewAs&&me&&(byId(world.users,me.uid)||{}).navHi
 function applyNav(){ document.body.classList.toggle('noAbDone',!!(world.settings&&world.settings.noAbDone)); const H=myNavHide(); $$('.nav[data-view]').forEach(n=>{ const v=n.dataset.view; if(H[v]&&v!=='settings'){ n.style.display='none'; return; } if(n.classList.contains('dmonly')){ n.style.display=(isDM()&&(!n.classList.contains('ruonly')||ruOn()))?'':'none'; return; } n.style.display=sectionOn(v)?'':'none'; }); }
 /* ошибка при отрисовке страницы — показать, а не пустой экран */
 window.addEventListener('error',e=>{ try{ if(document.body&&!document.body.dataset.errShown){ document.body.dataset.errShown='1'; setTimeout(()=>{ delete document.body.dataset.errShown; },3000); toast('Ошибка: '+(e.message||'?')+' (строка '+(e.lineno||'?')+')',true); } }catch{} });
-function go(view,id=null,opts={}){ if(!opts.back&&(state.view!==view||state.id!==id)){ navStack.push({view:state.view,id:state.id}); if(navStack.length>50) navStack.shift(); } state.view=view; state.id=id; state.q=''; render(); $('#main').scrollTop=0; }
+/* ===== адреса страниц: #/раздел/id/вкладка. F5 возвращает на ту же страницу, «Назад»/«Вперёд» браузера и мыши работают, ссылкой можно поделиться ===== */
+const ROUTE_VIEWS=new Set(['characters','orgs','locations','graph','wmap','docs','skills','timeline','log','trash','users','stlib','efflib','emocards','settings']);
+const ROUTE={want:null}; let RENDER_DEPTH=0;
+function routeHash(view,id,tab){ let h='#/'+view; if(id) h+='/'+encodeURIComponent(id); if(id&&tab) h+='/'+encodeURIComponent(tab); return h; }
+function routeParse(h){ const m=String(h||'').match(/^#\/([a-z]+)(?:\/([^/?#]+))?(?:\/([^/?#]+))?/); if(!m||!ROUTE_VIEWS.has(m[1])) return null; let id=null, tab=null; try{ id=m[2]?decodeURIComponent(m[2]):null; tab=m[3]?decodeURIComponent(m[3]):null; }catch{} return {view:m[1],id,tab}; }
+/* запись, на которую ведёт адрес, уже пришла из базы? (id без записи — ещё грузится или нет доступа) */
+function routeTarget(r){ if(!r.id) return true; const v=r.view; if(v==='characters') return !!byId(world.characters,r.id); if(v==='orgs') return !!byId(world.orgs,r.id); if(v==='locations') return !!byId(world.locations,r.id); if(v==='graph') return r.id==='__all__'||!!byId(world.maps,r.id); if(v==='wmap') return !!byId(world.wmaps,r.id); if(v==='docs') return !!byId(world.docs,r.id); return true; }
+function routeTab(){ return state.view==='characters'&&state.id&&charTab[state.id]&&charTab[state.id]!=='over'?charTab[state.id]:null; }
+function routeTitle(){ const id=state.id, v=state.view; let t='';
+  if(id){ if(v==='characters'||v==='orgs'||v==='locations') t=findEntity(id)?.name||''; else if(v==='wmap') t=byId(world.wmaps,id)?.name||'Карта'; else if(v==='graph') t=id==='__all__'?'Общий обзор':(byId(world.maps,id)?.title||'Карта связей'); else if(v==='docs') t=byId(world.docs,id)?.title||'Документ'; }
+  if(!t){ const n=document.querySelector(`.nav[data-view="${v}"] .t`); t=n?n.textContent:''; } return t; }
+function routeSync(mode){ if(!me) return; const h=routeHash(state.view,state.id,routeTab()); try{ const t=routeTitle(); document.title=(t?t+' · ':'')+'DnD COPR'; }catch{}
+  if(location.hash===h) return; try{ const d=(history.state&&history.state.d)||0; if(mode==='push') history.pushState({r:1,d:d+1},'',h); else history.replaceState({r:1,d},'',h); }catch{} }
+/* вход по ссылке: запоминаем цель и ждём, пока нужная запись придёт из базы (до 9 с), потом открываем */
+function routeInit(){ const r=routeParse(location.hash); ROUTE.want=r?{...r,until:Date.now()+9000}:null; }
+function routeApplyWant(){ const w=ROUTE.want; if(!w) return true;
+  if(routeTarget(w)){ ROUTE.want=null; state.view=w.view; state.id=w.id; if(w.tab&&w.view==='characters'&&w.id) charTab[w.id]=w.tab; return true; }
+  if(Date.now()<w.until){ const m=$('#main'); if(!m.querySelector('.routewait')) m.innerHTML='<div class="page routewait"><div class="empty">Загружаю страницу по ссылке…</div></div>'; clearTimeout(w.timer); w.timer=setTimeout(render,w.until-Date.now()+60); return false; }
+  ROUTE.want=null; state.view=w.view; state.id=null; toast('Страница по ссылке не найдена или недоступна',true); return true; }
+window.addEventListener('popstate',()=>{ if(!me||!world.settings) return; const r=routeParse(location.hash); if(!r) return; if($('#modal').classList.contains('on')) closeModal();
+  if(r.tab&&r.view==='characters'&&r.id) charTab[r.id]=r.tab;
+  if(r.id&&!routeTarget(r)){ go(r.view,null,{fromHash:true,back:true}); return; }
+  if(r.view===state.view&&r.id===state.id){ render(); return; }
+  go(r.view,r.id,{fromHash:true,back:true}); });
+function go(view,id=null,opts={}){ if(!RENDER_DEPTH) ROUTE.want=null; if(state.id!==id) dropBlankDrafts(id); const changed=state.view!==view||state.id!==id; if(!opts.back&&changed){ navStack.push({view:state.view,id:state.id}); if(navStack.length>50) navStack.shift(); } state.view=view; state.id=id; state.q=''; if(changed&&!opts.back&&!opts.fromHash&&!RENDER_DEPTH) routeSync('push'); render(); $('#main').scrollTop=0; }
 /* назад: туда, откуда пришли (карта, таймлайн, журнал…), иначе — в список */
-function goBack(fallbackView){ while(navStack.length){ const p=navStack.pop(); if(p.view===state.view&&p.id===state.id) continue; if(p.id&&p.view!=='graph'&&p.view!=='wmap'&&!findEntity(p.id)) continue; if(p.view==='graph'&&p.id&&p.id!=='__all__'&&!byId(world.maps,p.id)) continue; if(p.view==='wmap'&&p.id&&!byId(world.wmaps,p.id)) continue; go(p.view,p.id,{back:true}); return; } go(fallbackView,null,{back:true}); }
+function goBack(fallbackView){ const hs=history.state; if(hs&&hs.r&&hs.d>0){ navStack.pop(); history.back(); return; }
+  while(navStack.length){ const p=navStack.pop(); if(p.view===state.view&&p.id===state.id) continue; if(p.id&&p.view!=='graph'&&p.view!=='wmap'&&!findEntity(p.id)) continue; if(p.view==='graph'&&p.id&&p.id!=='__all__'&&!byId(world.maps,p.id)) continue; if(p.view==='wmap'&&p.id&&!byId(world.wmaps,p.id)) continue; go(p.view,p.id,{back:true}); return; } go(fallbackView,null,{back:true}); }
 function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); if(t==='c') go('characters',id); else if(t==='o') go('orgs',id); else if(t==='l') go('locations',id); }
-$$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view));
+$$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
+/* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
+const APP_NEWS=[
+  {d:'2026-09-27',t:'Удобство, поиск, корзина, телефон',items:[
+    'У страниц появились адреса: F5 возвращает на ту же страницу и вкладку листа, работают «Назад» и «Вперёд», ссылкой на лист или карту можно поделиться.',
+    'Общий поиск — Ctrl+K или 🔍 в меню: персонажи, организации, локации, карты, документы, события, эффекты.',
+    'Списки персонажей, организаций и локаций: вид «список» (☰) и сортировка по имени или по дате правки.',
+    'Корзина (у мастера): удалённые персонажи, организации, локации, карты, карты связей и документы 30 дней можно вернуть вместе со связями и картинками. Отдельные записи можно вернуть и из файла бэкапа.',
+    'На карточках карт видно, где сейчас люди (● здесь) и где стоит твой токен. В панели «Мой» — «📍 На карту» и «⌖ Найти».',
+    'Карта просторнее: меню слева сворачивается в полоску значков (◧), «Мой» и бой можно держать вкладками в колонке чата (◨), панель «Мой» сворачивается до заголовка (▁).',
+    'Телефон и планшет: масштаб щипком, сдвиг двумя пальцами, кнопки + − ⛶ на карте, меню со значками, листы персонажей помещаются в экран.',
+    'Пустые записи больше не создаются: персонаж, организация, локация или документ сохраняются, как только в них что-то введено; карты создаются сразу с названием.',
+    'Музыка сцены (включается в Настройках): мастер ставит трек кнопкой ♫ на карте — он играет у всех, громкость у каждого своя.',
+    'Плашка «Вышла новая версия» — сайт сам скажет, когда пора обновить страницу.',
+    'Мелочи: стандартные столбцы инвентаря, «↕ по дате» в таймлайне, пометка «дубль» в библиотеке эффектов, «↑ раньше…» в чате сверху, статус сохранения виден и на карте.']}];
+function helpFirst(){ const dm=isDM()&&!viewAs;
+  return dm?`<ol>
+    <li><b>Мир.</b> «Персонажи», «Организации», «Локации» → «+ Добавить». Запись сохранится, как только ты что-нибудь в неё введёшь. Связи — вкладка «Связи» на листе и раздел «Карты связей».</li>
+    <li><b>Игроки.</b> «Участники»: сделай вошедших игроками и закрепи за ними персонажей. Что игрокам можно — «Настройки → Права игроков».</li>
+    <li><b>Карта сессии.</b> «Карты» → «Из картинки» или «Нарисовать». Токены — «👥 Персонажи → ☷ Токены», сетка и туман — ⚙ на карте, «⇥ всех» переводит игроков на эту карту.</li>
+    <li><b>Бой.</b> ⚔ — трекер инициативы: «+ выделенные», раунды, ходы; полоса ▬ — компактный вид сверху.</li>
+    <li><b>Документы и музыка.</b> Письма и улики — «Документы» (выдать игроку или положить на карту). Фоновая музыка — «Настройки → Общая музыка сцены», потом ♫ на карте.</li>
+    <li><b>Если что-то удалили.</b> «Корзина» — 30 дней. Бэкапы — «Настройки → Данные»; на компьютере мастера бэкап делается сам раз в день.</li></ol>`
+  :`<ol>
+    <li><b>Твой персонаж</b> — в «Персонажах» первым, со звёздочкой ★. Лист разбит на вкладки: «Обзор», «Характеристики», «Способности»… Всё сохраняется само.</li>
+    <li><b>Где игра.</b> В «Картах» на карточке карты видно «● здесь» — там сейчас мастер и игроки. Мастер может и сам перевести тебя на нужную карту.</li>
+    <li><b>Твой токен.</b> На карте открой «👤 Мой» (или вкладку «Персонаж» в колонке чата): «📍 На карту» ставит токен в центр экрана, «⌖ Найти» показывает его. Двигай токен мышью или пальцем.</li>
+    <li><b>Кубики.</b> 💬 чат: кнопки d4…d100, «+ хар-ка» прибавит характеристику, <code>/roll 2d6+1</code> — любой бросок. У характеристик и способностей в «Моём» есть 🎲.</li>
+    <li><b>Документы.</b> Письма и улики, которые выдал мастер, лежат в «Документах»; документ на карте открывается кликом.</li>
+    <li><b>Поиск.</b> Ctrl+K или 🔍 в меню — быстро найти персонажа, карту или документ.</li></ol>`; }
+function helpKeys(){ const row=(k,t)=>`<tr><td>${k}</td><td>${t}</td></tr>`; const dm=isDM()&&!viewAs;
+  return `<h4>Везде</h4><table>${row('Ctrl+K','поиск по всей картотеке')}${row('?','эта справка')}${row('Shift+Enter','открыть / закрыть чат')}${row('Esc','закрыть окно')}${row('Ctrl+S','сохранить сейчас (обычно всё сохраняется само)')}${row('Alt+← / Alt+→','назад / вперёд по страницам (как в браузере)')}</table>
+  <h4>Карта</h4><table>${row('колесо · щипок','масштаб; + − ⛶ — кнопки справа внизу')}${row('тянуть · один палец','двигать карту или свой токен')}${row('два пальца','масштаб и сдвиг на телефоне')}${row('клик · двойной клик','что это · открыть лист или документ')}${row('Alt+клик','пинг — показать место всем'+(dm?' (Shift+Alt — с переносом всех)':''))}${row('R','линейка (её видят все, пока ты меряешь)')}${row('X','стрелки «кто кого атакует», Shift+X — убрать все')}${row('Space','во время движения токена — точка маршрута'+(dm?'; при открытом трекере — следующий ход':''))}${row('Ctrl+C / Ctrl+V','копировать и вставить (и на другую карту)')}${row('Delete','убрать выделенное')}${row('Ctrl+Z','отменить')}${row('Esc','сбросить инструмент и выделение')}${dm?row('V · A · L · S · P · T · N','выбор · область · линия · фигура · место · надпись · документ')+row('F','туман войны')+row('H','спрятать / показать панель')+row('Ctrl+A · Ctrl+D','выделить всё · дублировать')+row('Shift+клик · Shift+рамка','добавить к выделению'):''}</table>
+  <h4>Карты связей</h4><table>${row('тянуть','двигать элементы; по пустому месту — схему')}${row('Shift+тянуть','нарисовать связь')}${row('Ctrl+клик','выделить несколько')}${row('двойной клик','открыть лист')}${row('Ctrl+C / Ctrl+V · Del · Ctrl+Z','копировать и вставить · убрать · отменить')}</table>
+  <h4>Чат</h4><table>${row('/roll d20 · /r 2d6+1 атака','бросок с подписью')}${row('/roll 4d6kh3','оставить 3 лучших (kl — худших)')}${row('/gm d20','бросок видит только мастер')}${row('/me действие','действие от третьего лица')}${row('/help','все команды')}</table>`; }
+function helpNews(){ return APP_NEWS.map(n=>`<h4>${esc(n.d.split('-').reverse().join('.'))} — ${esc(n.t)}</h4><ul>${n.items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`).join('')+'<div class="faint" style="font-size:12px;margin-top:10px">Раньше — в файле НАСТРОЙКА.md у мастера.</div>'; }
+function helpMark(which){ try{ localStorage.setItem('help.seen','1'); if(which==='news') localStorage.setItem('news.seen',APP_NEWS[0].d); }catch{} }
+function helpOpen(tab){ tab=tab||'first'; helpMark(); $('#hlpNudge')?.remove();
+  const b=openModal(`<h2>Справка</h2><div class="hlptabs"><button class="btn sm" data-t="first">Первые шаги</button><button class="btn sm" data-t="keys">Клавиши и мышь</button><button class="btn sm" data-t="news">Что нового</button></div><div class="hlpbody"></div><div class="modal-actions"><button class="btn primary" id="hlpOk">Понятно</button></div>`,true);
+  const body=$('.hlpbody',b); const show=t=>{ $$('.hlptabs button',b).forEach(x=>x.classList.toggle('on',x.dataset.t===t)); body.innerHTML=t==='keys'?helpKeys():t==='news'?helpNews():helpFirst(); body.scrollTop=0; if(t==='news') helpMark('news'); };
+  $$('.hlptabs button',b).forEach(x=>x.onclick=()=>show(x.dataset.t)); $('#hlpOk',b).onclick=closeModal; show(tab); }
+/* первый вход — «Впервые здесь?», после обновления — «Что нового» (один раз, без окна поверх работы) */
+function helpNudge(){ let seen=null, news=null, old=false; try{ seen=localStorage.getItem('help.seen'); news=localStorage.getItem('news.seen'); old=!!(localStorage.getItem('chatSeen')||localStorage.getItem('chatSize')||Object.keys(localStorage).some(k=>/^(wm\.|lsec\.|copr\.)/.test(k))); }catch{ return; }
+  const latest=APP_NEWS[0].d; let text='', tab='';
+  if(!seen&&!old){ text='👋 Впервые здесь? Первые шаги — за минуту'; tab='first'; try{ localStorage.setItem('news.seen',latest); }catch{} }
+  else if(!news||news<latest){ text='✨ Что нового в картотеке'; tab='news'; } if(!text) return;
+  const b=el(`<div id="hlpNudge" role="status"><span>${esc(text)}</span><button class="btn sm primary">Открыть</button><button class="btn sm icon" title="Не сейчас">✕</button></div>`);
+  $('.primary',b).onclick=()=>{ b.remove(); helpOpen(tab); }; $('.icon',b).onclick=()=>{ b.remove(); helpMark(tab); }; document.body.append(b); setTimeout(()=>b.isConnected&&b.classList.add('on'),30); }
+document.addEventListener('keydown',e=>{ if(e.key!=='?'||e.ctrlKey||e.metaKey||e.altKey) return; const t=e.target; if(t&&(/INPUT|TEXTAREA|SELECT/.test(t.tagName)||t.isContentEditable)) return; if(!me||!world.settings||$('#modal').classList.contains('on')) return; e.preventDefault(); helpOpen(); });
+/* Alt+← / Alt+→ браузер и так делает «назад / вперёд» — с адресами страниц это теперь работает и внутри картотеки */
+/* В2/В3: значки пунктов меню — видны, когда меню свёрнуто в полоску (на карте, на узком экране); подсказка с названием при наведении */
+{ const IC={characters:'👤',orgs:'🛡',locations:'📍',graph:'🕸',wmap:'🗺',docs:'📜',skills:'✦',timeline:'⏳',log:'📓',trash:'🗑',users:'👥',stlib:'◉',efflib:'✨',emocards:'😈',settings:'⚙'};
+  $$('.nav[data-view]').forEach(n=>{ const d=$('.dot',n); if(d&&!$('.ic',n)) d.insertAdjacentHTML('afterend',`<span class="ic">${IC[n.dataset.view]||'•'}</span>`); if(!n.title) n.title=$('.t',n)?.textContent||''; }); }
+/* В2: меню слева на карте — полоска значков (по умолчанию), спрятано или полностью; у каждого своё, в этом браузере */
+function menuMode(){ return document.body.classList.contains('nomenu')?'none':document.body.classList.contains('railmenu')?'rail':'full'; }
+function menuTitle(){ return {rail:'Меню слева — полоска значков. Клик — спрятать совсем',none:'Меню слева спрятано. Клик — показать полностью',full:'Меню слева полностью. Клик — свернуть в полоску значков'}[menuMode()]; }
+function menuApply(mode){ document.body.classList.toggle('nomenu',mode==='none'); document.body.classList.toggle('railmenu',mode==='rail'); }
+function menuOnMap(){ let m=null; try{ m=localStorage.getItem('wm.menu'); if(!m) m=localStorage.getItem('nomenu')?'none':(innerWidth<900?'none':'rail'); }catch{ m='rail'; } menuApply(m); }
+/* В3: устройство с пальцем вместо мыши — подсказки про жесты, а не про колесо и Alt */
+const TOUCH_UI=matchMedia('(pointer:coarse)').matches&&!matchMedia('(hover:hover)').matches;
 function renderMe(){ const m=$('#me'); const nm=viewAs?viewAs.name:me.name, role=effRole(); m.innerHTML=`${!viewAs&&me.photo?`<img src="${esc(me.photo)}" referrerpolicy="no-referrer">`:`<div class="av">${viewAs?'👁':esc(initials(me.name))}</div>`}<div class="grow"><div class="nm" title="${esc(me.email)}">${esc(nm)}</div><span class="badge ${role}">${roleName(role)}</span></div><button class="out" title="${viewAs?'Выйти из режима просмотра':'Выйти'}">${viewAs?'✕':'⏻'}</button>`; $('.out',m).onclick=()=>viewAs?stopViewAs():AUTH.signOut(); $$('.dmonly').forEach(n=>n.style.display=isDM()?'':'none'); }
 function startViewAs(u){ if(!realDM()) return; viewAs={uid:u.id,role:u.role||'observer',name:u.name||u.email}; G.sel=null; renderMe(); go('characters'); toast(`Смотришь как «${viewAs.name}» (${roleName(viewAs.role)})`); }
 function stopViewAs(){ viewAs=null; G.sel=null; renderMe(); go('users'); }
 function updateCounts(){ { const nd=$('#nDocs'); if(nd) nd.textContent=world.docs.length||''; } { const n=$('#nEff'); if(n) n.textContent=(world.settings&&world.settings.effectLib||[]).length||''; const ne=$('#nEmo'); if(ne){ ne.textContent=(world.settings&&world.settings.effectLib||[]).filter(d=>d.emo).length||''; const nav=ne.closest('.nav'); if(nav) nav.style.display=(isDM()&&ruOn())?'':'none'; } } $('#nWmaps').textContent=world.wmaps.filter(mp=>isDM()||mp.visibility!=='hidden').length||''; $('#nMaps').textContent=world.maps.filter(mp=>isDM()||mp.owner===effUid()||mp.shared).length||''; $('#nChars').textContent=V.chars().length||''; $('#nOrgs').textContent=V.orgs().length||''; $('#nLocs').textContent=V.locs().length||''; $('#nUsers').textContent=world.users.length||''; const nl=world.log.filter(x=>!x.seen).length; const e=$('#nLog'); e.textContent=nl||''; e.classList.toggle('alert',nl>0); }
 
-function render(){
+/* обёртка: адрес страницы (переход по ссылке, адрес после отрисовки) + сама отрисовка */
+function render(){ if(me&&world.settings&&ROUTE.want&&!routeApplyWant()) return;
+  RENDER_DEPTH++; try{ renderPage(); } finally{ RENDER_DEPTH--; }
+  if(!RENDER_DEPTH&&me&&world.settings){ routeSync('replace'); musSync(); } }
+function renderPage(){
   if(!me||!world.settings) return;
   const m=$('#main');
   /* сохранить фокус */
@@ -1518,6 +1835,7 @@ function render(){
   else if(v==='graph') state.id==='__all__'? renderOverview(m) : state.id? renderMap(m,byId(world.maps,state.id)) : renderMaps(m);
   else if(v==='wmap') state.id? renderWorldMap(m,byId(world.wmaps,state.id)) : renderWorldMaps(m);
   else if(v==='log'&&isDM()) renderLog(m);
+  else if(v==='trash'&&isDM()) renderTrash(m);
   else if(v==='users'&&isDM()) renderUsers(m);
   else if(v==='settings'&&isDM()) renderSettings(m);
   else if(v==='efflib'&&isDM()) renderEffLib(m); else if(v==='stlib'&&isDM()) renderStLib(m); else if(v==='emocards'&&isDM()) renderEffLib(m);
@@ -1561,11 +1879,43 @@ function folderMenu(t,id,anchor,onChange){
   const b=openModal(`<h2>В папку</h2><div class="stack">${F.folders.map(f=>`<button class="btn ${cur===f.id?'active':''}" data-f="${f.id}">📁 ${esc(f.name)}</button>`).join('')||'<div class="faint">Папок ещё нет — создай через «+ папка» над списком.</div>'}${cur?'<button class="btn danger" data-f="">Убрать из папки</button>':''}</div><div class="modal-actions"><button class="btn" id="cancel">Закрыть</button></div>`);
   $('#cancel',b).onclick=closeModal; $$('[data-f]',b).forEach(x=>x.onclick=()=>{ if(x.dataset.f) F.map[id]=x.dataset.f; else delete F.map[id]; saveFolders(t,F); closeModal(); onChange(); });
 }
+/* С2: вид и порядок списков (персонажи, организации, локации) — у каждого зрителя свой, в этом браузере */
+function listPref(t){ let s={}; try{ s=JSON.parse(localStorage.getItem('list.pref.'+t)||'{}')||{}; }catch{} return {sort:s.sort||'folders',view:s.view||'cards'}; }
+function listPrefSet(t,k,v){ const s=listPref(t); s[k]=v; try{ localStorage.setItem('list.pref.'+t,JSON.stringify(s)); }catch{} }
+/* ===== С2: общий поиск (Ctrl+K): персонажи, организации, локации, карты, карты связей, документы, события таймлайна, эффекты, разделы ===== */
+const normS=s=>String(s||'').toLowerCase().replace(/ё/g,'е');
+function gsItems(){ const out=[]; const push=(g,icon,title,sub,hay,fn)=>out.push({g,icon,title,sub,t:normS(title),hay:normS(title+' '+sub+' '+hay),go:fn});
+  for(const c of V.chars()) if(!isClone(c)&&!c._draft) push('персонаж','👤',c.name||'без имени',c.title||'',[...(c.tags||[]),briefOnly(c)?c.brief||'':'',...world.memberships.filter(x=>x.charId===c.id).map(x=>byId(world.orgs,x.orgId)?.name||'')].join(' '),()=>go('characters',c.id));
+  if(sectionOn('orgs')) for(const o of V.orgs()) if(!o._draft) push('организация','🛡',o.name||'без имени',o.title||'',(o.tags||[]).join(' '),()=>go('orgs',o.id));
+  if(sectionOn('locations')) for(const l of V.locs()) if(!l._draft) push('локация','📍',l.name||'без имени',l.title||'',(l.tags||[]).join(' '),()=>go('locations',l.id));
+  if(sectionOn('wmap')) for(const mp of world.wmaps.filter(mp=>isDM()||mp.visibility!=='hidden')) push('карта','🗺',mp.name||'без названия','','',()=>go('wmap',mp.id));
+  if(sectionOn('graph')) for(const mp of world.maps.filter(mp=>isDM()||mp.owner===effUid()||mp.shared)) push('карта связей','🕸',mp.title||'без названия','','',()=>go('graph',mp.id));
+  if(sectionOn('docs')) for(const d of world.docs) if(!d._draft) push('документ',d.icon||'📜',d.title||'без названия','',docPlain(d.body||'').slice(0,500),()=>go('docs',d.id));
+  if(sectionOn('timeline')) for(const n of ((world.timeline&&world.timeline.nodes)||[])) for(const ev of (n.events||[])) if(ev.title) push('событие','⏳',ev.title,n.date||'',String(ev.text||'').slice(0,300),()=>{ tlMode='public'; tlOpen.add(ev.id); go('timeline'); });
+  if(isDM()) for(const d of ((world.settings&&world.settings.effectLib)||[])) if(d.name) push('эффект',d.icon||'✨',d.name,'',d.description||'',()=>{ go(d.emo&&ruOn()?'emocards':'efflib'); setTimeout(()=>{ const q=$('#eq'); if(q){ q.value=d.name; q.dispatchEvent(new Event('input')); } },60); });
+  for(const n of $$('.nav[data-view]')) if(n.style.display!=='none') push('раздел','→',n.querySelector('.t')?.textContent||n.dataset.view,'','',()=>go(n.dataset.view));
+  return out; }
+function gsSearch(q){ const Q=normS(q).trim(), words=Q.split(/\s+/).filter(Boolean); if(!words.length) return []; const res=[];
+  for(const it of gsItems()){ if(!words.every(w=>it.hay.includes(w))) continue; let s=0; if(it.t===Q) s+=200; else if(it.t.startsWith(Q)) s+=120; else if(it.t.includes(Q)) s+=70; if(words.every(w=>it.t.includes(w))) s+=40; if(it.g==='раздел') s-=20; s-=Math.min(20,it.t.length/5); res.push([s,it]); }
+  return res.sort((a,b)=>b[0]-a[0]).map(x=>x[1]); }
+function gsOpen(){ if(!me||$('#gsearch')) return; closeModal();
+  const w=el(`<div id="gsearch" role="dialog" aria-label="Поиск"><div class="gsbox"><div class="gsin"><span>🔍</span><input id="gsq" placeholder="Поиск: персонаж, организация, карта, документ, эффект…" autocomplete="off" spellcheck="false"><button class="btn sm icon" id="gsx" title="Закрыть (Esc)">✕</button></div><div class="gsres"></div><div class="gsfoot">↑ ↓ — выбрать · Enter — открыть · Esc — закрыть · Ctrl+K — поиск с любой страницы</div></div></div>`);
+  document.body.append(w); const inp=$('#gsq',w), res=$('.gsres',w); let list=[], cur=0;
+  const close=()=>{ w.remove(); }; const pick=i=>{ const x=list[i]; if(!x) return; close(); x.go(); };
+  const mark=()=>{ $$('.gsr',res).forEach((r,i)=>r.classList.toggle('on',i===cur)); const on=$('.gsr.on',res); if(on) on.scrollIntoView({block:'nearest'}); };
+  const draw=()=>{ const q=inp.value.trim(); list=q?gsSearch(q).slice(0,60):gsItems().filter(x=>x.g==='раздел'); cur=Math.min(cur,Math.max(0,list.length-1));
+    res.innerHTML=(q?'':'<div class="gsh">Разделы — или начни печатать</div>')+(list.length?list.map((x,i)=>`<div class="gsr ${i===cur?'on':''}" data-i="${i}"><span class="ic">${esc(x.icon)}</span><div class="grow" style="min-width:0"><div class="tt">${esc(x.title)}</div>${x.sub?`<div class="sb">${esc(x.sub)}</div>`:''}</div><span class="gk">${esc(x.g)}</span></div>`).join(''):'<div class="gsh">Ничего не найдено</div>');
+    $$('.gsr',res).forEach(r=>{ r.onclick=()=>pick(+r.dataset.i); r.onmousemove=()=>{ const i=+r.dataset.i; if(cur!==i){ cur=i; mark(); } }; }); };
+  inp.oninput=()=>{ cur=0; draw(); };
+  inp.onkeydown=e=>{ if(e.key==='ArrowDown'){ e.preventDefault(); cur=Math.min(list.length-1,cur+1); mark(); } else if(e.key==='ArrowUp'){ e.preventDefault(); cur=Math.max(0,cur-1); mark(); } else if(e.key==='Enter'){ e.preventDefault(); pick(cur); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  $('#gsx',w).onclick=close; w.addEventListener('mousedown',e=>{ if(e.target===w) close(); }); draw(); setTimeout(()=>inp.focus(),20); }
+document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.shiftKey&&(e.code==='KeyK'||e.key==='k'||e.key==='K'||e.key==='л'||e.key==='Л')){ if(!me||!world.settings) return; e.preventDefault(); e.stopPropagation(); gsOpen(); } },true);
 function renderList(m,t){
   const cfg={c:{title:'Персонажи',arr:V.chars(),add:async()=>{const c=await newCharacter();go('characters',c.id);},ph:'Поиск по имени, тегам, организации…',can:isDM()||(isPlayer()&&!viewAs&&can('plCharNew'))},
              o:{title:'Организации',arr:V.orgs(),add:async()=>{const o=await newOrg();go('orgs',o.id);},ph:'Поиск…',can:canWrite()},
              l:{title:'Локации',arr:V.locs(),add:async()=>{const l=await newLocation();go('locations',l.id);},ph:'Поиск…',can:canWrite()}}[t];
-  const page=el(`<div class="page"><div class="head"><h1>${cfg.title}</h1><input class="search grow" placeholder="${cfg.ph}" value="${esc(state.q)}">${cfg.can?'<button class="btn primary">+ Добавить</button>':''}</div><div class="fslot"></div><div class="grid"></div></div>`);
+  const page=el(`<div class="page"><div class="head"><h1>${cfg.title}</h1><input class="search grow" placeholder="${cfg.ph}" value="${esc(state.q)}">${cfg.can?'<button class="btn primary">+ Добавить</button>':''}</div><div class="fsrow"><div class="fslot"></div><div class="lvbar"><select class="lvsort" title="Порядок"><option value="folders">по папкам</option><option value="name">по имени</option><option value="recent">недавно изменённые</option></select><span class="lvview"><button class="btn sm icon" data-v="cards" title="Карточки">▦</button><button class="btn sm icon" data-v="list" title="Список — компактно, по строке на запись">☰</button></span></div></div><div class="grid"></div></div>`);
+  { const LS=listPref(t); const s=$('.lvsort',page); s.value=LS.sort; s.onchange=()=>{ listPrefSet(t,'sort',s.value); draw(); }; $$('.lvview button',page).forEach(b=>{ b.classList.toggle('on',b.dataset.v===LS.view); b.onclick=()=>{ listPrefSet(t,'view',b.dataset.v); $$('.lvview button',page).forEach(x=>x.classList.toggle('on',x===b)); draw(); }; }); }
   const ab=$('.head .btn',page); if(ab) ab.onclick=cfg.add;
   const grid=$('.grid',page), search=$('.search',page);
   let FB; const rebuildBar=()=>{ FB=folderBar(t,()=>{ rebuildBar(); draw(); }); const slot=$('.fslot',page); slot.innerHTML=''; slot.append(FB.bar); };
@@ -1574,12 +1924,14 @@ function renderList(m,t){
     const q=state.q.trim().toLowerCase(); const F=FB.F;
     let arr=cfg.arr.filter(e=>{ if(F.active==='__none'&&F.map[e.id]) return false; if(F.active&&F.active!=='__none'&&F.map[e.id]!==F.active) return false; if(!q) return true; let hay=[e.name,e.title,plHid(e,'desc')?'':e.description,...(e.tags||[])].join(' ').toLowerCase();
       if(t==='c') hay+=' '+world.memberships.filter(x=>x.charId===e.id).map(x=>byId(world.orgs,x.orgId)?.name||'').join(' ').toLowerCase(); return hay.includes(q); });
+    const LS=listPref(t); const asRow=LS.view==='list';
+    if(LS.sort==='name') arr=[...arr].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ru')); else if(LS.sort==='recent') arr=[...arr].sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
     if(t==='c'&&isPlayer()) arr=[...arr].sort((a,b)=>(canEdit(b)?1:0)-(canEdit(a)?1:0));
-    grid.innerHTML=''; grid.className='grid';
+    grid.innerHTML=''; grid.className=asRow?'lrows':'grid';
     if(!arr.length){ grid.append(el(`<div class="empty" style="grid-column:1/-1">${q?'Ничего не найдено':(cfg.can?'Пока пусто — нажми «Добавить»':'Пока пусто')}</div>`)); return; }
     /* «Все»: раскрывающиеся блоки по папкам; свои персонажи игрока — отдельным блоком сверху */
     const mineOf=e=>t==='c'&&isPlayer()&&canEdit(e);
-    if(F.active===''&&(F.folders.length||arr.some(mineOf))){ grid.className='lsecs';
+    if(LS.sort==='folders'&&F.active===''&&(F.folders.length||arr.some(mineOf))){ grid.className='lsecs';
       const fids=new Set(F.folders.map(f=>f.id)); const secs=[];
       const mine=arr.filter(mineOf); if(mine.length) secs.push({id:'__mine',name:mine.length>1?'Твои персонажи':'Твой персонаж',icon:'★',items:mine});
       const rest=arr.filter(e=>!mineOf(e));
@@ -1592,13 +1944,13 @@ function renderList(m,t){
         const hd=$('.lsh',sec); hd.onclick=()=>{ if(q) return; const now=!sec.classList.toggle('shut'); try{ localStorage.setItem(lsKey(s.id),now?'1':'0'); }catch{} };
         if(s.folder||s.id==='__none'){ hd.ondragover=ev=>{ ev.preventDefault(); hd.classList.add('over'); }; hd.ondragleave=()=>hd.classList.remove('over');
           hd.ondrop=ev=>{ ev.preventDefault(); hd.classList.remove('over'); const id=ev.dataTransfer.getData('text/plain'); if(!id) return; if(s.folder) F.map[id]=s.folder.id; else delete F.map[id]; saveFolders(t,F); rebuildBar(); draw(); }; }
-        const g=$('.grid',sec); if(!s.items.length) g.append(el('<div class="faint" style="grid-column:1/-1;font-size:12.5px">Пусто — перетащи сюда карточку</div>'));
-        for(const e of s.items) g.append(mkCard(e)); grid.append(sec); }
+        const g=$('.grid',sec); if(asRow) g.className='lrows'; if(!s.items.length) g.append(el('<div class="faint" style="grid-column:1/-1;font-size:12.5px">Пусто — перетащи сюда карточку</div>'));
+        for(const e of s.items) g.append(mkCard(e,asRow)); grid.append(sec); }
       hydrate(grid); return; }
-    for(const e of arr) grid.append(mkCard(e));
+    for(const e of arr) grid.append(mkCard(e,asRow));
     hydrate(grid);
   };
-  const mkCard=e=>{ const F=FB.F; const q=state.q.trim().toLowerCase(); {
+  const mkCard=(e,asRow)=>{ const F=FB.F; const q=state.q.trim().toLowerCase(); {
       let sub='', chips='', letters='', mini='';
       const brief=briefOnly(e);
       if(t==='c'){ sub=e.title||''; chips=V.mems().filter(x=>x.charId===e.id).map(x=>`<span class="chip o">${esc(byId(world.orgs,x.orgId)?.name||'?')}</span>`).join('');
@@ -1609,8 +1961,10 @@ function renderList(m,t){
       let mine=isPlayer()&&canEdit(e)?`<span class="mine">${t==='c'?'твой':'твоя'}</span>`:'';
       if(isDM()&&(visOf(e)!=='full'||visForN(e))) mine=`<span class="mine vis" title="${visForN(e)?'Своё правило для игроков: '+esc(Object.entries(e.visFor).map(([u,v])=>userName(u)+' — '+VIS_NAMES[v]).join(', ')):''}">${visOf(e)==='full'?'видна':visOf(e)==='brief'?'кратко':'скрыто'}${visForN(e)?' · 👥'+visForN(e):''}</span>`;
       const fname=F.map[e.id]?(F.folders.find(f=>f.id===F.map[e.id])?.name||''):'';
-      const card=el(`<div class="card ${t==='l'?'loc':''}" draggable="true"><div class="pic">${(e.name||'').trim()?`<span class="ini full" style="color:hsla(${entHue(e)},70%,72%,.4);font-size:${(e.name.length>24?20:e.name.length>12?26:34)}px">${esc(e.name.trim())}</span>`:`<span class="ini">?</span>`}${e.thumb?`<img src="${e.thumb}">`:(e.mainImage?`<img data-img="${e.mainImage}" data-thumb="1" style="display:none">`:'')}${mini}${mine}<button class="fbtn" title="${fname?'В папке «'+esc(fname)+'» — сменить':'Положить в папку'}">📁</button></div>
+      const card=asRow?el(`<div class="lrow ${t==='l'?'loc':''}" draggable="true"><div class="av">${e.thumb?`<img src="${e.thumb}">`:(e.mainImage?`<img data-img="${e.mainImage}" data-thumb="1" style="display:none">`:`<span>${esc(entAbbr(e))}</span>`)}</div><div class="grow" style="min-width:0"><div class="nm">${esc(e.name)||'<span class="faint">без имени</span>'}${mine}</div><div class="faint sb">${esc(sub)}${fname?` · 📁 ${esc(fname)}`:''}</div></div>${chips?`<div class="chips">${chips}</div>`:''}${letters?`<div class="letters">${letters}</div>`:''}<button class="fbtn" title="${fname?'В папке «'+esc(fname)+'» — сменить':'Положить в папку'}">📁</button></div>`)
+        :el(`<div class="card ${t==='l'?'loc':''}" draggable="true"><div class="pic">${(e.name||'').trim()?`<span class="ini full" style="color:hsla(${entHue(e)},70%,72%,.4);font-size:${(e.name.length>24?20:e.name.length>12?26:34)}px">${esc(e.name.trim())}</span>`:`<span class="ini">?</span>`}${e.thumb?`<img src="${e.thumb}">`:(e.mainImage?`<img data-img="${e.mainImage}" data-thumb="1" style="display:none">`:'')}${mini}${mine}<button class="fbtn" title="${fname?'В папке «'+esc(fname)+'» — сменить':'Положить в папку'}">📁</button></div>
         <div class="body"><div class="name">${esc(e.name)||'<span class="faint">без имени</span>'}</div><div class="sub">${esc(sub)||'&nbsp;'}</div>${chips?`<div class="chips">${chips}</div>`:''}${letters?`<div class="letters">${letters}</div>`:''}${fname?`<div class="ftag">📁 ${esc(fname)}</div>`:''}</div></div>`);
+      { const pim=$('.pic img',card); if(pim){ const ok=()=>{ if(pim.naturalWidth) $('.pic',card).classList.add('hasimg'); }; if(pim.complete) ok(); pim.addEventListener('load',ok); } } /* прозрачная картинка: имя-заглушка не просвечивает */
       card.onclick=ev=>{ if(ev.target.classList.contains('fbtn')){ ev.stopPropagation(); folderMenu(t,e.id,card,()=>{ rebuildBar(); draw(); }); return; } open(e.id); };
       card.ondragstart=ev=>{ ev.dataTransfer.setData('text/plain',e.id); ev.dataTransfer.effectAllowed='move'; card.classList.add('dragging'); };
       card.ondragend=()=>card.classList.remove('dragging');
@@ -2233,16 +2587,18 @@ function barsBlock(ch){
   };
   draw(); return p;
 }
+/* столбцы по умолчанию: из настроек мастера, а если их нет — Название / Кол-во / Описание */
+function invStdCols(){ const w=world.settings.inventoryColumns||[]; return w.length?JSON.parse(JSON.stringify(w)):[{id:'name',name:'Название'},{id:'qty',name:'Кол-во'},{id:'desc',name:'Описание'}]; }
 function inventoryBlock(ch){
-  const ed=canEdit(ch); const cols=invCols(ch);
+  const ed=canEdit(ch); let cols=invCols(ch);
   const p=el(`<div class="panel ${ed?'':'ro'}"><h3>Инвентарь <button class="btn sm w">+ Предмет</button><button class="btn sm icon w" title="Столбцы этого инвентаря" style="margin-left:6px">⚙</button></h3><div class="invwrap"><table class="inv"><thead></thead><tbody></tbody></table></div></div>`);
   const [addBtn,cfgBtn]=$$('h3 .btn',p);
-  addBtn.onclick=()=>{ (ch.inventory??=[]).push({id:uid(),c:{}}); touch(ch); draw(); setTimeout(()=>{ const last=$$('tbody tr:last-child input',p)[0]; last&&last.focus(); },0); };
+  addBtn.onclick=()=>{ if(!invCols(ch).length){ ch.inventoryColumns=invStdCols(); cols=invCols(ch); toast('Добавлены столбцы: '+cols.map(c=>c.name).join(', ')+'. Поменять — ⚙ рядом'); } (ch.inventory??=[]).push({id:uid(),c:{}}); touch(ch); draw(); setTimeout(()=>{ const last=$$('tbody tr:last-child input',p)[0]; last&&last.focus(); },0); };
   cfgBtn.onclick=()=>invColsDialog(ch);
   const draw=()=>{
     const th=$('thead',p), tb=$('tbody',p); const items=ch.inventory||[];
     th.innerHTML=`<tr><th class="pic"></th>${cols.map(c=>`<th>${esc(c.name)}</th>`).join('')}${ed?'<th class="act"></th>':''}</tr>`; tb.innerHTML='';
-    if(!cols.length){ tb.innerHTML=`<tr><td class="faint" colspan="99">Нет столбцов — задай их в настройках.</td></tr>`; return; }
+    if(!cols.length){ tb.innerHTML=`<tr><td class="faint" colspan="99">${ed?`Столбцы инвентаря не заданы. «+ Предмет» возьмёт стандартные (${esc(invStdCols().map(c=>c.name).join(', '))}), свои — кнопка ⚙.`:'Пусто.'}</td></tr>`; return; }
     if(!items.length){ tb.innerHTML=`<tr><td class="faint" colspan="99">${ed?'Пусто. Нажми «+ Предмет».':'Пусто.'}</td></tr>`; return; }
     items.filter(it=>ed||!it.hidden).forEach((it,i0)=>{ const i=items.indexOf(it); it.c??={}; it.images??=[]; const tr=el(`<tr class="${it.hidden?'hid':''}"><td class="pic">${ed?`<button class="eye keep ${it.hidden?'':'on'}" title="${it.hidden?'скрыт от остальных — раскрыть':'виден всем — скрыть'}">${it.hidden?'◌':'👁'}</button>`:''}</td>${cols.map(c=>`<td>${ed?`<input class="rich" data-c="${c.id}" value="${esc(it.c[c.id]||'')}" placeholder="—">`:`<span>${rich(it.c[c.id]||'')||'<span class="faint">—</span>'}</span>`}</td>`).join('')}${ed?`<td class="act"><button class="x-btn up" title="выше">↑</button><button class="x-btn dn" title="ниже">↓</button><button class="x-btn rm" title="удалить">×</button></td>`:''}</tr>`);
       $('td.pic',tr).append(thumbsRow(it.images,ed,()=>{ touch(ch); draw(); },ch.id));
@@ -2407,6 +2763,7 @@ const docOf=it=>!it||it.t!=='note'?null:(it.doc?byId(world.docs,it.doc)||null:it
 const canEditDoc=d=>!!d&&!viewAs&&world.docs.includes(d)&&(isDM()||(isPlayer()&&d.owner===me.uid));
 const docHeld=d=>!!d&&((d.given||[]).includes(effUid())||d.owner===effUid());
 const docPlain=t=>String(t||'').replace(/\[\/?(b|i|u|c(=[#\w]+)?)\]/g,'');
+function newDocDraft(){ if(!canWrite()||viewAs||(!isDM()&&!plOn('plDocNew'))) return null; return makeDraft('docs',{id:uid(),title:'',body:'',icon:'📜',color:'#8a6d3b',images:[],ref:null,given:[],pub:false}); }
 async function newDocument(extra={}){ if(!canWrite()||viewAs||(!isDM()&&!plOn('plDocNew'))) return null; try{ return await createDoc('docs',{id:uid(),title:'',body:'',icon:'📜',color:'#8a6d3b',images:[],ref:null,given:[],pub:false,...extra}); }catch{ return null; } }
 async function docTake(d){ if(!d||!isPlayer()||viewAs||docHeld(d)||!plOn('plDocTake')) return; const given=[...new Set([...(d.given||[]),me.uid])];
   try{ await DB.update('docs',d.id,{given,updatedAt:Date.now(),updatedBy:me.uid}); d.given=given; snapshots.set(d.id,stableStr(clean(d))); updateCounts(); toast('Документ теперь у тебя — раздел «Документы»'); }catch(e){ toast('Не удалось забрать: '+(e.code||e.message),true); } }
@@ -2432,17 +2789,19 @@ async function docDrop(d){ if(!d||!isPlayer()||viewAs||d.owner===me.uid||!(d.giv
   if(!await confirmDlg(`Убрать «${d.title||'документ'}» из своего списка?${d.pub?' Он лежит на карте на виду — его можно будет снова забрать.':' Прочитать его снова можно будет, только если мастер выдаст ещё раз.'}`,'Убрать')) return;
   d.given=(d.given||[]).filter(u=>u!==me.uid); touch(d); toast('Убран из твоего списка'); if(WM.redraw) WM.redraw(); }
 /* положить документ на карту (из раздела «Документы»): мастер — в элементы карты, игрок — в свои рисунки */
-async function docPlace(d,mp){ if(!d||!mp||viewAs) return false; const it={t:'note',doc:d.id,x:Math.round(mp.w/2-130),y:Math.round(mp.h/2-120),w:260,mode:'sheet'};
+async function docPlace(d,mp){ if(!d||!mp||viewAs) return false; if(d._draft) await draftSave(d); const it={t:'note',doc:d.id,x:Math.round(mp.w/2-130),y:Math.round(mp.h/2-120),w:260,mode:'sheet'};
   if(isDM()){ try{ await createDoc('wmdraw',{...it,id:uid(),mapId:mp.id,layer:'normal'}); }catch{ return false; } }
   else { if(!isPlayer()||world.settings.wmDMOnly){ toast('Класть на карту может только мастер',true); return false; } try{ await createDoc('wmdraw',{...it,id:uid(),mapId:mp.id,layer:'normal'}); }catch{ return false; } }
   docMadePub(d); return true; }
 function docMadePub(d){ if(d&&!d.pub&&(canEditDoc(d)||(isPlayer()&&!viewAs&&docHeld(d)&&world.docs.includes(d)&&plOn('plDocShow')))){ d.pub=true; touch(d); toast('Документ лежит на карте — теперь его читают все'); } }
 /* где документ лежит: [{mp,it}] */
 function docPlaces(d){ const out=[]; for(const mp of world.wmaps){ for(const it of (mp.items||[])) if(it.t==='note'&&it.doc===d.id) out.push({mp,it}); const s=WM.secrets.get(mp.id); for(const it of (s?.items||[])) if(it.t==='note'&&it.doc===d.id) out.push({mp,it,secret:true}); } for(const it of world.wmdraw) if(it.t==='note'&&it.doc===d.id){ const mp=byId(world.wmaps,it.mapId); if(mp) out.push({mp,it,doc:true}); } return out; }
-async function docDelete(d){ if(!canEditDoc(d)) return; const pl=docPlaces(d); if(!await confirmDlg(`Удалить документ «${d.title||'без названия'}»?${pl.length?` Он будет убран и с карт (${pl.length}).`:''}`)) return;
-  const dirty=new Set(); for(const {mp,it,secret,doc} of pl){ if(doc){ if(isDM()||it.owner===me.uid) DB.delete('wmdraw',it.id).catch(()=>{}); continue; } if(!isDM()) continue; if(secret){ const s=wmSecret(mp,true); s.items=s.items.filter(x=>x!==it); dirty.add(mp.id+'|s'); } else { mp.items=mp.items.filter(x=>x!==it); dirty.add(mp.id+'|p'); } }
+async function docDelete(d){ if(!canEditDoc(d)) return; if(d._draft){ world.docs=world.docs.filter(x=>x!==d); pending.delete(d.id); go('docs'); return; } const pl=docPlaces(d); if(!await confirmDlg(`Удалить документ «${d.title||'без названия'}»?${pl.length?` Он будет убран и с карт (${pl.length}).`:''} ${realDM()?'Вернуть можно из «Корзины» в течение '+TRASH_DAYS+' дней.':''}`)) return;
+  const g=uid(); if(!await trashMain(g,'docs',d,d.title,'doc',d.images||[])) return;
+  const dirty=new Set(), gone={}; for(const {mp,it,secret,doc} of pl){ if(doc){ if(isDM()||it.owner===me.uid){ await trashPut(g,'wmdraw',it); DB.delete('wmdraw',it.id).catch(()=>{}); } continue; } if(!isDM()) continue; const k=mp.id+'|'+(secret?'s':'p'); (gone[k]??=[]).push(clean(it)); if(secret){ const s=wmSecret(mp,true); s.items=s.items.filter(x=>x!==it); } else { mp.items=mp.items.filter(x=>x!==it); } dirty.add(k); }
+  for(const [k,its] of Object.entries(gone)){ const [id,w]=k.split('|'); await trashPut(g,'_mapitems',{id,secret:w==='s',items:its}); }
   for(const k of dirty){ const [id,w]=k.split('|'); const mp=byId(world.wmaps,id); if(mp) wmCommit(mp,w==='s'); }
-  for(const im of (d.images||[])) DB.delete('images',im).catch(()=>{}); await removeDoc('docs',d); if(state.view==='docs') go('docs'); }
+  await removeDoc('docs',d); if(state.view==='docs') go('docs'); }
 /* раздел «Документы»: слева список, справа документ (правка — мастеру и автору, остальным — чтение) */
 function renderDocs(m){ const cw=canWrite()&&!viewAs; const cur=state.id?byId(world.docs,state.id):null; const me_=effUid();
   const page=el(`<div class="page docs"><div class="head"><h1>Документы</h1><span class="grow"></span><input id="dq" placeholder="Поиск…" value="${esc(state.q||'')}" style="width:200px;margin-right:8px">${cw&&(isDM()||plOn('plDocNew'))?'<button class="btn primary" id="dnew">+ Документ</button>':''}</div><div class="docwrap"><div class="doclist"></div><div class="docmain"></div></div></div>`);
@@ -2455,7 +2814,7 @@ function renderDocs(m){ const cw=canWrite()&&!viewAs; const cur=state.id?byId(wo
     $$('.docit',listBox).forEach(x=>x.onclick=()=>go('docs',x.dataset.id)); };
   drawList();
   const dq=$('#dq',page); dq.oninput=()=>{ state.q=dq.value; drawList(); };
-  const dn=$('#dnew',page); if(dn) dn.onclick=async()=>{ const d=await newDocument(); if(d) go('docs',d.id); };
+  const dn=$('#dnew',page); if(dn) dn.onclick=()=>{ const d=newDocDraft(); if(d) go('docs',d.id); };
   if(!cur){ main.innerHTML=`<div class="faint" style="padding:30px;text-align:center">${world.docs.length?'Выбери документ слева':''}</div>`; m.append(page); return; }
   const d=cur, ce=canEditDoc(d); const maps=world.wmaps.filter(mp=>isDM()||mp.visibility!=='hidden'); const canPlace=cw&&(isDM()||(isPlayer()&&!world.settings.wmDMOnly)); const places=docPlaces(d);
   const ents=[...world.characters.filter(c=>!isClone(c)).map(e=>['c',e]),...world.orgs.map(e=>['o',e]),...world.locations.map(e=>['l',e])].filter(([,e])=>visibleEnt(e));
@@ -2671,7 +3030,7 @@ function layoutTabs(page,ch,B){
     const g=el(`<div class="tabgrid" style="grid-template-columns:${t.tpl}"></div>`);
     for(const col of t.cols){ const st=el('<div class="stack"></div>'); for(const id of col) if(B[id]){ st.append(B[id]); B[id].classList.toggle('empty',blockEmpty(id,ch,B[id])); } g.append(st); }
     body.append(g); hydrate(body); $$('textarea',body).forEach(ta=>{ ta.style.height='auto'; ta.style.height=Math.max(parseFloat(getComputedStyle(ta).minHeight)||28,ta.scrollHeight+2)+'px'; }); };
-  $$('span',bar).forEach(sp=>sp.onclick=()=>{ cur=sp.dataset.t; charTab[ch.id]=cur; show(); });
+  $$('span',bar).forEach(sp=>sp.onclick=()=>{ cur=sp.dataset.t; charTab[ch.id]=cur; show(); routeSync('replace'); });
   show(); page.append(d);
 }
 
@@ -3726,6 +4085,17 @@ function graphEngine(wrap,cv,opts){
   window.addEventListener('mousemove',onMove); window.addEventListener('mouseup',onUp);
   cv.ondblclick=e=>{ const n=hit(e.offsetX,e.offsetY,false); if(n){ open(eid_(n)); return; } if(opts.onNoteClick&&opts.onNote){ const nt=hitNote(e.offsetX,e.offsetY); if(nt){ opts.onNote(nt); return; } } const ref=hitLabel(e.offsetX,e.offsetY); if(ref&&opts.onLabel){ opts.onLabel(ref); return; } const nb=hit(e.offsetX,e.offsetY,true); if(nb) open(eid_(nb)); else if(opts.onBgDbl) opts.onBgDbl(toWorld(e.offsetX,e.offsetY)); };
   cv.onwheel=e=>{ e.preventDefault(); const f=e.deltaY<0?1.12:1/1.12; const before=toWorld(e.offsetX,e.offsetY); cam.k=Math.max(.2,Math.min(3,cam.k*f)); const after=toWorld(e.offsetX,e.offsetY); cam.x+=after.x-before.x; cam.y+=after.y-before.y; draw(); };
+  /* В3: схема связей пальцами — один палец двигает схему, два — масштаб (обработчики мыши на касания не срабатывают; тап по узлу работает как клик) */
+  cv.style.touchAction='none';
+  { const tp=new Map(); let g0=null;
+    const P=e=>{ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; };
+    const snap=()=>{ const ps=[...tp.values()]; if(ps.length>=2){ const [a,b]=ps; const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2}; g0={two:true,d0:Math.hypot(a.x-b.x,a.y-b.y)||1,k0:cam.k,w:toWorld(m.x,m.y)}; } else if(ps.length===1){ g0={two:false,sx:ps[0].x,sy:ps[0].y,cx:cam.x,cy:cam.y,moved:false}; } else g0=null; };
+    cv.addEventListener('pointerdown',e=>{ if(e.pointerType!=='touch') return; tp.set(e.pointerId,P(e)); try{ cv.setPointerCapture(e.pointerId); }catch{} snap(); },true);
+    cv.addEventListener('pointermove',e=>{ if(e.pointerType!=='touch'||!tp.has(e.pointerId)||!g0) return; tp.set(e.pointerId,P(e)); const ps=[...tp.values()];
+      if(g0.two&&ps.length>=2){ const [a,b]=ps; const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2}; cam.k=Math.max(.2,Math.min(3,g0.k0*Math.hypot(a.x-b.x,a.y-b.y)/g0.d0)); cam.x=(m.x-W()/2)/cam.k-g0.w.x; cam.y=(m.y-H()/2)/cam.k-g0.w.y; draw(); }
+      else if(!g0.two){ const a=ps[0]; if(!g0.moved&&Math.hypot(a.x-g0.sx,a.y-g0.sy)>6) g0.moved=true; if(g0.moved){ cam.x=g0.cx+(a.x-g0.sx)/cam.k; cam.y=g0.cy+(a.y-g0.sy)/cam.k; draw(); } } },true);
+    const end=e=>{ if(e.pointerType!=='touch'||!tp.has(e.pointerId)) return; tp.delete(e.pointerId); snap(); };
+    cv.addEventListener('pointerup',end,true); cv.addEventListener('pointercancel',end,true); }
   new ResizeObserver(()=>draw()).observe(wrap);
   cv.classList.toggle('linking',G.linkMode);
   return {draw,fit,layout,toWorld,center:()=>toWorld(W()/2,H()/2),_opts:opts};
@@ -3742,7 +4112,7 @@ const canEditMap=mp=>isDM()||(isPlayer()&&mp.owner===effUid());
 function renderMaps(m){
   const page=el(`<div class="page"><div class="head"><h1>Карты связей</h1><span class="grow"></span>${isDM()?'<button class="btn sm" id="allBtn">◎ Общий обзор</button>':''}${canWrite()?'<button class="btn primary" id="newMap">+ Новая карта</button>':''}</div>
     <div class="faint" style="margin:-10px 0 18px;line-height:1.6">Карта — это твой набор персонажей, организаций и локаций и нарисованные между ними связи (теория, схема, расстановка). Личная карта видна только тебе${isDM()?'':' и мастеру'}; общую видят все.</div><div class="grid maps"></div></div>`);
-  const nb=$('#newMap',page); if(nb) nb.onclick=async()=>{ try{ const mp=await createDoc('maps',{id:uid(),title:'',owner:effUid(),shared:false,showData:true,nodes:[],edges:[]}); go('graph',mp.id); }catch{} };
+  const nb=$('#newMap',page); if(nb) nb.onclick=async()=>{ const nm=await nameDlg('Новая карта связей','Название: двор короля, банда Кривого, семья героя…'); if(!nm) return; try{ const mp=await createDoc('maps',{id:uid(),title:nm,owner:effUid(),shared:false,showData:true,nodes:[],edges:[]}); go('graph',mp.id); }catch{} };
   const ab=$('#allBtn',page); if(ab) ab.onclick=()=>go('graph','__all__');
   const grid=$('.grid',page); const maps=world.maps.filter(mp=>isDM()||mp.owner===effUid()||mp.shared);
   if(!maps.length) grid.append(el(`<div class="empty" style="grid-column:1/-1">Карт пока нет${canWrite()?' — создай первую':''}.</div>`));
@@ -4019,7 +4389,7 @@ function renderMap(m,mp){
     const lb=$('#linkBtn',page); lb.onclick=()=>{ G.linkMode=!G.linkMode; lb.classList.toggle('active',G.linkMode); cv.classList.toggle('linking',G.linkMode); };
     tplBar($('#tplBar',page));
     $('#layoutBtn',page).onclick=()=>{ eng.layout(true); touch(mp); eng.fit(); };
-    $('#delMap',page).onclick=async()=>{ if(await confirmDlg(`Удалить карту «${mp.title||'без названия'}»?`)) { await removeDoc('maps',mp); go('graph'); } };
+    $('#delMap',page).onclick=async()=>{ if(await confirmDlg(`Удалить карту связей «${mp.title||'без названия'}»? ${realDM()?'Вернуть можно из «Корзины» в течение '+TRASH_DAYS+' дней.':'Мастер сможет вернуть её из корзины.'}`)) { if(!await trashMain(uid(),'maps',mp,mp.title,'map')) return; await removeDoc('maps',mp); go('graph'); } };
   }
   $('#fitBtn',page).onclick=()=>eng.fit(); lblToggle($('#lblBtn',page),eng); relLegend($('#glegend',page));
   rvButton($('#rvBtn',page),eng,{apply:ed?pos=>{ snap(); for(const n of mp.nodes||[]){ const p=pos[n.k||n.id]; if(p){ n.x=p.x; n.y=p.y; } } touch(mp); }:null,saveAs:canWrite()?pos=>mapCopy(mp,pos):null});
@@ -4166,12 +4536,21 @@ function renderOverview(m){
    ============================================================ */
 const tlOpen=new Set();
 let tlMode='public';
+/* ключ сортировки даты таймлайна: 11.05.987 → 987·05·11; 987.05.11; 05.987; 987; «до н. э.» — отрицательный год. null — не распознано */
+function tlDateKey(s){ s=String(s||'').trim().toLowerCase(); if(!s) return null; const neg=/до\s*н\.?\s*э|до нашей|\bbc\b/.test(s); let m, y, mo=0, d=0;
+  if((m=s.match(/(-?\d{3,6})[.\/-](\d{1,2})[.\/-](\d{1,2})(?!\d)/))){ y=+m[1]; mo=+m[2]; d=+m[3]; }
+  else if((m=s.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](-?\d{1,6})/))){ d=+m[1]; mo=+m[2]; y=+m[3]; }
+  else if((m=s.match(/(\d{1,2})[.\/-](-?\d{1,6})/))){ mo=+m[1]; y=+m[2]; }
+  else if((m=s.match(/-?\d{1,6}/))){ y=+m[0]; } else return null;
+  if(neg&&y>0) y=-y; return y*10000+mo*100+d; }
 function renderTimeline(m){
   const dmMode=isDM()&&!viewAs&&tlMode==='dm';
   const tl=dmMode?(world.dmTimeline||(world.dmTimeline={id:'dmtimeline',nodes:[]})):(world.timeline||(world.timeline={id:'timeline',nodes:[]})); const ed=isDM()&&!viewAs;
-  const page=el(`<div class="page tlpage ${ed?'':'ro'}"><div class="head" style="margin-bottom:8px"><h1>Таймлайн</h1>${isDM()&&!viewAs?`<div class="seg" style="margin-left:6px"><span class="${tlMode==='public'?'on':''}" data-m="public">общий</span><span class="${tlMode==='dm'?'on':''}" data-m="dm" title="Виден только мастеру">🔒 мастерский</span></div>`:''}<span class="faint" style="font-size:12.5px">${ed?'Дата — любой текст в летоисчислении мира; порядок — стрелками. Клик по событию сворачивает/разворачивает его.':'Клик по событию — развернуть.'}</span><span class="grow"></span><button class="btn sm" id="expAll">развернуть все</button><button class="btn sm" id="colAll">свернуть все</button><button class="btn primary w" id="addNode">+ Дата</button></div>
+  const page=el(`<div class="page tlpage ${ed?'':'ro'}"><div class="head" style="margin-bottom:8px"><h1>Таймлайн</h1>${isDM()&&!viewAs?`<div class="seg" style="margin-left:6px"><span class="${tlMode==='public'?'on':''}" data-m="public">общий</span><span class="${tlMode==='dm'?'on':''}" data-m="dm" title="Виден только мастеру">🔒 мастерский</span></div>`:''}<span class="faint" style="font-size:12.5px">${ed?'Дата — любой текст в летоисчислении мира; порядок — стрелками. Клик по событию сворачивает/разворачивает его.':'Клик по событию — развернуть.'}</span><span class="grow"></span>${ed?'<button class="btn sm" id="tlSort" title="Упорядочить даты по возрастанию. Понимает 12.05.987, 05.987, 987 и «до н. э.»; нераспознанные даты остаются в конце">↕ по дате</button>':''}<button class="btn sm" id="expAll">развернуть все</button><button class="btn sm" id="colAll">свернуть все</button><button class="btn primary w" id="addNode">+ Дата</button></div>
     <div class="tlwrap"><div class="tl"></div></div></div>`);
   $$('.head .seg span',page).forEach(x=>x.onclick=()=>{ tlMode=x.dataset.m; render(); });
+  { const sb=$('#tlSort',page); if(sb) sb.onclick=()=>{ const nodes=tl.nodes||[]; const xs=nodes.map((n,i)=>({n,i,k:tlDateKey(n.date)})); const ok=xs.filter(x=>x.k!=null).sort((a,b)=>a.k-b.k||a.i-b.i), bad=xs.filter(x=>x.k==null); const next=[...ok,...bad].map(x=>x.n);
+      if(next.every((n,i)=>n===nodes[i])){ toast(bad.length?`Уже по порядку (без распознанной даты: ${bad.length})`:'Даты уже по порядку'); return; } tl.nodes=next; touch(tl); draw(); toast(bad.length?`Упорядочено. Без распознанной даты, в конце: ${bad.length}`:'Упорядочено по дате'); }; }
   $('#expAll',page).onclick=()=>{ for(const n of tl.nodes||[]) for(const ev of n.events||[]) tlOpen.add(ev.id); draw(); };
   $('#colAll',page).onclick=()=>{ tlOpen.clear(); draw(); };
   const list=$('.tl',page);
@@ -4841,7 +5220,12 @@ function wmUndo(mp){ const j=WM.undo.pop(); if(!j) return; const {a,b,f,d,dm,gm}
     for(const now of cur) if(!d.some(o=>o.id===now.id)&&okDoc(now)) removeDoc(world.wmarkers.includes(now)?'wmarkers':'wmdraw',now); } }
 async function compressMap(file){ const im=await loadImg(file); let side=2600,q=.82,data=toJpeg(im,side,q); while(data.length>900_000&&side>800){ side=Math.round(side*.85); q=Math.max(.6,q-.05); data=toJpeg(im,side,q); } const s=Math.min(1,side/Math.max(im.width,im.height)); return {data,thumb:toJpeg(im,260,.8),w:Math.round(im.width*s),h:Math.round(im.height*s)}; }
 async function wmSetImage(mp,file){ toast('Загружаю карту…'); try{ const {data,thumb,w,h}=await compressMap(file); const id=uid(); await DB.set('images',id,{owner:me.uid,entity:mp.id,data,thumb,createdAt:Date.now()}); imgCache.set(id,data); imgCache.set('t:'+id,thumb); if(mp.image) DB.delete('images',mp.image).catch(()=>{}); WM.imgs.delete(mp.id); mp.image=id; mp.iw=w; mp.ih=h; mp.w=w; mp.h=h; touch(mp); render(); }catch(e){ console.error(e); toast('Не удалось загрузить: '+(e.code||e.message),true); } }
-async function newWorldMap(file){ const mp={id:uid(),name:'',visibility:'full',w:2400,h:1600,image:null,items:[],grid:{type:'none',size:100,snap:true},fog:{on:false,ops:[]},parent:null,tokenMode:'world',tokenBase:WM_TOKEN_BASE,tokenBaseSet:true}; await createDoc('wmaps',mp); if(file) await wmSetImage(mp,file); go('wmap',mp.id); }
+/* название новой записи: «Создать» доступна, только когда название не пустое */
+function nameDlg(title,ph,val=''){ return new Promise(res=>{ const b=openModal(`<h2>${esc(title)}</h2><input id="nv" value="${esc(val)}" placeholder="${esc(ph)}" maxlength="120" style="width:100%"><div class="modal-actions"><button class="btn" id="no">Отмена</button><button class="btn primary" id="yes">Создать</button></div>`);
+  const inp=$('#nv',b), yes=$('#yes',b); const upd=()=>{ yes.disabled=!inp.value.trim(); }; upd(); inp.oninput=upd; setTimeout(()=>{ inp.focus(); inp.select(); },30);
+  const ok=()=>{ const v=inp.value.trim(); if(!v) return; closeModal(); res(v); }; inp.onkeydown=e=>{ if(e.key==='Enter') ok(); }; yes.onclick=ok; $('#no',b).onclick=()=>{ closeModal(); res(null); }; }); }
+async function newWorldMap(file){ const nm=await nameDlg(file?'Новая карта из картинки':'Новая карта','Название: Долина Ветров, таверна «Кабан», подземелье…',file?String(file.name||'').replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').trim():''); if(!nm) return;
+  const mp={id:uid(),name:nm,visibility:'full',w:2400,h:1600,image:null,items:[],grid:{type:'none',size:100,snap:true},fog:{on:false,ops:[]},parent:null,tokenMode:'world',tokenBase:WM_TOKEN_BASE,tokenBaseSet:true}; await createDoc('wmaps',mp); if(file) await wmSetImage(mp,file); go('wmap',mp.id); }
 /* размеры фишек и мест на экране: постоянные (по умолчанию) или в масштабе сетки */
 const WM_TOKEN_BASE=16; // радиус токены ×1 в единицах карты. Старый стандарт 40 (ставился автоматически) считается «не задано»
 function wmBase(mp){ const b=+mp.tokenBase; if(mp.tokenBaseSet) return b||WM_TOKEN_BASE; return (!b||b===40)?WM_TOKEN_BASE:b; }
@@ -4940,15 +5324,24 @@ function renderWorldMaps(m){
   const nd=$('#newDraw',page); if(nd) nd.onclick=()=>newWorldMap(null);
   const grid=$('.grid',page); const maps=world.wmaps.filter(mp=>isDM()||mp.visibility!=='hidden');
   if(!maps.length) grid.append(el(`<div class="empty" style="grid-column:1/-1">Карт пока нет${ed?' — создай первую':''}.</div>`));
-  for(const mp of [...maps].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))){
+  const liveN=id=>wmPresOf(id).length?1:0; /* карты, где сейчас кто-то есть, — первыми */
+  for(const mp of [...maps].sort((a,b)=>liveN(b.id)-liveN(a.id)||(b.updatedAt||0)-(a.updatedAt||0))){
     const items=wmItems(mp); const nP=items.filter(x=>x.t==='place').length, nM=items.filter(x=>x.t==='marker'&&wmVisibleItem(mp,x)).length; const par=mp.parent?byId(world.wmaps,mp.parent):null;
-    const card=el(`<div class="card map"><div class="pic" style="aspect-ratio:16/9">${mp.image?`<img data-img="${mp.image}" data-thumb="1" style="display:none;width:100%;height:100%;object-fit:cover">`:'<canvas style="width:100%;height:100%"></canvas>'}</div><div class="body"><div class="name row" style="gap:6px"><span class="grow" style="min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(mp.name)||'<span class="faint">без названия</span>'}</span>${ed?'<button class="btn sm icon cfg" title="Настройки карты">⚙</button>':''}</div><div class="sub">${nP} ${plural(nP,'место','места','мест')} · ${nM} ${plural(nM,'токен','токена','токенов')}</div><div class="chips"><span class="chip">${mp.image?'🖼 картинка':'✎ рисунок'}</span>${par?`<span class="chip" title="Часть карты">↰ ${esc(par.name||'без названия')}</span>`:''}${mp.fog?.on?'<span class="chip">🌫 туман</span>':''}${mp.visibility==='hidden'?'<span class="chip">☾ скрыта от игроков</span>':''}</div></div></div>`);
+    const card=el(`<div class="card map"><div class="pic" style="aspect-ratio:16/9">${mp.image?`<img data-img="${mp.image}" data-thumb="1" style="display:none;width:100%;height:100%;object-fit:cover">`:'<canvas style="width:100%;height:100%"></canvas>'}</div><div class="body"><div class="name row" style="gap:6px"><span class="grow" style="min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(mp.name)||'<span class="faint">без названия</span>'}</span>${ed?'<button class="btn sm icon cfg" title="Настройки карты">⚙</button>':''}</div><div class="sub">${nP} ${plural(nP,'место','места','мест')} · ${nM} ${plural(nM,'токен','токена','токенов')}</div><div class="pres" data-map="${mp.id}" style="display:none"></div><div class="chips"><span class="chip">${mp.image?'🖼 картинка':'✎ рисунок'}</span>${par?`<span class="chip" title="Часть карты">↰ ${esc(par.name||'без названия')}</span>`:''}${mp.fog?.on?'<span class="chip">🌫 туман</span>':''}${mp.visibility==='hidden'?'<span class="chip">☾ скрыта от игроков</span>':''}</div></div></div>`);
     card.onclick=()=>go('wmap',mp.id); grid.append(card); const cfg=$('.cfg',card); if(cfg) cfg.onclick=e=>{ e.stopPropagation(); wmSettings(mp,()=>render()); };
     if(ed) card.oncontextmenu=e=>{ e.preventDefault(); ctxMenu(e.clientX,e.clientY,[{hdr:mp.name||'карта'},{icon:'↗',label:'Открыть',onClick:()=>go('wmap',mp.id)},{icon:'⚙',label:'Настройки…',onClick:()=>wmSettings(mp,()=>render())},{icon:'⧉',label:'Дублировать карту',onClick:async()=>{ const c=JSON.parse(JSON.stringify(clean(mp))); c.id=uid(); c.name=(mp.name||'карта')+' (копия)'; delete c.createdAt; await createDoc('wmaps',c); const s=wmSecret(mp); if(s&&s.items?.length){ const s2={id:'wm_'+c.id,items:JSON.parse(JSON.stringify(clean(s).items))}; WM.secrets.set(c.id,s2); touch(s2); } toast('Карта скопирована'); }},{icon:mp.visibility==='hidden'?'☀':'☾',label:mp.visibility==='hidden'?'Показать игрокам':'Скрыть от игроков',onClick:()=>{ mp.visibility=mp.visibility==='hidden'?'full':'hidden'; touch(mp); render(); }}]); };
     const cv=$('canvas',card); if(cv) requestAnimationFrame(()=>{ const W=cv.clientWidth||300, H=cv.clientHeight||170; cv.width=W; cv.height=H; const k=Math.min(W/mp.w,H/mp.h); wmDrawScene(cv.getContext('2d'),mp,mp.items||[],{x:-(W/k-mp.w)/2,y:-(H/k-mp.h)/2,k},W,H,{noGlyph:true,noLayers:true}); });
   }
-  m.append(page);
+  m.append(page); wmListPresence(page);
 }
+/* В4: кто сейчас на карте (живой слой presence_<uid>, свежее 200 с) и стоит ли там твой токен — на карточках в списке карт */
+function wmPresOf(mapId){ const now=Date.now(); return (world._live||[]).filter(d=>d.id.startsWith('presence_')&&d.map===mapId&&now-d.t<200000&&d.u!==me?.uid); }
+function wmMyTokenOn(mp){ const mine=new Set(world.characters.filter(c=>(c.players||[]).includes(effUid())).map(c=>c.id)); if(!mine.size) return false; return wmItems(mp).some(x=>x.t==='marker'&&x.ref&&mine.has(x.ref)); }
+function wmListPresence(root){ $$('.pres[data-map]',root||document).forEach(box=>{ const mp=byId(world.wmaps,box.dataset.map); if(!mp) return; const L=wmPresOf(mp.id);
+  const dm=L.some(d=>{ const u=byId(world.users,d.u); return u&&(u.role==='dm'||CONFIG.dmEmails.includes((u.email||'').toLowerCase())); }); const mine=wmMyTokenOn(mp); const parts=[];
+  if(L.length) parts.push(`<span class="on" title="Сейчас на карте: ${esc(L.map(d=>d.n||'?').join(', '))}">● ${L.length===1?esc(L[0].n||'1 человек'):L.length+' '+plural(L.length,'человек','человека','человек')} здесь${dm&&L.length>1?' · мастер':''}</span>`);
+  if(mine) parts.push('<span class="tok" title="Здесь стоит токен твоего персонажа">◉ твой токен</span>');
+  box.innerHTML=parts.join(''); box.style.display=parts.length?'':'none'; }); }
 /* --- настройки карты (модалка) --- */
 /* удалить карту со всем её содержимым: подложка, скрытый слой, токены и рисунки игроков, личные слои */
 /* копия карты: документ карты (сетка, туман, масштаб, слои), своя копия картинки, публичные элементы, токены, рисунки, скрытый слой мастера и личные слои — с новыми id */
@@ -4961,7 +5354,12 @@ async function wmMakeClone(orig,mp){ const root=cloneRoot(orig); const n=world.c
   if(c.ruina){ delete c.ruina.emo; delete c.ruina.speedN; delete c.ruina.speedEmo; delete c.ruina.scene; delete c.ruina.deck; delete c.ruina.rhand; delete c.ruina.used; delete c.ruina.counterTmp; } await createDoc('characters',c); return c; }
 /* клоны без единого токена на любой карте — удалить (мастер, при открытии/перерисовке карты) */
 let _cloneSweepT=0; function wmSweepClones(){ if(!isDM()||viewAs||Date.now()-_cloneSweepT<5000) return; _cloneSweepT=Date.now(); const refs=new Set(); for(const m of world.wmaps){ for(const it of (m.items||[])) if(it.ref) refs.add(it.ref); const sd=WM.secrets.get(m.id); if(sd) for(const it of (sd.items||[])) if(it.ref) refs.add(it.ref); } for(const d of world.wmarkers) if(d.ref) refs.add(d.ref); for(const d of world.wmpriv) for(const it of (d.items||[])) if(it.ref) refs.add(it.ref); for(const c of world.characters.filter(isClone)){ if(refs.has(c.id)) continue; if(Date.now()-(c.createdAt||0)<30000) continue; removeDoc('characters',c); } }
-async function wmDeleteMap(mp){ if(!await confirmDlg(`Удалить карту «${mp.name||'без названия'}»? Вместе с ней уйдут токены, рисунки, скрытый и личные слои. Это нельзя отменить.`,'Удалить')) return false; if(mp.image) DB.delete('images',mp.image).catch(()=>{}); const s=wmSecret(mp); if(s){ DB.delete('dm',s.id).catch(()=>{}); WM.secrets.delete(mp.id); } for(const d of world.wmarkers.filter(d=>d.mapId===mp.id)) removeDoc('wmarkers',d); for(const d of world.wmdraw.filter(d=>d.mapId===mp.id)) removeDoc('wmdraw',d); for(const d of world.wmpriv.filter(d=>d.mapId===mp.id)) removeDoc('wmpriv',d); for(const c of world.characters.filter(c=>c.cloneMap===mp.id)) removeDoc('characters',c); await removeDoc('wmaps',mp); go('wmap'); return true; }
+async function wmDeleteMap(mp){ if(!await confirmDlg(`Удалить карту «${mp.name||'без названия'}»? Вместе с ней уйдут токены, рисунки, скрытый и личные слои. Вернуть можно из «Корзины» в течение ${TRASH_DAYS} дней.`,'Удалить')) return false;
+  const g=uid(); const s=wmSecret(mp); const imgs=[mp.image,...[...(mp.items||[]),...((s&&s.items)||[])].flatMap(it=>[it.img,it.image,...(it.images||[])])];
+  if(!await trashMain(g,'wmaps',mp,mp.name,'wmap',imgs)) return false;
+  const rel=[...(s?[['dm',s]]:[]),...world.wmarkers.filter(d=>d.mapId===mp.id).map(d=>['wmarkers',d]),...world.wmdraw.filter(d=>d.mapId===mp.id).map(d=>['wmdraw',d]),...world.wmpriv.filter(d=>d.mapId===mp.id).map(d=>['wmpriv',d]),...world.characters.filter(c=>c.cloneMap===mp.id).map(c=>['characters',c])];
+  await Promise.all(rel.map(([c,d])=>trashPut(g,c,d)));
+  if(s){ DB.delete('dm',s.id).catch(()=>{}); WM.secrets.delete(mp.id); } for(const [c,d] of rel) if(c!=='dm') removeDoc(c,d); await removeDoc('wmaps',mp); go('wmap'); toast('Карта удалена — вернуть можно в «Корзине»'); return true; }
 function wmSettings(mp,after,tab){
   const g=wmGrid(mp); const f=mp.fog||(mp.fog={on:false,holes:[]});
   const others=world.wmaps.filter(x=>x.id!==mp.id);
@@ -4989,8 +5387,8 @@ function wmSettings(mp,after,tab){
 /* --- одна карта --- */
 function renderWorldMap(m,mp){
   if(!mp||!(isDM()||mp.visibility!=='hidden')){ go('wmap'); return; }
-  if(innerWidth<1150&&!WM.menuAuto&&!localStorage.getItem('nomenu')){ document.body.classList.add('nomenu'); WM.menuAuto=true; }
-  WM.cardsCompact??=localStorage.getItem('wm.cardsCompact')!=='0'; if(!WM.dockSet){ let d=null; try{ d=JSON.parse(localStorage.getItem('wm.dockSet')||'null'); }catch{} if(!d&&localStorage.getItem('wm.dock')==='1') d={me:true,fight:true}; WM.dockSet={me:!!d?.me,fight:!!d?.fight}; } WM.dock=!!(WM.dockSet.me||WM.dockSet.fight); WM.initStrip??=localStorage.getItem('wm.initStrip')!=='0';
+  menuOnMap();
+  WM.cardsCompact??=localStorage.getItem('wm.cardsCompact')!=='0'; if(!WM.dockSet){ let d=null; try{ d=JSON.parse(localStorage.getItem('wm.dockSet')||'null'); }catch{} if(!d&&localStorage.getItem('wm.dock')==='1') d={me:true,fight:true}; WM.dockSet=d?{me:!!d.me,fight:!!d.fight}:(innerWidth<1600?{me:true,fight:true}:{me:false,fight:false}); /* В2: без своего выбора на экранах уже 1600 px «Мой» и бой — вкладками в колонке чата, карте больше места */ } WM.dock=!!(WM.dockSet.me||WM.dockSet.fight); WM.initStrip??=localStorage.getItem('wm.initStrip')!=='0';
   const ed=isDM()&&!viewAs; const tok=ed||(isPlayer()&&(isHelper()||!world.settings.wmDMOnly)); const edI=ed||(isPlayer()&&!viewAs&&can('plInit')); if(!ed&&!toolOk(WM.tool)) WM.tool='select'; if(!ed&&!(tok?['marker','ruler','select','path','area','place','label','aura','note','arrow']:['ruler','select','aura',...(ed||plOn('plArrows')?['arrow']:[]),...(isPlayer()&&plOn('plTokens')?['marker']:[])]).includes(WM.tool)) WM.tool='select'; if(WM.tool==='aura'&&!WM.auraDraw) WM.tool='select';
   wmGrid(mp); mp.fog||(mp.fog={on:false,holes:[]}); const g=mp.grid;
   const myChars=ch=>isDM()||(ch.players||[]).includes(effUid());
@@ -5017,10 +5415,10 @@ function renderWorldMap(m,mp){
   const page=el(`<div class="page full"><div id="graphWrap" class="wmwrap ${localStorage.getItem('wm.tbHide')==='1'?'tbhide':''}"><canvas id="wmc"></canvas><button class="btn sm icon wmtbShow" id="tbShow" title="Показать панель (H)">▼</button>
     <div class="wmtb">
       <div class="bar">
-        <div class="cl"><button class="btn sm icon" id="back" title="К списку карт">←</button><button class="btn sm icon ${document.body.classList.contains('nomenu')?'active':''}" id="menuBtn" title="Спрятать / показать меню слева">◧</button>${parent?`<button class="btn sm" id="up" title="К родительской карте">↰ ${esc(parent.name||'карта')}</button>`:''}<span class="mname ${ed?'click':''}" id="mname" title="${ed?'Название карты — изменить в настройках (⚙)':esc(mp.name||'')}">${esc(mp.name)||'<span class=faint>без названия</span>'}${ed&&mp.visibility==='hidden'?' <span class=faint title="скрыта от игроков">☾</span>':''}</span></div>
+        <div class="cl"><button class="btn sm icon" id="back" title="К списку карт">←</button><button class="btn sm icon ${menuMode()!=='full'?'active':''}" id="menuBtn" title="${menuTitle()}">◧</button>${parent?`<button class="btn sm" id="up" title="К родительской карте">↰ ${esc(parent.name||'карта')}</button>`:''}<span class="mname ${ed?'click':''}" id="mname" title="${ed?'Название карты — изменить в настройках (⚙)':esc(mp.name||'')}">${esc(mp.name)||'<span class=faint>без названия</span>'}${ed&&mp.visibility==='hidden'?' <span class=faint title="скрыта от игроков">☾</span>':''}</span></div>
         ${G.length?'<span class="sep"></span>':''}<div class="cl tabs">${G.map(g=>`<button class="tab ${pinned(g.id)?'open':''}" data-g="${g.id}" title="${g.cap}"><i>${g.icon}</i><span>${g.cap}</span></button>`).join('')}</div>
         ${ed?'<span class="sep"></span><span id="wmlayers" class="lrs" title="Слои: клик — активный, ПКМ — показать / скрыть"></span>':''}<span class="grow"></span>
-        <div class="cl">${tb('select','⬚<span class="lbl"> Выбор</span>','Выбор и перетаскивание (V). Shift+клик — добавить к выделению, Shift+тянуть — рамка, Alt+клик — пинг')}${tb('ruler','📏','Линейка (R): кликай по точкам, Esc — убрать. Другие видят твою линейку, пока ты ей пользуешься')}${ed?`<button class="btn sm ${WM.rulerSecret?'active':''}" id="rulerSec" title="Скрытая линейка: игроки не видят твоих измерений">☾📏</button>`:''}${ed||plOn('plArrows')?'':'<!--'}${tb('arrow','➶','Стрелки «кто кого атакует» (X): тяни от токена к токену. Клик по стрелке — убрать, Shift+X — убрать все. Видят все на карте')}<button class="arcb" id="arcol" title="Цвет новых стрелок" style="background:${WM.arcol||'#ff5c6c'}"></button>${ed||plOn('plArrows')?'':'-->'}<button class="btn sm" id="fitBtn" title="Вписать карту в экран">⛶</button><button class="btn sm ${WM.showBars!==false?'active':''}" id="barsBtn" title="Полоски персонажей под токенами">❤</button><button class="btn sm ${WM.cardsCompact?'active':''}" id="cardsBtn" title="Карточки на карте: только названия. Полный текст — у выделенной карточки и в подсказке при наведении">🂠</button><button class="btn sm ${WM.dock?'active':''}" id="dockBtn" title="Что держать в правой колонке вместе с чатом (вкладками): персонажа, бой — или всё отдельно, как раньше">◨</button><button class="btn sm ${WM.showRoll?'active':''}" id="rollBtn" title="Бросок по формуле: характеристики, кубики, цель — выделенный токен">ƒ🎲</button>${ruOn()?`<button class="btn sm ${document.body.classList.contains('fight')?'active':''}" id="fightBtn" title="Боевой режим: убирает с панели рисование, области и места, открывает трекер и руку. Выключить — всё вернётся">⚔ Бой</button>`:''}<button class="btn sm ${showInit?'active':''}" id="initBtn" title="Трекер инициативы: порядок ходов, раунды">⚔${(()=>{ const n=wmItems(mp).filter(x=>x.t==='marker'&&x.inCombat).length; return n?`<b class="cnt">${n}</b>`:''; })()}</button>${ed?`<button class="btn sm ${WM.asPlayer?'active':''}" id="asPl" title="Показать карту так, как её видят игроки (туман, скрытое)">👁</button>`:''}${meOK&&ruOn()&&RU().handPanel!==false?`<button class="btn sm ${WM.showHand?'active':''}" id="handBtn2" title="Рука: карточки страниц внизу экрана">🃏 Рука</button>`:''}${ed&&ruOn()?'<button class="btn sm" id="ruClash" title="Руина: быстрое столкновение — выбрать скиллы обеих сторон">⚔⚔</button>':''}${ed?'<span class="sep"></span><button class="btn sm" id="callAll" title="Перевести всех игроков на эту карту (мгновенно)">⇥ всех</button>':''}<span class="sep"></span><button class="btn sm icon" id="tbHide" title="Спрятать панель (H)">▲</button></div>
+        <div class="cl">${tb('select','⬚<span class="lbl"> Выбор</span>','Выбор и перетаскивание (V). Shift+клик — добавить к выделению, Shift+тянуть — рамка, Alt+клик — пинг')}${tb('ruler','📏','Линейка (R): кликай по точкам, Esc — убрать. Другие видят твою линейку, пока ты ей пользуешься')}${ed?`<button class="btn sm ${WM.rulerSecret?'active':''}" id="rulerSec" title="Скрытая линейка: игроки не видят твоих измерений">☾📏</button>`:''}${ed||plOn('plArrows')?'':'<!--'}${tb('arrow','➶','Стрелки «кто кого атакует» (X): тяни от токена к токену. Клик по стрелке — убрать, Shift+X — убрать все. Видят все на карте')}<button class="arcb" id="arcol" title="Цвет новых стрелок" style="background:${WM.arcol||'#ff5c6c'}"></button>${ed||plOn('plArrows')?'':'-->'}<button class="btn sm" id="fitBtn" title="Вписать карту в экран">⛶</button><button class="btn sm ${WM.showBars!==false?'active':''}" id="barsBtn" title="Полоски персонажей под токенами">❤</button><button class="btn sm ${WM.cardsCompact?'active':''}" id="cardsBtn" title="Карточки на карте: только названия. Полный текст — у выделенной карточки и в подсказке при наведении">🂠</button><button class="btn sm ${WM.dock?'active':''}" id="dockBtn" title="Что держать в правой колонке вместе с чатом (вкладками): персонажа, бой — или всё отдельно, как раньше">◨</button><button class="btn sm ${WM.showRoll?'active':''}" id="rollBtn" title="Бросок по формуле: характеристики, кубики, цель — выделенный токен">ƒ🎲</button>${ruOn()?`<button class="btn sm ${document.body.classList.contains('fight')?'active':''}" id="fightBtn" title="Боевой режим: убирает с панели рисование, области и места, открывает трекер и руку. Выключить — всё вернётся">⚔ Бой</button>`:''}<button class="btn sm ${showInit?'active':''}" id="initBtn" title="Трекер инициативы: порядок ходов, раунды">⚔${(()=>{ const n=wmItems(mp).filter(x=>x.t==='marker'&&x.inCombat).length; return n?`<b class="cnt">${n}</b>`:''; })()}</button>${ed?`<button class="btn sm ${WM.asPlayer?'active':''}" id="asPl" title="Показать карту так, как её видят игроки (туман, скрытое)">👁</button>`:''}${meOK&&ruOn()&&RU().handPanel!==false?`<button class="btn sm ${WM.showHand?'active':''}" id="handBtn2" title="Рука: карточки страниц внизу экрана">🃏 Рука</button>`:''}${ed&&ruOn()?'<button class="btn sm" id="ruClash" title="Руина: быстрое столкновение — выбрать скиллы обеих сторон">⚔⚔</button>':''}${ed&&world.settings.sceneMusic?'<button class="btn sm icon" id="musBtn" title="Музыка сцены: включить трек всем, кто в картотеке">♫</button>':''}${ed?'<span class="sep"></span><button class="btn sm" id="callAll" title="Перевести всех игроков на эту карту (мгновенно)">⇥ всех</button>':''}<span class="sep"></span><button class="btn sm icon" id="tbHide" title="Спрятать панель (H)">▲</button></div>
       </div>
       <div class="dds">${G.map(g=>`<div class="dd ${pinned(g.id)?'on pin':''}" data-g="${g.id}"><div class="ddh"><span>${g.icon} ${g.cap}</span><button class="x-btn pinb ${pinned(g.id)?'on':''}" title="Закрепить: панель не будет закрываться при клике по карте">📌</button></div><div class="ddb">${g.inner}</div></div>`).join('')}</div>
     </div>
@@ -5032,7 +5430,10 @@ function renderWorldMap(m,mp){
     <div id="ghint"></div>
   </div></div>`);
   const wrap=$('#graphWrap',page), cv=$('#wmc',page), ctx=cv.getContext('2d'), info=$('#ginfo',page), hint=$('#ghint',page), layersBox=$('#wmlayers',page), barWrap=$('#wmbarwrap',page), bar=$('#wmbar',page);
-  $('#back',page).onclick=()=>{ if(ruler){ ruler=null; rulerPub(); } go('wmap'); }; const tbToggle=()=>{ const on=!wrap.classList.contains('tbhide'); wrap.classList.toggle('tbhide',on); localStorage.setItem('wm.tbHide',on?'1':''); WM.fitChat&&WM.fitChat(); }; $('#tbHide',page).onclick=tbToggle; { const rc=$('#ruClash',page); if(rc) rc.onclick=ruClashDialog; } $('#tbShow',page).onclick=tbToggle; $('#menuBtn',page).onclick=()=>{ document.body.classList.toggle('nomenu'); $('#menuBtn',page).classList.toggle('active',document.body.classList.contains('nomenu')); localStorage.setItem('nomenu',document.body.classList.contains('nomenu')?'1':''); setTimeout(draw,50); }; const upB=$('#up',page); if(upB) upB.onclick=()=>go('wmap',mp.parent);
+  $('#back',page).onclick=()=>{ if(ruler){ ruler=null; rulerPub(); } go('wmap'); }; const tbToggle=()=>{ const on=!wrap.classList.contains('tbhide'); wrap.classList.toggle('tbhide',on); localStorage.setItem('wm.tbHide',on?'1':''); WM.fitChat&&WM.fitChat(); }; $('#tbHide',page).onclick=tbToggle; { const rc=$('#ruClash',page); if(rc) rc.onclick=ruClashDialog; } $('#tbShow',page).onclick=tbToggle; $('#menuBtn',page).onclick=()=>{ const next={rail:'none',none:'full',full:'rail'}[menuMode()]; menuApply(next); try{ localStorage.setItem('wm.menu',next); localStorage.setItem('nomenu',next==='none'?'1':''); }catch{} const b=$('#menuBtn',page); b.classList.toggle('active',next!=='full'); b.title=menuTitle(); toast({rail:'Меню — полоска значков',none:'Меню спрятано',full:'Меню полностью'}[next]); setTimeout(draw,50); };
+  { const mb=$('#musBtn',page); if(mb) mb.onclick=()=>musicDialog(); }
+  /* В3: панель инструментов шире экрана прокручивается пальцем — край с продолжением подсвечиваем затуханием */
+  { const tb=$('.wmtb .bar',page); if(tb){ const upd=()=>{ tb.classList.toggle('fr',tb.scrollLeft+tb.clientWidth<tb.scrollWidth-4); tb.classList.toggle('fl',tb.scrollLeft>4); }; tb.addEventListener('scroll',upd,{passive:true}); try{ new ResizeObserver(upd).observe(tb); }catch{} setTimeout(upd,300); } } const upB=$('#up',page); if(upB) upB.onclick=()=>go('wmap',mp.parent);
   if(ed) $('#mname',page).onclick=()=>wmSettings(mp,()=>render());
   const ca=$('#callAll',page); if(ca) ca.onclick=()=>{ LIVE.set('goto_all',{map:mp.id,t:Date.now(),u:me.uid,n:me.name}).catch(()=>{}); toast('Все игроки переведены на эту карту'); };
   const cam=WM.cams[mp.id]??={x:0,y:0,k:1,fitted:false};
@@ -5434,7 +5835,7 @@ const canMove=it=>ed||(it._doc&&((it.t==='marker'&&(it.layer||'normal')==='norma
   const fitChat=()=>{ const c=$('#chat'); if(!c||!cv.isConnected) return; c.style.top=(wrap.classList.contains('tbhide')?10:64)+'px'; let bottom=14; if(barWrap.classList.contains('on')){ const cw=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chatw'))||340; const chatLeft=innerWidth-Math.min(cw,innerWidth-64)-10; const br=bar.getBoundingClientRect(); if(br.right>chatLeft-6) bottom=52+bar.offsetHeight; } c.style.bottom=bottom+'px'; }; WM.fitChat=fitChat; { const ro=new ResizeObserver(()=>{ if(!cv.isConnected){ ro.disconnect(); return; } fitChat(); }); ro.observe(bar); } addEventListener('resize',fitChat);
   const updTabs=()=>$$('.wmtb .dd',page).forEach(dd=>{ const a=$('.tool.active',dd); const t=tabOf(dd.dataset.g); t.classList.toggle('has',!!a); t.title=a?'Активный инструмент: '+(a.title||'').split('.')[0]:$('.ddh span',dd).textContent; });
   const setTool=t=>{ if(t==='line'){ WM.pkind='line'; WM.lineTool=1; t='path'; } else if(t==='path'){ WM.lineTool=0; if(WM.pkind==='line') WM.pkind=$('#pkind',page)?.value||'road'; } else if(t==='shape') WM.lineTool=0; WM.tool=t; poly=null; const tbn=$(`.tool[data-tool="${t}"]`,page); if(t!=='ruler'&&ruler){ ruler=null; rulerPub(); } $$('.tool',page).forEach(b=>b.classList.toggle('active',b.dataset.tool===(t==='path'&&WM.lineTool?'line':t))); updTabs(); cv.style.cursor=t==='select'?'grab':(t==='fog'&&WM.fogShape!=='rect')?'none':'crosshair'; setHint(); draw(); };
-  function setHint(){ const h={select:'Тяни карту или элемент · колесо — масштаб · Shift+клик — к выделению · Shift+тянуть — рамка · Alt+клик — пинг (Shift+Alt — с переносом всех) · двойной клик — открыть · Delete · Ctrl+Z'+(ed?' · Ctrl+C / Ctrl+V':''),area:(WM.ashape==='free'?'Обведи область мышью — контур замкнётся сам':WM.ashape==='poly'?'Кликай по вершинам; двойной клик или Enter — замкнуть':'Растяни от угла до угла; Shift — квадрат/круг')+' · после рисования — сразу выбор; двойной клик по кнопке инструмента закрепляет его',path:(WM.pshape==='free'?'Проведи линию мышью':WM.pshape==='line'?'Растяни прямую; Shift — под углом 45°':'Кликай по точкам; двойной клик или Enter — закончить')+' · двойной клик по кнопке — закрепить инструмент',place:'Кликни по карте, где поставить место',arrow:'Тяни от токена к токену — стрелка «кто кого атакует» · клик по стрелке — убрать · Shift+X — убрать все · Esc — выйти',note:'Кликни по карте, где положить документ — откроется выбор из раздела «Документы»',label:'Кликни по карте, где написать',aura:'Аура: кликай по вершинам вокруг токена; Enter или двойной клик — закончить, Esc — отмена',marker:'Кликни по карте — поставить токен (можно много одинаковых)',zone:'Растяни прямоугольник зоны. Привязку к локации можно задать в панели справа',fog:(WM.fogShape==='rect'?'Растяни прямоугольник':'Веди кистью')+(WM.fogMode==='reveal'?', чтобы открыть участок игрокам':', чтобы снова закрыть участок'),ruler:'Кликай по точкам — расстояние в клетках и единицах карты · Esc — убрать',calib:'Растяни рамку по клеткам на картинке; затем укажи, сколько клеток она покрывает',resize:'Жёлтые ручки — размер холста (Shift — пропорционально) · голубые — растянуть картинку (Shift — без пропорций) · тяни картинку — сдвинуть · Ctrl+Z — вернуть'}; hint.innerHTML=(ed?h[WM.tool]:(h[WM.tool]&&WM.tool!=='select'?h[WM.tool]:(tok?'Колесо — масштаб · тяни — двигать карту · клик по токену — что это · двойной клик — открыть · Alt+клик — пинг · свои токены: ставить и двигать (Space во время движения — точка маршрута)':'Колесо — масштаб · тяни — двигать карту · клик по токену или месту — что это · двойной клик — открыть · Alt+клик — пинг')))||''; }
+  function setHint(){ const h={select:'Тяни карту или элемент · колесо — масштаб · Shift+клик — к выделению · Shift+тянуть — рамка · Alt+клик — пинг (Shift+Alt — с переносом всех) · двойной клик — открыть · Delete · Ctrl+Z'+(ed?' · Ctrl+C / Ctrl+V':''),area:(WM.ashape==='free'?'Обведи область мышью — контур замкнётся сам':WM.ashape==='poly'?'Кликай по вершинам; двойной клик или Enter — замкнуть':'Растяни от угла до угла; Shift — квадрат/круг')+' · после рисования — сразу выбор; двойной клик по кнопке инструмента закрепляет его',path:(WM.pshape==='free'?'Проведи линию мышью':WM.pshape==='line'?'Растяни прямую; Shift — под углом 45°':'Кликай по точкам; двойной клик или Enter — закончить')+' · двойной клик по кнопке — закрепить инструмент',place:'Кликни по карте, где поставить место',arrow:'Тяни от токена к токену — стрелка «кто кого атакует» · клик по стрелке — убрать · Shift+X — убрать все · Esc — выйти',note:'Кликни по карте, где положить документ — откроется выбор из раздела «Документы»',label:'Кликни по карте, где написать',aura:'Аура: кликай по вершинам вокруг токена; Enter или двойной клик — закончить, Esc — отмена',marker:'Кликни по карте — поставить токен (можно много одинаковых)',zone:'Растяни прямоугольник зоны. Привязку к локации можно задать в панели справа',fog:(WM.fogShape==='rect'?'Растяни прямоугольник':'Веди кистью')+(WM.fogMode==='reveal'?', чтобы открыть участок игрокам':', чтобы снова закрыть участок'),ruler:'Кликай по точкам — расстояние в клетках и единицах карты · Esc — убрать',calib:'Растяни рамку по клеткам на картинке; затем укажи, сколько клеток она покрывает',resize:'Жёлтые ручки — размер холста (Shift — пропорционально) · голубые — растянуть картинку (Shift — без пропорций) · тяни картинку — сдвинуть · Ctrl+Z — вернуть'}; hint.innerHTML=(ed?h[WM.tool]:(h[WM.tool]&&WM.tool!=='select'?h[WM.tool]:(tok?'Колесо — масштаб · тяни — двигать карту · клик по токену — что это · двойной клик — открыть · Alt+клик — пинг · свои токены: ставить и двигать (Space во время движения — точка маршрута)':'Колесо — масштаб · тяни — двигать карту · клик по токену или месту — что это · двойной клик — открыть · Alt+клик — пинг')))||''; if(TOUCH_UI&&(WM.tool==='select'||!ed)) hint.innerHTML='Один палец — двигать карту или свой токен · два пальца — масштаб и сдвиг · тап по токену — что это · двойной тап — открыть'; }
   $$('.tool',page).forEach(b=>{ b.onclick=()=>{ if(b.dataset.tool==='marker'&&!$('#entSel',page).value){ if(palBtn&&!WM.showPal) palBtn.click(); toast('Выбери в панели, кого поставить'); return; } setTool(b.dataset.tool); }; b.ondblclick=()=>{ const t=b.dataset.tool; if(['select','ruler'].includes(t)) return; WM.pin=WM.pin===t?null:t; $$('.tool',page).forEach(x=>x.classList.toggle('pinned',WM.pin===x.dataset.tool)); toast(WM.pin?'Инструмент закреплён — Esc, чтобы вернуться к выбору':'Инструмент откреплён'); }; });
   const bindSel=(id,key,tool)=>{ const e=$(id,page); if(e) e.onchange=()=>{ WM[key]=e.value; setTool(tool); }; };
   bindSel('#akind','akind','area'); bindSel('#ashape','ashape','area'); bindSel('#pkind','pkind','path'); bindSel('#pshape','pshape','line'); bindSel('#pshape2','pshape','path'); bindSel('#sshape','sshape','shape'); { const bs=(id,key,ls)=>{ const e=$(id,page); if(e) e.oninput=()=>{ WM[key]=e.type==='range'||e.type==='number'?+e.value:e.value; localStorage.setItem(ls,String(WM[key])); }; }; bs('#sfill','sfill','wm.sfill'); bs('#sstroke','sstroke','wm.sstroke'); bs('#sw','sw','wm.sw'); bs('#salpha','salpha','wm.salpha'); } bindSel('#ckind','ckind','place'); bindSel('#fogMode','fogMode','fog'); bindSel('#fogShape','fogShape','fog');
@@ -5571,12 +5972,19 @@ const canMove=it=>ed||(it._doc&&((it.t==='marker'&&(it.layer||'normal')==='norma
     box.innerHTML=list.map(d=>`<div class="ddoc" data-id="${d.id}"><span class="ic">${esc(d.icon||'📜')}</span><span class="grow nm" title="${esc(d.title||'')}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(d.title)||'<span class=faint>без названия</span>'}${d.owner===me_?' <span class="faint" style="font-size:10px">мой</span>':''}${here.has(d.id)?' <span class="faint" style="font-size:10px" title="лежит на этой карте">🗺</span>':''}</span><button class="x-btn rd" title="Прочитать">📖</button>${canEditDoc(d)?'<button class="x-btn ed" title="Править">✎</button>':''}${!viewAs?`<button class="x-btn rm" title="${d.owner===me_?'Удалить документ':'Убрать из своего списка'}">✕</button>`:''}</div>`).join('')||'<div class="faint" style="font-size:12px;padding:4px">Документов нет. Их выдаёт мастер, а лежащие на карте можно забрать себе (📥).</div>';
     $$('.ddoc',box).forEach(r=>{ const d=byId(world.docs,r.dataset.id); $('.rd',r).onclick=()=>docView(d); const e_=$('.ed',r); if(e_) e_.onclick=()=>docEditDialog(d); const x=$('.rm',r); if(x) x.onclick=async()=>{ if(d.owner===me_) await docDelete(d); else await docDrop(d); drawMe(); }; });
     const nb=$('.medocNew',meBox); if(nb) nb.onclick=async()=>{ const d=await newDocument({title:'Новый документ'}); if(d){ docEditDialog(d); drawMe(); } }; }
+  /* В4: из панели «Мой» — найти токен персонажа на этой карте (клик — следующий, если их несколько) или поставить его в центр экрана */
+  function meTokens(ch){ return items().filter(x=>x.t==='marker'&&x.ref===ch.id); }
+  function meActHtml(ch){ if(viewAs) return ''; const toks=meTokens(ch);
+    if(toks.length) return `<button class="btn sm meact" id="meFind" title="Показать токен на карте${toks.length>1?' — их '+toks.length+', клик ещё раз покажет следующий':''}">⌖ Найти</button>`;
+    return $('.tool[data-tool="marker"]',page)&&myChars(ch)?'<button class="btn sm meact" id="mePlace" title="Поставить токен этого персонажа в центр экрана — потом перетащи куда нужно">📍 На карту</button>':''; }
+  function meActBind(ch){ const f=$('#meFind',meBox); if(f) f.onclick=()=>{ const toks=meTokens(ch); if(!toks.length){ drawMe(); return; } WM.findI=((WM.findI??-1)+1)%toks.length; const it=toks[WM.findI]; WM.sel=[it]; centerOn(it.x,it.y); showInfo(); draw(); };
+    const p=$('#mePlace',meBox); if(p) p.onclick=async()=>{ const c=toWorld(W()/2,H()/2); await addItem({t:'marker',ref:ch.id,x:Math.round(c.x),y:Math.round(c.y),size:tokSpawn()}); setTimeout(drawMe,300); toast('Токен в центре экрана — перетащи куда нужно'); }; }
   function drawMe(){ if(!meBox||!meOK||!WM.showMe) return; const scrollEl=$('.mebody',meBox); const scrollY=scrollEl?scrollEl.scrollTop:0; const mine=meChars(); const curOk=WM.meChar&&visibleEnt(byId(world.characters,WM.meChar)); WM.meChar=curOk?WM.meChar:(mine[0]?.id||world.characters.find(c=>visibleEnt(c))?.id); const ch=byId(world.characters,WM.meChar); if(!ch){ meBox.innerHTML='<div class="faint" style="padding:12px">Нет персонажей</div>'; return; } const chars=mine.some(c=>c.id===ch.id)?mine:[...mine,ch]; const ce=canEdit(ch); const open_=(WM.meOpen??=new Set()); const brief=briefOnly(ch);
     const isPasAb=a=>ruOn()&&!(a.dice||[]).length&&(a.ruCond||(a.on&&Object.values(a.on).some(v=>String(v||'').trim()))||(a.mods||[]).length);
     const meAbs=(ch.abilities||[]).filter(a=>ce||!a.hidden), meSkills=meAbs.filter(a=>!isPasAb(a)), mePas=meAbs.filter(isPasAb);
-    meBox.innerHTML=`<div class="hd">${chars.length>1?`<select id="meCh">${chars.map(c=>`<option value="${c.id}" ${c.id===ch.id?'selected':''}>${esc(c.name)||'без имени'}${myChars(c)?'':' · чтение'}</option>`).join('')}</select>`:`<b class="grow" style="padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(ch.name)||'без имени'}</b>`}<button class="btn sm icon" id="meOpen" title="Открыть лист персонажа">↗</button><button class="btn sm icon" id="meClose" title="закрыть">✕</button></div>
+    meBox.innerHTML=`<div class="hd">${chars.length>1?`<select id="meCh">${chars.map(c=>`<option value="${c.id}" ${c.id===ch.id?'selected':''}>${esc(c.name)||'без имени'}${myChars(c)?'':' · чтение'}</option>`).join('')}</select>`:`<b class="grow" style="padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(ch.name)||'без имени'}</b>`}<button class="btn sm icon" id="meMin" title="Свернуть до заголовка / развернуть">▁</button><button class="btn sm icon" id="meOpen" title="Открыть лист персонажа">↗</button><button class="btn sm icon" id="meClose" title="закрыть">✕</button></div>
       <div class="mebody">
-        <div class="mehd"><div class="av">${ch.thumb?`<img src="${esc(ch.thumb)}">`:(ch.mainImage?`<img data-img="${ch.mainImage}" data-thumb="1" style="display:none">`:esc(entAbbr(ch)))}</div><div class="grow" style="min-width:0"><div class="nm">${esc(chLabel(ch))||'без имени'}</div><div class="faint" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(ch.title||'')}</div></div></div>
+        <div class="mehd"><div class="av">${ch.thumb?`<img src="${esc(ch.thumb)}">`:(ch.mainImage?`<img data-img="${ch.mainImage}" data-thumb="1" style="display:none">`:esc(entAbbr(ch)))}</div><div class="grow" style="min-width:0"><div class="nm">${esc(chLabel(ch))||'без имени'}</div><div class="faint" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(ch.title||'')}</div></div>${meActHtml(ch)}</div>
         ${brief?`<div class="tb"><div class="muted" style="font-size:12.5px;line-height:1.5">${rich(ch.brief||'')||'<span class=faint>Ничего не известно.</span>'}</div></div>`:`
         <div class="metabs">${[['tok','Токен'],['ab','Способности',meSkills.length],...(ruOn()?[['pas','Пассивки',mePas.length]]:[]),['tk','Техники',techItems().filter(x=>techLearned(ch,x)&&techVisible(x,ch)).length],['ef','Эффекты',(ch.effects||[]).filter(effVis).length],['inv','Инвентарь',(ch.inventory||[]).filter(x=>ce||!x.hidden).length],...(isPlayer()?[['doc','Документы',world.docs.filter(docHeld).length]]:[])].map(([k,l,n])=>`<span data-t="${k}" class="${(localStorage.getItem('meTab')||'tok')===k?'on':''}">${l}${n?`<i>${n}</i>`:''}</span>`).join('')}</div>
         ${woundsOn()?`<div class="tb" data-tab="tok"><h4>Раны</h4>${woundsHTML(ch,{ed:canQuick(ch)&&!viewAs})}</div>`:''}<div class="tb" data-tab="tok"><h4>Полоски ${ce?'<button class="btn sm icon addBar" title="добавить полоску">+</button>':''}</h4><div class="bars"></div></div>
@@ -5594,7 +6002,8 @@ const canMove=it=>ed||(it._doc&&((it.t==='marker'&&(it.layer||'normal')==='norma
       if(plHid(ch,'bars')) hideTb('.bars'); if(plHid(ch,'stats')) hideTb('.mestats'); if(plHid(ch,'effects')) rmTab('ef'); if(plHid(ch,'abilities')){ rmTab('ab'); rmTab('pas'); } }
       const H=new Set(world.settings.meHide||[]); const map={bars:'.bars',statuses:'.stlist',auras:'.aulist',ruina:'.ruinfo',stats:'.mestats'}; for(const [k,s2] of Object.entries(map)) if(H.has(k)){ const x=$(s2,meBox); const tb=x&&x.closest('.tb'); if(tb) tb.classList.add('mehide'); } for(const k of ['ab','tk','ef']) if(H.has(k)){ $$('.metabs span[data-t="'+k+'"]',meBox).forEach(x=>x.remove()); if((localStorage.getItem('meTab')||'tok')===k) localStorage.setItem('meTab','tok'); } }
     { const body=$('.mebody',meBox); const applyTab=()=>{ const t=localStorage.getItem('meTab')||'tok'; $$('.metabs span',meBox).forEach(x=>x.classList.toggle('on',x.dataset.t===t)); $$('.tb[data-tab]',body).forEach(x=>x.style.display=x.dataset.tab===t?'':'none'); }; $$('.metabs span',meBox).forEach(x=>x.onclick=()=>{ localStorage.setItem('meTab',x.dataset.t); applyTab(); }); applyTab(); }
-    $('#meOpen',meBox).onclick=()=>open(ch.id); $('#meClose',meBox).onclick=()=>meBtn.click();
+    $('#meOpen',meBox).onclick=()=>open(ch.id); $('#meClose',meBox).onclick=()=>meBtn.click(); meActBind(ch);
+    { WM.meMin??=(()=>{ try{ return localStorage.getItem('wm.meMin')==='1'; }catch{ return false; } })(); meBox.classList.toggle('min',WM.meMin&&!meBox.closest('#chat')); const mm=$('#meMin',meBox); if(mm) mm.onclick=()=>{ WM.meMin=!WM.meMin; try{ localStorage.setItem('wm.meMin',WM.meMin?'1':''); }catch{} meBox.classList.toggle('min',WM.meMin); draw(); }; }
     { const av=$('.mehd .av',meBox); if(av&&ch.mainImage){ av.title='Открыть арт во весь экран'; av.onclick=()=>lightbox(ch.mainImage); } const io=$('.invOpen',meBox); if(io) io.onclick=()=>open(ch.id); }
     const stDie=$('.stdie',meBox); if(stDie) stDie.onchange=()=>localStorage.setItem('statDie',stDie.value);
     $$('.mestats .ms.der',meBox).forEach(row=>{ const x=fxDerived(ch).find(y=>y.d.id===row.dataset.der); if(!x||!x.ok) return; const sb=$('.say',row); if(sb) sb.onclick=()=>chatStatAs(ch,x.d.name,x.v,x.L); const rb=$('.roll',row); if(rb) rb.onclick=()=>chatFxAs(ch,`${localStorage.getItem('statDie')||'d20'} + ${x.d.key||x.d.id}`,x.d.name); });
@@ -5852,6 +6261,18 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
     const tr=(world._live||[]).find(d=>d.id==='trail_'+mp.id); if(tr&&tr.t>WM.lastTrail&&tr.u!==me.uid&&Math.abs(Date.now()-tr.t)<10000){ WM.lastTrail=tr.t; WM.trails.push(tr); kick(); } if(tr&&tr.t>WM.lastTrail) WM.lastTrail=tr.t; };
   /* мышь */
   cv.onwheel=e=>{ e.preventDefault(); const r=cv.getBoundingClientRect(); const sx=e.clientX-r.left, sy=e.clientY-r.top; const w=toWorld(sx,sy); const k2=Math.max(.05,Math.min(4,cam.k*(e.deltaY<0?1.15:1/1.15))); cam.k=k2; cam.x=w.x-sx/k2; cam.y=w.y-sy/k2; draw(); };
+  /* ===== В3: жесты на телефоне и планшете — щипок = масштаб, два пальца = сдвиг карты. Второй палец забирает жест у инструмента
+     (первый палец инструмент уже получил; пока жест идёт, его движения инструменту не отдаём, отпускание — отдаём, чтобы тот завершился).
+     Кнопки + − ⛶ — для всех ===== */
+  { const tp=new Map(), seen=new Set(); let pz=null, lock=false;
+    const P=e=>{ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; };
+    const pzStart=()=>{ const [a,b]=[...tp.values()]; const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2}; pz={d0:Math.hypot(a.x-b.x,a.y-b.y)||1,k0:cam.k,w:toWorld(m.x,m.y)}; };
+    cv.addEventListener('pointerdown',e=>{ if(e.pointerType!=='touch') return; tp.set(e.pointerId,P(e)); if(tp.size===1&&!lock){ seen.add(e.pointerId); return; } e.stopImmediatePropagation(); e.preventDefault(); try{ cv.setPointerCapture(e.pointerId); }catch{} if(tp.size>=2) pzStart(); },true);
+    cv.addEventListener('pointermove',e=>{ if(e.pointerType!=='touch'||!tp.has(e.pointerId)) return; tp.set(e.pointerId,P(e)); if(!pz&&!lock) return; e.stopImmediatePropagation(); if(!pz||tp.size<2) return; const [a,b]=[...tp.values()]; const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2}; const k=Math.max(.05,Math.min(4,pz.k0*Math.hypot(a.x-b.x,a.y-b.y)/pz.d0)); cam.k=k; cam.x=pz.w.x-m.x/k; cam.y=pz.w.y-m.y/k; draw(); },true);
+    const pzEnd=e=>{ if(e.pointerType!=='touch'||!tp.has(e.pointerId)) return; tp.delete(e.pointerId); if(pz){ pz=null; lock=tp.size>0; } if(tp.size>=2) pzStart(); if(!tp.size) lock=false; if(!seen.has(e.pointerId)) e.stopImmediatePropagation(); seen.delete(e.pointerId); };
+    cv.addEventListener('pointerup',pzEnd,true); cv.addEventListener('pointercancel',pzEnd,true);
+    const zb=el('<div class="wmzoom"><button class="btn icon" data-z="in" title="Приблизить">+</button><button class="btn icon" data-z="out" title="Отдалить">−</button><button class="btn icon" data-z="fit" title="Вся карта на экране">⛶</button></div>'); wrap.append(zb);
+    $$('button',zb).forEach(b=>b.onclick=()=>{ if(b.dataset.z==='fit'){ fit(); return; } const f=b.dataset.z==='in'?1.3:1/1.3, cx=W()/2, cy=H()/2, w=toWorld(cx,cy), k2=Math.max(.05,Math.min(4,cam.k*f)); cam.k=k2; cam.x=w.x-cx/k2; cam.y=w.y-cy/k2; draw(); }); }
   cv.onpointerleave=()=>ruDieHoverHide();
   /* ===== размер карты «как в Paint» (инструмент ⤡, мастер). Состояние перетаскивания — WM._rz ===== */
   function rzImgR(){ if(!mp.image) return null; const im=WM.imgs.get(mp.id); return {x:mp.ix||0,y:mp.iy||0,w:mp.iw||(im&&im.width)||mp.w,h:mp.ih||(im&&im.height)||mp.h}; }
@@ -6025,7 +6446,7 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
    в исходные (origUid), на локальном — в local_<почта>; ссылки на uid во всех документах заменяются.
    ============================================================ */
 /* все коллекции Firestore (сверено с firestore.rules; live — в Realtime Database, его не сохраняем: там только временное) */
-const BK_COLLS=['users','meta','dm','characters','orgs','locations','memberships','locLinks','relations','maps','wmaps','wmarkers','wmdraw','wmpriv','docs','images','log','chat','chatdm'];
+const BK_COLLS=['users','meta','dm','characters','orgs','locations','memberships','locLinks','relations','maps','wmaps','wmarkers','wmdraw','wmpriv','docs','images','log','chat','chatdm','trash'];
 async function fullBackup(prog){ if(!realDM()) return; const data={}, errs=[]; let n=0;
   for(const c of BK_COLLS){ prog.textContent='Читаю '+c+'…'; try{ data[c]=await (DB.listServer||DB.list)(c,{}); n+=data[c].length; }catch(e){ console.error(c,e); errs.push(c+': '+(e.code||e.message)); data[c]=[]; } }
   if(errs.length&&!await confirmDlg(`Не удалось прочитать: ${errs.join('; ')}. Бэкап будет НЕПОЛНЫМ. Всё равно сохранить?`,'Сохранить неполный')){ prog.textContent='Бэкап отменён: '+errs.join('; '); return; }
@@ -6044,6 +6465,61 @@ async function fullRestore(file,prog){ if(!realDM()) return; let bk; try{ bk=JSO
 let presTimer=null, presLast=0;
 function liveGoto(docs){ if(!me||viewAs) return; const now=Date.now(); for(const d of docs){ if(!(d.id==='goto_all'||d.id==='goto_'+me.uid)||!d.map||d.u===me.uid) continue; if(d.t<=(WM.lastGoto||WM.liveStart||0)||now-d.t>20000) continue; WM.lastGoto=d.t; if(state.view==='wmap'&&state.id===d.map) continue; const mp=byId(world.wmaps,d.map); if(!mp||!(isDM()||mp.visibility!=='hidden')) continue; go('wmap',d.map); toast(`${d.n||'Мастер'} перевёл тебя на карту «${mp.name||'без названия'}»`); return; } }
 function presenceBeat(force){ if(!me||viewAs||MOCK&&false) return; const onMap=state.view==='wmap'&&state.id; if(!onMap&&!force) return; if(document.visibilityState!=='visible'&&!force) return; if(!force&&Date.now()-presLast<80000) return; presLast=Date.now(); LIVE.volatile('presence_'+me.uid); LIVE.set('presence_'+me.uid,{u:me.uid,n:me.name,t:Date.now(),map:onMap?state.id:null}).catch(()=>{}); }
+/* ===== С5: сайт обновили, а вкладка открыта давно — плашка «Вышла новая версия». Сверяем ETag страницы (HEAD-запрос, без скачивания файла) раз в 3 минуты и при возврате во вкладку ===== */
+const APPV={base:null,shown:false};
+async function appVerProbe(){ try{ const r=await fetch(location.pathname,{method:'HEAD',cache:'no-store'}); if(!r.ok) return null; return r.headers.get('etag')||r.headers.get('last-modified')||null; }catch{ return null; } }
+async function appVerCheck(){ if(APPV.shown||APPV.busy||document.visibilityState!=='visible') return; APPV.busy=true; try{ const v=await appVerProbe(); if(!v) return; if(APPV.base==null){ APPV.base=v; return; } if(v!==APPV.base) appVerBanner(v); } finally{ APPV.busy=false; } }
+function appVerBanner(v){ if(APPV.shown) return; APPV.shown=true; const b=el(`<div id="updBar" role="status"><span>✨ Вышла новая версия картотеки.</span><button class="btn sm primary">Обновить страницу</button><button class="btn sm icon" title="Позже — напомню при следующем обновлении">✕</button></div>`);
+  $('.primary',b).onclick=()=>{ b.querySelector('.primary').disabled=true; if(pending.size||inflight){ clearTimeout(saveTimer); flush().catch(()=>{}).finally(()=>setTimeout(()=>location.reload(),500)); } else location.reload(); };
+  $('.icon',b).onclick=()=>{ b.remove(); APPV.base=v; APPV.shown=false; }; document.body.append(b); }
+setTimeout(appVerCheck,3000); setInterval(appVerCheck,3*60e3); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') appVerCheck(); });
+/* ===== С6: общая музыка сцены. Включается в Настройках («Общая музыка сцены», по умолчанию выключено).
+   Мастер ставит трек (♫ на карте) — запись live/music {on,url,title,loop,t}; у всех, кто в картотеке, играет маленький плеер,
+   громкость, «без звука» и «не слушать» — у каждого свои (в этом браузере). Опоздавшие подключаются с того же места. ===== */
+const MUS={key:'',cur:null,el:null,muted:false,paused:false,blocked:false,skip:''};
+function musOn(){ return !!(world.settings&&world.settings.sceneMusic); }
+function musParse(url){ url=String(url||'').trim(); let m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})/); if(m) return {k:'yt',id:m[1]}; if(/soundcloud\.com\//.test(url)) return {k:'sc',url}; if(/^https?:\/\//.test(url)) return {k:'au',url}; return null; }
+function musLive(){ return (world._live||[]).find(d=>d.id==='music')||null; }
+function musVol(){ let v=.6; try{ const s=localStorage.getItem('music.vol'); if(s!=null&&s!=='') v=+s; }catch{} return Math.max(0,Math.min(1,isNaN(v)?.6:v)); }
+function musVolApply(){ const v=MUS.muted?0:musVol(), n=MUS.el; if(!n) return; if(n.tagName==='AUDIO'){ n.volume=v; return; }
+  if(n.classList.contains('yt')){ try{ const w=n.contentWindow; w.postMessage(JSON.stringify({event:'command',func:'setVolume',args:[Math.round(v*100)]}),'*'); w.postMessage(JSON.stringify({event:'command',func:v?'unMute':'mute',args:[]}),'*'); }catch{} } }
+/* что должно играть сейчас: включено в настройках, трек включён мастером и не старше 12 часов */
+function musSync(){ const d=musLive(); const want=musOn()&&me&&d&&d.on&&musParse(d.url)&&Date.now()-(+d.t||0)<12*3600e3?d:null; const key=want?want.url+'|'+want.t:'';
+  document.body.classList.toggle('musOn',!!want&&MUS.skip!==key); if(key===MUS.key){ musBar(); return; } MUS.key=key; musStop(); if(want&&MUS.skip!==key) musStart(want); musBar(); }
+function musStop(){ if(MUS.el){ try{ if(MUS.el.tagName==='AUDIO') MUS.el.pause(); }catch{} MUS.el.remove(); } MUS.el=null; MUS.cur=null; MUS.paused=false; MUS.blocked=false; }
+function musStart(d){ const p=musParse(d.url); const off=Math.max(0,Math.floor((Date.now()-(+d.t||Date.now()))/1000)); MUS.cur={...d,p}; let node;
+  if(p.k==='yt'){ node=el(`<iframe class="musfr yt" src="https://www.youtube-nocookie.com/embed/${p.id}?autoplay=1&start=${off<6*3600?off:0}&enablejsapi=1&controls=0&disablekb=1&modestbranding=1&rel=0&playsinline=1${d.loop!==false?'&loop=1&playlist='+p.id:''}" allow="autoplay; encrypted-media" title="музыка сцены"></iframe>`); node.addEventListener('load',()=>setTimeout(musVolApply,400)); }
+  else if(p.k==='sc') node=el(`<iframe class="musfr sc" src="https://w.soundcloud.com/player/?url=${encodeURIComponent(p.url)}&auto_play=true&show_comments=false&visual=false&buying=false&sharing=false&show_user=false" allow="autoplay" title="музыка сцены"></iframe>`);
+  else { node=document.createElement('audio'); node.className='musau'; node.preload='auto'; node.loop=d.loop!==false; node.src=p.url; node.volume=MUS.muted?0:musVol();
+    node.addEventListener('loadedmetadata',()=>{ try{ if(node.duration&&isFinite(node.duration)) node.currentTime=node.loop?off%node.duration:Math.min(off,node.duration); }catch{} },{once:true});
+    node.addEventListener('play',()=>{ MUS.blocked=false; musBarUpd(); }); node.addEventListener('pause',musBarUpd);
+    node.play().catch(()=>{ MUS.blocked=true; musBarUpd(); }); }
+  MUS.el=node; }
+function musBar(){ let bar=$('#musBar'); const d=MUS.cur; if(!d){ if(bar) bar.remove(); return; }
+  if(!bar){ bar=el(`<div id="musBar" role="region" aria-label="Музыка сцены"><span class="mi" title="Музыка сцены — её включил мастер">♫</span><div class="mt"></div><div class="mslot"></div><button class="btn sm icon mplay" title="Пауза / играть">⏸</button><input type="range" class="mvol" min="0" max="1" step="0.05" title="Громкость — только у тебя"><button class="btn sm icon mmute" title="Без звука">🔊</button><button class="btn sm icon mx" title="Не слушать этот трек (новый трек мастера включится снова)">✕</button></div>`); document.body.append(bar);
+    $('.mvol',bar).oninput=e=>{ try{ localStorage.setItem('music.vol',e.target.value); }catch{} MUS.muted=false; musVolApply(); musBarUpd(); };
+    $('.mmute',bar).onclick=()=>{ MUS.muted=!MUS.muted; musVolApply(); musBarUpd(); };
+    $('.mplay',bar).onclick=()=>{ const n=MUS.el; if(!n) return; if(n.tagName==='AUDIO'){ if(n.paused) n.play().catch(()=>{}); else n.pause(); } else if(n.classList.contains('yt')){ MUS.paused=!MUS.paused; try{ n.contentWindow.postMessage(JSON.stringify({event:'command',func:MUS.paused?'pauseVideo':'playVideo',args:[]}),'*'); }catch{} } musBarUpd(); };
+    $('.mt',bar).onclick=()=>{ if(isDM()&&!viewAs) musicDialog(); };
+    $('.mx',bar).onclick=()=>{ MUS.skip=MUS.key; musStop(); bar.remove(); document.body.classList.remove('musOn'); toast('Музыка сцены выключена у тебя. Следующий трек мастера включится снова'); }; }
+  const slot=$('.mslot',bar); if(MUS.el&&MUS.el.tagName!=='AUDIO'&&MUS.el.parentNode!==slot) slot.replaceChildren(MUS.el); if(MUS.el&&MUS.el.tagName==='AUDIO') slot.replaceChildren();
+  $('.mt',bar).textContent=d.title||(d.p.k==='yt'?'YouTube':d.p.k==='sc'?'SoundCloud':'музыка'); $('.mt',bar).title=(d.n?'Включил: '+d.n+'. ':'')+(isDM()?'Клик — сменить трек':''); musBarUpd(); }
+function musBarUpd(){ const bar=$('#musBar'); if(!bar) return; const n=MUS.el; const au=!!(n&&n.tagName==='AUDIO'), sc=!!(n&&n.classList&&n.classList.contains('sc'));
+  $('.mvol',bar).value=musVol(); for(const c of ['.mvol','.mmute','.mplay']) $(c,bar).style.display=sc?'none':''; $('.mmute',bar).textContent=MUS.muted?'🔇':'🔊';
+  $('.mplay',bar).textContent=au?(n.paused?'▶':'⏸'):(MUS.paused?'▶':'⏸'); bar.classList.toggle('blocked',au&&n.paused&&MUS.blocked); $('.mplay',bar).title=au&&MUS.blocked?'Браузер не дал включить звук сам — нажми, чтобы слушать':'Пауза / играть'; }
+function musicDialog(){ if(!isDM()||viewAs) return; if(!musOn()){ toast('Сначала включи «Общая музыка сцены» в Настройках',true); return; } const cur=musLive(); const playing=cur&&cur.on; let hist=[]; try{ hist=JSON.parse(localStorage.getItem('music.hist')||'[]')||[]; }catch{}
+  const sheets=[...world.characters,...world.orgs,...world.locations].filter(e=>e.music&&e.music.url&&!isClone(e)&&musParse(e.music.url)).map(e=>({url:e.music.url,title:e.music.title||e.name||''}));
+  const sugg=[...hist,...sheets.filter(x=>!hist.some(h=>h.url===x.url))].slice(0,16);
+  const b=openModal(`<h2>♫ Музыка сцены</h2><div class="faint" style="margin:-8px 0 10px;line-height:1.5">Играет у всех, кто сейчас в картотеке, — маленький плеер внизу экрана; громкость и «без звука» у каждого свои. Подходит YouTube, SoundCloud или прямая ссылка на mp3/ogg.${playing?`<br>Сейчас: <b>${esc(cur.title||cur.url)}</b>`:''}</div>
+    <input id="muU" placeholder="https://youtu.be/…  или  https://…/track.mp3" style="width:100%" value="${esc(playing?cur.url:'')}"><input id="muT" placeholder="Название (необязательно): таверна, бой, дождь…" style="width:100%;margin-top:6px" value="${esc(playing?cur.title||'':'')}">
+    <label class="row" style="gap:6px;margin-top:8px;font-size:13px"><input type="checkbox" id="muL" ${!cur||cur.loop!==false?'checked':''}> по кругу</label>
+    ${sugg.length?`<div class="tiny" style="margin:12px 0 4px">Недавние и из листов</div><div class="mulist">${sugg.map(x=>`<button class="btn sm" data-u="${esc(x.url)}" data-t="${esc(x.title||'')}" title="${esc(x.url)}">${esc(x.title||x.url.slice(0,40))}</button>`).join('')}</div>`:''}
+    <div class="modal-actions">${playing?'<button class="btn danger" id="muStop" style="margin-right:auto">■ Остановить у всех</button>':''}<button class="btn" id="muX">Закрыть</button><button class="btn primary" id="muGo">▶ Включить всем</button></div>`);
+  $$('.mulist button',b).forEach(x=>x.onclick=()=>{ $('#muU',b).value=x.dataset.u; $('#muT',b).value=x.dataset.t; });
+  $('#muX',b).onclick=closeModal; const stp=$('#muStop',b); if(stp) stp.onclick=()=>{ LIVE.set('music',{on:false,t:Date.now(),by:me.uid,n:me.name||''}).catch(()=>{}); closeModal(); toast('Музыка остановлена у всех'); };
+  $('#muGo',b).onclick=()=>{ const url=$('#muU',b).value.trim(); if(!musParse(url)){ toast('Не понимаю ссылку — нужен YouTube, SoundCloud или прямой адрес файла',true); return; } const title=$('#muT',b).value.trim(), loop=$('#muL',b).checked;
+    MUS.skip=''; LIVE.set('music',{on:true,url,title,loop,t:Date.now(),by:me.uid,n:me.name||''}).catch(err=>toast('Не удалось: '+(err.code||err.message),true));
+    try{ localStorage.setItem('music.hist',JSON.stringify([{url,title},...hist.filter(x=>x.url!==url)].slice(0,8))); }catch{} closeModal(); toast('♫ Играет у всех: '+(title||url)); }; }
 function presenceStart(){ if(presTimer) return; presTimer=setInterval(()=>presenceBeat(false),30000); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') presenceBeat(false); }); }
 
 /* ============================================================
@@ -6096,7 +6572,7 @@ function chatRender(){ const box=$('#chat .msgs'); if(!box) return; const all=ch
   if(!all.length) box.append(el('<div class="sys">Пока тихо. Напиши что-нибудь или брось кубик: /roll d20</div>'));
   $('#chatMore').style.display=CHAT.noMore?'none':''; if(atBottom||CHAT.open) box.scrollTop=box.scrollHeight;
   const unread=CHAT.open?0:all.filter(m=>m.t>CHAT.seen&&m.u!==me?.uid).length; const n=$('#chatBtn .n'); n.textContent=unread||''; n.classList.toggle('on',unread>0); if(CHAT.open){ CHAT.seen=Date.now(); localStorage.setItem('chatSeen',CHAT.seen); } }
-function chatOpen(v){ CHAT.open=v; $('#chat').classList.toggle('on',v); document.body.classList.toggle('chat-open',v); setTimeout(chatTall,0); WM.fitChat&&WM.fitChat(); if(v){ CHAT.seen=Date.now(); localStorage.setItem('chatSeen',CHAT.seen); setTimeout(()=>$('#chatText').focus(),50); } chatRender(); }
+function chatOpen(v){ CHAT.open=v; $('#chat').classList.toggle('on',v); document.body.classList.toggle('chat-open',v); setTimeout(chatTall,0); WM.fitChat&&WM.fitChat(); if(state.view==='wmap'&&state.id&&WM.redraw) setTimeout(()=>WM.redraw&&WM.redraw(),80); /* полоса инициативы и кнопки подстраиваются под ширину */ if(v){ CHAT.seen=Date.now(); localStorage.setItem('chatSeen',CHAT.seen); setTimeout(()=>$('#chatText').focus(),50); } chatRender(); }
 async function chatShare(card){ if(!me||viewAs) return; const m={i:uid(),t:Date.now(),u:me.uid,n:card.n||me.name,k:'card',col:chatColorOf()||null,ti:String(card.title||'').slice(0,120),su:String(card.sub||'').slice(0,160),m:String(card.body||'').slice(0,2000)}; if(card.c) m.c=card.c; const day=dayId(m.t); try{ await chatPut('chat',m); chatOpen(true); toast('Отправлено в чат'); }catch(e){ console.error(e); toast('Не отправилось: '+(e.code||e.message),true); } }
 function techShareCard(it,ch){ const b=techBranch(it.branch); const parts=[]; if(it.desc) parts.push(it.desc); if(it.effect) parts.push('[b]Эффект:[/b] '+it.effect); if(it.fatigue) parts.push('[b]Усталость:[/b] '+it.fatigue); if(it.special) parts.push('[b]Особое условие:[/b] '+it.special); chatShare({title:(it.main?'◆ ':'')+it.name,sub:[b?.name,it.tag,techCost(it)!=null?techCost(it)+' очк.':it.cost].filter(Boolean).join(' · ')+(ch?' · '+(ch.name||'без имени'):''),body:parts.join('\n'),n:ch?.name||me.name,c:ch?.id}); }
 function chatSpeaker(){ const sel=$('#chatAs'); const id=sel&&sel.value; const c=id&&findEntity(id); return c?{c:c.id,n:c.name||'без имени'}:null; }
@@ -6220,8 +6696,8 @@ function renderUsers(m){
   for(const u of users){
     const chars=world.characters.filter(c=>(c.players||[]).includes(u.id));
     const row=el(`<div class="urow">${u.photo?`<img src="${esc(u.photo)}" referrerpolicy="no-referrer">`:`<div class="av">${esc(initials(u.name||u.email))}</div>`}<div><b>${esc(u.name||'')}</b>${u.id===me.uid?' <span class="faint">(ты)</span>':''}</div><div class="em" title="${esc(u.email)}">${esc(u.email)}</div>
-      <select ${u.id===me.uid?'disabled':''}><option value="observer" ${u.role==='observer'?'selected':''}>наблюдатель</option><option value="player" ${u.role==='player'?'selected':''}>игрок</option><option value="dm" ${u.role==='dm'?'selected':''}>мастер</option></select>
-      ${u.role==='player'?`<label class="hlp" title="Помощник мастера: свой столбец в «Настройки → Права игроков», замок карт на него не действует"><input type="checkbox" data-h ${u.helper?'checked':''}> 🛡 помощник</label>`:''}<div class="chips">${u.id!==me.uid?`<button class="btn sm icon" data-va title="Посмотреть картотеку глазами этого участника">👁</button>`:''}${u.role==='player'?chars.map(c=>`<span class="chip c click" data-open="${c.id}">${esc(c.name)||'без имени'}<span class="x" data-c="${c.id}">×</span></span>`).join('')+`<select class="addc" style="padding:3px 24px 3px 8px;font-size:12px"><option value="">+ персонаж</option>${world.characters.filter(c=>!isClone(c)&&!(c.players||[]).includes(u.id)).map(c=>`<option value="${c.id}">${esc(c.name)||'без имени'}</option>`).join('')}</select>`:'<span class="faint">—</span>'}</div></div>`);
+      <div class="urole"><select ${u.id===me.uid?'disabled':''}><option value="observer" ${u.role==='observer'?'selected':''}>наблюдатель</option><option value="player" ${u.role==='player'?'selected':''}>игрок</option><option value="dm" ${u.role==='dm'?'selected':''}>мастер</option></select>
+      ${u.role==='player'?`<label class="hlp" title="Помощник мастера: свой столбец в «Настройки → Права игроков», замок карт на него не действует"><input type="checkbox" data-h ${u.helper?'checked':''}> 🛡 помощник</label>`:''}</div><div class="chips">${u.id!==me.uid?`<button class="btn sm icon" data-va title="Посмотреть картотеку глазами этого участника">👁</button>`:''}${u.role==='player'?chars.map(c=>`<span class="chip c click" data-open="${c.id}">${esc(c.name)||'без имени'}<span class="x" data-c="${c.id}">×</span></span>`).join('')+`<select class="addc" style="padding:3px 24px 3px 8px;font-size:12px"><option value="">+ персонаж</option>${world.characters.filter(c=>!isClone(c)&&!(c.players||[]).includes(u.id)).map(c=>`<option value="${c.id}">${esc(c.name)||'без имени'}</option>`).join('')}</select>`:'<span class="faint">—</span>'}</div></div>`);
     const va=$('[data-va]',row); if(va) va.onclick=()=>startViewAs(u); const hl=$('[data-h]',row); if(hl) hl.onchange=async()=>{ try{ await DB.update('users',u.id,{helper:hl.checked}); u.helper=hl.checked; toast(hl.checked?'Помощник мастера':'Обычный игрок'); }catch(err){ hl.checked=!hl.checked; toast('Ошибка: '+(err.code||err.message),true); } };
     $('select:not(.addc)',row).onchange=async e=>{ const role=e.target.value; try{ await DB.update('users',u.id,{role}); u.role=role; toast('Роль обновлена'); render(); }catch(err){ toast('Ошибка: '+(err.code||err.message),true); } };
     const addc=$('.addc',row); if(addc) addc.onchange=()=>{ const c=byId(world.characters,addc.value); if(c){ (c.players??=[]).push(u.id); touch(c); render(); } };
@@ -6236,7 +6712,7 @@ function renderUsers(m){
    ============================================================ */
 /* страница «Эффекты»: библиотека готовых эффектов */
 /* компактная карточка эффекта библиотеки: значок, имя, описание в 2 строки, метки; клик — редактор */
-function effLibCard(d,opts={}){ const tg=[]; tg.push(`<span class="${d.dur?'on':''}" title="срок в раундах">${d.dur?'⏳ '+d.dur+' р.':'∞ бессрочно'}</span>`); if(d.stack) tg.push(`<span class="on" title="копится до ${d.stack} стаков">× до ${d.stack}</span>`); if((d.mods||[]).length) tg.push(`<span class="fx" title="${esc(modsSummary(d.mods))}">ƒ ${(d.mods||[]).length}</span>`); const np=EFF_TRIG_KEYS.filter(k=>String(d[k]||'').trim()).length; if(np) tg.push(`<span class="fx" title="программы хода">⚡ ${np}</span>`); const ne=Object.values(d.ev||{}).filter(v=>String(v||'').trim()).length; if(ne) tg.push(`<span class="ru" title="события Руины">⚔ ${ne}</span>`); if(d.cond) tg.push(`<span class="ru" title="условие: ${esc(d.cond)}">если…</span>`); if(d.emo) tg.push(`<span class="emo" title="карта эмоции">${d.emo==='pos'?'🌞':'🌑'} ярус ${+d.emoTier||1}</span>`); if(d.chat) tg.push('<span title="программы пишут в чат">💬</span>'); if(d.hidden) tg.push('<span title="скрытый — видит только мастер">'+EYE_OFF+'</span>');
+function effLibCard(d,opts={}){ const tg=[]; tg.push(`<span class="${d.dur?'on':''}" title="срок в раундах">${d.dur?'⏳ '+d.dur+' р.':'∞ бессрочно'}</span>`); if(d.stack) tg.push(`<span class="on" title="копится до ${d.stack} стаков">× до ${d.stack}</span>`); if((d.mods||[]).length) tg.push(`<span class="fx" title="${esc(modsSummary(d.mods))}">ƒ ${(d.mods||[]).length}</span>`); const np=EFF_TRIG_KEYS.filter(k=>String(d[k]||'').trim()).length; if(np) tg.push(`<span class="fx" title="программы хода">⚡ ${np}</span>`); const ne=Object.values(d.ev||{}).filter(v=>String(v||'').trim()).length; if(ne) tg.push(`<span class="ru" title="события Руины">⚔ ${ne}</span>`); if(d.cond) tg.push(`<span class="ru" title="условие: ${esc(d.cond)}">если…</span>`); if(d.emo) tg.push(`<span class="emo" title="карта эмоции">${d.emo==='pos'?'🌞':'🌑'} ярус ${+d.emoTier||1}</span>`); if(d.chat) tg.push('<span title="программы пишут в чат">💬</span>'); if(d.hidden) tg.push('<span title="скрытый — видит только мастер">'+EYE_OFF+'</span>'); { const nd=d.name?(world.settings.effectLib||[]).filter(x=>x!==d&&x.name&&fxNorm(x.name)===fxNorm(d.name)).length:0; if(nd) tg.push(`<span class="dup" title="В библиотеке есть ещё ${nd} ${plural(nd,'эффект','эффекта','эффектов')} с таким названием — при наложении их легко перепутать. Переименуй или удали лишний.">дубль</span>`); }
   const card=el(`<div class="effc ${d.name?'':'empty'} ${tintCls(d)}" style="${tintStyle(d)}"><div class="eh"><span class="ic">${d.image?`<img data-img="${d.image}" data-thumb="1">`:esc(d.icon||'✨')}</span><span class="nm ${d.name?'':'none'}">${esc(d.name||'без названия')}</span><button class="x-btn del" title="Удалить из библиотеки">×</button></div>${d.description?`<div class="ds">${esc(d.description)}</div>`:'<div class="ds faint">описания нет</div>'}<div class="tg">${tg.join('')}</div></div>`);
   card.onclick=e=>{ if(e.target.closest('.del')) return; opts.onEdit&&opts.onEdit(); }; $('.del',card).onclick=e=>{ e.stopPropagation(); opts.onDelete&&opts.onDelete(); }; return card; }
 /* редактор эффекта библиотеки — окно с секциями (как панель настроек Руины); правки пишутся в объект сразу */
@@ -6289,7 +6765,10 @@ function renderEffLib(m){ const s=world.settings; effSeedWounds(); s.effectLib??
         $('.fdel',hd).onclick=async()=>{ if(!await confirmDlg(`Удалить папку «${G.f.name}»? Эффекты из неё останутся в библиотеке.`,'Удалить папку')) return; for(const d of lib) if(d.folder===G.f.id) delete d.folder; F.splice(F.indexOf(G.f),1); touch(s); draw(q); }; }
       grid.append(hd); if(closed(G.id)) continue; for(const d of G.items) grid.append(mk(d)); if(!G.items.length) grid.append(el('<div class="faint efempty">Пусто — перетащи сюда эффекты мышью</div>')); }
     hydrate(grid); };
-  $('#addE',page).onclick=()=>{ const d={id:uid(),name:'',icon:'✨',dur:0,description:'',mods:[]}; lib.unshift(d); touch(s); draw(''); $('#eq',page).value=''; effLibEditor(d,{onChange:()=>touch(s),onClose:()=>draw(''),onDelete:async()=>{ lib.splice(lib.indexOf(d),1); touch(s); return true; }}); };
+  $('#addE',page).onclick=()=>{ const d={id:uid(),name:'',icon:'✨',dur:0,description:'',mods:[]}; const tpl=JSON.parse(JSON.stringify(d)); $('#eq',page).value='';
+    /* в библиотеку эффект попадает только когда в нём появилось что-то кроме пустых полей */
+    const put=()=>{ if(!lib.includes(d)){ if(isBlankDraft(d,tpl)) return; lib.unshift(d); } touch(s); };
+    effLibEditor(d,{onChange:put,onClose:()=>draw(''),onDelete:async()=>{ const i=lib.indexOf(d); if(i>=0){ lib.splice(i,1); touch(s); } return true; }}); };
   { const af=$('#addF',page); if(mode==='emo') af.style.display='none'; af.onclick=async()=>{ const n=await promptDlg('Название папки',''); if(!n||!n.trim()) return; (s.effFolders??=[]).push({id:uid(),name:n.trim()}); touch(s); draw($('#eq',page).value.trim().toLowerCase()); }; }
   $('#eq',page).oninput=e=>draw(e.target.value.trim().toLowerCase()); draw(''); m.append(page); }
 function stUsage(id){ let n=0; for(const c of world.characters) if((c.statuses||[]).some(x=>x.k===id)) n++; return n; }
@@ -6381,6 +6860,7 @@ function renderSettings(m){
     <div class="panel mynav"><h3>Моё меню <span class="faint" style="font-size:12px;font-weight:400">— только у тебя</span></h3><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Сними галочку — раздел пропадёт из твоего меню слева (игроки и данные не затрагиваются; открыть его можно и по ссылке). «Настройки» остаются всегда.</div><div class="row wrap" style="gap:6px 18px">${$$('#side .nav[data-view]').filter(n=>n.dataset.view!=='settings').map(n=>`<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" data-mynav="${n.dataset.view}" ${myNavHide()[n.dataset.view]?'':'checked'}>${esc($('.t',n)?.textContent||n.dataset.view)}</label>`).join('')}</div></div>
     <div class="panel hblocks"><h3>Блоки листов</h3><label class="row" style="gap:8px;margin-bottom:12px;cursor:pointer"><input type="checkbox" id="classicSheet" ${s.classicSheet?'checked':''}><span>Старое отображение листа персонажа <span class="faint">(две колонки, перетаскивание блоков — вместо вкладок)</span></span></label><label class="row" style="gap:8px;margin-bottom:12px;cursor:pointer"><input type="checkbox" id="noAbDone" ${s.noAbDone?'checked':''}><span>Убрать пункт «в работе / сделана» у способностей <span class="faint">(способности не блокируются как «сделанные»)</span></span></label><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Сними галочку — блок исчезнет у всех сущностей этого типа. Данные не удаляются; поставь галочку обратно — всё вернётся.</div><div class="list"></div></div>
     <div class="panel tokset"><h3>Токены на карте</h3><div class="row" style="gap:10px;align-items:center;flex-wrap:wrap"><span>Размер нового токена</span><input type="range" id="tokSpawnR" min="0.3" max="4" step="0.1" value="${+s.tokenSpawn||1}" style="width:200px"><input type="number" id="tokSpawnN" min="0.3" max="10" step="0.1" value="${+s.tokenSpawn||1}" style="width:70px"><span class="faint">× от базового размера карты</span></div><div class="faint" style="font-size:12px;margin-top:6px;line-height:1.5">С таким размером токен появляется, когда его ставят на карту (из панели токенов, перетаскиванием, ПКМ). Уже стоящие токены не меняются — их размер правится в меню ПКМ → «Размер». Базовый размер у каждой карты свой: «Настройки карты» → «базовый радиус».</div></div>
+    <div class="panel musset"><h3>Общая музыка сцены</h3><label class="row" style="gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="sceneMusic" ${s.sceneMusic?'checked':''}> Включить</label><div class="faint" style="font-size:12px;margin-top:6px;line-height:1.5">Мастер ставит фоновую музыку кнопкой ♫ на карте — её слышат все, кто сейчас в картотеке (YouTube, SoundCloud или прямая ссылка на mp3). У каждого игрока маленький плеер внизу экрана: своя громкость, «без звука», «не слушать этот трек». Выключено — плеера нет ни у кого.</div></div>
     <div class="panel wndset"><h3>Раны вместо ХП</h3><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Альтернатива полоске здоровья: у персонажа засечки ран по степеням. Эффекты «Малая / Средняя / Тяжелая рана» в библиотеке остаются отдельно — это другое.</div><div class="wbody"></div></div>
     <div class="panel dbars"><h3>Базовые полоски <button class="btn sm">+ Полоска</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Создаются у каждого нового персонажа (текущее = максимум). Дальше у персонажа правятся отдельно.</div><div class="list"></div></div>
     <div class="panel invcols"><h3>Столбцы инвентаря <button class="btn sm">+ Столбец</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Базовый набор — копируется новым персонажам. У каждого персонажа столбцы потом настраиваются отдельно (⚙ в блоке инвентаря).</div><div class="list"></div></div>
@@ -6388,7 +6868,7 @@ function renderSettings(m){
     <div class="panel"><h3>Данные</h3><div class="muted" style="font-size:13px;margin-bottom:10px">Расход Firestore за эту вкладку: <b>${STAT.w}</b> записей, <b>${STAT.r}</b> чтений <span class="faint">(лимит Spark — 20 000 / 50 000 в сутки на всех). Живые сигналы карты идут через Realtime Database и здесь не считаются.</span></div><div class="muted" style="line-height:1.7;font-size:13px">Импорт из локальной картотеки: выбери <code>world.json</code>, затем (по желанию) папку <code>images</code> — картинки будут сжаты и загружены.</div>
       <div class="row wrap" style="margin-top:12px"><button class="btn sm" id="imp">Импорт world.json…</button><button class="btn sm" id="exp">Скачать резервную копию</button></div>
       <div class="muted" style="line-height:1.7;font-size:13px;margin-top:14px"><b>Резервный сервер.</b> Сейчас: <b>${window.LOCAL_BACKEND?'локальный ('+esc(window.LOCAL_BACKEND)+')':'облако Firebase'}</b>. Полный бэкап включает всё: участников, карты, чат, картинки. Чтобы переехать: скачай полный бэкап здесь → запусти <code>local-server.cmd</code> → зайди на резервный сервер как мастер → «Восстановить из бэкапа». Обратно — так же в облако.</div>
-      <div class="row wrap" style="margin-top:10px"><button class="btn sm" id="fullExp">⬇ Полный бэкап (JSON)</button><button class="btn sm" id="fullImp">⬆ Восстановить из бэкапа…</button></div><div id="bkProg" class="faint" style="font-size:12px;margin-top:6px"></div></div>
+      <div class="row wrap" style="margin-top:10px"><button class="btn sm" id="fullExp">⬇ Полный бэкап (JSON)</button><button class="btn sm" id="fullImp">⬆ Восстановить из бэкапа…</button><button class="btn sm" id="partImp" title="Выбрать в файле бэкапа отдельных персонажей, карты, документы и вернуть только их — со связями и картинками. Остальное не меняется">⬆ Вернуть отдельные записи…</button></div><div id="bkProg" class="faint" style="font-size:12px;margin-top:6px"></div></div>
   </div><div class="settings ruwrap" data-tab="ruina" style="grid-template-columns:1fr;display:none">
     <div class="panel ruset"><h3>Руина — боевая система <span class="faint" style="font-size:11px;letter-spacing:0;text-transform:none">доп. режим</span></h3><label class="row" style="gap:8px;cursor:pointer;margin-bottom:8px"><input type="checkbox" id="ruOn" ${s.ruina?.on?'checked':''}> <b>Включить</b></label>
       <div class="ruprof"><b>Профиль правил</b><span class="faint">— ставит разом основные настройки, дальше правь что угодно вручную</span>
@@ -6445,7 +6925,7 @@ function renderSettings(m){
       </div><div class="faint" style="font-size:11.5px;line-height:1.5;margin-top:8px">В формулах и конструкторе при включённом режиме доступны: <code>стаггер</code>, <code>стаггер.max</code>, <code>ошеломлён</code> (1/0), <code>эмоции</code>, <code>раунд</code>, <code>куб</code> (значение куба в программе), <code>урон</code> (урон попадания), <code>атакующий</code> (1/0 — атакующий ли куб в событии), <code>скорость</code>; всё это есть и у <code>цель.…</code>. Программы: <code>стаки -= 1</code> — стаки эффекта, <code>куб -= 2</code> — изменить бросок (в «при броске куба»). Условие пассивки — обычная формула: <code>hp < hp.max / 2</code>, <code>цель.ошеломлён</code>, <code>эффект('Ярость') >= 2</code>.</div></div>
   </div></div>`);
   const sl=$('.stats .list',page);
-  const drawStats=()=>{ sl.innerHTML=''; s.stats.forEach((st,i)=>{ const row=el(`<div class="srow"><input value="${esc(st.name)}"><input class="key" value="${esc(st.key||'')}" placeholder="код: ${esc(st.id.length<=8?st.id:'react')}" title="Код для формул (латиницей, без пробелов). Если пусто — в формулах используется id или название" style="width:90px;font-family:monospace;font-size:12px"><div class="row" style="gap:2px"><button class="btn icon sm" title="выше">↑</button><button class="btn icon sm" title="ниже">↓</button></div><button class="x-btn">×</button></div>`);
+  const drawStats=()=>{ sl.innerHTML=''; s.stats.forEach((st,i)=>{ const row=el(`<div class="srow s4"><input value="${esc(st.name)}"><input class="key" value="${esc(st.key||'')}" placeholder="код: ${esc(st.id.length<=8?st.id:'react')}" title="Код для формул (латиницей, без пробелов). Если пусто — в формулах используется id или название" style="width:90px;font-family:monospace;font-size:12px"><div class="row" style="gap:2px"><button class="btn icon sm" title="выше">↑</button><button class="btn icon sm" title="ниже">↓</button></div><button class="x-btn">×</button></div>`);
     $('input',row).oninput=e=>{ st.name=e.target.value; touch(s); }; $('.key',row).oninput=e=>{ st.key=e.target.value.trim().replace(/[^\w]/g,'')||undefined; if(!st.key) delete st.key; touch(s); };
     const [up,dn]=$$('.btn',row); up.onclick=()=>{ if(i>0){ [s.stats[i-1],s.stats[i]]=[s.stats[i],s.stats[i-1]]; touch(s); drawStats(); } }; dn.onclick=()=>{ if(i<s.stats.length-1){ [s.stats[i+1],s.stats[i]]=[s.stats[i],s.stats[i+1]]; touch(s); drawStats(); } };
     $('.x-btn',row).onclick=async()=>{ const R=statRefs(st); const msg=`Удалить характеристику «${st.name}»?`+(R.length?`\n\nНа неё ссылаются: ${R.join(', ')}. После удаления эти модификаторы перестанут действовать, а формулы покажут ⚠. Значения у персонажей останутся в данных, но пропадут с листов.`:''); if(!await confirmDlg(msg)) return; s.stats.splice(i,1); touch(s); drawStats(); };
@@ -6490,7 +6970,8 @@ function renderSettings(m){
     for(const id of BLOCKS_BY_TYPE[t]){ const on=!blockHiddenGlobally(t,id); const c=el(`<label class="chip click" style="gap:6px"><input type="checkbox" ${on?'checked':''} style="width:13px;height:13px">${esc(BLOCK_NAMES[id]||id)}</label>`); $('input',c).onchange=e=>{ if(t==='c'&&id==='auras'){ s.showAuras=e.target.checked; touch(s); return; } const arr=new Set(s.hiddenBlocks[t]||[]); if(e.target.checked) arr.delete(id); else arr.add(id); s.hiddenBlocks[t]=[...arr]; touch(s); }; ch.append(c); }
     hl.append(sec); }
   { const ME=[['bars','Полоски'],['statuses','Статусы'],['auras','Ауры'],['ruina','Руина'],['stats','Характеристики'],['ab','Вкладка «Способности»'],['tk','Вкладка «Техники»'],['ef','Вкладка «Эффекты»']]; const sec=el(`<div style="margin-bottom:10px"><div class="tiny" style="margin-bottom:6px">Панель «Мой» на карте</div><div class="chips"></div></div>`); const chx=$('.chips',sec); const H=new Set(s.meHide||[]); for(const [id,label] of ME){ const c=el(`<label class="chip click" style="gap:6px"><input type="checkbox" ${H.has(id)?'':'checked'} style="width:13px;height:13px">${esc(label)}</label>`); $('input',c).onchange=e=>{ const set=new Set(s.meHide||[]); if(e.target.checked) set.delete(id); else set.add(id); s.meHide=[...set]; touch(s); }; chx.append(c); } hl.append(sec); }
-  wndSettings($('.wndset .wbody',page),s); { const R_=$('#tokSpawnR',page), N_=$('#tokSpawnN',page); const set=v=>{ v=Math.max(.3,Math.min(10,+v||1)); s.tokenSpawn=v; R_.value=Math.min(4,v); N_.value=v; touch(s); }; if(R_){ R_.oninput=()=>set(R_.value); N_.onchange=()=>set(N_.value); } };
+  wndSettings($('.wndset .wbody',page),s); { const sm=$('#sceneMusic',page); if(sm) sm.onchange=()=>{ s.sceneMusic=sm.checked; touch(s); if(!sm.checked){ const d=musLive(); if(d&&d.on) LIVE.set('music',{on:false,t:Date.now(),by:me.uid,n:me.name||''}).catch(()=>{}); } setTimeout(musSync,50); toast(sm.checked?'Музыка сцены включена: кнопка ♫ на карте':'Музыка сцены выключена'); }; }
+{ const R_=$('#tokSpawnR',page), N_=$('#tokSpawnN',page); const set=v=>{ v=Math.max(.3,Math.min(10,+v||1)); s.tokenSpawn=v; R_.value=Math.min(4,v); N_.value=v; touch(s); }; if(R_){ R_.oninput=()=>set(R_.value); N_.onchange=()=>set(N_.value); } };
   s.defaultBars??=[]; const dl=$('.dbars .list',page);
   const drawBars=()=>{ dl.innerHTML=''; if(!s.defaultBars.length) dl.innerHTML='<div class="faint">Нет.</div>';
     s.defaultBars.forEach((b,i)=>{ const row=el(`<div class="srow t"><input type="color" value="${b.color||'#ff5c6c'}"><div class="row"><input class="grow" value="${esc(b.name||'')}" placeholder="название"><input type="number" value="${b.max??10}" min="0" style="width:70px;text-align:center" title="максимум"><input class="fmax" value="${esc(b.fmax||'')}" placeholder="ƒ макс. (необязательно)" title="Максимум по формуле у новых персонажей, например evol*3" style="width:150px;font-family:monospace;font-size:12px"></div><div class="row" style="gap:2px"><button class="btn icon sm">↑</button><button class="btn icon sm">↓</button></div><button class="x-btn">×</button></div>`);
@@ -6512,7 +6993,7 @@ function renderSettings(m){
       const [col,ic,lab]=$$('input',row); col.oninput=()=>{ t.color=col.value; touch(s); }; ic.oninput=()=>{ t.icon=ic.value; touch(s); }; { const pk=el('<button class="btn sm icon" title="Выбрать эмодзи из палитры">🙂</button>'); ic.after(pk); pk.onclick=()=>emojiPicker(pk,x=>{ t.icon=x; ic.value=x; if(t.image){ DB.delete('images',t.image).catch(()=>{}); delete t.image; } touch(s); drawIcons(); }); } lab.oninput=()=>{ t.label=lab.value; touch(s); }; $('.pic',row).onclick=()=>pickFiles(async files=>{ const ids=await uploadImages(files,'status'); if(ids[0]){ if(t.image) DB.delete('images',t.image).catch(()=>{}); t.image=ids[0]; touch(s); drawIcons(); } }); $('.x-btn',row).onclick=()=>{ if(t.image) DB.delete('images',t.image).catch(()=>{}); s.statusIcons.splice(i,1); touch(s); drawIcons(); }; il.append(row); }); hydrate(il); };
   $('.sticons h3 .btn',page).onclick=()=>go('stlib');
   drawIcons();
-  $('#fullExp',page).onclick=()=>fullBackup($('#bkProg',page)); $('#fullImp',page).onclick=()=>{ const fi=$('#jsonIn'); fi.value=''; fi.onchange=()=>{ if(fi.files[0]) fullRestore(fi.files[0],$('#bkProg',page)); }; fi.click(); };
+  $('#fullExp',page).onclick=()=>fullBackup($('#bkProg',page)); $('#fullImp',page).onclick=()=>{ const fi=$('#jsonIn'); fi.value=''; fi.onchange=()=>{ if(fi.files[0]) fullRestore(fi.files[0],$('#bkProg',page)); }; fi.click(); }; { const pi=$('#partImp',page); if(pi) pi.onclick=partRestorePick; }
   $('#exp',page).onclick=()=>{ const a=document.createElement('a'); const w={...world}; delete w.users; delete w.log; a.href=URL.createObjectURL(new Blob([JSON.stringify(w,null,2)],{type:'application/json'})); a.download='kartoteka-backup.json'; a.click(); };
   $('#imp',page).onclick=()=>{ const fi=$('#jsonIn'); fi.value=''; fi.onchange=()=>importLocal(fi.files[0]); fi.click(); };
   ruSettingsBeautify(page); genSettingsBeautify(page);

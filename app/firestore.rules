@@ -204,5 +204,11 @@ service cloud.firestore {
       allow read, update, delete: if isDM();
       allow create: if canWrite() && request.resource.data.uid == uid();
     }
+
+    // ===== корзина (2026-09-27): удалённое 30 дней лежит здесь. Кладёт тот, кто удаляет (игрок — только от своего имени); смотрит, возвращает и чистит дм
+    match /trash/{id} {
+      allow read, update, delete: if isDM();
+      allow create: if canWrite() && request.resource.data.by == uid();
+    }
   }
 }
