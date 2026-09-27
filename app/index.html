@@ -982,6 +982,9 @@ body.onmap.wmBarOn #musBar{bottom:calc(var(--barh,60px) + 26px)}
 @media (prefers-reduced-motion:reduce){ #musBar.blocked .mbtn,#musBar.playing .eq i{animation:none} }
 /* длинное название (организация на карточке и в строке списка) переносится внутри своего чипа, а не вылезает за край */
 .card .chips .chip,.lrow .chips .chip{max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;border-radius:12px;line-height:1.3;text-align:left}
+.chips.compact .chip{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+.chips.compact .chip.more{flex:none;overflow:visible;color:var(--text);border-color:var(--line2);cursor:pointer}
+.chips.compact .chip.more:hover{background:var(--panel2)}
 #updBar{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 16px;border-radius:12px;background:var(--panel2);border:1px solid rgba(255,209,102,.5);box-shadow:0 10px 30px rgba(0,0,0,.45);font-size:13.5px;max-width:calc(100vw - 24px);flex-wrap:wrap}
 .card.map .pres{display:flex;gap:6px 10px;flex-wrap:wrap;margin-top:6px;font-size:12px;font-weight:600}
 .card.map .pres .on{color:var(--mint)}
@@ -1793,8 +1796,9 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
-  {d:'2026-09-27',t:'Длинные названия на карточках',items:[
-    'Длинное название организации на карточке персонажа (и в строке списка) больше не вылезает за край — переносится внутри своей плашки.'
+  {d:'2026-09-27',t:'Организации на карточках',items:[
+    'Длинное название организации на карточке персонажа больше не вылезает за край — переносится внутри своей плашки.',
+    'Много организаций больше не растягивают карточку: не больше двух строк (в виде «список» — одна), остальные сворачиваются в «+N». Наведи на «+N» — увидишь названия, нажми — откроется лист на вкладке «Связи».'
   ]},
   {d:'2026-09-27',t:'Своё название сайта',items:[
     'Мастер может переименовать сайт: Настройки → Общие → Интерфейс → «Название сайта». Новое имя видно в меню слева, на вкладке браузера и на странице входа.'
@@ -1936,6 +1940,22 @@ function folderMenu(t,id,anchor,onChange){
   const b=openModal(`<h2>В папку</h2><div class="stack">${F.folders.map(f=>`<button class="btn ${cur===f.id?'active':''}" data-f="${f.id}">📁 ${esc(f.name)}</button>`).join('')||'<div class="faint">Папок ещё нет — создай через «+ папка» над списком.</div>'}${cur?'<button class="btn danger" data-f="">Убрать из папки</button>':''}</div><div class="modal-actions"><button class="btn" id="cancel">Закрыть</button></div>`);
   $('#cancel',b).onclick=closeModal; $$('[data-f]',b).forEach(x=>x.onclick=()=>{ if(x.dataset.f) F.map[id]=x.dataset.f; else delete F.map[id]; saveFolders(t,F); closeModal(); onChange(); });
 }
+/* организации на карточке персонажа: не больше 2 строк (в строке списка — 1). Всё помещается — как есть, длинные названия переносятся.
+   Не помещается — плашки в одну строку с многоточием, сколько влезает, в конце «+N»: подсказка — остальные названия, клик — лист на вкладке «Связи» */
+function capChips(row){ if(!row||!row.isConnected||!row.clientWidth) return; const lines=+row.dataset.lines||2;
+  row.classList.remove('compact'); row.querySelector('.chip.more')?.remove(); const chips=[...row.children].filter(c=>c.classList.contains('chip')); chips.forEach(c=>{ c.style.display=''; c.style.maxWidth=''; }); if(!chips.length) return;
+  const gap=parseFloat(getComputedStyle(row).rowGap)||0; row.classList.add('compact'); const h=chips[0].getBoundingClientRect().height; row.classList.remove('compact');
+  const cap=lines*h+(lines-1)*gap+1, top=()=>row.getBoundingClientRect().top, bot=x=>x.getBoundingClientRect().bottom-top();
+  if(bot(chips[chips.length-1])<=cap&&chips.every(c=>bot(c)<=cap)) return; /* всё помещается — оставляем как есть */
+  row.classList.add('compact'); const more=el('<span class="chip more" role="button" tabindex="0"></span>'); row.append(more);
+  let n=chips.length; const set=()=>{ more.textContent='+'+(chips.length-n); };
+  while(n>0){ set(); if(n===chips.length&&bot(chips[n-1])<=cap){ more.remove(); return; } if(bot(more)<=cap&&bot(chips[n-1])<=cap) break;
+    const last=chips[n-1]; if(!last.style.maxWidth&&bot(last)<=cap){ last.style.maxWidth=`calc(100% - ${Math.ceil(more.getBoundingClientRect().width+gap)}px)`; if(bot(more)<=cap&&bot(last)<=cap) break; last.style.maxWidth=''; }
+    if(n===1){ last.style.maxWidth=`calc(100% - ${Math.ceil(more.getBoundingClientRect().width+gap)}px)`; break; } last.style.display='none'; n--; }
+  const hid=chips.slice(n); more.title='Ещё: '+hid.map(c=>c.title||c.textContent.trim()).join(', ')+(row.dataset.ent?' — клик: все связи':'');
+  const id=row.dataset.ent; if(id){ const go_=ev=>{ ev.stopPropagation(); ev.preventDefault(); charTab[id]='links'; open(id); }; more.onclick=go_; more.onkeydown=ev=>{ if(ev.key==='Enter'||ev.key===' ') go_(ev); }; } }
+function chipsCapWatch(root,target){ let fr=0; const sched=()=>{ clearTimeout(fr); fr=setTimeout(()=>$$('.chips[data-lines]',root).forEach(capChips),40); };
+  try{ new ResizeObserver(sched).observe(target); new MutationObserver(sched).observe(target,{childList:true}); }catch{} sched(); }
 /* С2: вид и порядок списков (персонажи, организации, локации) — у каждого зрителя свой, в этом браузере */
 function listPref(t){ let s={}; try{ s=JSON.parse(localStorage.getItem('list.pref.'+t)||'{}')||{}; }catch{} return {sort:s.sort||'folders',view:s.view||'cards'}; }
 function listPrefSet(t,k,v){ const s=listPref(t); s[k]=v; try{ localStorage.setItem('list.pref.'+t,JSON.stringify(s)); }catch{} }
@@ -2018,9 +2038,9 @@ function renderList(m,t){
       let mine=isPlayer()&&canEdit(e)?`<span class="mine">${t==='c'?'твой':'твоя'}</span>`:'';
       if(isDM()&&(visOf(e)!=='full'||visForN(e))) mine=`<span class="mine vis" title="${visForN(e)?'Своё правило для игроков: '+esc(Object.entries(e.visFor).map(([u,v])=>userName(u)+' — '+VIS_NAMES[v]).join(', ')):''}">${visOf(e)==='full'?'видна':visOf(e)==='brief'?'кратко':'скрыто'}${visForN(e)?' · 👥'+visForN(e):''}</span>`;
       const fname=F.map[e.id]?(F.folders.find(f=>f.id===F.map[e.id])?.name||''):'';
-      const card=asRow?el(`<div class="lrow ${t==='l'?'loc':''}" draggable="true"><div class="av">${e.thumb?`<img src="${e.thumb}">`:(e.mainImage?`<img data-img="${e.mainImage}" data-thumb="1" style="display:none">`:`<span>${esc(entAbbr(e))}</span>`)}</div><div class="grow" style="min-width:0"><div class="nm">${esc(e.name)||'<span class="faint">без имени</span>'}${mine}</div><div class="faint sb">${esc(sub)}${fname?` · 📁 ${esc(fname)}`:''}</div></div>${chips?`<div class="chips">${chips}</div>`:''}${letters?`<div class="letters">${letters}</div>`:''}<button class="fbtn" title="${fname?'В папке «'+esc(fname)+'» — сменить':'Положить в папку'}">📁</button></div>`)
+      const card=asRow?el(`<div class="lrow ${t==='l'?'loc':''}" draggable="true"><div class="av">${e.thumb?`<img src="${e.thumb}">`:(e.mainImage?`<img data-img="${e.mainImage}" data-thumb="1" style="display:none">`:`<span>${esc(entAbbr(e))}</span>`)}</div><div class="grow" style="min-width:0"><div class="nm">${esc(e.name)||'<span class="faint">без имени</span>'}${mine}</div><div class="faint sb">${esc(sub)}${fname?` · 📁 ${esc(fname)}`:''}</div></div>${chips?`<div class="chips" data-ent="${e.id}" data-lines="1">${chips}</div>`:''}${letters?`<div class="letters">${letters}</div>`:''}<button class="fbtn" title="${fname?'В папке «'+esc(fname)+'» — сменить':'Положить в папку'}">📁</button></div>`)
         :el(`<div class="card ${t==='l'?'loc':''}" draggable="true"><div class="pic">${(e.name||'').trim()?`<span class="ini full" style="color:hsla(${entHue(e)},70%,72%,.4);font-size:${(e.name.length>24?20:e.name.length>12?26:34)}px">${esc(e.name.trim())}</span>`:`<span class="ini">?</span>`}${e.thumb?`<img src="${e.thumb}">`:(e.mainImage?`<img data-img="${e.mainImage}" data-thumb="1" style="display:none">`:'')}${mini}${mine}<button class="fbtn" title="${fname?'В папке «'+esc(fname)+'» — сменить':'Положить в папку'}">📁</button></div>
-        <div class="body"><div class="name">${esc(e.name)||'<span class="faint">без имени</span>'}</div><div class="sub">${esc(sub)||'&nbsp;'}</div>${chips?`<div class="chips">${chips}</div>`:''}${letters?`<div class="letters">${letters}</div>`:''}${fname?`<div class="ftag">📁 ${esc(fname)}</div>`:''}</div></div>`);
+        <div class="body"><div class="name">${esc(e.name)||'<span class="faint">без имени</span>'}</div><div class="sub">${esc(sub)||'&nbsp;'}</div>${chips?`<div class="chips" data-ent="${e.id}" data-lines="2">${chips}</div>`:''}${letters?`<div class="letters">${letters}</div>`:''}${fname?`<div class="ftag">📁 ${esc(fname)}</div>`:''}</div></div>`);
       { const pim=$('.pic img',card); if(pim){ const ok=()=>{ if(pim.naturalWidth) $('.pic',card).classList.add('hasimg'); }; if(pim.complete) ok(); pim.addEventListener('load',ok); } } /* прозрачная картинка: имя-заглушка не просвечивает */
       card.onclick=ev=>{ if(ev.target.classList.contains('fbtn')){ ev.stopPropagation(); folderMenu(t,e.id,card,()=>{ rebuildBar(); draw(); }); return; } open(e.id); };
       card.ondragstart=ev=>{ ev.dataTransfer.setData('text/plain',e.id); ev.dataTransfer.effectAllowed='move'; card.classList.add('dragging'); };
@@ -2028,7 +2048,7 @@ function renderList(m,t){
       return card;
     } };
   search.oninput=()=>{ state.q=search.value; draw(); };
-  draw(); m.append(page);
+  draw(); m.append(page); chipsCapWatch(page,grid);
 }
 
 /* ============================================================
