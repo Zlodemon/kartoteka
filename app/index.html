@@ -934,20 +934,48 @@ body.chat-open.onmap .wmzoom{right:calc(min(var(--chatw),100vw - 64px) + 24px)}
 #wmme.min .mebody,#wmme.min .mrz{display:none}
 #wmme.min{align-self:flex-start}
 #chat #wmme #meMin{display:none}
-#musBar{position:fixed;right:84px;bottom:16px;z-index:66;display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:12px;background:rgba(10,13,22,.95);border:1px solid var(--line2);box-shadow:0 8px 24px rgba(0,0,0,.45);max-width:min(470px,calc(100vw - 100px));font-size:12.5px}
+#musBar{position:fixed;right:84px;bottom:16px;z-index:66;font-size:12.5px}
 body.chat-open #musBar{right:calc(min(var(--chatw),100vw - 64px) + 24px)}
 body.onmap.wmBarOn #musBar{bottom:calc(var(--barh,60px) + 26px)}
+#musBar .mbtn{position:relative;width:40px;height:40px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(10,13,22,.92);border:1px solid var(--line2);box-shadow:0 6px 18px rgba(0,0,0,.4);color:var(--gold);cursor:pointer;transition:border-color .15s,background .15s}
+#musBar .mbtn:hover,#musBar.open .mbtn{border-color:var(--gold);background:rgba(20,24,38,.97)}
+#musBar .eq{display:flex;align-items:flex-end;gap:2px;height:14px}
+#musBar .eq i{width:3px;height:35%;background:currentColor;border-radius:1px}
+#musBar.playing .eq i{animation:musEq .9s ease-in-out infinite}
+#musBar.playing .eq i:nth-child(2){animation-delay:-.3s}
+#musBar.playing .eq i:nth-child(3){animation-delay:-.6s}
+@keyframes musEq{0%,100%{height:25%}50%{height:100%}}
+#musBar .mmi{display:none;font-size:15px}
+#musBar.muted .eq{display:none}
+#musBar.muted .mmi{display:block}
+#musBar .mtip{position:absolute;right:0;bottom:calc(100% + 6px);padding:3px 8px;border-radius:8px;background:rgba(10,13,22,.97);border:1px solid var(--line2);color:var(--text);font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s}
+#musBar.tip:not(.open) .mtip{opacity:1}
+#musBar .mpanel{position:absolute;right:0;bottom:calc(100% + 8px);width:290px;max-width:calc(100vw - 20px);box-sizing:border-box;padding:10px;border-radius:12px;background:rgba(10,13,22,.97);border:1px solid var(--line2);box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:8px;transition:opacity .12s,transform .12s}
+#musBar:not(.open) .mpanel{visibility:hidden;opacity:0;pointer-events:none;transform:translateY(6px)}
+#musBar .mhd{display:flex;align-items:center;gap:6px}
 #musBar .mi{color:var(--gold);font-size:15px;padding:0 2px}
-#musBar .mt{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default}
+#musBar .mt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default;font-weight:600}
+#musBar .mt.dm{cursor:pointer}
+#musBar .mt.dm:hover{color:var(--gold)}
 #musBar .mslot{display:flex}
-#musBar .musfr{width:72px;height:40px;border:0;border-radius:6px;background:#000}
-#musBar .musfr.sc{width:170px;height:40px}
-#musBar .mvol{width:78px}
-#musBar.blocked .mplay{background:var(--orange);color:#111;animation:musPulse 1.2s ease-in-out infinite}
-@keyframes musPulse{50%{box-shadow:0 0 0 4px rgba(255,138,61,.3)}}
+#musBar .mslot:empty{display:none}
+#musBar .musfr{width:100%;aspect-ratio:16/9;height:auto;border:0;border-radius:8px;background:#000}
+#musBar .musfr.sc{aspect-ratio:auto;height:60px}
+#musBar .mctl{display:flex;align-items:center;gap:6px}
+#musBar input.mvol{flex:1;min-width:0;-webkit-appearance:none;appearance:none;height:26px;margin:0 4px;padding:0;border:0;border-radius:0;background:transparent;cursor:pointer;--p:60%}
+#musBar input.mvol:focus-visible{outline:2px solid rgba(255,209,102,.5);outline-offset:2px;border-radius:6px}
+#musBar input.mvol::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--gold) var(--p),rgba(255,255,255,.15) var(--p))}
+#musBar input.mvol::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;margin-top:-6px;border-radius:50%;background:#fff;border:3px solid var(--gold);box-shadow:0 1px 5px rgba(0,0,0,.5)}
+#musBar input.mvol::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,.15)}
+#musBar input.mvol::-moz-range-progress{height:6px;border-radius:3px;background:var(--gold)}
+#musBar input.mvol::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid var(--gold)}
+#musBar .mpct{min-width:34px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+#musBar.blocked .mbtn{background:var(--orange);border-color:var(--orange);color:#111;animation:musPulse 1.2s ease-in-out infinite}
+#musBar.blocked .mplay{background:var(--orange);color:#111}
+@keyframes musPulse{50%{box-shadow:0 0 0 5px rgba(255,138,61,.3)}}
 .mulist{display:flex;gap:6px;flex-wrap:wrap}
-@media (max-width:700px){ #musBar{left:10px;right:70px;bottom:12px;max-width:none} #musBar .mt{max-width:90px} #musBar .mvol{width:60px} body.musOn #ghint{display:none} }
-@media (prefers-reduced-motion:reduce){ #musBar.blocked .mplay{animation:none} }
+@media (max-width:700px){ #musBar{right:70px;bottom:12px} body.musOn #ghint{display:none} }
+@media (prefers-reduced-motion:reduce){ #musBar.blocked .mbtn,#musBar.playing .eq i{animation:none} }
 #updBar{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:10px;padding:8px 10px 8px 16px;border-radius:12px;background:var(--panel2);border:1px solid rgba(255,209,102,.5);box-shadow:0 10px 30px rgba(0,0,0,.45);font-size:13.5px;max-width:calc(100vw - 24px);flex-wrap:wrap}
 .card.map .pres{display:flex;gap:6px 10px;flex-wrap:wrap;margin-top:6px;font-size:12px;font-weight:600}
 .card.map .pres .on{color:var(--mint)}
@@ -1749,6 +1777,10 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-09-27',t:'Музыка сцены: плеер свёрнут',items:[
+    'Плеер музыки теперь — маленькая кнопка ♫ в углу, а не полоса на экране. Клик по ней открывает панель с паузой и громкостью, клик мимо — сворачивает.',
+    'Громкость: новый крупный слайдер с процентами, а ещё можно просто крутить колесо мыши над кнопкой ♫ (с Shift — точнее).'
+  ]},
   {d:'2026-09-27',t:'Удобство, поиск, корзина, телефон',items:[
     'У страниц появились адреса: F5 возвращает на ту же страницу и вкладку листа, работают «Назад» и «Вперёд», ссылкой на лист или карту можно поделиться.',
     'Общий поиск — Ctrl+K или 🔍 в меню: персонажи, организации, локации, карты, документы, события, эффекты.',
@@ -6481,7 +6513,7 @@ function musOn(){ return !!(world.settings&&world.settings.sceneMusic); }
 function musParse(url){ url=String(url||'').trim(); let m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})/); if(m) return {k:'yt',id:m[1]}; if(/soundcloud\.com\//.test(url)) return {k:'sc',url}; if(/^https?:\/\//.test(url)) return {k:'au',url}; return null; }
 function musLive(){ return (world._live||[]).find(d=>d.id==='music')||null; }
 function musVol(){ let v=.6; try{ const s=localStorage.getItem('music.vol'); if(s!=null&&s!=='') v=+s; }catch{} return Math.max(0,Math.min(1,isNaN(v)?.6:v)); }
-function musVolApply(){ const v=MUS.muted?0:musVol(), n=MUS.el; if(!n) return; if(n.tagName==='AUDIO'){ n.volume=v; return; }
+function musVolApply(){ const v=MUS.muted?0:musVol(), n=MUS.el; if(!n) return; if(n.tagName==='AUDIO'){ n.volume=v*v; return; }
   if(n.classList.contains('yt')){ try{ const w=n.contentWindow; w.postMessage(JSON.stringify({event:'command',func:'setVolume',args:[Math.round(v*100)]}),'*'); w.postMessage(JSON.stringify({event:'command',func:v?'unMute':'mute',args:[]}),'*'); }catch{} } }
 /* что должно играть сейчас: включено в настройках, трек включён мастером и не старше 12 часов */
 function musSync(){ const d=musLive(); const want=musOn()&&me&&d&&d.on&&musParse(d.url)&&Date.now()-(+d.t||0)<12*3600e3?d:null; const key=want?want.url+'|'+want.t:'';
@@ -6490,23 +6522,36 @@ function musStop(){ if(MUS.el){ try{ if(MUS.el.tagName==='AUDIO') MUS.el.pause()
 function musStart(d){ const p=musParse(d.url); const off=Math.max(0,Math.floor((Date.now()-(+d.t||Date.now()))/1000)); MUS.cur={...d,p}; let node;
   if(p.k==='yt'){ node=el(`<iframe class="musfr yt" src="https://www.youtube-nocookie.com/embed/${p.id}?autoplay=1&start=${off<6*3600?off:0}&enablejsapi=1&controls=0&disablekb=1&modestbranding=1&rel=0&playsinline=1${d.loop!==false?'&loop=1&playlist='+p.id:''}" allow="autoplay; encrypted-media" title="музыка сцены"></iframe>`); node.addEventListener('load',()=>setTimeout(musVolApply,400)); }
   else if(p.k==='sc') node=el(`<iframe class="musfr sc" src="https://w.soundcloud.com/player/?url=${encodeURIComponent(p.url)}&auto_play=true&show_comments=false&visual=false&buying=false&sharing=false&show_user=false" allow="autoplay" title="музыка сцены"></iframe>`);
-  else { node=document.createElement('audio'); node.className='musau'; node.preload='auto'; node.loop=d.loop!==false; node.src=p.url; node.volume=MUS.muted?0:musVol();
+  else { node=document.createElement('audio'); node.className='musau'; node.preload='auto'; node.loop=d.loop!==false; node.src=p.url; node.volume=MUS.muted?0:musVol()**2;
     node.addEventListener('loadedmetadata',()=>{ try{ if(node.duration&&isFinite(node.duration)) node.currentTime=node.loop?off%node.duration:Math.min(off,node.duration); }catch{} },{once:true});
     node.addEventListener('play',()=>{ MUS.blocked=false; musBarUpd(); }); node.addEventListener('pause',musBarUpd);
     node.play().catch(()=>{ MUS.blocked=true; musBarUpd(); }); }
   MUS.el=node; }
+function musSetVol(v){ v=Math.max(0,Math.min(1,Math.round(v*100)/100)); try{ localStorage.setItem('music.vol',String(v)); }catch{} MUS.muted=false; musVolApply(); musBarUpd(); }
+function musOpen(on){ const bar=$('#musBar'); if(bar) bar.classList.toggle('open',!!on); }
+function musTip(bar){ bar.classList.add('tip'); clearTimeout(MUS.tipT); MUS.tipT=setTimeout(()=>bar.classList.remove('tip'),1000); }
+/* свёрнутый плеер = круглая кнопка ♫ (клик — панель, колесо — громкость); панель закрывается кликом мимо */
+document.addEventListener('pointerdown',e=>{ const b=$('#musBar'); if(b&&b.classList.contains('open')&&!b.contains(e.target)) musOpen(false); },true);
 function musBar(){ let bar=$('#musBar'); const d=MUS.cur; if(!d){ if(bar) bar.remove(); return; }
-  if(!bar){ bar=el(`<div id="musBar" role="region" aria-label="Музыка сцены"><span class="mi" title="Музыка сцены — её включил мастер">♫</span><div class="mt"></div><div class="mslot"></div><button class="btn sm icon mplay" title="Пауза / играть">⏸</button><input type="range" class="mvol" min="0" max="1" step="0.05" title="Громкость — только у тебя"><button class="btn sm icon mmute" title="Без звука">🔊</button><button class="btn sm icon mx" title="Не слушать этот трек (новый трек мастера включится снова)">✕</button></div>`); document.body.append(bar);
-    $('.mvol',bar).oninput=e=>{ try{ localStorage.setItem('music.vol',e.target.value); }catch{} MUS.muted=false; musVolApply(); musBarUpd(); };
+  if(!bar){ bar=el(`<div id="musBar" role="region" aria-label="Музыка сцены"><div class="mpanel"><div class="mhd"><span class="mi">♫</span><div class="mt"></div><button class="btn sm icon mx" title="Не слушать этот трек (новый трек мастера включится снова)">✕</button></div><div class="mslot"></div><div class="mctl"><button class="btn sm icon mplay" title="Пауза / играть">⏸</button><button class="btn sm icon mmute" title="Без звука">🔊</button><input type="range" class="mvol" min="0" max="100" step="1" aria-label="Громкость — только у тебя" title="Громкость — только у тебя"><span class="mpct"></span></div></div><button class="mbtn" aria-label="Музыка сцены"><span class="eq"><i></i><i></i><i></i></span><span class="mmi">🔇</span><span class="mtip"></span></button></div>`); document.body.append(bar);
+    $('.mvol',bar).oninput=e=>musSetVol(+e.target.value/100);
+    bar.addEventListener('wheel',e=>{ if(MUS.el&&MUS.el.classList&&MUS.el.classList.contains('sc')) return; e.preventDefault(); const st=e.shiftKey?.01:.05; musSetVol((MUS.muted?0:musVol())+(e.deltaY<0?st:-st)); musTip(bar); },{passive:false});
+    $('.mbtn',bar).onclick=()=>{ const n=MUS.el; if(n&&n.tagName==='AUDIO'&&MUS.blocked&&n.paused){ n.play().catch(()=>{}); return; } musOpen(!bar.classList.contains('open')); };
     $('.mmute',bar).onclick=()=>{ MUS.muted=!MUS.muted; musVolApply(); musBarUpd(); };
     $('.mplay',bar).onclick=()=>{ const n=MUS.el; if(!n) return; if(n.tagName==='AUDIO'){ if(n.paused) n.play().catch(()=>{}); else n.pause(); } else if(n.classList.contains('yt')){ MUS.paused=!MUS.paused; try{ n.contentWindow.postMessage(JSON.stringify({event:'command',func:MUS.paused?'pauseVideo':'playVideo',args:[]}),'*'); }catch{} } musBarUpd(); };
-    $('.mt',bar).onclick=()=>{ if(isDM()&&!viewAs) musicDialog(); };
+    $('.mt',bar).onclick=()=>{ if(isDM()&&!viewAs){ musOpen(false); musicDialog(); } };
     $('.mx',bar).onclick=()=>{ MUS.skip=MUS.key; musStop(); bar.remove(); document.body.classList.remove('musOn'); toast('Музыка сцены выключена у тебя. Следующий трек мастера включится снова'); }; }
   const slot=$('.mslot',bar); if(MUS.el&&MUS.el.tagName!=='AUDIO'&&MUS.el.parentNode!==slot) slot.replaceChildren(MUS.el); if(MUS.el&&MUS.el.tagName==='AUDIO') slot.replaceChildren();
-  $('.mt',bar).textContent=d.title||(d.p.k==='yt'?'YouTube':d.p.k==='sc'?'SoundCloud':'музыка'); $('.mt',bar).title=(d.n?'Включил: '+d.n+'. ':'')+(isDM()?'Клик — сменить трек':''); musBarUpd(); }
-function musBarUpd(){ const bar=$('#musBar'); if(!bar) return; const n=MUS.el; const au=!!(n&&n.tagName==='AUDIO'), sc=!!(n&&n.classList&&n.classList.contains('sc'));
-  $('.mvol',bar).value=musVol(); for(const c of ['.mvol','.mmute','.mplay']) $(c,bar).style.display=sc?'none':''; $('.mmute',bar).textContent=MUS.muted?'🔇':'🔊';
-  $('.mplay',bar).textContent=au?(n.paused?'▶':'⏸'):(MUS.paused?'▶':'⏸'); bar.classList.toggle('blocked',au&&n.paused&&MUS.blocked); $('.mplay',bar).title=au&&MUS.blocked?'Браузер не дал включить звук сам — нажми, чтобы слушать':'Пауза / играть'; }
+  const mt=$('.mt',bar); mt.textContent=d.title||(d.p.k==='yt'?'YouTube':d.p.k==='sc'?'SoundCloud':'музыка'); mt.title=(d.n?'Включил: '+d.n+'. ':'')+(isDM()&&!viewAs?'Клик — сменить трек':''); mt.classList.toggle('dm',isDM()&&!viewAs); musBarUpd(); }
+function musBarUpd(){ const bar=$('#musBar'); if(!bar) return; const n=MUS.el, d=MUS.cur; const au=!!(n&&n.tagName==='AUDIO'), sc=!!(n&&n.classList&&n.classList.contains('sc'));
+  const v=Math.round(musVol()*100), shown=MUS.muted?0:v, r=$('.mvol',bar); r.value=shown; r.style.setProperty('--p',shown+'%'); $('.mpct',bar).textContent=shown+'%';
+  $('.mctl',bar).style.display=sc?'none':''; $('.mmute',bar).textContent=MUS.muted||!v?'🔇':'🔊';
+  const blocked=au&&n.paused&&MUS.blocked, paused=au?n.paused:MUS.paused;
+  $('.mplay',bar).textContent=paused?'▶':'⏸'; bar.classList.toggle('blocked',blocked); bar.classList.toggle('playing',!paused&&!blocked&&!!shown); bar.classList.toggle('muted',!sc&&!shown);
+  $('.mplay',bar).title=blocked?'Браузер не дал включить звук сам — нажми, чтобы слушать':'Пауза / играть';
+  $('.mtip',bar).textContent='Громкость '+shown+'%';
+  const name=d?(d.title||(d.p.k==='yt'?'YouTube':d.p.k==='sc'?'SoundCloud':'музыка')):'';
+  $('.mbtn',bar).title=blocked?'Браузер не дал включить звук сам — нажми, чтобы слушать':'♫ '+name+(sc?'':' · громкость '+shown+'%')+'\nКлик — плеер'+(sc?'':', колесо мыши — громкость'); }
 function musicDialog(){ if(!isDM()||viewAs) return; if(!musOn()){ toast('Сначала включи «Общая музыка сцены» в Настройках',true); return; } const cur=musLive(); const playing=cur&&cur.on; let hist=[]; try{ hist=JSON.parse(localStorage.getItem('music.hist')||'[]')||[]; }catch{}
   const sheets=[...world.characters,...world.orgs,...world.locations].filter(e=>e.music&&e.music.url&&!isClone(e)&&musParse(e.music.url)).map(e=>({url:e.music.url,title:e.music.title||e.name||''}));
   const sugg=[...hist,...sheets.filter(x=>!hist.some(h=>h.url===x.url))].slice(0,16);
