@@ -166,7 +166,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .portrait.wide{aspect-ratio:16/10}
 .portrait:hover,.portrait.over{border-color:var(--orange)}
 .portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.cropbox{position:relative;overflow:hidden;line-height:0;border-radius:8px;user-select:none;touch-action:none}.cropbox img{max-width:min(560px,70vw);max-height:62vh;display:block}
+.cropbox{position:relative;overflow:hidden;line-height:0;border-radius:8px;user-select:none;touch-action:none;background:#141726}.cropbox img{max-width:min(560px,70vw);max-height:62vh;display:block}
 .cropfr{position:absolute;box-shadow:0 0 0 9999px rgba(0,0,0,.6);outline:2px solid var(--gold);cursor:move;border-radius:2px}.cropfr .h{position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;background:var(--gold);border-radius:3px;cursor:nwse-resize;border:1px solid #000}
 .cprev{width:112px;height:112px;border:1px solid var(--line2);border-radius:10px;background:#0d1020}.cprev.tok{border-radius:50%}
 .magrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;max-height:56vh;overflow:auto;padding:2px}
@@ -1646,7 +1646,9 @@ function drawDown(im,sx,sy,sw,sh,tw,th){ let src=im; while(sw>tw*2&&sh>th*2){ co
 function toJpeg(im,maxSide,q){ const s=Math.min(1,maxSide/Math.max(im.width,im.height)); return drawDown(im,0,0,im.width,im.height,Math.max(1,Math.round(im.width*s)),Math.max(1,Math.round(im.height*s))).toDataURL('image/jpeg',q); }
 /* кадр главной картинки: квадрат ent.crop={id,cx,cy,s,ar}; cx,cy — центр в долях ширины/высоты, s — сторона в долях короткой стороны, ar = ширина/высота */
 function cropOf(ent){ const c=ent&&ent.crop; return c&&c.id===ent.mainImage?c:null; }
-function cropBox(c,W,H){ const m=Math.min(W,H); const S=Math.min(m,(c?c.s:1)*m); let x=(c?c.cx:.5)*W-S/2, y=(c?c.cy:.5)*H-S/2; x=Math.max(0,Math.min(W-S,x)); y=Math.max(0,Math.min(H-S,y)); return {x,y,S}; }
+/* s может быть больше 1 (до длинной стороны): тогда квадрат шире картинки — вытянутый портрет помещается целиком, по бокам поля */
+function cropBox(c,W,H){ const m=Math.min(W,H), M=Math.max(W,H); const S=Math.min(M,(c?c.s:1)*m); let x=(c?c.cx:.5)*W-S/2, y=(c?c.cy:.5)*H-S/2; x=Math.max(Math.min(0,W-S),Math.min(Math.max(0,W-S),x)); y=Math.max(Math.min(0,H-S),Math.min(Math.max(0,H-S),y)); return {x,y,S}; }
+const CROP_BG='#141726';
 function loadURL(u){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=u; }); }
 /* css для <img> в квадратной рамке по кадру */
 function cropCss(ent){ const c=cropOf(ent); if(!c||!c.ar) return ''; const b=cropBox(c,c.ar,1); const k=100/b.S; return `inset:auto;object-fit:fill;max-width:none;width:${c.ar*k}%;height:${k}%;left:${-b.x*k}%;top:${-b.y*k}%`; }
@@ -1654,7 +1656,8 @@ function cropCss(ent){ const c=cropOf(ent); if(!c||!c.ar) return ''; const b=cro
 const THUMB_V=2;
 async function refreshThumb(ent){ const root=typeOf(ent.id)==='c'?cloneRoot(ent):ent; if(!root.mainImage||root.mainImage===SIL_ID||root.imgHidden) return;
   try{ const u=await imgURL(root.mainImage); if(!u) return; const im=await loadURL(u); const b=cropBox(cropOf(root),im.width,im.height); const side=Math.max(1,Math.min(320,Math.round(b.S)));
-    const t=drawDown(im,b.x,b.y,b.S,b.S,side,side).toDataURL('image/jpeg',.86); const tv=THUMB_V+'.'+uid().slice(-5);
+    const pad=b.x<0||b.y<0||b.x+b.S>im.width||b.y+b.S>im.height;
+    const t=(pad?(()=>{ const k=side/b.S; const c=document.createElement('canvas'); c.width=c.height=side; const x=c.getContext('2d'); x.fillStyle=CROP_BG; x.fillRect(0,0,side,side); const dw=Math.max(1,Math.round(im.width*k)), dh=Math.max(1,Math.round(im.height*k)); x.drawImage(drawDown(im,0,0,im.width,im.height,dw,dh),Math.round(-b.x*k),Math.round(-b.y*k),dw,dh); return c; })():drawDown(im,b.x,b.y,b.S,b.S,side,side)).toDataURL('image/jpeg',.86); const tv=THUMB_V+'.'+uid().slice(-5);
     for(const c of [root,...(typeOf(root.id)==='c'?world.characters.filter(x=>x.cloneOf===root.id):[])]){ c.thumb=t; c.tv=tv; if(root.crop) c.crop={...root.crop}; else delete c.crop; touch(c); } }catch(e){ console.warn('thumb',e); } }
 const THUMB_UP=new Set();
 async function cropDialog(ent){ ent=typeOf(ent.id)==='c'?cloneRoot(ent):ent; const u=await imgURL(ent.mainImage); if(!u) return; const im=await loadURL(u); const W=im.width,H=im.height;
@@ -1662,10 +1665,11 @@ async function cropDialog(ent){ ent=typeOf(ent.id)==='c'?cloneRoot(ent):ent; con
   const b=openModal(`<h2>Кадр картинки</h2><div class="faint" style="margin:-6px 0 10px;font-size:12.5px;line-height:1.5">Рамка — то, что видно на токене, в портрете и в списках. Тяни рамку, за угол — размер, колесо — масштаб.</div><div class="row" style="gap:16px;align-items:flex-start;flex-wrap:wrap"><div class="cropbox"><img src="${u}" draggable="false"><div class="cropfr"><span class="h"></span></div></div><div class="stack" style="gap:10px;align-items:center"><canvas class="cprev tok" width="112" height="112"></canvas><span class="tiny">токен</span><canvas class="cprev" width="112" height="112"></canvas><span class="tiny">портрет</span></div></div>
     <div class="modal-actions"><button class="btn" id="reset">Сбросить</button><span class="grow"></span><button class="btn" id="cancel">Отмена</button><button class="btn primary" id="ok">Сохранить</button></div>`,true);
   const box=$('.cropbox',b), img=$('img',box), fr=$('.cropfr',box), pv=$$('.cprev',b);
-  const dims=()=>{ const dw=img.clientWidth||1, dh=img.clientHeight||1; return {dw,dh,m:Math.min(dw,dh)}; };
-  const clamp=()=>{ s=Math.max(.08,Math.min(1,s)); const m=Math.min(W,H), S=s*m; cx=Math.max(S/2/W,Math.min(1-S/2/W,cx)); cy=Math.max(S/2/H,Math.min(1-S/2/H,cy)); };
-  const lay=()=>{ clamp(); const {dw,dh,m}=dims(); const S=s*m; fr.style.width=fr.style.height=S+'px'; fr.style.left=(cx*dw-S/2)+'px'; fr.style.top=(cy*dh-S/2)+'px';
-    const q=cropBox({cx,cy,s},W,H); for(const c of pv){ const x=c.getContext('2d'); x.clearRect(0,0,112,112); x.save(); if(c.classList.contains('tok')){ x.beginPath(); x.arc(56,56,54,0,7); x.clip(); } x.imageSmoothingQuality='high'; x.drawImage(im,q.x,q.y,q.S,q.S,0,0,112,112); x.restore(); } };
+  /* окно — квадрат по длинной стороне картинки: рамку можно растянуть шире короткой стороны (поля по бокам) */
+  const dims=()=>{ const dw=img.clientWidth||1, dh=img.clientHeight||1; const D=Math.max(dw,dh); return {dw,dh,m:Math.min(dw,dh),ox:(D-dw)/2,oy:(D-dh)/2,D}; };
+  const clamp=()=>{ const m=Math.min(W,H), M=Math.max(W,H); s=Math.max(.08,Math.min(M/m,s)); const S=s*m; const a=S/2/W, bb=S/2/H; cx=Math.max(Math.min(a,1-a),Math.min(Math.max(a,1-a),cx)); cy=Math.max(Math.min(bb,1-bb),Math.min(Math.max(bb,1-bb),cy)); };
+  const lay=()=>{ clamp(); const {dw,dh,m,ox,oy,D}=dims(); box.style.width=box.style.height=D+'px'; img.style.marginLeft=ox+'px'; img.style.marginTop=oy+'px'; const S=s*m; fr.style.width=fr.style.height=S+'px'; fr.style.left=(ox+cx*dw-S/2)+'px'; fr.style.top=(oy+cy*dh-S/2)+'px';
+    const q=cropBox({cx,cy,s},W,H); for(const c of pv){ const x=c.getContext('2d'); x.clearRect(0,0,112,112); x.save(); if(c.classList.contains('tok')){ x.beginPath(); x.arc(56,56,54,0,7); x.clip(); } x.fillStyle=CROP_BG; x.fillRect(0,0,112,112); x.imageSmoothingQuality='high'; const k=112/q.S; x.drawImage(im,0,0,W,H,-q.x*k,-q.y*k,W*k,H*k); x.restore(); } };
   let drag=null; fr.onpointerdown=e=>{ e.preventDefault(); fr.setPointerCapture(e.pointerId); const {dw,dh,m}=dims(); drag={rs:e.target.classList.contains('h'),x:e.clientX,y:e.clientY,cx,cy,s,dw,dh,m,l:cx*dw-s*m/2,t:cy*dh-s*m/2}; };
   fr.onpointermove=e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y;
     if(drag.rs){ const S=Math.max(20,drag.s*drag.m+Math.max(dx,dy)); s=S/drag.m; cx=(drag.l+S/2)/drag.dw; cy=(drag.t+S/2)/drag.dh; } else { cx=drag.cx+dx/drag.dw; cy=drag.cy+dy/drag.dh; } lay(); };
