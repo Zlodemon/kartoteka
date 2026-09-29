@@ -73,7 +73,7 @@ service cloud.firestore {
         && request.resource.data.owner == resource.data.owner
         && sameVisibility())
         // урон в бою: игрок меняет только полоски и статусы любого персонажа, если это разрешено в настройках
-        || (isPlayer() && pvpEdit() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bars','statuses','effects','ruina','wounds','updatedAt','updatedBy']));
+        || (isPlayer() && pvpEdit() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bars','statuses','effects','ruina','wounds','dead','updatedAt','updatedBy']));
     }
 
     // ===== организации и локации: создаёт дм или игрок (owner = он сам), правит дм или автор
