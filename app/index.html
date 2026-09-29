@@ -1169,6 +1169,7 @@ if(MOCK){
     subscribe(coll,opts,cb){ const s={coll,opts,cb}; subs.push(s); setTimeout(()=>fire(coll),0); return ()=>subs.splice(subs.indexOf(s),1); },
     async set(coll,id,data){ (store[coll]??={})[id]={...clean(data),id}; setTimeout(()=>fire(coll),0); },
     async update(coll,id,part){ if(!(store[coll]||{})[id]) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur={...store[coll][id]}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete cur[k]; else cur[k]=clean(v); } store[coll][id]={...cur,id}; setTimeout(()=>fire(coll),0); },
+    async mergeUpdate(coll,id,fn){ if(!(store[coll]||{})[id]) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur=JSON.parse(JSON.stringify(store[coll][id])); const part=fn(cur); const nx={...cur}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete nx[k]; else nx[k]=clean(v); } store[coll][id]={...nx,id}; setTimeout(()=>fire(coll),0); return nx; },
     async push(coll,id,field,value,extra){ const cur=(store[coll]??={})[id]||{}; store[coll][id]={...cur,...clean(extra||{}),[field]:[...(cur[field]||[]),clean(value)],id}; setTimeout(()=>fire(coll),0); },
     async list(coll,opts){ let docs=Object.values(store[coll]||{}).filter(d=>match(d,opts)); if(opts?.orderBy) docs.sort((a,b)=>(b[opts.orderBy]||0)-(a[opts.orderBy]||0)); if(opts?.limit) docs=docs.slice(0,opts.limit); return docs.map(d=>({...d})); },
     DEL:Symbol('del'),
@@ -1260,6 +1261,8 @@ if(MOCK){
         first=false; cb(docs); if(miss.length) Promise.all(miss.map(thLoad)).then(again); }, err=>{ console.error(coll,err); if(err.code==='permission-denied') toast('Нет доступа: '+coll,true); }); },
     set:(coll,id,data)=>(STAT.w++,TH_COLLS.has(coll)?thOut(coll,id,clean(data),true).then(d=>F.setDoc(F.doc(db,coll,id),clean(d))):F.setDoc(F.doc(db,coll,id),clean(data))),
     update:(coll,id,part)=>{ STAT.w++; const go=p=>F.updateDoc(F.doc(db,coll,id),Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]))); return TH_COLLS.has(coll)?thOut(coll,id,{...part},false).then(go):go(part); },
+    /* запись с чтением свежей версии: fn(текущее на сервере) → поля для записи. Если документ успели поменять между чтением и записью, Firestore повторит сам */
+    mergeUpdate:(coll,id,fn)=>F.runTransaction(db,async t=>{ const ref=F.doc(db,coll,id); const s=await t.get(ref); STAT.r++; if(!s.exists()) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur=s.data(); const part=fn(JSON.parse(JSON.stringify(cur))); STAT.w++; t.update(ref,Object.fromEntries(Object.entries(part).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]))); const nx={...cur}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete nx[k]; else nx[k]=clean(v); } return nx; }),
     push:(coll,id,field,value,extra)=>(STAT.w++,F.setDoc(F.doc(db,coll,id),{...clean(extra||{}),[field]:F.arrayUnion(clean(value))},{merge:true})),
     async list(coll,opts){ let q=F.collection(db,coll); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts); const snap=await F.getDocs(q); return snap.docs.map(d=>({...d.data(),id:d.id})); },
     async listServer(coll){ const snap=await F.getDocsFromServer(F.collection(db,coll)); return snap.docs.map(d=>({...d.data(),id:d.id})); },
@@ -1432,15 +1435,25 @@ function migrateVisibility(){ if(!realDM()||migrated||!world.settings) return; m
 const snapshots=new Map(); // id -> stableStr последних известных данных (для журнала)
 const NO_RENDER_KEYS=new Set(['_live','_chat','_chatdm']); // чат и пинги перерисовывают только себя
 const REDRAW_KEYS=new Set(['wmaps','wmarkers','wmdraw','wmpriv','_dm','characters','orgs','locations','docs']); // на открытой карте — только перерисовка холста, без пересборки страницы (иначе рвётся перетаскивание и мигают картинки)
+/* элементы массивов с id (элементы карты, полоски, статусы…) при обновлении из базы остаются теми же объектами: выделение, перетаскивание
+   и открытые формы держат ссылку. Раньше чужая правка карты подменяла все элементы — начатое перетаскивание двигало «отвязанную» копию и терялось */
+function reuseArr(oa,nv){ if(!Array.isArray(nv)) return nv; const M=new Map(oa.map(x=>[x.id,x])); return nv.map(n=>{ const o=(n&&typeof n==='object'&&n.id!=null)?M.get(n.id):null; if(!o||o===n) return n; for(const k of Object.keys(o)) if(!k.startsWith('_')) delete o[k]; Object.assign(o,n); return o; }); }
 function applyDocs(key,coll,docs,post){
   const prev=world[key]||[]; const prevMap=new Map(prev.map(x=>[x.id,x]));
   const drafts=prev.filter(x=>x._draft&&!docs.some(d=>d.id===x.id)); /* черновики (ещё не в базе) не выбрасываем */
   let changed=prev.length-drafts.length!==docs.length;
   const next=docs.map(d=>{ const old=prevMap.get(d.id); const s=stableStr(clean(d));
-    if(pending.has(d.id)){ // локальные правки в полёте: вливаем чужие изменения в локальную копию (трёхстороннее слияние), свои не теряем
-      const loc=pending.get(d.id).obj; const baseS=snapshots.get(d.id); if(baseS&&baseS!==s){ if(mergeRemote(loc,JSON.parse(baseS),clean(d))) changed=true; snapshots.set(d.id,s); } return old||loc; }
+    const tb=TXB.get(d.id);
+    if(pending.has(d.id)||(tb&&old)){ // локальные правки в полёте: вливаем чужие изменения в локальную копию (трёхстороннее слияние), свои не теряем
+      const loc=pending.get(d.id)?.obj||old;
+      /* пока идёт запись со слиянием, база — версия сервера до неё (в локальной копии уже есть наша неподтверждённая правка) */
+      if(tb){ const R=clean(d); if(sameV(tb.base,R)) return old||loc;
+        /* «отправленное» (база следующей записи) тоже получает чужие правки — иначе при следующей записи они сойдут за наши и откатят чужое */
+        const sb=snapshots.get(d.id); if(sb){ const so=JSON.parse(sb); mergeRemote(so,tb.base,R); snapshots.set(d.id,stableStr(clean(so))); }
+        if(mergeRemote(loc,tb.base,R)) changed=true; tb.base=R; return old||loc; }
+      const baseS=snapshots.get(d.id); if(baseS&&baseS!==s){ if(mergeRemote(loc,JSON.parse(baseS),clean(d))) changed=true; snapshots.set(d.id,s); } return old||loc; }
     if(old&&stableStr(clean(old))===s) return old; changed=true; snapshots.set(d.id,s);
-    if(old){ for(const k of Object.keys(old)) if(!k.startsWith('_')) delete old[k]; Object.assign(old,d); return old; } // тот же объект: открытые страницы и поля ввода не теряют ссылку
+    if(old){ const arrs=Object.entries(old).filter(([k,v])=>!k.startsWith('_')&&isIdArr(v)); for(const k of Object.keys(old)) if(!k.startsWith('_')) delete old[k]; Object.assign(old,d); for(const [k,oa] of arrs) old[k]=reuseArr(oa,old[k]); return old; } // тот же объект: открытые страницы и поля ввода не теряют ссылку
     return d; });
   world[key]=drafts.length?next.concat(drafts):next; if(post) post(); if(key==='characters') chatFillSpeakers();
   if(changed){ updateCounts(); if(NO_RENDER_KEYS.has(key)){} else if(state.view==='wmap'&&state.id&&WM.redraw&&REDRAW_KEYS.has(key)){ WM.redraw(); if(key==='characters'&&WM.onMe) WM.onMe(); if(['wmaps','wmarkers'].includes(key)&&WM.onInit) WM.onInit(); if(WM.onScene&&['characters','wmaps','wmarkers'].includes(key)) WM.onScene(); } else scheduleRender(); }
@@ -1454,6 +1467,18 @@ document.addEventListener('input',e=>{ if($('#main').contains(e.target)) lastInp
    ЗАПИСЬ + ЖУРНАЛ
    ============================================================ */
 const pending=new Map(); let saveTimer=null, saving=false;
+/* записи со слиянием в полёте: id → {n, base}. base — версия сервера до первой из них; пока n>0, чужие снимки вливаются относительно неё */
+const TXB=new Map(), TXQ=new Map();
+const idArrLike=v=>Array.isArray(v)&&v.every(x=>x&&typeof x==='object'&&!Array.isArray(x)&&x.id!=null);
+/* поле-массив элементов с id (элементы карты, полоски, статусы, эффекты…) пишем не «как у меня», а слив с тем, что сейчас на сервере:
+   иначе двое, двигающие разные элементы одной карты, затирают друг друга (побеждает последняя запись) */
+function txWrite(coll,docId,part,base,keys,data){
+  const tb=TXB.get(docId); if(tb) tb.n++; else TXB.set(docId,{n:1,base});
+  const prev=TXQ.get(docId)||Promise.resolve();
+  const run=prev.catch(()=>{}).then(()=>DB.mergeUpdate(coll,docId,cur=>{ const p={...part}; for(const k of keys){ const r=cur[k]; if(idArrLike(r)) p[k]=mergeIdArrays(JSON.parse(JSON.stringify(data[k])),base[k],r); } return p; }))
+    .then(nx=>{ const t=TXB.get(docId); if(t&&--t.n<=0){ TXB.delete(docId); if(!pending.has(docId)) snapshots.set(docId,stableStr(clean(nx))); } })
+    .catch(e=>{ const t=TXB.get(docId); if(t&&--t.n<=0) TXB.delete(docId); if(e.code==='not-found') return DB.set(coll,docId,data); if(e.code==='permission-denied') throw e; return DB.update(coll,docId,part); /* нет сети и т.п. — пишем как раньше, Firestore доставит из очереди */ });
+  TXQ.set(docId,run); run.finally(()=>{ if(TXQ.get(docId)===run) TXQ.delete(docId); }); return run; }
 /* ---- параллельная работа: трёхстороннее слияние (база = последняя известная версия сервера) ---- */
 const SYNC_META=new Set(['updatedAt','updatedBy','_pending']);
 const isObj=v=>v&&typeof v==='object'&&!Array.isArray(v);
@@ -1471,8 +1496,8 @@ function mergeIdArrays(l,b,r){ const L=new Map(l.map(x=>[x.id,x])), B=new Map(b.
   for(const x of l){ const id=x.id, bb=B.get(id), rr=R.get(id);
     if(!bb){ out.push(x); continue; }                                   // добавили мы
     if(!rr){ if(sameV(x,bb)) continue; out.push(x); continue; }         // удалили они (если мы не правили — соглашаемся)
-    if(sameV(x,bb)){ out.push(JSON.parse(JSON.stringify(rr))); continue; } // правили только они
-    if(sameV(rr,bb)){ out.push(x); continue; }                          // правили только мы
+    if(sameV(rr,bb)){ out.push(x); continue; }                          // они не трогали (или правили только мы) — тот же объект
+    if(sameV(x,bb)){ for(const k of Object.keys(x)) if(!k.startsWith('_')) delete x[k]; Object.assign(x,JSON.parse(JSON.stringify(rr))); out.push(x); continue; } // правили только они — обновляем на месте
     if(isObj(x)&&isObj(rr)) mergeRemote(x,bb,rr); out.push(x); }        // оба — по полям
   for(const y of r) if(!B.has(y.id)&&!L.has(y.id)) out.push(JSON.parse(JSON.stringify(y))); // добавили они
   return out; }
@@ -1496,7 +1521,8 @@ async function flush(){
     if(born){ if(isPlayer()) addLog({coll,docId,kind:'create',entityName:entityLabel(coll,obj),label:'создал',after:data}); }
     else if(isPlayer()&&coll!=='maps') logDiff(coll,docId,obj,data).catch(e=>console.error(e));
     pending.delete(id); snapshots.set(docId,stableStr(data));
-    const w=baseS?(part?Promise.resolve().then(()=>DB.update(coll,docId,part)).catch(e=>{ if(e.code==='not-found') return DB.set(coll,docId,data); throw e; }):null):Promise.resolve().then(()=>DB.set(coll,docId,data));
+    const baseO=baseS&&part?JSON.parse(baseS):null; const arrK=baseO?Object.keys(part).filter(k=>part[k]!==DB.DEL&&idArrLike(data[k])&&idArrLike(baseO[k])):[];
+    const w=baseS?(part?(arrK.length&&DB.mergeUpdate&&!('thumb' in part)&&!('thumbRef' in part)?txWrite(coll,docId,part,baseO,arrK,data):Promise.resolve().then(()=>DB.update(coll,docId,part)).catch(e=>{ if(e.code==='not-found') return DB.set(coll,docId,data); throw e; })):null):Promise.resolve().then(()=>DB.set(coll,docId,data));
     if(!w) continue; inflight++; ws.push(w.catch(e=>saveFail(e,coll,docId,id)).finally(()=>{ inflight--; saveStatus(); }));
   }
   saving=false; if(pending.size) saveTimer=setTimeout(flush,200); saveStatus();
@@ -1881,6 +1907,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-09-29',t:'Карта: плавнее и без потерь',items:['Когда кто-то тянет токен, карточку, документ, линию или картинку, остальные видят это сразу и плавно (раньше — только токены и рывками, а остальное прыгало на место через секунду после отпускания).','Двое, двигающие разные элементы одной карты одновременно, больше не затирают друг друга — раньше одно из движений могло пропасть. То же с полосками одного персонажа.','Перетаскивание больше не срывается, если в этот момент кто-то другой что-то поменял на карте.']},
   {d:'2026-09-29',t:'Масштаб карты',items:['Карта из маленькой картинки (меньше 2000 px по длинной стороне) сразу растягивается до 2400 — токены, карточки и документы на ней нормального размера.','Для уже созданных карт: ⚙ карты → «Масштаб карты» → ×N → Применить. Всё нарисованное и поставленное растягивается вместе с картой, а токены и карточки становятся относительно меньше. Сетка, туман и расстояния сохраняются.']},
   {d:'2026-09-29',t:'Выделение группой у игроков',items:['На карте игрок может выделять рамкой (Shift + тянуть по пустому месту) — берутся только свои рисунки и токены. Ctrl+A — все свои рисунки на карте. Delete или × — стереть выделенное.']},
   {d:'2026-09-29',t:'Документы',items:[
@@ -5481,6 +5508,8 @@ const IMG_H=[['nw',0,0],['n',.5,0],['ne',1,0],['w',0,.5],['e',1,.5],['sw',0,1],[
 WM.barHide=(()=>{ try{ return new Set(JSON.parse(localStorage.getItem('wm.barHide')||'[]')); }catch{ return new Set(); } })();
 function wmBarHideToggle(id){ if(WM.barHide.has(id)) WM.barHide.delete(id); else WM.barHide.add(id); try{ localStorage.setItem('wm.barHide',JSON.stringify([...WM.barHide].slice(-400))); }catch{} }
 function wmDrawScene(ctx,mp,items,cam,W,H,o={}){
+  /* элементы, которые сейчас тянет кто-то другой, — рисуем на живой позиции (копия поверх настоящего элемента, сам он не меняется) */
+  if(o.livePos&&o.livePos.size) items=items.map(it=>{ const lp=o.livePos.get(it.id); if(!lp||it.t==='marker') return it; const c=Object.create(it); if(lp.dx!=null&&it.pts){ c.pts=it.pts.map((v,i)=>v+(i%2?lp.dy:lp.dx)); c._gk=undefined; } else if(lp.x!=null){ c.x=lp.x; c.y=lp.y; } return c; });
   const k=cam.k, dpr=o.dpr||1; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H); ctx.fillStyle='#0b0d14'; ctx.fillRect(0,0,W,H);
   const world=()=>ctx.setTransform(dpr*k,0,0,dpr*k,-cam.x*k*dpr,-cam.y*k*dpr), screen=()=>ctx.setTransform(dpr,0,0,dpr,0,0);
   const selSet=o.sel||new Set(); const lv=()=>true; const visIt=it=>o.noLayers?true:wmLayer(wmLayerOf(it)).vis; const dimOf=it=>{ if(!o.active||o.active==='normal'||o.active==='all') return 1; return wmLayerOf(it)===o.active?1:.45; };
@@ -5708,7 +5737,7 @@ const canMove=it=>ed||(it._doc&&((it.t==='marker'&&(it.layer||'normal')==='norma
   let stroke=null, poly=null, shape=null, marq=null, pan=null, drag=null, vdrag=null, idrag=null, fdrag=null, moved=false, lastPt=null, fogDrag=false, ruler=null, calib=null, animTimer=null, rdrag=null, rpop=null, adrag=null;
   const kick=()=>{ if(animTimer) return; const step=()=>{ animTimer=null; const now=Date.now(); WM.pings=WM.pings.filter(p=>now-p.t<2600); WM.trails=WM.trails.filter(p=>now-p.t<4000); draw(); if(WM.pings.length||WM.trails.length) animTimer=requestAnimationFrame(step); }; animTimer=requestAnimationFrame(step); };
   function draw(){ if(!cv.isConnected) return; placeStrip(); if(typeof applyDrags==='function') applyDrags(); const dpr=devicePixelRatio||1; cv.width=W()*dpr; cv.height=H()*dpr; cv.style.width=W()+'px'; cv.style.height=H()+'px';
-    const its=items(); { const o_={dpr,sel:selSet(),imgs,active:(ed&&!WM.asPlayer)?WM.active:'all',duelMk:[],barBox:[],imgHandles:!!(single()&&single().t==='img'&&canMove(single())&&hittable(single())&&WM.tool==='select')}; wmDrawScene(ctx,mp,its,cam,W(),H(),o_); WM._duelMk=o_.duelMk; WM._barBox=o_.barBox; }; arrowsDraw(dpr);
+    const its=items(); { const o_={dpr,sel:selSet(),imgs,livePos:WM.livePos,active:(ed&&!WM.asPlayer)?WM.active:'all',duelMk:[],barBox:[],imgHandles:!!(single()&&single().t==='img'&&canMove(single())&&hittable(single())&&WM.tool==='select')}; wmDrawScene(ctx,mp,its,cam,W(),H(),o_); WM._duelMk=o_.duelMk; WM._barBox=o_.barBox; }; arrowsDraw(dpr);
     for(const it of its) if(it.t==='marker'){ const e=findEntity(it.ref); const ik=e&&imgs.get(e.id); if(e&&e.mainImage&&(!imgs.has(e.id)||(ik&&ik._k!==e.mainImage+'#'+(e.tv||'')))){ const mk=e.mainImage, kk=mk+'#'+(e.tv||''); imgs.set(e.id,null); (async()=>{ const u=e.thumb||await imgURL(mk,true); if(!u) return; const im=new Image(); im._k=kk; im.onload=()=>{ imgs.set(e.id,im); draw(); }; im.src=u; })(); }
       for(const st of (e?.statuses||[])){ const d=statusDef(st.k); if(d.image&&!imgs.has('st:'+d.image)){ imgs.set('st:'+d.image,null); (async()=>{ const u=await imgURL(d.image,true); if(!u) return; const im=new Image(); im.onload=()=>{ imgs.set('st:'+d.image,im); draw(); }; im.src=u; })(); } } }
     const k=cam.k; ctx.setTransform(dpr*k,0,0,dpr*k,-cam.x*k*dpr,-cam.y*k*dpr); ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round'; if(WM.tool==='resize'&&ed) drawRz(k);
@@ -6496,8 +6525,9 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
   function facePub(it,end){ if(viewAs||!it||it._secret||it._priv) return; const id='face_'+mp.id+'_'+me.uid;
     if(end){ clearTimeout(faceTm); faceTm=null; if(!faceShown) return; faceShown=false; if(it.facing==null){ LIVE.remove(id).catch(()=>{}); return; } LIVE.set(id,{u:me.uid,t:Date.now(),tk:it.id,facing:it.facing,done:1}).catch(()=>{}); clearTimeout(WM._faceRm); WM._faceRm=setTimeout(()=>LIVE.remove(id).catch(()=>{}),8000); return; }
     if(faceTm) return; const wait=Math.max(0,66-(Date.now()-faceLast)); faceTm=setTimeout(()=>{ faceTm=null; if(it.facing==null) return; faceLast=Date.now(); faceShown=true; LIVE.volatile(id); LIVE.set(id,{u:me.uid,t:Date.now(),tk:it.id,facing:it.facing}).catch(()=>{}); },wait); }
-  const dragIts=list=>list.filter(x=>x.it.t==='marker'&&!x.it._secret&&!x.it._priv).map(x=>({id:x.it.id,x:Math.round(x.it.x),y:Math.round(x.it.y)}));
-  function dragPub(end,finalList){ if(viewAs) return; const id='drag_'+mp.id+'_'+me.uid; if(end){ clearTimeout(dragTm); dragTm=null; if(!dragShown) return; dragShown=false; const its=finalList?dragIts(finalList):[]; if(!its.length){ LIVE.remove(id).catch(()=>{}); return; } /* финал держим в живом канале, пока у всех не придёт запись из Firestore; потом убираем */ LIVE.set(id,{u:me.uid,t:Date.now(),its,done:1}).catch(()=>{}); clearTimeout(WM._dragRm); WM._dragRm=setTimeout(()=>LIVE.remove(id).catch(()=>{}),8000); return; } if(!drag) return; if(dragTm) return; const wait=Math.max(0,66-(Date.now()-dragLast)); dragTm=setTimeout(()=>{ dragTm=null; if(!drag) return; dragLast=Date.now(); const its=dragIts(drag.list); if(!its.length) return; dragShown=true; LIVE.volatile(id); LIVE.set(id,{u:me.uid,t:Date.now(),its}).catch(()=>{}); },wait); }
+  /* что тянем — в живой канал: токены и элементы с x/y — позиция, фигуры и линии (pts) — сдвиг от начала и итоговая первая точка */
+  const dragIts=list=>list.filter(x=>!x.it._secret&&!x.it._priv).map(x=>x.it.pts&&x.pts?{id:x.it.id,dx:Math.round((x.it.pts[0]-x.pts[0])*10)/10,dy:Math.round((x.it.pts[1]-x.pts[1])*10)/10,p0:[x.it.pts[0],x.it.pts[1]]}:{id:x.it.id,x:Math.round(x.it.x),y:Math.round(x.it.y)});
+  function dragPub(end,finalList){ if(viewAs) return; const id='drag_'+mp.id+'_'+me.uid; if(end){ clearTimeout(dragTm); dragTm=null; if(!dragShown) return; dragShown=false; const its=finalList?dragIts(finalList):[]; if(!its.length){ LIVE.remove(id).catch(()=>{}); return; } /* финал держим в живом канале, пока у всех не придёт запись из Firestore; потом убираем */ LIVE.set(id,{u:me.uid,t:Date.now(),its,done:1}).catch(()=>{}); clearTimeout(WM._dragRm); WM._dragRm=setTimeout(()=>LIVE.remove(id).catch(()=>{}),8000); return; } if(!drag) return; if(dragTm) return; const wait=Math.max(0,40-(Date.now()-dragLast)); dragTm=setTimeout(()=>{ dragTm=null; if(!drag) return; dragLast=Date.now(); const its=dragIts(drag.list); if(!its.length) return; dragShown=true; LIVE.volatile(id); LIVE.set(id,{u:me.uid,t:Date.now(),its}).catch(()=>{}); },wait); }
   function rulerPub(){ if(viewAs) return; const hide=!ruler||(WM.rulerSecret&&ed); const pts=hide?[]:(ruler.cur?[...ruler.pts,ruler.cur.x,ruler.cur.y]:ruler.pts).map(v=>Math.round(v)); if(hide&&!rulerShown) return; const send=()=>{ rulerTm=null; rulerLast=Date.now(); rulerShown=pts.length>0; const id='ruler_'+mp.id+'_'+me.uid; if(!pts.length){ LIVE.remove(id).catch(()=>{}); return; } LIVE.volatile(id); LIVE.set(id,{pts,t:Date.now(),u:me.uid,n:me.name,color:myColor(),map:mp.id}).catch(()=>{}); }; if(hide){ clearTimeout(rulerTm); rulerTm=null; send(); return; } if(rulerTm) return; const wait=Math.max(0,80-(Date.now()-rulerLast)); rulerTm=setTimeout(send,wait); }
   /* пинг: локально + всем через live */
   function ping(x,y,move){ const col=myColor(); WM.pings.push({x,y,t:Date.now(),n:me.name,color:col}); kick(); if(!viewAs) LIVE.set('ping_'+mp.id,{x:Math.round(x),y:Math.round(y),t:Date.now(),u:me.uid,n:me.name,color:col,cam:move?1:0}).catch(()=>{}); }
@@ -6505,13 +6535,27 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
   function drawOnline(){ const box=$('#wmonline',page); if(!box) return; const now=Date.now(); const list=(world._live||[]).filter(d=>d.id.startsWith('presence_')&&now-d.t<200000&&d.u!==me.uid).sort((a,b)=>(b.map===mp.id)-(a.map===mp.id)); box.innerHTML=list.map(d=>{ const u=byId(world.users,d.u); const here=d.map===mp.id; return `<div class="u ${here?'':'away'} ${ed?'click':''}" data-u="${d.u}" title="${here?'на этой карте':(d.map?'на другой карте':'в картотеке')}${ed?' · клик — позвать сюда':''}"><div class="av">${u&&u.photo?`<img src="${esc(u.photo)}" referrerpolicy="no-referrer">`:esc(initials(d.n||''))}</div><span>${esc(d.n||'')}</span><span class="dot"></span></div>`; }).join(''); if(ed) $$('.u',box).forEach(r=>r.onclick=()=>{ const uidT=r.dataset.u; LIVE.set('goto_'+uidT,{map:mp.id,t:Date.now(),u:me.uid,n:me.name}).catch(()=>{}); toast('Позвал: '+(r.textContent||'').trim()); }); }
   drawOnline();
   WM.onInit=()=>drawInit();
+  /* плавность чужого перетаскивания: от показанного сейчас к новой цели за время между пакетами (30–120 мс) */
+  WM.lerp??=new Map(); WM.livePos??=new Map(); let lerpRaf=0; /* переживают пересборку страницы карты — иначе плавный переход начинался заново с места и давал рывок назад */
+  function liveLerp(id,tx,ty,sx,sy,pt){ const now=performance.now(); let L=WM.lerp.get(id);
+    if(!L){ L={fx:sx,fy:sy,tx,ty,t0:now,dur:60,pt}; WM.lerp.set(id,L); }
+    else if(L.tx!==tx||L.ty!==ty){ const c=lerpCur(L,now); const gap=pt&&L.pt?pt-L.pt:60; L.fx=c.x; L.fy=c.y; L.tx=tx; L.ty=ty; L.t0=now; L.dur=Math.max(30,Math.min(120,gap||60)); L.pt=pt; }
+    return lerpCur(L,now); }
+  function lerpCur(L,now){ const f=Math.min(1,Math.max(0,(now-L.t0)/L.dur)); const e=f*(2-f); return {x:L.fx+(L.tx-L.fx)*e,y:L.fy+(L.ty-L.fy)*e}; }
+  function lerpKick(){ if(lerpRaf) return; lerpRaf=requestAnimationFrame(()=>{ lerpRaf=0; if(!WM.lerp.size) return; const now=performance.now(); let busy=false; for(const L of WM.lerp.values()) if(now-L.t0<L.dur) busy=true; if(applyDrags()) draw(); if(busy) lerpKick(); }); }
   function applyDrags(){ const now=Date.now(); const live=world._live||[]; const dr=live.filter(d=>d.id.startsWith('drag_'+mp.id+'_')&&d.u!==me.uid&&d.its&&now-d.t<(d.done?10000:6000)); const all=wmItems(mp); let ch=false; for(const it of all) if(it._dx!=null){ delete it._dx; delete it._dy; ch=true; }
     /* взгляд других: держим, пока истина не совпадёт */
     const fc=live.filter(d=>d.id.startsWith('face_'+mp.id+'_')&&d.u!==me.uid&&d.tk&&d.facing!=null&&now-d.t<(d.done?10000:6000)); for(const it of all) if(it._df!=null){ delete it._df; ch=true; } for(const d of fc){ const it=all.find(x=>x.id===d.tk&&x.t==='marker'); if(!it) continue; if(d.done&&it.facing===d.facing) continue; it._df=d.facing; ch=true; }
     /* чужие контуры: скрыть, когда такой элемент уже появился на карте */
     const dw=live.filter(d=>d.id.startsWith('draw_'+mp.id+'_')&&d.u!==me.uid&&d.pts&&d.pts.length>=4&&now-d.t<(d.done?10000:20000)).filter(d=>!d.done||!all.some(it=>it.pts&&it.pts.length===d.pts.length&&Math.abs(it.pts[0]-d.pts[0])<1.5&&Math.abs(it.pts[1]-d.pts[1])<1.5&&Math.abs(it.pts[it.pts.length-1]-d.pts[d.pts.length-1])<1.5)); if(dw.length||(WM.drawPrev||[]).length) ch=true; WM.drawPrev=dw;
     if(fc.length||dw.length){ clearTimeout(WM._liveTm); WM._liveTm=setTimeout(()=>{ applyDrags(); draw(); },6500); }
-    for(const d of dr) for(const o of d.its){ const it=all.find(x=>x.id===o.id&&x.t==='marker'); if(!it) continue; if(d.done&&Math.abs(it.x-o.x)<.6&&Math.abs(it.y-o.y)<.6) continue; /* истина уже пришла — смещение не нужно */ it._dx=o.x; it._dy=o.y; ch=true; }
+    /* чужое перетаскивание: цель из живого канала (до 25 раз в секунду), на экране — плавный переход к ней (liveLerp), а не скачок */
+    const seen=new Set(); const hadLP=WM.livePos.size; WM.livePos.clear();
+    for(const d of dr) for(const o of d.its){ const it=all.find(x=>x.id===o.id); if(!it) continue;
+      if(o.dx!=null){ if(!it.pts) continue; if(d.done&&o.p0&&Math.abs(it.pts[0]-o.p0[0])<.6&&Math.abs(it.pts[1]-o.p0[1])<.6) continue; const p=liveLerp(it.id,o.dx,o.dy,0,0,d.t); WM.livePos.set(it.id,{dx:p.x,dy:p.y}); seen.add(it.id); ch=true; continue; }
+      if(d.done&&Math.abs(it.x-o.x)<.6&&Math.abs(it.y-o.y)<.6) continue; /* истина уже пришла — смещение не нужно */
+      const p=liveLerp(it.id,o.x,o.y,it.x,it.y,d.t); if(it.t==='marker'){ it._dx=p.x; it._dy=p.y; } else WM.livePos.set(it.id,{x:p.x,y:p.y}); seen.add(it.id); ch=true; }
+    for(const id of [...WM.lerp.keys()]) if(!seen.has(id)) WM.lerp.delete(id); if(hadLP&&!WM.livePos.size) ch=true; if(WM.lerp.size) lerpKick();
     if(dr.length){ clearTimeout(WM._dragTm); WM._dragTm=setTimeout(()=>{ applyDrags(); draw(); },dr.some(d=>!d.done)?6500:10500); } return ch; }
   WM.onLive=()=>{ drawOnline(); arrowsLive(); { const sh=(world._live||[]).find(d=>d.id==='show_'+mp.id); if(sh&&(sh.image||sh.note)&&sh.u!==me.uid&&sh.t>(WM.lastShow||0)&&Date.now()-sh.t<15000){ WM.lastShow=sh.t; if(sh.note){ const nt=items().find(x=>x.id===sh.note&&x.t==='note'); if(nt&&docOf(nt)){ noteOpen(nt); toast(`${sh.n||'Мастер'} показывает документ`); } } else { lightbox(sh.image); toast(`${sh.n||'Мастер'} показывает картинку`); } } }
     /* результат столкновения из живого слоя — блок на карте одинаковый у всех, кто бы ни разрешал */
@@ -6621,7 +6665,7 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
     if(idrag){ const it=idrag.it; idrag=null; cv.style.cursor=''; commitIt(it); showInfo(); draw(); return; }
     if(WM._tf){ const T=WM._tf; WM._tf=null; const it=T.it; if(!moved){ if(ed) WM.undo.pop(); draw(); return; } for(let i=0;i<it.pts.length;i++) it.pts[i]=Math.round(it.pts[i]*10)/10; commitIt(it); draw(); return; }
     if(vdrag){ const it=vdrag.it; vdrag=null; for(let i=0;i<it.pts.length;i++) it.pts[i]=Math.round(it.pts[i]*10)/10; commitIt(it); draw(); return; }
-    if(drag){ const d=drag; drag=null; cv.style.cursor='grab'; for(const x of d.list){ delete x.it._vx; delete x.it._vy; } if(!moved){ dragPub(true); WM.undo.pop(); draw(); return; } let pub=false,sec=false; for(const x of d.list){ const it=x.it; if(it.pts){ for(let i=0;i<it.pts.length;i++) it.pts[i]=Math.round(it.pts[i]*10)/10; } else { it.x=Math.round(it.x*10)/10; it.y=Math.round(it.y*10)/10; } if(it._doc) touch(it); else if(it._secret) sec=true; else pub=true; } if(pub) touch(mp); if(sec) touch(wmSecret(mp,true));
+    if(drag){ const d=drag; drag=null; cv.style.cursor='grab'; for(const x of d.list){ delete x.it._vx; delete x.it._vy; } if(!moved){ dragPub(true); WM.undo.pop(); draw(); return; } let pub=false,sec=false; for(const x of d.list){ const it=x.it; if(it.pts){ for(let i=0;i<it.pts.length;i++) it.pts[i]=Math.round(it.pts[i]*10)/10; } else { it.x=Math.round(it.x*10)/10; it.y=Math.round(it.y*10)/10; } if(it._doc) touchFast(it); else if(it._secret) sec=true; else pub=true; } if(pub) touchFast(mp); if(sec) touchFast(wmSecret(mp,true));
       if(d.trail){ const it=d.list[0].it; const pts=[...d.trail,it.x,it.y].map(v=>Math.round(v)); const tr={pts,t:Date.now(),u:me.uid,ref:it.ref,color:myColor()}; WM.trails.push(tr); kick(); if(!viewAs&&!it._secret) LIVE.set('trail_'+mp.id,tr).catch(()=>{}); } dragPub(true,d.list); draw(); return; }
     if(pan){ pan=null; cv.style.cursor=WM.tool==='select'?'grab':'crosshair'; if(moved) return; }
     if(moved&&!(lastPt&&Math.hypot(sx-lastPt.sx,sy-lastPt.sy)<=12)) return;
@@ -7302,7 +7346,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK) Object.assign(window,{G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{snapshots,pending,flush,wmItems,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
