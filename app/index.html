@@ -391,6 +391,14 @@ body.phone .cdsh{flex-wrap:wrap;row-gap:8px}body.phone .cdsh .grow{flex-basis:10
 @media (max-width:860px){.cdbox .modal-actions{flex-wrap:wrap}.cdbox .cdpos{display:none}}
 .cdtts{font-size:12px;padding:3px 10px;border-radius:20px;border:1px solid var(--line);color:var(--muted);cursor:help}
 .cdtts.ok{color:var(--mint);border-color:rgba(142,247,193,.3)}.cdtts.busy{color:var(--gold);border-color:rgba(255,209,102,.35)}.cdtts.err{color:var(--red);border-color:rgba(255,92,108,.4)}
+.cdttsst{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.cdttsrow{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-size:13px;line-height:1.5}
+.cdttsrow .ic{font-size:18px}.cdttsrow .grow{flex:1;min-width:0}.cdttsrow a{color:var(--cyan)}
+.cdttst{width:100%;border-collapse:collapse;font-size:13px}.cdttst th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:500;padding:4px 8px}
+.cdttst td{padding:7px 8px;border-top:1px solid var(--line)}.cdttst td:first-child{width:28px}
+.cdst{font-size:12px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+.cdst.ok{color:var(--mint);border-color:rgba(142,247,193,.3)}.cdst.chg{color:var(--gold);border-color:rgba(255,209,102,.35)}.cdst.new{color:var(--cyan);border-color:rgba(79,208,255,.35)}
+.cdttsp{min-height:18px;margin:10px 0 2px;color:var(--gold)}
 .seg.dirseg span.on{color:#fff;background:rgba(233,194,255,.14)}.tlpage .head .seg span.on[data-m=dm]{color:var(--gold)}
 .seg.visctl span.on[data-v=full]{color:var(--mint)}.seg.visctl span.on[data-v=brief]{color:var(--gold)}.seg.visctl span.on[data-v=hidden]{color:var(--red)}
 .eye{border:none;background:none;cursor:pointer;font-size:15px;padding:2px 6px;border-radius:6px;color:var(--faint)}.eye.on{color:var(--mint)}.eye:hover{background:var(--panel2)}
@@ -1264,7 +1272,7 @@ if(MOCK){
   };
   LIVE={ set:(id,o)=>DB.set('live',id,o), remove:id=>DB.delete('live',id), volatile(){}, subscribe:cb=>DB.subscribe('live',null,cb) };
   const MU={dm:{uid:'u_dm',email:CONFIG.dmEmails[0],name:'Мастер (mock)',photo:''},player:{uid:'u_pl',email:'player@example.com',name:'Игрок (mock)',photo:''},observer:{uid:'u_ob',email:'obs@example.com',name:'Наблюдатель (mock)',photo:''}}; const mu=MU[MOCK]||null;
-  let cbA=null; AUTH={ onChange(cb){ cbA=cb; setTimeout(()=>cb(mu),0); }, async signIn(){ cbA&&cbA(mu); }, async signOut(){ location.search=''; }, as(r){ cbA&&cbA(MU[r]); } };
+  let cbA=null; AUTH={ onChange(cb){ cbA=cb; setTimeout(()=>cb(mu),0); }, async signIn(){ cbA&&cbA(mu); }, async signOut(){ location.search=''; }, as(r){ cbA&&cbA(MU[r]); }, async googleToken(){ if(window.__cdToken) return window.__cdToken; throw new Error('в тестовом режиме вход Google недоступен'); } };
   // стартовые данные для mock
   DB.set('users','u_dm',{email:CONFIG.dmEmails[0],name:'Мастер (mock)',photo:'',role:'dm'});
   DB.set('users','u_pl',{email:'player@example.com',name:'Игрок (mock)',photo:'',role:'player'});
@@ -1363,6 +1371,7 @@ if(MOCK){
     onChange(cb){ A.onAuthStateChanged(auth,u=>cb(u?{uid:u.uid,email:u.email,name:u.displayName||u.email,photo:u.photoURL||''}:null)); },
     async signIn(){ if(LOCAL){ const email=($('#lemail').value||'').trim().toLowerCase(), name=($('#lname').value||'').trim(); if(!email.includes('@')){ throw new Error('введи почту, под которой ты входил в облако'); } const sub='local_'+btoa(unescape(encodeURIComponent(email))).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_'); localStorage.setItem('localLogin',JSON.stringify({email,name})); await A.signInWithCredential(auth,A.GoogleAuthProvider.credential(JSON.stringify({sub,email,email_verified:true,name:name||email}))); return; }
       const p=new A.GoogleAuthProvider(); try{ await A.signInWithPopup(auth,p); }catch(e){ if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment') await A.signInWithRedirect(auth,p); else throw e; } },
+    async googleToken(scopes){ const p=new A.GoogleAuthProvider(); for(const s of scopes) p.addScope(s); if(me&&me.email) p.setCustomParameters({login_hint:me.email}); const u=auth.currentUser; const r=u?await A.reauthenticateWithPopup(u,p):await A.signInWithPopup(auth,p); const c=A.GoogleAuthProvider.credentialFromResult(r); if(!c||!c.accessToken) throw new Error('Google не выдал доступ'); return c.accessToken; },
     signOut:()=>A.signOut(auth),
   };
 }
@@ -7862,7 +7871,7 @@ function renderCards(m){ const dm=isDM(); const tw={s:150,m:200,l:270}[cdUiGet('
   const all=cdCards(); const tags=[...new Set([...cdGet('tags').map(t=>t.n),...all.flatMap(c=>c.tags||[])])]; const tgts=[...new Set([...cdGet('tgts'),...all.map(c=>c.tgt).filter(Boolean)])]; const ens=[...new Set(all.map(c=>String(c.en??'').trim().toUpperCase()).filter(Boolean))].sort();
   const opt=(L,v)=>L.map(t=>`<option ${cdNorm(t)===cdNorm(v)?'selected':''}>${esc(t)}</option>`).join('');
   const page=el(`<div class="page cdlib"><div class="head"><h1>Карточки</h1><span class="faint cdcnt">${all.length} ${plural(all.length,'карта','карты','карт')}</span>${dm?'<span class="cdtts" id="cdTts"></span>':''}<span class="grow"></span>
-    ${dm?`<button class="btn sm" id="cdLists" title="Теги, цели, цвета текста, подсветка, оформление по умолчанию">⚙ Справочники</button><button class="btn sm" id="cdIO" title="Перенести сеты с картами и артами в другую игру или на другой сайт">⇅ Импорт / экспорт</button><button class="btn" id="cdNewSet">+ Сет</button><button class="btn primary" id="cdNew">+ Карта</button>`:''}</div>
+    ${dm?`<button class="btn sm" id="cdTtsB" title="Выгрузить сеты в Tabletop Simulator: картинки — на сайт картинок, колоды — в папку TTS">🎲 В TTS</button><button class="btn sm" id="cdLists" title="Теги, цели, цвета текста, подсветка, оформление по умолчанию">⚙ Справочники</button><button class="btn sm" id="cdIO" title="Перенести сеты с картами и артами в другую игру или на другой сайт">⇅ Импорт / экспорт</button><button class="btn" id="cdNewSet">+ Сет</button><button class="btn primary" id="cdNew">+ Карта</button>`:''}</div>
     ${dm&&!cdOn()?'<div class="cdwarn">Режим карточек выключен — у игроков раздела нет. Включить: <b>Настройки → 🃏 Карточки</b>.</div>':''}
     <div class="cdbar"><input id="cdQ" placeholder="поиск по названию, тексту, тегам…" value="${esc(CD_UI.q)}"><select id="cdT"><option value="">все теги</option>${opt(tags,CD_UI.tag)}</select><select id="cdG"><option value="">любая цель</option>${opt(tgts,CD_UI.tgt)}</select><select id="cdE"><option value="">энергия: любая</option>${ens.map(e=>`<option value="${esc(e)}" ${CD_UI.en===e?'selected':''}>энергия ${esc(e)}</option>`).join('')}</select><span class="grow"></span><span class="seg cdsz">${['s','m','l'].map(s=>`<span data-s="${s}" class="${cdUiGet('size','m')===s?'on':''}" title="Размер карт">${{s:'▪',m:'◼',l:'⬛'}[s]}</span>`).join('')}</span></div>
     <div class="cdsets"></div></div>`);
@@ -7884,7 +7893,7 @@ function renderCards(m){ const dm=isDM(); const tw={s:150,m:200,l:270}[cdUiGet('
   const q=$('#cdQ',page); q.oninput=()=>{ CD_UI.q=q.value; clearTimeout(q._t); q._t=setTimeout(()=>{ render(); },250); };
   $('#cdT',page).onchange=e=>{ CD_UI.tag=e.target.value; render(); }; $('#cdG',page).onchange=e=>{ CD_UI.tgt=e.target.value; render(); }; $('#cdE',page).onchange=e=>{ CD_UI.en=e.target.value; render(); };
   $$('.cdsz span',page).forEach(s=>s.onclick=()=>{ cdUiSet('size',s.dataset.s); render(); });
-  if(dm){ $('#cdNew',page).onclick=()=>cdNewCard(sets[0]?sets[0].id:''); $('#cdNewSet',page).onclick=cdNewSet; $('#cdLists',page).onclick=()=>cdListsDlg(); $('#cdIO',page).onclick=cdIODlg; const h=$('#cdHeroSet',page); if(h) h.onclick=cdNewSet; }
+  if(dm){ $('#cdTtsB',page).onclick=()=>cdTtsDlg(); $('#cdNew',page).onclick=()=>cdNewCard(sets[0]?sets[0].id:''); $('#cdNewSet',page).onclick=cdNewSet; $('#cdLists',page).onclick=()=>cdListsDlg(); $('#cdIO',page).onclick=cdIODlg; const h=$('#cdHeroSet',page); if(h) h.onclick=cdNewSet; }
   m.append(page); if(dm){ cdFaceBadge(); cdFaceSched(1200); } }
 let CD_DRAG=null;
 function cdTile(c,tw,list){ const dm=isDM(); const t=el(`<div class="cdtile" data-id="${esc(c.id)}" ${dm?'draggable="true"':''}><canvas></canvas>${dm&&!c.pub?'<span class="cdlock" title="Игроки эту карту не видят">🔒</span>':''}</div>`);
@@ -7903,7 +7912,7 @@ function cdCardMenu(c,x,y){ const sets=cdSets(); ctxMenu(x,y,[{icon:'✎',label:
 function cdSetMenu(s,x,y){ const L=cdSets(); const i=L.findIndex(z=>z.id===s.id);
   const swap=j=>{ const o=L[j]; if(!o) return; L.forEach((z,k)=>{ if(z.order!==k*10){ z.order=k*10; touch(z); } }); const a=s.order; s.order=o.order; o.order=a; touch(s); touch(o); render(); };
   ctxMenu(x,y,[{icon:'✎',label:'Настроить сет',onClick:()=>cdSetEdit(s)},{icon:'↑',label:'Выше',disabled:i<=0,onClick:()=>swap(i-1)},{icon:'↓',label:'Ниже',disabled:i>=L.length-1,onClick:()=>swap(i+1)},
-    {icon:s.pub?'🔒':'👁',label:s.pub?'Скрыть от игроков':'Показать игрокам',onClick:()=>{ cdSetPub(s,!s.pub); render(); }},{icon:'⬇',label:'Скачать сетку для TTS вручную',onClick:()=>cdSheetDownload(s)},{sep:1},{icon:'🗑',label:'Удалить сет',danger:1,onClick:()=>cdSetDelete(s)}]); }
+    {icon:s.pub?'🔒':'👁',label:s.pub?'Скрыть от игроков':'Показать игрокам',onClick:()=>{ cdSetPub(s,!s.pub); render(); }},{icon:'🎲',label:'Выгрузить в TTS',onClick:()=>cdTtsDlg(s.id)},{icon:'⬇',label:'Скачать сетку для TTS вручную',onClick:()=>cdSheetDownload(s)},{sep:1},{icon:'🗑',label:'Удалить сет',danger:1,onClick:()=>cdSetDelete(s)}]); }
 function cdSetPub(s,v){ s.pub=!!v; touch(s); for(const c of world.cards||[]) if(c.set===s.id&&cdPub(c)) touch(c); }
 
 /* ============ создание / удаление ============ */
@@ -8141,7 +8150,7 @@ async function cdFaceBack(s){ const h=cdSigBack(s); const tf=s.tf||cdGet('tf'); 
 function cdFaceBadge(){ const b=document.getElementById('cdTts'); if(!b) return; const n=cdFaceJobs().length;
   b.className='cdtts '+(n?'busy':CD_Q.err?'err':'ok');
   b.textContent=n?`⏳ готовлю картинки для TTS: ${n}`:CD_Q.err?'⚠ картинки для TTS готовы не все':'✓ готово для TTS';
-  b.title=n?'Картинки карт для программы 4_KARTY_V_TTS рисуются в фоне. Не закрывай вкладку, пока счётчик не дойдёт до конца.':CD_Q.err?'Не получилось сохранить часть картинок (нет сети или прав). Обнови страницу — подготовка продолжится.':'Картинки всех карт и рубашек готовы. Запусти 4_KARTY_V_TTS.cmd — колоды появятся в TTS.'; }
+  b.title=n?'Картинки карт для программы 4_KARTY_V_TTS рисуются в фоне. Не закрывай вкладку, пока счётчик не дойдёт до конца.':CD_Q.err?'Не получилось сохранить часть картинок (нет сети или прав). Обнови страницу — подготовка продолжится.':'Картинки всех карт и рубашек готовы для программы 4_KARTY_V_TTS.cmd. Выгрузить прямо с сайта — кнопка «🎲 В TTS».'; }
 /* запасной путь без программы: сетка до 10×7 (последняя клетка — пустая) + рубашка; в TTS: Объекты → Компоненты → Custom → Deck → картинки с диска */
 async function cdSheetDownload(s){ const cards=cdInSet(s.id); if(!cards.length){ toast('В сете нет карт',true); return; } const per=69, cw=500, ch=700; toast('Рисую сетку…');
   const save=(data,name)=>{ const a=document.createElement('a'); a.href=data; a.download=name; a.click(); };
@@ -8152,6 +8161,127 @@ async function cdSheetDownload(s){ const cards=cdInSet(s.id); if(!cards.length){
     save(data,`${base}${cards.length>per?'-'+k:''} (${part.length} карт, ${cols}×${rows}).jpg`); }
   const back=await cdJpeg((x,w)=>cdDrawBack(x,s,w,true),[s.back&&s.back.d==='img'&&s.back.img],[[s.tf||cdGet('tf'),700,'✦']],cw,ch); save(back,base+' — рубашка.jpg');
   toast('Скачано. В TTS: Объекты → Компоненты → Custom → Deck, укажи файлы и число карт по ширине/высоте из имени файла'); }
+
+/* ============ выгрузка в Tabletop Simulator прямо с сайта ============
+   картинки — на отдельный сайт Hosting этого же проекта (<проект>-tts.web.app) через REST API Firebase Hosting:
+   браузер мастера получает у Google токен с правом выкладки (вход Google ещё раз, раз в час), клонирует текущую версию
+   сайта картинок, добавляет новые файлы и выпускает её. Основной сайт не трогается, его обновления картинки не стирают.
+   колоды — файлами в папку TTS «Saved Objects/Картотека» через File System Access API (Chrome, Edge, Яндекс Браузер):
+   папку выбирают один раз, браузер её запоминает. Имена картинок = подписи (f-<подпись карты>.jpg), TTS не покажет старое из кэша.
+   у сета в tts — что выгружено: {at, cards:{id карты: подпись}, b: подпись рубашки, file: имя файла колоды} */
+const CD_TTS={tok:null,exp:0,dir:null,busy:false};
+const CD_HOST='https://firebasehosting.googleapis.com/v1beta1/';
+const cdProj=()=>(CONFIG.firebase&&CONFIG.firebase.projectId)||'';
+const cdTtsSiteId=()=>CDS().ttsSite||(cdProj()+'-tts');
+const cdTtsUrl=()=>`https://${cdTtsSiteId()}.web.app/`;
+const cdSleep=ms=>new Promise(r=>setTimeout(r,ms));
+const cdTokOk=()=>!!(CD_TTS.tok&&CD_TTS.exp>Date.now()+60000);
+/* вход Google с правом выкладки на Hosting — только по нажатию (окно входа браузер иначе заблокирует) */
+async function cdTtsLogin(){ const t=await AUTH.googleToken(['https://www.googleapis.com/auth/firebase']); CD_TTS.tok=t; CD_TTS.exp=Date.now()+55*60e3; return t; }
+async function cdH(url,opt={}){ if(!cdTokOk()) throw Object.assign(new Error('Нужен вход Google для выкладки картинок'),{code:'login'});
+  const r=await fetch(url.startsWith('http')?url:CD_HOST+url,{...opt,headers:{authorization:'Bearer '+CD_TTS.tok,'content-type':'application/json',...(opt.headers||{})}});
+  const t=await r.text(); let j=null; try{ j=t?JSON.parse(t):null; }catch{}
+  if(!r.ok){ if(r.status===401){ CD_TTS.tok=null; } const e=new Error((j&&j.error&&j.error.message)||('HTTP '+r.status)); e.status=r.status; if(r.status===401) e.code='login'; throw e; } return j; }
+/* сайт для картинок: есть — берём, нет — создаём (адрес занят кем-то чужим — добавляем хвост и запоминаем в настройках) */
+async function cdTtsSite(){ let id=cdTtsSiteId();
+  try{ await cdH(`projects/${cdProj()}/sites/${id}`); return id; }catch(e){ if(e.status!==404&&e.status!==403) throw e; }
+  for(let i=0;i<3;i++){ try{ await cdH(`projects/${cdProj()}/sites?siteId=${id}`,{method:'POST',body:'{}'}); break; }
+    catch(e){ if(e.status===409||/already|taken|exists/i.test(e.message)){ id=(cdProj()+'-tts').slice(0,24)+'-'+Math.random().toString(36).slice(2,6); continue; } throw e; } }
+  await cdH(`sites/${id}/config?update_mask=maxVersions`,{method:'PATCH',body:JSON.stringify({maxVersions:5})}).catch(()=>{}); // старые версии не копятся
+  if(id!==cdTtsSiteId()){ cdMut().ttsSite=id; touch(world.settings); } return id; }
+async function cdTtsFiles(site){ const rel=await cdH(`sites/${site}/releases?pageSize=1`); const v=rel&&rel.releases&&rel.releases[0]&&rel.releases[0].version; const files=new Set(); if(!v) return {ver:null,files};
+  let pt=''; do{ const j=await cdH(`${v.name}/files?pageSize=1000${pt?'&pageToken='+encodeURIComponent(pt):''}`); for(const f of (j&&j.files)||[]) files.add(f.path); pt=j&&j.nextPageToken; }while(pt); return {ver:v.name,files}; }
+async function cdGzip(blob){ return new Uint8Array(await new Response(blob.stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer()); }
+async function cdSha(u8){ return [...new Uint8Array(await crypto.subtle.digest('SHA-256',u8))].map(b=>b.toString(16).padStart(2,'0')).join(''); }
+async function cdTtsPublish(site,last,add,P){ let ver;
+  if(last){ let op=await cdH(`sites/${site}/versions:clone`,{method:'POST',body:JSON.stringify({sourceVersion:last,finalize:false})}); for(let i=0;!op.done&&i<150;i++){ await cdSleep(800); op=await cdH(op.name); } if(!op.done) throw new Error('Hosting долго готовит версию — попробуй ещё раз'); if(op.error) throw new Error(op.error.message||'не удалось скопировать версию'); ver=op.response.name; }
+  else ver=(await cdH(`sites/${site}/versions`,{method:'POST',body:JSON.stringify({config:{headers:[{glob:'**',headers:{'Access-Control-Allow-Origin':'*','Cache-Control':'public, max-age=86400'}}]}})})).name;
+  const gz={}, files={}; for(const f of add){ const g=await cdGzip(f.blob); const h=await cdSha(g); gz[h]=g; files[f.path]=h; }
+  const paths=Object.keys(files); let up=0;
+  for(let i=0;i<paths.length;i+=500){ const part=Object.fromEntries(paths.slice(i,i+500).map(p=>[p,files[p]])); const pop=await cdH(`${ver}:populateFiles`,{method:'POST',body:JSON.stringify({files:part})});
+    for(const h of (pop&&pop.uploadRequiredHashes)||[]){ P(`Выкладываю картинки: ${++up}…`); const r=await fetch(pop.uploadUrl+'/'+h,{method:'POST',headers:{authorization:'Bearer '+CD_TTS.tok,'content-type':'application/octet-stream'},body:gz[h]}); if(!r.ok) throw new Error('Загрузка картинки: HTTP '+r.status); } }
+  await cdH(`${ver}?update_mask=status`,{method:'PATCH',body:JSON.stringify({status:'FINALIZED'})});
+  await cdH(`sites/${site}/releases?versionName=${encodeURIComponent(ver)}`,{method:'POST',body:'{}'}); }
+
+/* --- папка TTS (Saved Objects) --- */
+function cdIdb(get,val){ return new Promise((res,rej)=>{ const rq=indexedDB.open('kartoteka-tts',1); rq.onupgradeneeded=()=>rq.result.createObjectStore('kv'); rq.onerror=()=>rej(rq.error);
+  rq.onsuccess=()=>{ const tx=rq.result.transaction('kv',get?'readonly':'readwrite'); const st=tx.objectStore('kv'); const r=get?st.get('dir:'+cdProj()):st.put(val,'dir:'+cdProj()); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }; }); }
+async function cdDirSub(d,n){ try{ return await d.getDirectoryHandle(n); }catch{ return null; } }
+async function cdTtsPick(){ if(!window.showDirectoryPicker){ toast('Этот браузер не умеет сохранять в папку — нужен Chrome, Edge или Яндекс Браузер. Пока колоды будут скачиваться файлами.',true); return null; }
+  let h; try{ h=await showDirectoryPicker({id:'kartoteka-tts',mode:'readwrite',startIn:'documents'}); }catch{ return null; }
+  /* можно выбрать «Документы», «My Games», «Tabletop Simulator», «Saves» или сразу «Saved Objects» */
+  let d=h; for(const n of ['My Games','Tabletop Simulator','Saves','Saved Objects']){ if(d.name===n) continue; const s=await cdDirSub(d,n); if(s) d=s; }
+  if(d.name!=='Saved Objects'){ if(!await confirmDlg(`В папке «${h.name}» нет «Tabletop Simulator\\Saves\\Saved Objects». Всё равно складывать колоды сюда (в подпапку «Картотека»)?`,'Да, сюда')) return null; }
+  CD_TTS.dir=d; await cdIdb(false,d).catch(()=>{}); return d; }
+/* папка с разрешением на запись; ask — можно спросить разрешение (только из нажатия) */
+async function cdTtsDir(ask){ if(window.__cdDir) return window.__cdDir; let d=CD_TTS.dir||await cdIdb(true).catch(()=>null); if(!d) return null; CD_TTS.dir=d;
+  try{ let p=await d.queryPermission({mode:'readwrite'}); if(p!=='granted'&&ask) p=await d.requestPermission({mode:'readwrite'}); return p==='granted'?d:null; }catch{ return null; } }
+async function cdWriteFile(dir,name,data){ const f=await dir.getFileHandle(name,{create:true}); const w=await f.createWritable(); await w.write(data); await w.close(); }
+
+/* --- колода в формате сохранённого объекта TTS --- */
+const cdTtsPlain=t=>String(t||'').replace(/\{(#[0-9a-fA-F]{3,8}|[\wа-яё-]{1,12})\|/gi,'').replace(/[{}]/g,'').replace(/\*\*/g,'');
+const cdTtsGuid=()=>Math.random().toString(16).slice(2,8).padEnd(6,'0');
+const cdTtsT=(x=0,y=1,z=0)=>({posX:x,posY:y,posZ:z,rotX:0,rotY:180,rotZ:180,scaleX:1.5,scaleY:1,scaleZ:1.5});
+const CD_TTS_COMMON={ColorDiffuse:{r:0.713235259,g:0.713235259,b:0.713235259},LayoutGroupSortIndex:0,Value:0,Locked:false,Grid:true,Snap:true,IgnoreFoW:false,MeasureMovement:false,DragSelectable:true,Autoraise:true,Sticky:true,Tooltip:true,GridProjection:false,HideWhenFaceDown:true,Hands:true,SidewaysCard:false,LuaScript:'',LuaScriptState:'',XmlUI:''};
+function cdTtsDeck(s,cards,url,bsig,sigs){ const back=url+'b-'+bsig+'.jpg', v=x=>String(x??'').trim()||'—';
+  const objs=cards.map((c,i)=>{ const k=i+1, cd={FaceURL:url+'f-'+sigs[c.id]+'.jpg',BackURL:back,NumWidth:1,NumHeight:1,BackIsHidden:true,UniqueBack:false,Type:0};
+    return {GUID:cdTtsGuid(),Name:'CardCustom',Transform:cdTtsT(),Nickname:c.name||'',Description:[`Энергия ${v(c.en)} · Инициатива ${v(c.ini)}`,[(c.tags||[]).join(', '),c.tgt].filter(Boolean).join(' · '),'',cdTtsPlain(c.text)].join('\n').trim(),
+      GMNotes:JSON.stringify({kartoteka:c.id,en:c.en??'',ini:c.ini??'',tags:c.tags||[],tgt:c.tgt||''}),Tags:(c.tags||[]).filter(Boolean).map(String),...CD_TTS_COMMON,CardID:k*100,CustomDeck:{[k]:cd}}; });
+  const obj=objs.length===1?{...objs[0],Transform:cdTtsT()}:{GUID:cdTtsGuid(),Name:'Deck',Transform:cdTtsT(),Nickname:s.name||'Сет',Description:`Картотека: ${cards.length} ${plural(cards.length,'карта','карты','карт')}${s.pub?'':' · скрытый сет'}`,GMNotes:JSON.stringify({kartoteka:s.id}),Tags:[],...CD_TTS_COMMON,Hands:false,DeckIDs:objs.map((o,i)=>(i+1)*100),CustomDeck:Object.assign({},...objs.map(o=>o.CustomDeck)),ContainedObjects:objs};
+  return {SaveName:s.name||'Сет',Date:'',VersionNumber:'',GameMode:'',GameType:'',GameComplexity:'',Tags:[],Gravity:0.5,PlayArea:0.5,Table:'',Sky:'',Note:'',TabStates:{},LuaScript:'',LuaScriptState:'',XmlUI:'',ObjectStates:[obj]}; }
+const cdTtsName=s=>(String(s.name||'Сет').replace(/[\\/:*?"<>|\x00-\x1f]+/g,'_').replace(/[. ]+$/,'').trim()||'Сет').slice(0,80);
+const cdBlob=u=>fetch(u).then(r=>r.blob());
+
+/* --- что поменялось с прошлой выгрузки --- */
+function cdTtsState(s){ const cards=cdInSet(s.id), t=s.tts; if(!cards.length) return {k:'empty',t:'пусто',n:0};
+  if(!t) return {k:'new',t:'не выгружался',n:cards.length};
+  const changed=cards.filter(c=>(t.cards||{})[c.id]!==cdSigCard(c)).length, removed=Object.keys(t.cards||{}).filter(id=>!cards.some(c=>c.id===id)).length, back=t.b!==cdSigBack(s);
+  if(!changed&&!removed&&!back&&t.file===cdTtsName(s)+'.json') return {k:'ok',t:'✓ в TTS',n:0};
+  const parts=[]; if(changed) parts.push(`изменено ${changed}`); if(removed) parts.push(`убрано ${removed}`); if(back) parts.push('рубашка'); if(!parts.length) parts.push('новое название');
+  return {k:'chg',t:parts.join(', '),n:changed+removed+(back?1:0)}; }
+
+async function cdTtsExport(ids,P){ if(CD_TTS.busy) return; CD_TTS.busy=true; P=P||(t=>setStatus(t,'dirty'));
+  try{ const sets=ids.map(id=>byId(world.cardsets,id)).filter(Boolean).filter(s=>cdInSet(s.id).length); if(!sets.length){ toast('В выбранных сетах нет карт',true); return false; }
+    P('Проверяю сайт картинок…'); const site=await cdTtsSite(); const url=`https://${site}.web.app/`; const {ver,files}=await cdTtsFiles(site);
+    /* картинки, которых на сайте ещё нет, рисуем здесь же */
+    const add=[]; const plan=sets.map(s=>{ const cards=cdInSet(s.id); const sigs=Object.fromEntries(cards.map(c=>[c.id,cdSigCard(c)])); return {s,cards,sigs,b:cdSigBack(s)}; });
+    const need=[]; for(const p of plan){ if(!files.has('/b-'+p.b+'.jpg')&&!need.some(x=>x.path==='/b-'+p.b+'.jpg')) need.push({path:'/b-'+p.b+'.jpg',back:p.s}); for(const c of p.cards){ const path='/f-'+p.sigs[c.id]+'.jpg'; if(!files.has(path)&&!need.some(x=>x.path===path)) need.push({path,card:c}); } }
+    for(let i=0;i<need.length;i++){ const n=need[i]; P(`Рисую картинки: ${i+1}/${need.length}`);
+      const data=n.card?await cdJpeg((x,w)=>cdDraw(x,n.card,w,true),[n.card.art&&n.card.art.img],cdFontsOf(n.card)):await cdJpeg((x,w)=>cdDrawBack(x,n.back,w,true),[n.back.back&&n.back.back.d==='img'&&n.back.back.img],[[n.back.tf||cdGet('tf'),700,(n.back.back||{}).t!=null?(n.back.back||{}).t||'✦':'✦']]);
+      add.push({path:n.path,blob:await cdBlob(data)}); }
+    if(add.length){ P(`Выкладываю ${add.length} ${plural(add.length,'картинку','картинки','картинок')} на ${site}.web.app…`); await cdTtsPublish(site,ver,add,P); }
+    /* колоды: в папку TTS или скачиванием */
+    const dir=await cdTtsDir(false); let sub=null; if(dir){ try{ sub=await dir.getDirectoryHandle('Картотека',{create:true}); }catch(e){ console.error(e); } }
+    for(const p of plan){ const name=cdTtsName(p.s), json=JSON.stringify(cdTtsDeck(p.s,p.cards,url,p.b,p.sigs),null,2);
+      if(sub){ await cdWriteFile(sub,name+'.json',json); const th=await cdJpeg((x,w)=>cdDrawBack(x,p.s,w,true),[],[],256,358); await cdWriteFile(sub,name+'.png',await cdBlob(th));
+        const old=p.s.tts&&p.s.tts.file; if(old&&old!==name+'.json'){ for(const f of [old,old.replace(/\.json$/,'.png')]) await sub.removeEntry(f).catch(()=>{}); } }
+      else { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([json],{type:'application/json'})); a.download=name+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
+      const o=byId(world.cardsets,p.s.id); if(o){ o.tts={at:Date.now(),cards:p.sigs,b:p.b,file:name+'.json'}; touch(o); } }
+    setStatus('синхронизировано');
+    toast(sub?`Готово: ${plan.length} ${plural(plan.length,'колода','колоды','колод')} в TTS → «Сохранённые объекты → Картотека»`:`Готово: файлы колод скачаны — положи их в «Документы\\My Games\\Tabletop Simulator\\Saves\\Saved Objects»`);
+    return true; }
+  catch(e){ console.error('tts export',e); setStatus('ошибка выгрузки','err'); toast(e.code==='login'?'Нужно войти Google для выкладки картинок — кнопка в окне «В TTS»':'Не получилось выгрузить в TTS: '+(e.message||e),true); if(e.code==='login') CD_TTS.tok=null; return false; }
+  finally{ CD_TTS.busy=false; } }
+
+/* --- окно «В TTS» --- */
+async function cdTtsDlg(pre){ if(!isDM()) return; const sel=new Set(pre?[pre]:cdSets().filter(s=>['new','chg'].includes(cdTtsState(s).k)).map(s=>s.id));
+  const b=openModal(`<h2>🎲 Выгрузка в Tabletop Simulator</h2><div class="cdttsst"></div><div class="cdttsl"></div><div class="faint cdhint cdttsp"></div>
+    <div class="faint cdhint">В TTS колоды лежат в <b>Объекты → Сохранённые объекты → Картотека</b>. Колоды, которые уже на столе, сами не обновятся — возьми колоду из меню заново. Скрытые сеты тоже выгружаются: файл колоды есть только у тебя.</div>
+    <div class="modal-actions"><button class="btn sm" id="tChg">Отметить изменённые</button><span class="grow"></span><button class="btn" id="tNo">Закрыть</button><button class="btn primary" id="tGo">⬆ Выгрузить выбранные</button></div>`,true);
+  b.classList.add('cdbox','cdlbox'); const P=t=>{ const p=$('.cdttsp',b); if(p) p.textContent=t; };
+  const drawSt=async()=>{ const h=$('.cdttsst',b); if(!h) return; const dir=await cdTtsDir(false), saved=dir||CD_TTS.dir||await cdIdb(true).catch(()=>null);
+    h.innerHTML=`<div class="cdttsrow"><span class="ic">${cdTokOk()?'✅':'🔑'}</span><span class="grow"><b>Картинки</b> выкладываются на <a href="${esc(cdTtsUrl())}" target="_blank">${esc(cdTtsSiteId())}.web.app</a> — отдельный сайт твоего проекта, основной не меняется.<br><span class="faint">${cdTokOk()?'Вход есть до '+new Date(CD_TTS.exp).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):'Нужен вход Google с правом выкладки (раз в час). Google может предупредить, что приложение не проверено: «Дополнительно → Перейти» — это твой же сайт.'}</span></span>${cdTokOk()?'':'<button class="btn sm primary" id="tLog">Войти Google</button>'}</div>
+      <div class="cdttsrow"><span class="ic">${dir?'✅':saved?'🔓':'📁'}</span><span class="grow"><b>Папка TTS:</b> ${dir?esc(dir.name)+' → Картотека':saved?'выбрана, браузер спросит разрешение при выгрузке':window.showDirectoryPicker?'не выбрана':'этот браузер не пишет в папки — колоды будут скачиваться файлами'}<br><span class="faint">Документы → My Games → Tabletop Simulator → Saves → Saved Objects (можно выбрать любую из этих папок).</span></span>${window.showDirectoryPicker?`<button class="btn sm" id="tDir">${saved?'Другая папка…':'Выбрать папку…'}</button>`:''}</div>`;
+    const l=$('#tLog',h); if(l) l.onclick=async()=>{ try{ await cdTtsLogin(); }catch(e){ console.error(e); toast('Вход не удался: '+(e.code||e.message),true); } drawSt(); };
+    const d=$('#tDir',h); if(d) d.onclick=async()=>{ await cdTtsPick(); drawSt(); }; };
+  const drawL=()=>{ const h=$('.cdttsl',b); if(!h) return; const sets=cdSets();
+    h.innerHTML=sets.length?`<table class="cdttst"><tr><th></th><th>Сет</th><th>Карт</th><th>Состояние</th></tr>${sets.map(s=>{ const st=cdTtsState(s); return `<tr data-s="${esc(s.id)}"><td><input type="checkbox" ${sel.has(s.id)?'checked':''} ${st.k==='empty'?'disabled':''}></td><td><b>${esc(s.name||'Без названия')}</b>${s.pub?'':' <span class="faint" title="Скрытый сет">🔒</span>'}</td><td>${cdInSet(s.id).length}</td><td><span class="cdst ${st.k}">${esc(st.t)}</span>${s.tts?`<span class="faint"> · ${new Date(s.tts.at).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>`:''}</td></tr>`; }).join('')}</table>`:'<div class="faint">Сетов пока нет.</div>';
+    $$('tr[data-s] input',h).forEach(cb=>cb.onchange=()=>{ const id=cb.closest('tr').dataset.s; cb.checked?sel.add(id):sel.delete(id); $('#tGo',b).disabled=!sel.size; }); $('#tGo',b).disabled=!sel.size; };
+  $('#tNo',b).onclick=closeModal; $('#tChg',b).onclick=()=>{ sel.clear(); for(const s of cdSets()) if(['new','chg'].includes(cdTtsState(s).k)) sel.add(s.id); drawL(); };
+  $('#tGo',b).onclick=async()=>{ if(!cdTokOk()){ try{ await cdTtsLogin(); }catch(e){ toast('Вход не удался: '+(e.code||e.message),true); drawSt(); return; } drawSt(); toast('Вход есть — нажми «Выгрузить» ещё раз'); return; }
+    if(!await cdTtsDir(true)&&(CD_TTS.dir||await cdIdb(true).catch(()=>null))) toast('Без разрешения на папку колоды скачаются файлами',true);
+    const go=$('#tGo',b); go.disabled=true; const ok=await cdTtsExport([...sel],P); if($('#tGo',b)){ go.disabled=false; if(ok){ sel.clear(); P('Готово. Возьми колоды в TTS: Объекты → Сохранённые объекты → Картотека.'); } drawL(); drawSt(); } };
+  drawSt(); drawL(); }
 
 function renderSettings(m){
   const s=world.settings;
@@ -8328,7 +8458,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{cdImport,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{cdImport,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
