@@ -401,6 +401,7 @@ body.phone .cdsh{flex-wrap:wrap;row-gap:8px}body.phone .cdsh .grow{flex-basis:10
 .cdttsp{min-height:18px;margin:10px 0 2px;color:var(--gold)}
 .cdsec{font-size:13px;font-weight:700;letter-spacing:.3px;margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}.cdsec .faint{font-weight:400}
 .cdlay .cdbkt canvas{border-radius:5px}
+.cdbkmode{margin-bottom:10px}
 .seg.dirseg span.on{color:#fff;background:rgba(233,194,255,.14)}.tlpage .head .seg span.on[data-m=dm]{color:var(--gold)}
 .seg.visctl span.on[data-v=full]{color:var(--mint)}.seg.visctl span.on[data-v=brief]{color:var(--gold)}.seg.visctl span.on[data-v=hidden]{color:var(--red)}
 .eye{border:none;background:none;cursor:pointer;font-size:15px;padding:2px 6px;border-radius:6px;color:var(--faint)}.eye.on{color:var(--mint)}.eye:hover{background:var(--panel2)}
@@ -7876,7 +7877,7 @@ function cdDrawScroll(x,c,S,exp,tags,tc,name){ const fr=S.frame, ink='#2b2118'; 
 /* --- рубашка: свои настройки, не зависят от лица (цвет и шрифт знака по умолчанию берутся у лица сета, пока не заданы свои);
    «общая рубашка» (settings.cards.back.on) — одна для всех карт всех сетов --- */
 function cdBackOf(s,mode){ const G=CDS().back||{};
-  if(mode==='g'||(mode!=='own'&&G.on)) return {d:G.d||'b1',bg:G.bg||'#17141f',fr:G.fr||cdGet('frame'),t:G.t!=null?G.t:'✦',tf:G.tf||cdGet('tf'),img:G.img||'',art:G.art};
+  if(mode==='g'||(mode!=='own'&&G.on&&!(s&&s.ownBack))) return {d:G.d||'b1',bg:G.bg||'#17141f',fr:G.fr||cdGet('frame'),t:G.t!=null?G.t:'✦',tf:G.tf||cdGet('tf'),img:G.img||'',art:G.art};
   s=s||{}; const b=s.back||{}; return {d:b.d||'b1',bg:b.bg||'#17141f',fr:b.fr||s.frame||cdGet('frame'),t:b.t!=null?b.t:'✦',tf:b.tf||s.tf||cdGet('tf'),img:b.img||'',art:b.art}; }
 const cdBackImg=B=>B.d==='img'&&B.img?B.img:null;
 const cdBackFonts=B=>[[B.tf,700,B.t||'✦']];
@@ -8078,7 +8079,7 @@ const cdMerge=(o,p)=>{ o={...(o||{}),...p}; for(const k of Object.keys(p)) if(p[
 function cdSetEdit(s,fresh){ if(!isDM()||!s) return; const S=()=>byId(world.cardsets,s.id)||s;
   const fontOpts=v=>CD_FONTS.map(f=>`<option value="${esc(f)}" ${v===f?'selected':''} style="font-family:'${esc(f)}'">${esc(f)}</option>`).join('');
   const G=()=>!!(CDS().back||{}).on;
-  const b=openModal(`<div class="cded cdsetd"><div class="cdedL"><div class="row" style="gap:12px;justify-content:center"><div class="cdpv"><canvas class="f"></canvas><div class="faint cap">лицо</div></div><div class="cdpv"><canvas class="bk"></canvas><div class="faint cap">рубашка${G()?' (общая)':''}</div></div></div></div>
+  const b=openModal(`<div class="cded cdsetd"><div class="cdedL"><div class="row" style="gap:12px;justify-content:center"><div class="cdpv"><canvas class="f"></canvas><div class="faint cap">лицо</div></div><div class="cdpv"><canvas class="bk"></canvas><div class="faint cap"><span class="bkcap"></span></div></div></div></div>
     <div class="cdedR"><input id="sName" class="cdname" placeholder="Название сета" maxlength="60" value="${esc(S().name||'')}">
       <label class="row cdchk"><input type="checkbox" id="sPub" ${S().pub?'checked':''}> <span><b>Игроки видят этот сет</b><br><span class="faint">Скрытые сеты (например, карты врагов) видит только мастер — правилами базы, не только интерфейсом.</span></span></label>
       <div class="cdsec">Лицо карт</div>
@@ -8100,9 +8101,12 @@ function cdSetEdit(s,fresh){ if(!isDM()||!s) return; const S=()=>byId(world.card
   const drawFr=()=>{ const h=$('.cdfr',b); const cur=S().frame||cdGet('frame'); h.innerHTML=CD_FRAMES.map(f=>`<button class="sw ${cur===f?'on':''}" data-c="${f}" style="--c:${f}"></button>`).join('')+`<input type="color" value="${esc(cur)}" title="Свой цвет">`;
     $$('[data-c]',h).forEach(x=>x.onclick=()=>{ S().frame=x.dataset.c; save(); drawFr(); }); $('input',h).oninput=e=>{ S().frame=e.target.value; save(); $$('[data-c]',h).forEach(x=>x.classList.toggle('on',x.dataset.c===e.target.value)); }; };
   const bw=$('.cdbkwrap',b);
-  if(G()){ bw.innerHTML='<div class="cdwarn" style="margin:0">Сейчас у всех карт <b>общая рубашка</b>. Её настраивают в справочниках; свою рубашку сета можно включить, сняв там галочку «Одна рубашка для всех карт».</div><button class="btn sm" id="sGlob" style="margin-top:8px">⚙ Настроить общую рубашку</button>'; $('#sGlob',bw).onclick=()=>cdListsDlg('back',()=>cdSetEdit(S())); }
-  else cdBackEditor(bw,{get:()=>S().back,put:p=>{ S().back=cdMerge(S().back,p); save(); },res:()=>cdBackOf(S(),'own'),follow:true,owner:s.id});
-  drawLay(); drawFr();
+  const drawBack=()=>{ bw.innerHTML=''; const own=!G()||!!S().ownBack; $('.bkcap',b).textContent=own?'рубашка':'рубашка (общая)'; cdRefresh();
+    if(G()){ const sw=el(`<div class="seg cdbkmode"><button class="btn sm ${own?'':'on'}" data-m="g">Общая рубашка</button><button class="btn sm ${own?'on':''}" data-m="o">Своя для этого сета</button></div>`); bw.append(sw);
+      $$('[data-m]',sw).forEach(x=>x.onclick=()=>{ const o=S(); if(x.dataset.m==='o') o.ownBack=true; else delete o.ownBack; save(); drawBack(); });
+      if(!own){ const n=el('<div><div class="faint cdhint">Этот сет берёт общую рубашку из справочников. «Своя для этого сета» — отдельная рубашка только у него.</div><button class="btn sm" style="margin-top:6px">⚙ Настроить общую рубашку</button></div>'); $('button',n).onclick=()=>cdListsDlg('back',()=>cdSetEdit(S())); bw.append(n); return; } }
+    const h=el('<div></div>'); bw.append(h); cdBackEditor(h,{get:()=>S().back,put:p=>{ S().back=cdMerge(S().back,p); save(); },res:()=>cdBackOf(S(),'own'),follow:true,owner:s.id}); };
+  drawLay(); drawFr(); drawBack();
   $('#sOk',b).onclick=()=>{ closeModal(); render(); }; $('#sDel',b).onclick=()=>cdSetDelete(S());
   if(fresh) setTimeout(()=>{ const n=$('#sName',b); n.focus(); n.select(); },40); }
 
@@ -8132,7 +8136,8 @@ function cdListsDlg(tab='tags',back){ if(!isDM()) return; let T=tab==='hl'?'pal'
       S.hl.forEach((h,i)=>{ const r=el(`<div class="cdlrow"><select class="k"><option value="br" ${h.k==='br'?'selected':''}>[в квадратных скобках]</option><option value="caps" ${h.k==='caps'?'selected':''}>СЛОВА КАПСОМ</option><option value="w" ${h.k==='w'?'selected':''}>слова…</option></select>${h.k==='w'?`<input class="grow w" placeholder="горени, кровотечени, уязвимост" value="${esc(h.w||'')}" title="Через запятую; совпадает начало слова — «горени» подсветит «горения» и «горение»">`:'<span class="grow"></span>'}<select class="c">${palOpt(h.c)}</select><label class="row" style="gap:4px"><input type="checkbox" class="bb" ${h.b?'checked':''}><b>Ж</b></label><button class="btn sm x">✕</button></div>`);
         $('.k',r).onchange=e=>{ h.k=e.target.value; save(); draw(); }; const wi=$('.w',r); if(wi) wi.oninput=()=>{ h.w=wi.value; save(); }; $('.c',r).onchange=e=>{ h.c=e.target.value; save(); }; $('.bb',r).onchange=e=>{ h.b=e.target.checked||undefined; save(); }; $('.x',r).onclick=()=>{ S.hl.splice(i,1); save(); draw(); }; body.append(r); });
       const ah=el('<button class="btn sm">+ правило подсветки</button>'); ah.onclick=()=>{ S.hl.push({k:'br',c:(S.pal[0]||{}).id||'y'}); save(); draw(); }; body.append(ah); }
-    if(T==='back'){ const G=S.back||{}; const r=el(`<div><label class="row cdchk"><input type="checkbox" id="gOn" ${G.on?'checked':''}> <span><b>Одна рубашка для всех карт</b><br><span class="faint">Все сеты получат эту рубашку, их собственные рубашки не удаляются — снимешь галочку, вернутся.</span></span></label><div class="row" style="gap:16px;align-items:flex-start;margin-top:10px"><div class="cdpv"><canvas></canvas></div><div class="grow gbe"></div></div></div>`);
+    if(T==='back'){ const G=S.back||{}; const r=el(`<div><label class="row cdchk"><input type="checkbox" id="gOn" ${G.on?'checked':''}> <span><b>Общая рубашка для всех сетов</b><br><span class="faint">Все сеты получат эту рубашку, кроме тех, где в настройках сета выбрано «Своя для этого сета». Собственные рубашки сетов не удаляются — снимешь галочку, вернутся.</span></span></label><div class="row" style="gap:16px;align-items:flex-start;margin-top:10px"><div class="cdpv"><canvas></canvas></div><div class="grow gbe"></div></div></div>`);
+      const own=(world.cardsets||[]).filter(x=>x.ownBack); if(G.on&&own.length) r.append(el(`<div class="faint cdhint" style="margin-top:10px">Своя рубашка у сетов: ${own.map(x=>'<b>'+esc(x.name||'Без названия')+'</b>').join(', ')}. Поменять — в настройках сета (✎ сет).</div>`));
       body.append(r); cdCanvas($('canvas',r),150,()=>({_b:cdBackOf(null,'g')}),true);
       $('#gOn',r).onchange=e=>{ S.back=cdMerge(S.back,{on:e.target.checked||undefined}); save(); };
       cdBackEditor($('.gbe',r),{get:()=>S.back,put:p=>{ S.back=cdMerge(S.back,p); save(); },res:()=>cdBackOf(null,'g'),follow:false,owner:'cards'}); }
