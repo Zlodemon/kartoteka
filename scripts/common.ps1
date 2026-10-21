@@ -115,3 +115,12 @@ function Backup-Data($cfg) {
   if ($ok) { Get-ChildItem $BackupDir -Filter 'kartoteka-full-*.json' | Sort-Object LastWriteTime -Descending | Select-Object -Skip $KeepBackups | Remove-Item -Force -ErrorAction SilentlyContinue }
   return $ok
 }
+
+# перенос данных в папку игры campaigns/main — один раз, при переходе на версию с несколькими играми (2026-10); повторный запуск ничего не делает.
+# -Delta — после выкладки докопировать то, что старые вкладки успели поменять в корне. Корень не удаляется (остаётся архивом)
+function Migrate-Data($cfg, [switch]$Delta) {
+  $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+  $a = @((Join-Path $PSScriptRoot 'migrate-camps.js'), $cfg.projectId, $BackupDir); if ($Delta) { $a += '--delta' }
+  try { & node.exe @a | Out-Host; $ok = ($LASTEXITCODE -eq 0) } finally { $ErrorActionPreference = $old }
+  return $ok
+}

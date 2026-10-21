@@ -3,10 +3,12 @@
     ".read": false,
     ".write": false,
     "live": {
-      ".read": "auth != null",
-      "$id": {
-        ".write": "auth != null",
-        ".validate": "newData.hasChild('t') && newData.child('t').isNumber()"
+      "$cid": {
+        ".read": "auth != null",
+        "$id": {
+          ".write": "auth != null",
+          ".validate": "newData.hasChild('t') && newData.child('t').isNumber()"
+        }
       }
     }
   }

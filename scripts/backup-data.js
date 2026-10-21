@@ -5,6 +5,7 @@
 //   --keep N — оставить только N последних бэкапов с тем же началом имени (daily или full); другие файлы не трогаются
 // Вход берётся из Firebase CLI (тот же, что для firebase deploy); только чтение, в базу ничего не пишет.
 // Коллекции берутся из самой базы (listCollectionIds), так что новые коллекции попадают в бэкап без правки скрипта.
+// Игры (campaigns/<id>/…): основная — в data (как раньше), остальные — в camps.<id>.data.
 const fs = require('fs'), path = require('path'), os = require('os');
 
 const argv = process.argv.slice(2), ki = argv.indexOf('--keep'), keep = ki >= 0 ? Math.max(1, parseInt(argv[ki + 1], 10) || 30) : 0, daily = argv.includes('--daily');
@@ -38,34 +39,52 @@ function val(v) {
 function fields(f) { const o = {}; for (const k of Object.keys(f)) o[k] = val(f[k]); return o; }
 
 (async () => {
-  const base = `https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents`;
-  let tok = await accessToken();
+  // FIRESTORE_EMULATOR_HOST=localhost:8080 — проверка на эмуляторе (вход не нужен)
+  const EMU = process.env.FIRESTORE_EMULATOR_HOST;
+  const base = (EMU ? `http://${EMU}/v1/` : 'https://firestore.googleapis.com/v1/') + `projects/${project}/databases/(default)/documents`;
+  let tok = EMU ? 'owner' : await accessToken();
   const api = async (url, opts = {}) => { for (let i = 0; ; i++) { const r = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), authorization: 'Bearer ' + tok } });
-      if (r.ok) return r.json(); const txt = await r.text(); if (r.status === 401 && i === 0) { tok = await accessToken(); continue; }
+      if (r.ok) return r.json(); const txt = await r.text(); if (r.status === 401 && i === 0 && !EMU) { tok = await accessToken(); continue; }
       if ((r.status === 429 || r.status >= 500) && i < 4) { await new Promise(res => setTimeout(res, 1500 * (i + 1))); continue; }
       throw new Error(`HTTP ${r.status}: ${txt.slice(0, 300)}`); } };
+  const enc = p => p.split('/').map(encodeURIComponent).join('/');
+  const collIds = async parent => { const out = []; let pt = ''; do { const j = await api(base + (parent ? '/' + enc(parent) : '') + ':listCollectionIds', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pageSize: 100, pageToken: pt || undefined }) }); out.push(...(j.collectionIds || [])); pt = j.nextPageToken; } while (pt); return out.sort(); };
 
-  let colls = [], pt = ''; do { const j = await api(base + ':listCollectionIds', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pageSize: 100, pageToken: pt || undefined }) }); colls.push(...(j.collectionIds || [])); pt = j.nextPageToken; } while (pt);
-  colls.sort();
+  /* раскладка базы: с 2026-10-21 данные каждой игры лежат в campaigns/<id>/<коллекция>, в корне — только users, campaigns, site (и старый корень-архив после переноса).
+     Файл: data = основная игра (main) + users/campaigns/site — его, как и раньше, возвращает кнопка «Восстановить»; остальные игры — в camps.<id>.data.
+     Если переноса ещё не было (campaigns/main пуст) — бэкап корня, как раньше */
+  const rootColls = await collIds('');
+  const mainColls = rootColls.includes('campaigns') ? await collIds('campaigns/main') : [];
+  const camps = mainColls.length;
+  const GLOBAL = ['users', 'campaigns', 'site'];
   fs.mkdirSync(outDir, { recursive: true });
   const d0 = new Date(), p2 = n => String(n).padStart(2, '0'); const stamp = `${d0.getFullYear()}-${p2(d0.getMonth() + 1)}-${p2(d0.getDate())}_${p2(d0.getHours())}-${p2(d0.getMinutes())}`; // местное время
   const prefix = `kartoteka-${daily ? 'daily' : 'full'}-${project}-`;
   const file = path.join(outDir, `${prefix}${stamp}.json`), tmp = file + '.part';
   const out = fs.openSync(tmp, 'w'); const w = s => fs.writeSync(out, s);
-  const at = Date.now(); w(`{"v":1,"at":${at},"from":"cloud","project":${JSON.stringify(project)},"data":{`);
-  const counts = {}; let total = 0;
-  for (let ci = 0; ci < colls.length; ci++) { const c = colls[ci]; w((ci ? ',' : '') + JSON.stringify(c) + ':['); let n = 0, page = '';
-    const size = c === 'images' ? 20 : 300;
-    do { const j = await api(`${base}/${encodeURIComponent(c)}?pageSize=${size}${page ? '&pageToken=' + encodeURIComponent(page) : ''}`);
-      for (const d of (j.documents || [])) { const id = d.name.split('/').pop(); w((n ? ',' : '') + JSON.stringify({ ...fields(d.fields || {}), id })); n++; }
-      page = j.nextPageToken; process.stdout.write(`\r  ${c}: ${n}        `); } while (page);
-    w(']'); counts[c] = n; total += n; process.stdout.write('\n'); }
-  w(`},"counts":${JSON.stringify(counts)}}`); fs.closeSync(out);
+  let total = 0; const regDocs = {};
+  // одна коллекция → JSON-массив; key — имя в файле, src — путь в базе
+  async function dump(src, label) { w('['); let n = 0, page = ''; const size = /(^|\/)images$/.test(src) ? 20 : 300;
+    do { const j = await api(`${base}/${enc(src)}?pageSize=${size}${page ? '&pageToken=' + encodeURIComponent(page) : ''}`);
+      for (const d of (j.documents || [])) { const id = d.name.split('/').pop(); const o = { ...fields(d.fields || {}), id }; if (src === 'campaigns') regDocs[id] = o; w((n ? ',' : '') + JSON.stringify(o)); n++; }
+      page = j.nextPageToken; process.stdout.write(`\r  ${label}: ${n}        `); } while (page);
+    w(']'); total += n; process.stdout.write('\n'); return n; }
+  async function block(list) { const counts = {}; w('{'); for (let i = 0; i < list.length; i++) { const [key, src] = list[i]; w((i ? ',' : '') + JSON.stringify(key) + ':'); counts[key] = await dump(src, src); } w('}'); return counts; }
+  const at = Date.now(); w(`{"v":1,"at":${at},"from":"cloud","project":${JSON.stringify(project)},` + (camps ? '"camp":{"id":"main"},' : '') + '"data":');
+  const mainList = camps ? [...GLOBAL.filter(c => rootColls.includes(c)).map(c => [c, c]), ...mainColls.map(c => [c, 'campaigns/main/' + c])] : rootColls.map(c => [c, c]);
+  const counts = await block(mainList); const campCounts = {};
+  if (camps) { w(',"camps":{'); let k = 0;
+    for (const id of Object.keys(regDocs).filter(x => x !== 'main').sort()) { const cc = await collIds('campaigns/' + id); if (!cc.length) continue;
+      w((k++ ? ',' : '') + JSON.stringify(id) + ':{"name":' + JSON.stringify(regDocs[id].name || '') + ',"data":'); campCounts[id] = await block(cc.map(c => [c, `campaigns/${id}/${c}`])); w(',"counts":' + JSON.stringify(campCounts[id]) + '}'); }
+    w('}'); }
+  w(`,"counts":${JSON.stringify(counts)}}`); fs.closeSync(out);
   // проверка: файл читается как JSON и числа совпадают
-  const chk = JSON.parse(fs.readFileSync(tmp, 'utf8')); for (const c of colls) if ((chk.data[c] || []).length !== counts[c]) throw new Error('проверка не сошлась на ' + c);
+  const chk = JSON.parse(fs.readFileSync(tmp, 'utf8'));
+  for (const [c, n] of Object.entries(counts)) if ((chk.data[c] || []).length !== n) throw new Error('проверка не сошлась на ' + c);
+  for (const [id, cc] of Object.entries(campCounts)) for (const [c, n] of Object.entries(cc)) if ((chk.camps[id].data[c] || []).length !== n) throw new Error(`проверка не сошлась на ${id}/${c}`);
   fs.renameSync(tmp, file);
   const mb = (fs.statSync(file).size / 1048576).toFixed(1);
-  console.log(`OK ${total} документов, ${mb} МБ → ${file}`);
+  console.log(`OK ${total} документов${camps ? `, игр: ${1 + Object.keys(campCounts).length}` : ''}, ${mb} МБ → ${file}`);
   if (keep) { // старые бэкапы этого проекта сверх N последних — удалить (имя содержит дату, поэтому сортировка по имени = по времени)
     const mine = fs.readdirSync(outDir).filter(f => f.startsWith(prefix) && f.endsWith('.json')).sort().reverse();
     for (const f of mine.slice(keep)) { try { fs.unlinkSync(path.join(outDir, f)); console.log('удалён старый бэкап: ' + f); } catch (e) { console.error('не удалось удалить ' + f + ': ' + e.message); } } }

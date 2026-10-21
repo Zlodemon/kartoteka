@@ -1098,6 +1098,7 @@ body.phone #modal .box{max-height:calc(100dvh - 20px)}
   <aside id="side">
     <div class="logo" title="Персонажи, организации, способности и связи">DnD COPR</div>
     <script>try{const n=localStorage.getItem("siteName");if(n){document.title=n;document.querySelectorAll("#boot .logo,#login .logo,#side .logo").forEach(e=>e.textContent=n);}}catch(e){}</script>
+    <div id="campName" style="display:none;font-size:12px;color:var(--faint);padding:0 10px 12px;margin-top:-8px;overflow-wrap:anywhere"></div>
     <div class="me" id="me"></div>
     <div class="gsbtn" id="gsBtn" title="Поиск по всей картотеке — Ctrl+K"><span class="ic">🔍</span><span class="t">Поиск</span><kbd>Ctrl K</kbd></div>
     <div class="gsbtn hlpbtn" id="helpBtn" title="Справка: первые шаги, клавиши, что нового — клавиша ?"><span class="ic">❔</span><span class="t">Справка</span><kbd>?</kbd></div>
@@ -1169,20 +1170,25 @@ let AUTH_SEEN=false; setTimeout(()=>{ const m=$('#bootMsg'); if(m) m.textContent
    ============================================================ */
 let DB, AUTH, LIVE; // LIVE — эфемерные сигналы (линейка, пинги, следы, присутствие, перетаскивание): Realtime Database
 const STAT={w:0,r:0}; // расход Firestore за сессию: записи / чтения
+/* игры (кампании): данные каждой игры лежат в своей папке campaigns/<id>/<коллекция> той же базы (живой слой — live/<id>/…). Общие для всех игр только участники (users),
+   список игр (campaigns) и выбор игры «для всех» (site). CAMP задаётся один раз при входе (campResolve) и до перезагрузки страницы не меняется — переключение игры = перезагрузка */
+let CAMP='main';
+const GLOBAL_COLLS=new Set(['users','campaigns','site']);
+const cpath=coll=>coll.includes('/')?coll.split('/'):GLOBAL_COLLS.has(coll)?[coll]:['campaigns',CAMP,coll]; // 'campaigns/<id>/meta' — явный путь (запись в другую игру, например при создании)
 if(MOCK){
-  const store={}; const subs=[];
+  const store={}; const subs=[]; const P=coll=>cpath(coll).join('/'); // ключ хранилища = путь коллекции (с папкой игры)
   const match=(d,o)=>!o?.where||o.where.every(([f,op,v])=>op==='=='?d[f]===v:op==='in'?v.includes(d[f]):op==='>='?d[f]>=v:op==='<'?d[f]<v:op==='array-contains'?(d[f]||[]).includes(v):true);
   const fire=coll=>subs.filter(s=>s.coll===coll).forEach(s=>{ let docs=Object.values(store[coll]||{}).filter(d=>match(d,s.opts)); if(s.opts?.orderBy) docs.sort((a,b)=>(b[s.opts.orderBy]||0)-(a[s.opts.orderBy]||0)); s.cb(docs.map(d=>({...d}))); });
   DB={
-    subscribe(coll,opts,cb){ const s={coll,opts,cb}; subs.push(s); setTimeout(()=>fire(coll),0); return ()=>subs.splice(subs.indexOf(s),1); },
-    async set(coll,id,data){ (store[coll]??={})[id]={...clean(data),id}; setTimeout(()=>fire(coll),0); },
-    async update(coll,id,part){ if(!(store[coll]||{})[id]) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur={...store[coll][id]}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete cur[k]; else cur[k]=clean(v); } store[coll][id]={...cur,id}; setTimeout(()=>fire(coll),0); },
-    async mergeUpdate(coll,id,fn){ if(!(store[coll]||{})[id]) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur=JSON.parse(JSON.stringify(store[coll][id])); const part=fn(cur); const nx={...cur}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete nx[k]; else nx[k]=clean(v); } store[coll][id]={...nx,id}; setTimeout(()=>fire(coll),0); return nx; },
-    async push(coll,id,field,value,extra){ const cur=(store[coll]??={})[id]||{}; store[coll][id]={...cur,...clean(extra||{}),[field]:[...(cur[field]||[]),clean(value)],id}; setTimeout(()=>fire(coll),0); },
-    async list(coll,opts){ let docs=Object.values(store[coll]||{}).filter(d=>match(d,opts)); if(opts?.orderBy) docs.sort((a,b)=>(b[opts.orderBy]||0)-(a[opts.orderBy]||0)); if(opts?.limit) docs=docs.slice(0,opts.limit); return docs.map(d=>({...d})); },
+    subscribe(coll,opts,cb){ coll=P(coll); const s={coll,opts,cb}; subs.push(s); setTimeout(()=>fire(coll),0); return ()=>subs.splice(subs.indexOf(s),1); },
+    async set(coll,id,data){ coll=P(coll); (store[coll]??={})[id]={...clean(data),id}; setTimeout(()=>fire(coll),0); },
+    async update(coll,id,part){ coll=P(coll); if(!(store[coll]||{})[id]) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur={...store[coll][id]}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete cur[k]; else cur[k]=clean(v); } store[coll][id]={...cur,id}; setTimeout(()=>fire(coll),0); },
+    async mergeUpdate(coll,id,fn){ coll=P(coll); if(!(store[coll]||{})[id]) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur=JSON.parse(JSON.stringify(store[coll][id])); const part=fn(cur); const nx={...cur}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete nx[k]; else nx[k]=clean(v); } store[coll][id]={...nx,id}; setTimeout(()=>fire(coll),0); return nx; },
+    async push(coll,id,field,value,extra){ coll=P(coll); const cur=(store[coll]??={})[id]||{}; store[coll][id]={...cur,...clean(extra||{}),[field]:[...(cur[field]||[]),clean(value)],id}; setTimeout(()=>fire(coll),0); },
+    async list(coll,opts){ coll=P(coll); let docs=Object.values(store[coll]||{}).filter(d=>match(d,opts)); if(opts?.orderBy) docs.sort((a,b)=>(b[opts.orderBy]||0)-(a[opts.orderBy]||0)); if(opts?.limit) docs=docs.slice(0,opts.limit); return docs.map(d=>({...d})); },
     DEL:Symbol('del'),
-    async delete(coll,id){ delete (store[coll]||{})[id]; setTimeout(()=>fire(coll),0); },
-    async get(coll,id){ const d=(store[coll]||{})[id]; return d?{...d}:null; },
+    async delete(coll,id){ coll=P(coll); delete (store[coll]||{})[id]; setTimeout(()=>fire(coll),0); },
+    async get(coll,id){ coll=P(coll); const d=(store[coll]||{})[id]; return d?{...d}:null; },
   };
   LIVE={ set:(id,o)=>DB.set('live',id,o), remove:id=>DB.delete('live',id), volatile(){}, subscribe:cb=>DB.subscribe('live',null,cb) };
   const MU={dm:{uid:'u_dm',email:CONFIG.dmEmails[0],name:'Мастер (mock)',photo:''},player:{uid:'u_pl',email:'player@example.com',name:'Игрок (mock)',photo:''},observer:{uid:'u_ob',email:'obs@example.com',name:'Наблюдатель (mock)',photo:''}}; const mu=MU[MOCK]||null;
@@ -1191,6 +1197,8 @@ if(MOCK){
   DB.set('users','u_dm',{email:CONFIG.dmEmails[0],name:'Мастер (mock)',photo:'',role:'dm'});
   DB.set('users','u_pl',{email:'player@example.com',name:'Игрок (mock)',photo:'',role:'player'});
   DB.set('users','u_ob',{email:'obs@example.com',name:'Наблюдатель (mock)',photo:'',role:'observer'});
+  // ?mock=dm&camp=test — вторая игра (пустая), выбрана «для всех»: проверка, что игры не видят данных друг друга
+  { const mc=new URLSearchParams(location.search).get('camp'); if(mc&&mc!=='main'){ DB.set('campaigns','main',{name:'Основная игра',createdAt:Date.now()}); DB.set('campaigns',mc,{name:'Тестовая игра «'+mc+'»',createdAt:Date.now()}); DB.set('site','main',{active:mc}); } }
   // ?mock=dm&demo — готовый персонаж для оценки раскладок
   if(new URLSearchParams(location.search).has('demo')){
     const C='demo_char', O='demo_org', L='demo_loc', I=()=>Math.random().toString(36).slice(2,8);
@@ -1226,8 +1234,8 @@ if(MOCK){
      тогда сравнения «Date.now() − d.t» верны у всех. Смещение даёт сам Realtime Database (.info/serverTimeOffset). Раньше пинг «из будущего» давал отрицательный радиус и ошибку в каждом кадре */
   let CLK=0; try{ R.onValue(R.ref(rtdb,'.info/serverTimeOffset'),sn=>{ const v=+sn.val(); if(isFinite(v)){ CLK=v; if(Math.abs(v)>5000) console.warn('часы этого компьютера расходятся с сервером на',Math.round(v/1000),'с — время живого слоя поправлено'); } }); }catch(e){ console.warn(e); }
   const tOut=o=>(o&&typeof o.t==='number')?{...o,t:o.t+CLK}:o, tIn=v=>(v&&typeof v.t==='number')?{...v,t:v.t-CLK}:v;
-  { const liveMap=new Map(); const vol=new Set(); LIVE={ set:(id,o)=>R.set(R.ref(rtdb,'live/'+id),clean(tOut(o))), remove:id=>R.remove(R.ref(rtdb,'live/'+id)), volatile(id){ if(vol.has(id)) return; vol.add(id); R.onDisconnect(R.ref(rtdb,'live/'+id)).remove().catch(()=>{}); },
-    subscribe(cb){ const r=R.ref(rtdb,'live'); const emit=()=>cb([...liveMap.values()]); R.onChildAdded(r,sn=>{ liveMap.set(sn.key,{...tIn(sn.val()),id:sn.key}); emit(); }); R.onChildChanged(r,sn=>{ liveMap.set(sn.key,{...tIn(sn.val()),id:sn.key}); emit(); }); R.onChildRemoved(r,sn=>{ liveMap.delete(sn.key); emit(); }); } };
+  { const liveMap=new Map(); const vol=new Set(); LIVE={ set:(id,o)=>R.set(R.ref(rtdb,'live/'+CAMP+'/'+id),clean(tOut(o))), remove:id=>R.remove(R.ref(rtdb,'live/'+CAMP+'/'+id)), volatile(id){ if(vol.has(id)) return; vol.add(id); R.onDisconnect(R.ref(rtdb,'live/'+CAMP+'/'+id)).remove().catch(()=>{}); },
+    subscribe(cb){ const r=R.ref(rtdb,'live/'+CAMP); const emit=()=>cb([...liveMap.values()]); R.onChildAdded(r,sn=>{ liveMap.set(sn.key,{...tIn(sn.val()),id:sn.key}); emit(); }); R.onChildChanged(r,sn=>{ liveMap.set(sn.key,{...tIn(sn.val()),id:sn.key}); emit(); }); R.onChildRemoved(r,sn=>{ liveMap.delete(sn.key); emit(); }); } };
     /* после обрыва связи сервер уже выполнил «удалить при отключении» (присутствие, линейка, перетаскивание) и больше его не помнит —
        регистрируем заново и сразу отмечаемся. Раньше игрок пропадал из «на карте» до следующего пульса (до 2 минут) */
     let conn=false; try{ R.onValue(R.ref(rtdb,'.info/connected'),sn=>{ const c=!!sn.val(); if(c&&!conn){ vol.clear(); try{ LIVE.onReconnect&&LIVE.onReconnect(); }catch(e){ console.warn(e); } } conn=c; }); }catch(e){ console.warn(e); } }
@@ -1245,7 +1253,7 @@ if(MOCK){
       if(d.thumbRef){ TH_LEGACY.delete(key); if(!d.thumb){ const t=TH.get(d.thumbRef); if(t) d.thumb=t; else if(!miss.includes(d.thumbRef)&&!(Date.now()-(TH_FAIL.get(d.thumbRef)||0)<30000)) miss.push(d.thumbRef); } }
       else if(thBig(d.thumb)) TH_LEGACY.set(key,d.thumb); else TH_LEGACY.delete(key); }
     return miss; }
-  async function thEnsure(ref,t,ent){ if(TH_OK.has(ref)){ TH.set(ref,t); return true; } const r=F.doc(db,'images',ref);
+  async function thEnsure(ref,t,ent){ if(TH_OK.has(ref)){ TH.set(ref,t); return true; } const r=F.doc(db,...cpath('images'),ref);
     try{ const ex=await F.getDoc(r); STAT.g=(STAT.g||0)+1; if(!ex.exists()){ STAT.w++; await F.setDoc(r,{owner:me.uid,entity:ent,data:t,kind:'thumb',createdAt:Date.now()}); } }
     catch(e){ try{ const ex=await F.getDoc(r); if(!ex.exists()) return false; }catch{ return false; } } /* одновременно создал другой клиент — документ уже есть, этого достаточно */
     TH.set(ref,t); TH_OK.add(ref); return true; }
@@ -1259,7 +1267,7 @@ if(MOCK){
       data.thumbRef=ref; if(full) delete data.thumb; else data.thumb=DB.DEL; if(mig) TH_LEGACY.delete(key); return data; }
     catch(e){ console.warn('thumb',e); return data; } }
   DB={
-    subscribe(coll,opts,cb){ let q=F.collection(db,coll); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts);
+    subscribe(coll,opts,cb){ let q=F.collection(db,...cpath(coll)); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts);
       let last=null, first=true; const conv=snap=>snap.docs.map(d=>({...d.data(),id:d.id,_pending:d.metadata.hasPendingWrites}));
       return F.onSnapshot(q, snap=>{ try{ STAT.r+=snap.docChanges().filter(c=>!c.doc.metadata.hasPendingWrites).length; }catch{} last=snap;
         if(!TH_COLLS.has(coll)){ cb(conv(snap)); return; }
@@ -1267,17 +1275,17 @@ if(MOCK){
         /* первый снимок чуть придерживаем, пока грузятся миниатюры (из кэша — миллисекунды), чтобы портреты не мигали буквами */
         if(miss.length&&first){ first=false; Promise.race([Promise.all(miss.map(thLoad)),new Promise(r=>setTimeout(r,2500))]).then(again); return; }
         first=false; cb(docs); if(miss.length) Promise.all(miss.map(thLoad)).then(again); }, err=>{ console.error(coll,err); if(err.code==='permission-denied') toast('Нет доступа: '+coll,true); }); },
-    set:(coll,id,data)=>(STAT.w++,TH_COLLS.has(coll)?thOut(coll,id,clean(data),true).then(d=>F.setDoc(F.doc(db,coll,id),clean(d))):F.setDoc(F.doc(db,coll,id),clean(data))),
-    update:(coll,id,part)=>{ STAT.w++; const go=p=>F.updateDoc(F.doc(db,coll,id),Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]))); return TH_COLLS.has(coll)?thOut(coll,id,{...part},false).then(go):go(part); },
+    set:(coll,id,data)=>(STAT.w++,TH_COLLS.has(coll)?thOut(coll,id,clean(data),true).then(d=>F.setDoc(F.doc(db,...cpath(coll),id),clean(d))):F.setDoc(F.doc(db,...cpath(coll),id),clean(data))),
+    update:(coll,id,part)=>{ STAT.w++; const go=p=>F.updateDoc(F.doc(db,...cpath(coll),id),Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]))); return TH_COLLS.has(coll)?thOut(coll,id,{...part},false).then(go):go(part); },
     /* запись с чтением свежей версии: fn(текущее на сервере) → поля для записи. Если документ успели поменять между чтением и записью, Firestore повторит сам */
-    mergeUpdate:(coll,id,fn)=>F.runTransaction(db,async t=>{ const ref=F.doc(db,coll,id); const s=await t.get(ref); STAT.r++; if(!s.exists()) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur=s.data(); const part=fn(JSON.parse(JSON.stringify(cur))); STAT.w++; t.update(ref,Object.fromEntries(Object.entries(part).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]))); const nx={...cur}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete nx[k]; else nx[k]=clean(v); } return nx; }),
-    push:(coll,id,field,value,extra)=>(STAT.w++,F.setDoc(F.doc(db,coll,id),{...clean(extra||{}),[field]:F.arrayUnion(clean(value))},{merge:true})),
-    async list(coll,opts){ let q=F.collection(db,coll); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts); const snap=await F.getDocs(q); return snap.docs.map(d=>({...d.data(),id:d.id})); },
-    async listServer(coll){ const snap=await F.getDocsFromServer(F.collection(db,coll)); return snap.docs.map(d=>({...d.data(),id:d.id})); },
+    mergeUpdate:(coll,id,fn)=>F.runTransaction(db,async t=>{ const ref=F.doc(db,...cpath(coll),id); const s=await t.get(ref); STAT.r++; if(!s.exists()) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur=s.data(); const part=fn(JSON.parse(JSON.stringify(cur))); STAT.w++; t.update(ref,Object.fromEntries(Object.entries(part).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]))); const nx={...cur}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete nx[k]; else nx[k]=clean(v); } return nx; }),
+    push:(coll,id,field,value,extra)=>(STAT.w++,F.setDoc(F.doc(db,...cpath(coll),id),{...clean(extra||{}),[field]:F.arrayUnion(clean(value))},{merge:true})),
+    async list(coll,opts){ let q=F.collection(db,...cpath(coll)); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts); const snap=await F.getDocs(q); return snap.docs.map(d=>({...d.data(),id:d.id})); },
+    async listServer(coll){ const snap=await F.getDocsFromServer(F.collection(db,...cpath(coll))); return snap.docs.map(d=>({...d.data(),id:d.id})); },
     DEL:Symbol('del'),
-    delete:(coll,id)=>(STAT.w++,F.deleteDoc(F.doc(db,coll,id))),
-    async get(coll,id){ const s=await F.getDoc(F.doc(db,coll,id)); if(!s.exists()) return null; const d={...s.data(),id:s.id}; if(TH_COLLS.has(coll)) thAttach(coll,[d]); return d; },
-    async getImg(coll,id){ try{ const s=await F.getDocFromCache(F.doc(db,coll,id)); if(s.exists()) return {...s.data(),id:s.id}; }catch{} return DB.get(coll,id); },
+    delete:(coll,id)=>(STAT.w++,F.deleteDoc(F.doc(db,...cpath(coll),id))),
+    async get(coll,id){ const s=await F.getDoc(F.doc(db,...cpath(coll),id)); if(!s.exists()) return null; const d={...s.data(),id:s.id}; if(TH_COLLS.has(coll)) thAttach(coll,[d]); return d; },
+    async getImg(coll,id){ try{ const s=await F.getDocFromCache(F.doc(db,...cpath(coll),id)); if(s.exists()) return {...s.data(),id:s.id}; }catch{} return DB.get(coll,id); },
   };
   AUTH={
     onChange(cb){ A.onAuthStateChanged(auth,u=>cb(u?{uid:u.uid,email:u.email,name:u.displayName||u.email,photo:u.photoURL||''}:null)); },
@@ -1405,15 +1413,64 @@ AUTH.onChange(async u=>{
   if(!ud){ const role=CONFIG.dmEmails.includes((u.email||'').toLowerCase())?'dm':'observer'; ud={email:u.email,name:u.name,photo:u.photo,role,createdAt:Date.now()}; try{ await DB.set('users',u.uid,ud); }catch(e){ console.error(e); toast('Не удалось создать профиль: '+(e.code||e.message),true); } }
   else if(ud.name!==u.name||ud.photo!==u.photo){ try{ await DB.update('users',u.uid,{name:u.name,photo:u.photo}); }catch{} }
   myRole=(CONFIG.everyoneDM&&!(MOCK&&new URLSearchParams(location.search).has('strict')))?'dm':(ud.role||'observer');
+  if(!await campResolve(ud)) return;
   bootEnd(false); $('#app').style.display='grid';
   subscribeAll();
   if(localStorage.getItem('nomenu')) document.body.classList.add('nomenu');
   routeInit(); renderMe(); phoneInit(); render(); chatInit(); pnavRender(); setTimeout(helpNudge,2500);
 });
+/* какая игра открыта. Главное — активная игра, которую мастер выставил на сервере (site/main.active, «для всех»): клиент читает её при входе и дальше следит
+   за ней (campCheck) — мастер переключил, и у всех открытых вкладок страница сама перезагружается в новую игру.
+   Опция «игра для себя» (site/main.personal, по умолчанию включена): мастер может открыть другую игру только у себя (users.camp), например готовить следующую.
+   Игру, которой нет в списке campaigns, пропускаем. Вышла другая игра (в том числе после входа под другим аккаунтом) — перезагрузка,
+   чтобы в памяти не осталось данных и несохранённых правок прежней */
+let CAMP_DOC=null, CAMP_SET=false, SITE=null;
+const campPersonal=()=>!SITE||SITE.personal!==false;
+const campActive=()=>(SITE&&SITE.active)||'main';
+const campName=c=>{ const d=c===CAMP&&CAMP_DOC?CAMP_DOC:byId(world.campaigns||[],c); return (d&&d.name)||(c==='main'?'Основная игра':'Игра '+c); };
+async function campResolve(ud){ try{ SITE=await DB.get('site','main'); }catch(e){ console.warn('site/main',e); }
+  const doc=async c=>{ if(!c||typeof c!=='string') return null; try{ return (await DB.get('campaigns',c))||(c==='main'?{id:'main'}:null); }catch(e){ console.warn('campaigns/'+c,e); return c==='main'?{id:'main'}:null; } };
+  let c=campPersonal()?ud&&ud.camp:null, d=await doc(c); if(!d){ c=SITE&&SITE.active; d=await doc(c); } if(!d){ c='main'; d=await doc(c); }
+  if(CAMP_SET&&c!==CAMP){ location.reload(); return false; }
+  CAMP=c; CAMP_DOC=d; CAMP_SET=true; return true; }
+/* то же по живым снимкам site / campaigns / users (ждём, пока придут все три): вышла другая игра — дописываем правки и перезагружаемся */
+const CW={site:false,camps:false,users:false,busy:false};
+function campTarget(){ const ok=c=>!!c&&(c==='main'||(world.campaigns||[]).some(x=>x.id===c)); const u=byId(world.users,me.uid);
+  if(campPersonal()&&u&&ok(u.camp)) return u.camp; const a=campActive(); return ok(a)?a:'main'; }
+function campCheck(){ if(!me||!CW.site||!CW.camps||!CW.users||CW.busy) return; const d=byId(world.campaigns,CAMP); if(d) CAMP_DOC=d; campBadge();
+  const t=campTarget(); if(t===CAMP) return; CW.busy=true; toast('Открываю игру «'+campName(t)+'»…');
+  const go=()=>setTimeout(()=>location.reload(),400); if(pending.size||inflight){ clearTimeout(saveTimer); flush().catch(()=>{}).finally(go); } else go(); }
+/* название игры под названием сайта — когда игр больше одной; «только у тебя» — мастер открыл не ту, что у всех */
+function campBadge(){ const b=$('#campName'); if(!b) return; const many=CAMP!=='main'||(world.campaigns||[]).some(x=>x.id!=='main'); b.style.display=many?'':'none'; if(!many) return;
+  const solo=CAMP!==campActive(); b.textContent='🎲 '+campName(CAMP)+(solo?' · только у тебя':''); b.style.color=solo?'var(--yellow,#ffd166)':'';
+  b.title=solo?'Эта игра открыта только у тебя; у остальных — «'+campName(campActive())+'». Настройки → Игры':'Текущая игра'; b.style.cursor=isDM()?'pointer':''; b.onclick=()=>{ if(isDM()) go('settings'); }; }
+/* ---- Настройки → Игры ---- */
+function campList(){ const m=new Map((world.campaigns||[]).map(x=>[x.id,x])); if(!m.has('main')) m.set('main',{id:'main'}); return [...m.values()].sort((a,b)=>a.id==='main'?-1:b.id==='main'?1:(a.createdAt||0)-(b.createdAt||0)); }
+async function campSite(part){ const cur={...(SITE||{})}; delete cur.id; delete cur._pending; try{ await DB.set('site','main',{active:'main',...cur,...part,updatedAt:Date.now(),updatedBy:me.uid}); }catch(e){ console.error(e); toast('Не удалось сохранить: '+(e.code||e.message),true); } }
+async function campSetActive(c){ if(!await confirmDlg(`Сделать «${campName(c)}» активной игрой для всех? У всех, у кого открыт сайт, страница перезагрузится в эту игру.`,'Переключить всех')) return;
+  await campSite({active:c}); const u=byId(world.users,me.uid); if(u&&u.camp) try{ await DB.update('users',me.uid,{camp:DB.DEL}); }catch(e){ console.warn(e); } } // сначала общая, потом снимаем свою — иначе успели бы перезагрузиться в старую общую
+async function campOpenMine(c){ try{ await DB.update('users',me.uid,{camp:c===campActive()?DB.DEL:c}); }catch(e){ console.error(e); toast('Не удалось: '+(e.code||e.message),true); } }
+async function campRename(c){ const n=await promptDlg('Название игры',campName(c),'Сохранить'); if(n==null||!n.trim()) return; const d={...(byId(world.campaigns,c)||{})}; delete d.id; delete d._pending;
+  try{ await DB.set('campaigns',c,{createdAt:Date.now(),...d,name:n.trim().slice(0,60)}); }catch(e){ console.error(e); toast('Не удалось: '+(e.code||e.message),true); } }
+function campNewDialog(){ const b=openModal(`<h2>Новая игра</h2><div class="field"><label>Название</label><input id="cnName" maxlength="60" style="width:100%" placeholder="Например: Хроники Ветрограда"></div>
+    <label class="row" style="gap:8px;margin-top:12px;align-items:flex-start"><input type="checkbox" id="cnCopy" checked style="margin-top:3px"><span>Взять настройки и библиотеки из «${esc(campName(CAMP))}» — характеристики, полоски, эффекты, статусы, техники, права игроков, Руина</span></label>
+    <div class="faint" style="font-size:12.5px;margin-top:10px;line-height:1.5">Персонажи, организации, карты, документы, карты связей и чат в новой игре свои — она начинается пустой. Игроки останутся в текущей, пока ты не сделаешь новую активной для всех.</div>
+    <div class="modal-actions"><button class="btn" id="no">Отмена</button><button class="btn primary" id="yes">Создать</button></div>`);
+  $('#no',b).onclick=closeModal; $('#cnName',b).onkeydown=e=>{ if(e.key==='Enter') $('#yes',b).click(); };
+  $('#yes',b).onclick=async()=>{ const name=$('#cnName',b).value.trim().slice(0,60); if(!name){ toast('Впиши название',true); return; } const copy=$('#cnCopy',b).checked; $('#yes',b).disabled=true; const id='g'+uid();
+    try{ if(copy){ const base='campaigns/'+id+'/meta'; const s=clean(world.settings||{}); delete s.id; await DB.set(base,'settings',{...s,updatedAt:Date.now()}); const tc=(world._settings||[]).find(x=>x.id==='techniques'); if(tc){ const t=clean(tc); delete t.id; await DB.set(base,'techniques',t); } } // техники — только сохранённые в базе (встроенный каталог новая игра соберёт сама)
+      await DB.set('campaigns',id,{name,createdAt:Date.now(),createdBy:me.uid}); closeModal(); toast('Игра «'+name+'» создана'); }
+    catch(e){ console.error(e); toast('Не удалось создать игру: '+(e.code||e.message),true); $('#yes',b).disabled=false; } }; }
+function campPanel(p){ const box=$('.camplist',p), pers=$('#campPers',p); pers.checked=campPersonal(); const act=campActive();
+  box.innerHTML=campList().map(c=>`<div class="row camprow" data-c="${esc(c.id)}" style="gap:8px;align-items:center;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--line,#ffffff14)"><span class="grow"><b>${esc(campName(c.id))}</b>${c.id===act?' <span style="font-size:11.5px;color:var(--green,#8ef7c1)">● активна у всех</span>':''}${c.id===CAMP&&c.id!==act?' <span style="font-size:11.5px;color:var(--yellow,#ffd166)">● открыта у тебя</span>':''}</span>${c.id!==act?'<button class="btn sm primary ca">Сделать активной для всех</button>':''}${campPersonal()&&c.id!==CAMP?'<button class="btn sm cm">Открыть для себя</button>':''}<button class="btn sm icon cr" title="Переименовать">✎</button></div>`).join('');
+  $$('.camprow',box).forEach(r=>{ const c=r.dataset.c, a=$('.ca',r), mm=$('.cm',r); if(a) a.onclick=()=>campSetActive(c); if(mm) mm.onclick=()=>campOpenMine(c); $('.cr',r).onclick=()=>campRename(c); });
+  pers.onchange=()=>campSite({personal:pers.checked}); $('#campNew',p).onclick=campNewDialog; }
 function subscribeAll(){
   const sub=(coll,key,opts,post)=>unsubs.push(DB.subscribe(coll,opts,docs=>{ applyDocs(key,coll,docs,post); }));
   sub('meta','_settings',null,()=>{ const s=world._settings.find(x=>x.id==='settings'); const fresh=s?{...defaultSettings(),...s}:{...defaultSettings(),id:'settings'}; if(!world.settings) world.settings=fresh; else if(!pending.has('settings')&&!(s&&s.updatedAt&&s.updatedAt===world.settings.updatedAt)){ for(const k of Object.keys(world.settings)) if(!(k in fresh)) delete world.settings[k]; Object.assign(world.settings,fresh); } const t=world._settings.find(x=>x.id==='timeline'); if(!pending.has('timeline')&&!(t&&world.timeline&&t.updatedAt&&t.updatedAt===world.timeline.updatedAt)) world.timeline=t?t:{id:'timeline',nodes:[]}; const tc=world._settings.find(x=>x.id==='techniques'); if(!pending.has('techniques')&&!(tc&&world.techniques&&tc.updatedAt&&tc.updatedAt===world.techniques.updatedAt)){ world.techniques=tc?tc:(realDM()?techBaseCatalog():{id:'techniques',branches:[],groups:[]}); techLayoutCache={}; } applySiteName(); });
-  sub('memberships','memberships'); sub('locLinks','locLinks'); sub('users','users'); sub('wmarkers','wmarkers'); sub('wmdraw','wmdraw');
+  CW.site=CW.camps=CW.users=false; world.campaigns=[]; world._site=[];
+  sub('site','_site',null,()=>{ SITE=world._site.find(x=>x.id==='main')||null; CW.site=true; campCheck(); }); sub('campaigns','campaigns',null,()=>{ CW.camps=true; campCheck(); });
+  sub('memberships','memberships'); sub('locLinks','locLinks'); sub('users','users',null,()=>{ CW.users=true; campCheck(); }); sub('wmarkers','wmarkers'); sub('wmdraw','wmdraw');
   world._live=[]; WM.liveStart=Date.now(); LIVE.subscribe(docs=>{ world._live=docs; liveGoto(docs); WM.onLive&&WM.onLive(); if(state.view==='wmap'&&!state.id) wmListPresence(); musSync(); }); presenceStart();
   world._chat=[]; sub('chat','_chat',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); if(realDM()){ world._chatdm=[]; sub('chatdm','_chatdm',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); }
   if(realDM()) sub('docs','docs');
@@ -1968,6 +2025,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-21',t:'Несколько игр на одном сайте',items:['Настройки → «Игры»: у каждой игры свои настройки, персонажи, организации, локации, карты, документы, карты связей и чат. Участники и их роли общие.','«+ Новая игра» — пустая, можно сразу взять настройки и библиотеки (характеристики, полоски, эффекты, статусы, техники, права, Руина) из текущей.','«Сделать активной для всех» — у всех, у кого открыт сайт, страница сама перезагрузится в эту игру. Сайт всегда открывает активную игру, которую выставил мастер.','«Открыть для себя» (опция, включена) — мастер готовит другую игру, игроки остаются в активной; под названием сайта видно «только у тебя». Игроки чужую игру прочитать не могут.']},
   {d:'2026-09-29',t:'Телефон: без правой кнопки',items:['Долгое нажатие пальцем по карте или токену открывает то же меню, что правая кнопка мыши.','Раны: тап по степени раны — меню «＋ Добавить рану / − Снять рану».','«⬚ Все мои» в группе «Рисовать» — выделить все свои рисунки, потом × — стереть (вместо Shift-рамки и Ctrl+A).']},
   {d:'2026-09-29',t:'Свои панели на карте',items:['У игроков появились «Настройки» в меню слева: там «Мои панели на карте» и «Моё меню». Сними галочку — кнопка или раздел пропадёт с верхней панели карты или с нижней панели токена. Только у тебя, на любом устройстве.','🌱 «Для новичка» — одним нажатием спрятать редкое (области, места, картинки, бросок по формуле…); «Показать всё» — вернуть как было.','🧩 справа в верхней панели карты открывает то же окно прямо на карте.']},
   {d:'2026-09-29',t:'Слои на Tab',items:['Мастер на карте: Tab — следующий слой (Карта → Обычный → Скрытый), Shift+Tab — предыдущий.','Кнопка «＋» в группе «Персонажи» убрана — токены ставятся из панели «☷ Токены» (клик по строке, затем по карте, или перетащить).']},
@@ -7143,11 +7201,12 @@ const BK_COLLS=['users','meta','dm','characters','orgs','locations','memberships
 async function fullBackup(prog){ if(!realDM()) return; const data={}, errs=[]; let n=0;
   for(const c of BK_COLLS){ prog.textContent='Читаю '+c+'…'; try{ data[c]=await (DB.listServer||DB.list)(c,{}); n+=data[c].length; }catch(e){ console.error(c,e); errs.push(c+': '+(e.code||e.message)); data[c]=[]; } }
   if(errs.length&&!await confirmDlg(`Не удалось прочитать: ${errs.join('; ')}. Бэкап будет НЕПОЛНЫМ. Всё равно сохранить?`,'Сохранить неполный')){ prog.textContent='Бэкап отменён: '+errs.join('; '); return; }
-  const out={v:1,at:Date.now(),from:window.LOCAL_BACKEND?'local':'cloud',counts:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,v.length])),data}; const txt=JSON.stringify(out);
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'})); a.download='kartoteka-full-'+new Date().toISOString().slice(0,16).replace('T','_').replace(':','-')+'.json'; a.click();
+  const out={v:1,at:Date.now(),from:window.LOCAL_BACKEND?'local':'cloud',camp:{id:CAMP,name:CAMP_DOC?.name||''},counts:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,v.length])),data}; const txt=JSON.stringify(out);
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'})); a.download='kartoteka-full-'+(CAMP!=='main'?CAMP+'-':'')+new Date().toISOString().slice(0,16).replace('T','_').replace(':','-')+'.json'; a.click();
   prog.innerHTML=`${errs.length?'<b style="color:var(--red)">НЕПОЛНЫЙ</b> ':'✔ '}Готово: ${n} документов, ${(txt.length/1048576).toFixed(1)} МБ. ${esc(Object.entries(out.counts).filter(([,v])=>v).map(([k,v])=>k+' '+v).join(' · '))}`; }
 async function fullRestore(file,prog){ if(!realDM()) return; let bk; try{ bk=JSON.parse(await file.text()); }catch{ toast('Это не файл бэкапа',true); return; } if(!bk||!bk.data){ toast('Это не файл бэкапа',true); return; }
-  const total=Object.values(bk.data).reduce((a,x)=>a+x.length,0); if(!await confirmDlg(`Восстановить ${total} документов из бэкапа от ${fmtDate(bk.at)}? Существующие документы с теми же id будут перезаписаны.`,'Восстановить')) return;
+  const total=Object.values(bk.data).reduce((a,x)=>a+x.length,0); const bkCamp=bk.camp&&bk.camp.id&&bk.camp.id!==CAMP?` Бэкап сделан в другой игре («${bk.camp.name||bk.camp.id}») — документы запишутся в текущую.`:'';
+  if(!await confirmDlg(`Восстановить ${total} документов из бэкапа от ${fmtDate(bk.at)}? Существующие документы с теми же id будут перезаписаны.${bkCamp}`,'Восстановить')) return;
   const local=!!window.LOCAL_BACKEND; const map={}; const b64=e=>'local_'+btoa(unescape(encodeURIComponent(e))).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
   const orig={}; for(const u of (bk.data.users||[])){ if(local){ const nid=b64((u.email||'').toLowerCase()); if(u.id!==nid){ map[u.id]=nid; orig[nid]=u.origUid||u.id; } } else if(u.origUid&&u.id!==u.origUid){ map[u.id]=u.origUid; } delete u.origUid; }
   let txt=JSON.stringify(bk.data); for(const [a,b] of Object.entries(map)) txt=txt.split('"'+a+'"').join('"'+b+'"'); const data=JSON.parse(txt); for(const u of (data.users||[])) if(orig[u.id]) u.origUid=orig[u.id];
@@ -7527,7 +7586,7 @@ function ruSettingsBeautify(page){ const grid=$('.ruset .rugrid',page); if(!grid
   const mark=()=>{ for(const v of wrap.querySelectorAll('.val')){ let set=false; for(const inp of v.querySelectorAll('input,select')){ if(inp.tagName==='SELECT'){ if(inp.selectedIndex>0) set=true; } else if(inp.type==='checkbox'){ if(inp.checked!==(inp.dataset.def!=null?inp.dataset.def==='1':inp.defaultChecked)) set=true; } else if(inp.type==='number'){ const ph=inp.placeholder; if(inp.value!==''&&inp.value!==ph) set=true; } else if(inp.type==='text'||!inp.type||inp.type==='search'){ const ph=inp.placeholder; if(inp.value.trim()!==''&&inp.value.trim()!==ph) set=true; } } v.classList.toggle('set',set); } }; mark(); wrap.addEventListener('change',()=>setTimeout(mark,0));
   grid.replaceWith(wrap); wrap.before(nav); wrap.before(el('<div class="ruleg"><span><i style="background:var(--gold)"></i> золотая метка слева — значение изменено относительно стандартного</span><span>▶ заголовок секции — свернуть/развернуть</span></div>')); }
 /* общие настройки — как у Руины: панели сгруппированы в цветные раскрывающиеся секции (открытые запоминаются), навигация-чипы и поиск по тексту панелей */
-const GEN_SEC=[['char','Персонаж и характеристики','📊','#ffd166',['stats','derived','fxset','letters']],['bars','Полоски, раны, инвентарь','❤','#ff5c6c',['dbars','wndset','invcols']],['rel','Связи и статусы','🔗','#e9c2ff',['tpls','sticons']],['map','Карта и токены','🗺','#d5c6a2',['tokset']],['acc','Игроки и доступ','👥','#4fd0ff',['wmset','sections']],['ui','Интерфейс','🎨','#8ef7c1',['sitename','myui','mynav','hblocks']],['data','Данные и резервные копии','💾','#9aa0b4',['__data']]];
+const GEN_SEC=[['camp','Игры','🎲','#ff8a3d',['camps']],['char','Персонаж и характеристики','📊','#ffd166',['stats','derived','fxset','letters']],['bars','Полоски, раны, инвентарь','❤','#ff5c6c',['dbars','wndset','invcols']],['rel','Связи и статусы','🔗','#e9c2ff',['tpls','sticons']],['map','Карта и токены','🗺','#d5c6a2',['tokset']],['acc','Игроки и доступ','👥','#4fd0ff',['wmset','sections']],['ui','Интерфейс','🎨','#8ef7c1',['sitename','myui','mynav','hblocks']],['data','Данные и резервные копии','💾','#9aa0b4',['__data']]];
 function genSettingsBeautify(page){ const box=$('.settings[data-tab="main"]',page); if(!box||box.dataset.sec) return; box.dataset.sec='1'; box.classList.add('gs');
   const panels=[...box.children].filter(p=>p.classList.contains('panel')); const keyOf=p=>[...p.classList].find(c=>c!=='panel')||'__data';
   const opened=(()=>{ try{ return JSON.parse(localStorage.getItem('genSetOpen')||'null'); }catch{ return null; } })();
@@ -7573,6 +7632,7 @@ function renderSettings(m){
     <div class="panel tpls"><h3>Шаблоны связей <button class="btn sm">+ Шаблон</button></h3><div class="list"></div></div>
     <div class="panel wmset"><h3>Права игроков</h3><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Что игрокам можно делать самим. Мастер может всё всегда. Выключенное запрещено и в интерфейсе, и в правилах базы (кроме стрелок и копирования — там только интерфейс).</div><label class="row" style="gap:8px;cursor:pointer;align-items:flex-start"><input type="checkbox" id="wmDMOnly" ${s.wmDMOnly?'checked':''} style="margin-top:3px"><span>Замок карт: разметку карт правит только мастер <span class="faint">— игрокам (не помощникам) недоступна вся разметка ниже, что бы там ни стояло. Что можно со своими персонажами при замке — тоже ниже.</span></span></label><label class="row" style="gap:8px;cursor:pointer;align-items:flex-start;margin-top:10px"><input type="checkbox" id="pvpEdit" ${s.pvpEdit!==false?'checked':''} style="margin-top:3px"><span>Игроки могут менять полоски, статусы и раны <b>чужих</b> персонажей <span class="faint">— урон и эффекты в бою применяются прямо с карты, без мастера. Выключи, если хочешь применять всё сам.</span></span></label><div class="plt"><span></span><span class="plh">Игроки</span><span class="plh" title="Игроки с отметкой 🛡 в «Участниках»">🛡 Помощники</span>${PL_PERMS.map(p=>p.length===1?`<div class="plg">${p[0]}</div>`:`<span><b>${p[1]}</b> <span class="faint">— ${p[2]}</span></span><input type="checkbox" data-pl="${p[0]}" data-col="p" ${(s[p[0]]===undefined?!PL_OFF.has(p[0]):s[p[0]]!==false)?'checked':''}><input type="checkbox" data-pl="${p[0]}" data-col="h" ${s['h_'+p[0]]!==false?'checked':''}>`).join('')}</div><div class="faint" style="font-size:11.5px;margin-top:8px;line-height:1.5">Помощник — игрок с отметкой 🛡 в разделе «Участники»: у него свой столбец прав, и замок карт на него не действует.</div></div>
     <div class="panel sections"><h3>Разделы сайта</h3><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Сними галочку — раздел пропадёт из меню у игроков и наблюдателей (ссылки на него ведут в «Персонажи»). Мастер видит всё всегда. Данные не удаляются.</div><div class="row wrap" style="gap:6px 18px">${SECTIONS.map(([k,n])=>`<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" data-sec="${k}" ${(s.sections||{})[k]===false?'':'checked'}>${n}</label>`).join('')}</div></div>
+    <div class="panel camps"><h3>Игры <button class="btn sm" id="campNew">+ Новая игра</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:8px;line-height:1.5">У каждой игры свои настройки, персонажи, организации, локации, карты, документы, карты связей и чат. Участники и их роли — общие. Сайт у всех открывает активную игру; переключишь — у всех перезагрузится.</div><div class="camplist"></div><label class="row" style="gap:8px;margin-top:12px;align-items:flex-start"><input type="checkbox" id="campPers" style="margin-top:3px"><span>Игра «для себя»: мастер может открыть другую игру только у себя (например, готовить следующую), остальные остаются в активной</span></label></div>
     <div class="panel sitename"><h3>Название сайта</h3><input id="siteNameIn" maxlength="40" value="${esc(s.siteName||'')}" placeholder="${SITE_DEF}" style="width:100%;max-width:360px"><div class="faint" style="font-size:12px;line-height:1.5;margin-top:6px">Показывается в меню слева, на вкладке браузера, на странице входа и на заставке загрузки — у всех участников. Пусто — «${SITE_DEF}».</div></div>
     <div class="panel myui"><h3>🧩 Мои панели на карте <span class="faint" style="font-size:12px;font-weight:400">— только у тебя</span></h3><div class="uiped"></div></div>
     <div class="panel mynav"><h3>Моё меню <span class="faint" style="font-size:12px;font-weight:400">— только у тебя</span></h3><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Сними галочку — раздел пропадёт из твоего меню слева (игроки и данные не затрагиваются; открыть его можно и по ссылке). «Настройки» остаются всегда.</div><div class="row wrap" style="gap:6px 18px">${$$('#side .nav[data-view]').filter(n=>n.dataset.view!=='settings').map(n=>`<label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" data-mynav="${n.dataset.view}" ${myNavHide()[n.dataset.view]?'':'checked'}>${esc($('.t',n)?.textContent||n.dataset.view)}</label>`).join('')}</div></div>
@@ -7691,6 +7751,7 @@ function renderSettings(m){
   { const ME=[['bars','Полоски'],['statuses','Статусы'],['auras','Ауры'],['ruina','Руина'],['stats','Характеристики'],['ab','Вкладка «Способности»'],['tk','Вкладка «Техники»'],['ef','Вкладка «Эффекты»']]; const sec=el(`<div style="margin-bottom:10px"><div class="tiny" style="margin-bottom:6px">Панель «Мой» на карте</div><div class="chips"></div></div>`); const chx=$('.chips',sec); const H=new Set(s.meHide||[]); for(const [id,label] of ME){ const c=el(`<label class="chip click" style="gap:6px"><input type="checkbox" ${H.has(id)?'':'checked'} style="width:13px;height:13px">${esc(label)}</label>`); $('input',c).onchange=e=>{ const set=new Set(s.meHide||[]); if(e.target.checked) set.delete(id); else set.add(id); s.meHide=[...set]; touch(s); }; chx.append(c); } hl.append(sec); }
   wndSettings($('.wndset .wbody',page),s); { const sm=$('#sceneMusic',page); if(sm) sm.onchange=()=>{ s.sceneMusic=sm.checked; touch(s); if(!sm.checked){ const d=musLive(); if(d&&d.on) LIVE.set('music',{on:false,t:Date.now(),by:me.uid,n:me.name||''}).catch(()=>{}); } setTimeout(musSync,50); toast(sm.checked?'Музыка сцены включена: кнопка ♫ на карте':'Музыка сцены выключена'); }; }
 { const sn=$('#siteNameIn',page); if(sn) sn.oninput=()=>{ s.siteName=sn.value.slice(0,40); touch(s); applySiteName(); }; }
+  { const cp=$('.panel.camps',page); if(cp) campPanel(cp); }
 { const R_=$('#tokSpawnR',page), N_=$('#tokSpawnN',page); const set=v=>{ v=Math.max(.3,Math.min(10,+v||1)); s.tokenSpawn=v; R_.value=Math.min(4,v); N_.value=v; touch(s); }; if(R_){ R_.oninput=()=>set(R_.value); N_.onchange=()=>set(N_.value); } };
   s.defaultBars??=[]; const dl=$('.dbars .list',page);
   const drawBars=()=>{ dl.innerHTML=''; if(!s.defaultBars.length) dl.innerHTML='<div class="faint">Нет.</div>';
@@ -7735,7 +7796,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
