@@ -23,7 +23,7 @@ service cloud.firestore {
     function can(k) { return isHelper() ? st().get('h_' + k, true) != false : st().get(k, !(k in ['plMoveAll', 'plInit', 'plDocMove'])) != false; }
     function plOn(k) { return can(k); }
     // разметка карты: к какому праву относится рисунок; loot/card — предметы и карточки своих способностей
-    function drawPerm(d) { return d.get('t', '') in ['path', 'area'] ? (d.get('kind', '') in ['line', 'shape'] ? 'plDraw' : 'plAreas') : (d.get('t', '') in ['place', 'label'] ? 'plPlaces' : (d.get('t', '') == 'note' ? 'plNotes' : (d.get('t', '') == 'img' ? 'plImages' : 'plOther'))); }
+    function drawPerm(d) { return d.get('t', '') == 'tmpl' ? 'plDraw' : d.get('t', '') in ['path', 'area'] ? (d.get('kind', '') in ['line', 'shape'] ? 'plDraw' : 'plAreas') : (d.get('t', '') in ['place', 'label'] ? 'plPlaces' : (d.get('t', '') == 'note' ? 'plNotes' : (d.get('t', '') == 'img' ? 'plImages' : 'plOther'))); }
     function drawOk(d) { return d.get('t', '') in ['loot', 'card'] ? (!mapsLocked() || isHelper() || can('plLoot')) : ((!mapsLocked() || isHelper()) && can(drawPerm(d))); }
     function mapsLocked() { return get(/databases/$(database)/documents/meta/settings).data.get('wmDMOnly', false) == true; }
 
