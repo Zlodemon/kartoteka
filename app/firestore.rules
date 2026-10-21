@@ -109,6 +109,8 @@ service cloud.firestore {
       // ===== карточки (TTS): правит мастер; игроки читают только открытые (pub — сет открыт и карта не скрыта)
       match /cards/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow write: if isDM(); }
       match /cardsets/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow write: if isDM(); }
+      // картинки карт для TTS: рисует браузер мастера, забирает программа 4_KARTY_V_TTS
+      match /cardfaces/{id} { allow read, write: if isDM(); }
 
       // ===== картинки
       match /images/{id} {
