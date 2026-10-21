@@ -19,9 +19,7 @@ service cloud.firestore {
       allow read: if authed();
       allow create: if authed() && id == uid()
         && (request.resource.data.role == 'observer' || (request.resource.data.role == 'dm' && request.auth.token.email.lower() in dmEmails()));
-      // camp — личная игра участника; меняет только мастер (иначе игрок сам зашёл бы в игру, которую мастер готовит втайне)
-      allow update: if dmG() || (id == uid() && request.resource.data.role == resource.data.role && request.resource.data.get('helper', false) == resource.data.get('helper', false)
-        && request.resource.data.get('camp', '') == resource.data.get('camp', ''));
+      allow update: if dmG() || (id == uid() && request.resource.data.role == resource.data.role && request.resource.data.get('helper', false) == resource.data.get('helper', false));
       allow delete: if dmG();
     }
 
@@ -33,12 +31,9 @@ service cloud.firestore {
       allow read: if authed();
       allow write: if dmG();
 
-      // игрок (и наблюдатель) видит только игру, в которой он сейчас: активную для всех или свою (users.camp — если включена опция «игра для себя», site/main.personal).
-      // Мастер — любую, так он готовит следующую без спойлеров
-      function siteDoc() { return exists(/databases/$(database)/documents/site/main) ? get(/databases/$(database)/documents/site/main).data : {}; }
-      function activeCamp() { return siteDoc().get('active', 'main'); }
-      function myCamp() { return siteDoc().get('personal', true) != false && exists(userPath()) ? get(userPath()).data.get('camp', '') : ''; }
-      function here() { return cid == activeCamp() || cid == myCamp(); }
+      // игрок (и наблюдатель) видит только активную игру (site/main.active). Мастер — любую: при входе он может выбрать другую и готовить её без спойлеров
+      function activeCamp() { return exists(/databases/$(database)/documents/site/main) ? get(/databases/$(database)/documents/site/main).data.get('active', 'main') : 'main'; }
+      function here() { return cid == activeCamp(); }
       function signedIn() { return authed() && (dmG() || here()); }
       function isDM() { return dmG(); }
       function isPlayer() { return signedIn() && role() == 'player'; }
@@ -135,8 +130,9 @@ service cloud.firestore {
 
       // ===== связи: личные (owner) или общие (shared)
       match /relations/{id} {
+        // мастер создаёт и чужие документы (восстановление из бэкапа, перенос игры) — раньше «Восстановить» молча теряло связи, карты связей, чат, журнал и корзину
         allow read: if isDM() || (signedIn() && (resource.data.owner == uid() || resource.data.shared == true));
-        allow create: if canWrite() && request.resource.data.owner == uid();
+        allow create: if isDM() || (canWrite() && request.resource.data.owner == uid());
         allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid());
         allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
       }
@@ -144,7 +140,7 @@ service cloud.firestore {
       // ===== карты связей: личные (owner) или общие (shared)
       match /maps/{id} {
         allow read: if isDM() || (signedIn() && (resource.data.owner == uid() || resource.data.shared == true));
-        allow create: if canWrite() && request.resource.data.owner == uid();
+        allow create: if isDM() || (canWrite() && request.resource.data.owner == uid());
         allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid());
         allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
       }
@@ -208,28 +204,28 @@ service cloud.firestore {
       function chatFirst() { return request.resource.data.msgs is list && request.resource.data.msgs.size() == 1 && request.resource.data.msgs[0].u == uid(); }
       match /chat/{day} {
         allow read: if signedIn();
-        allow create: if signedIn() && chatFirst();
-        allow update: if signedIn() && chatAppend();
+        allow create: if isDM() || (signedIn() && chatFirst());
+        allow update: if isDM() || (signedIn() && chatAppend());
         allow delete: if isDM();
       }
       // броски «мастеру»: пишут все, читает только дм
       match /chatdm/{day} {
         allow read: if isDM();
-        allow create: if signedIn() && chatFirst();
-        allow update: if signedIn() && chatAppend();
+        allow create: if isDM() || (signedIn() && chatFirst());
+        allow update: if isDM() || (signedIn() && chatAppend());
         allow delete: if isDM();
       }
 
       // ===== журнал правок: пишут игроки, читает и помечает дм
       match /log/{id} {
         allow read, update, delete: if isDM();
-        allow create: if canWrite() && request.resource.data.uid == uid();
+        allow create: if isDM() || (canWrite() && request.resource.data.uid == uid());
       }
 
       // ===== корзина (2026-09-27): удалённое 30 дней лежит здесь. Кладёт тот, кто удаляет (игрок — только от своего имени); смотрит, возвращает и чистит дм
       match /trash/{id} {
         allow read, update, delete: if isDM();
-        allow create: if canWrite() && request.resource.data.by == uid();
+        allow create: if isDM() || (canWrite() && request.resource.data.by == uid());
       }
     }
   }
