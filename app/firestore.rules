@@ -106,6 +106,10 @@ service cloud.firestore {
         allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
       }
 
+      // ===== карточки (TTS): правит мастер; игроки читают только открытые (pub — сет открыт и карта не скрыта)
+      match /cards/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow write: if isDM(); }
+      match /cardsets/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow write: if isDM(); }
+
       // ===== картинки
       match /images/{id} {
         allow read: if signedIn();
