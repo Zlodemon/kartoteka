@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Карточки для TTS</title>
+<style>
+:root{--bg:#f6f4ef;--card:#ffffff;--text:#1f1d1a;--muted:#6b665d;--line:#e3ded3;--acc:#8a4b12;--accbg:#fbeedf;--ok:#1e7a45;--okbg:#e5f4ea;--warn:#8a5a00;--warnbg:#fff4d6;--code:#f1ede4}
+@media (prefers-color-scheme:dark){:root{--bg:#14151a;--card:#1c1e25;--text:#ecebe7;--muted:#a19d95;--line:#2d3039;--acc:#f0a35e;--accbg:#2b2117;--ok:#6fd49b;--okbg:#15291e;--warn:#f3c56b;--warnbg:#2c2513;--code:#262932}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px}
+h2{font-size:22px;margin:42px 0 12px;padding-top:6px;border-top:1px solid var(--line)}
+h3{font-size:17px;margin:22px 0 8px}
+p{margin:8px 0}
+.lead{color:var(--muted);font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin:14px 0}
+.step{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.num{width:44px;height:44px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px}
+.ok{background:var(--okbg);border-color:transparent}
+.warn{background:var(--warnbg);border-color:transparent}
+.acc{background:var(--accbg);border-color:transparent}
+code,kbd{font-family:Consolas,monospace;background:var(--code);padding:1px 6px;border-radius:6px;font-size:14px}
+kbd{border:1px solid var(--line)}
+ol,ul{padding-left:22px;margin:6px 0}
+li{margin:4px 0}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td,th{border-top:1px solid var(--line);padding:8px 6px;vertical-align:top;text-align:left}
+th{color:var(--muted);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.5px;border-top:none}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px;margin:8px 0}
+summary{cursor:pointer;font-weight:600}
+.toc{columns:2;column-gap:28px}
+a{color:var(--acc)}.toc a{text-decoration:none}
+.small{font-size:14px;color:var(--muted)}
+@media (max-width:600px){.toc{columns:1}.step{grid-template-columns:36px 1fr}.num{width:36px;height:36px;font-size:17px}}
+</style>
+</head>
+<body>
+<main>
+<h1>Карточки → Tabletop Simulator</h1>
+<p class="lead">Как включить у себя библиотеку карт и выгружать колоды в TTS прямо с сайта. Для тех, у кого своя копия картотеки (ставили через <code>1_USTANOVKA.cmd</code>).</p>
+
+<div class="card acc"><b>Что получится.</b> На сайте раздел «Карточки»: сеты карт, конструктор с превью, библиотека для игроков (скрытые сеты видит только мастер). Кнопка <b>🎲 В TTS</b> выкладывает картинки карт в интернет на отдельный адрес вашего проекта и кладёт колоды в TTS: <b>Объекты → Сохранённые объекты → Картотека</b>. Игроки в мультиплеере видят карты, потому что картинки грузятся по ссылкам. Ничего платить и ставить не нужно.</div>
+
+<div class="card toc">
+<a href="#t1">1. Обновите сайт</a><br>
+<a href="#t2">2. Включите карточки</a><br>
+<a href="#t3">3. Сделайте или загрузите карты</a><br>
+<a href="#t4">4. Оформление и рубашки</a><br>
+<a href="#t5">5. Первая выгрузка в TTS</a><br>
+<a href="#t6">6. Карты в TTS</a><br>
+<a href="#t7">7. Поменяли карты — обновите</a><br>
+<a href="#t8">8. Если что-то не так</a><br>
+<a href="#t9">9. Запасной путь — программа</a><br>
+<a href="#t10">10. Что где лежит и лимиты</a>
+</div>
+
+<h2 id="t1">1. Обновите сайт</h2>
+<div class="card"><div class="step"><div class="num">1</div><div>
+<p>Дважды щёлкните <code>2_OBNOVIT_SAIT.cmd</code> в папке картотеки. Нужна версия от <b>21.10.2026</b> или новее — версию пишет окно обновления. После обновления игрокам достаточно нажать <kbd>F5</kbd>.</p>
+</div></div></div>
+
+<h2 id="t2">2. Включите карточки</h2>
+<div class="card"><div class="step"><div class="num">2</div><div>
+<p>Зайдите на сайт мастером: <b>Настройки → вкладка 🃏 Карточки → «Включить»</b>. В меню слева появится раздел <b>«Карточки»</b>. Выключите — раздел у игроков пропадёт, карты не удалятся.</p>
+</div></div></div>
+
+<h2 id="t3">3. Сделайте или загрузите карты</h2>
+<div class="card">
+<ul>
+<li><b>+ Сет</b> — группа карт, в TTS это одна колода. У сета есть галочка «Игроки видят этот сет»: снимите её для карт врагов.</li>
+<li><b>+ Карта</b> — конструктор: название, энергия и инициатива (число, <code>X</code>, <code>0</code>), теги, цель, текст, арт. Арт двигается мышью прямо на превью, колесо — масштаб; картинку можно вставить <kbd>Ctrl</kbd>+<kbd>V</kbd> или перетащить.</li>
+<li>В тексте: выделите слова и нажмите цвет; <code>**жирный**</code>; пустая строка — отступ.</li>
+<li><b>⚙ Справочники</b> — списки тегов (с цветами), целей, цветов текста и необязательные правила подсветки.</li>
+<li><b>⇅ Импорт / экспорт</b> — перенести сеты с картами и артами файлом, например от другого мастера.</li>
+</ul></div>
+
+<h2 id="t4">4. Оформление и рубашки</h2>
+<div class="card">
+<p>В настройках сета (<b>✎ сет</b>) две независимые части:</p>
+<ul>
+<li><b>Лицо карт</b> — дизайн (<b>Классика</b>, <b>Полный арт</b>, <b>Свиток</b>), цвет рамки, шрифты названия и текста. Отдельной карте можно задать свой дизайн, рамку и шрифты: в конструкторе «Оформление этой карты».</li>
+<li><b>Рубашка</b> — узор (или своя картинка), цвет, фон, знак в центре и его шрифт. Настраивается отдельно от лица: можно сделать одинаковые рубашки у сетов с разными рамками. Цвет «как у лица» значит — пока не выбран свой цвет, рубашка повторяет рамку.</li>
+</ul>
+<p><b>Одна рубашка на все карты:</b> ⚙ Справочники → <b>Рубашка</b> → «Одна рубашка для всех карт». Свои рубашки сетов не удаляются: снимете галочку — вернутся.</p>
+</div>
+
+<h2 id="t5">5. Первая выгрузка в TTS</h2>
+<div class="card warn"><b>Нужно:</b> браузер <b>Chrome, Edge или Яндекс Браузер</b> на том компьютере, где стоит TTS, и вход на сайт под Google-аккаунтом, который <b>создавал Firebase-проект</b> при установке (владелец проекта). В Firefox и Safari всё работает, но колоды не сохранятся в папку сами, а скачаются файлами.</div>
+<div class="card"><div class="step"><div class="num">1</div><div>
+<p>В «Карточках» нажмите <b>🎲 В TTS</b>.</p></div></div></div>
+<div class="card"><div class="step"><div class="num">2</div><div>
+<p><b>«Войти Google»</b> — разрешение выкладывать картинки на ваш Firebase Hosting. Откроется окно Google.</p>
+<p>Google может показать <b>«Приложение не проверено»</b> / <b>«Google hasn't verified this app»</b>. Это нормально: приложение — ваш же сайт. Нажмите <b>«Дополнительно» → «Перейти на … (небезопасно)»</b> → <b>«Разрешить»</b>.</p>
+<p class="small">Вход действует час. Потом кнопка «Войти Google» появится снова.</p></div></div></div>
+<div class="card"><div class="step"><div class="num">3</div><div>
+<p><b>«Выбрать папку…»</b> — укажите папку TTS. Проще всего выбрать <b>«Документы»</b>: сайт сам найдёт внутри <code>My Games\Tabletop Simulator\Saves\Saved Objects</code>. Браузер спросит «Разрешить сайту редактировать файлы?» — <b>Разрешить</b>. Папку браузер запомнит; после перезапуска браузера он ещё раз спросит разрешение при выгрузке.</p></div></div></div>
+<div class="card"><div class="step"><div class="num">4</div><div>
+<p>Отметьте сеты и нажмите <b>«⬆ Выгрузить выбранные»</b>. Сайт нарисует картинки, выложит их и запишет колоды. При первой выгрузке он сам создаст адрес для картинок <code>ваш-проект-tts.web.app</code> — это отдельный сайт вашего проекта, основной сайт и его обновления он не трогает.</p></div></div></div>
+
+<h2 id="t6">6. Карты в TTS</h2>
+<div class="card ok">
+<p>В TTS: <b>Objects (Объекты) → Saved Objects (Сохранённые объекты) → Картотека</b> → колода сета → перетащите на стол. Если TTS был открыт во время выгрузки — закройте и снова откройте это меню.</p>
+<p>У каждой карты в TTS есть описание (энергия, инициатива, теги, цель, текст — видно при наведении) и теги TTS. Скрытые сеты тоже выгружаются: файл колоды есть только у вас.</p>
+</div>
+
+<h2 id="t7">7. Поменяли карты — обновите</h2>
+<div class="card">
+<p>Окно <b>🎲 В TTS</b> показывает у каждого сета: <b>«не выгружался»</b>, <b>«изменено N»</b> или <b>«✓ в TTS»</b>. Нажмите <b>«Отметить изменённые»</b> → <b>«Выгрузить»</b>. Заново выкладываются <b>только изменённые карты</b>: поменяли текст двух карт — уйдут две картинки. Поменяли цвет одного тега — перерисуются только карты с этим тегом.</p>
+<p>Карты, которые <b>уже лежат на столе</b>, сами не поменяются. Уберите старую колоду и возьмите новую из «Сохранённых объектов». Каждая правка получает новое имя картинки, поэтому TTS не покажет старую версию из кэша.</p>
+</div>
+
+<h2 id="t8">8. Если что-то не так</h2>
+<details><summary>«Доступ заблокирован» / «Error 403: access_denied» при входе Google</summary>
+<p>Экран согласия Google у вашего проекта в тестовом режиме. Откройте <a href="https://console.cloud.google.com/auth/audience" target="_blank">console.cloud.google.com → Google Auth Platform → Audience (Аудитория)</a>, выберите сверху свой проект и сделайте одно из двух:</p>
+<ul><li><b>Test users → Add users</b> — добавьте свою почту (почту мастера);</li><li>или <b>Publish app</b> — перевести в рабочий режим (проверка Google для этого не нужна, будет только предупреждение «не проверено»).</li></ul></details>
+<details><summary>«The caller does not have permission» / 403 при выгрузке</summary>
+<p>Вы вошли не тем аккаунтом. Выкладывать картинки может только владелец или редактор Firebase-проекта. Либо зайдите на сайт аккаунтом, которым создавали проект, либо добавьте почту мастера: <a href="https://console.firebase.google.com/" target="_blank">console.firebase.google.com</a> → ваш проект → ⚙ <b>Project settings → Users and permissions → Add member</b>, роль <b>Editor</b>.</p></details>
+<details><summary>«Firebase Hosting API has not been used… or it is disabled»</summary>
+<p>Откройте ссылку из сообщения (или <a href="https://console.cloud.google.com/apis/library/firebasehosting.googleapis.com" target="_blank">Firebase Hosting API</a>, выбрав свой проект) и нажмите <b>Enable</b>. Через минуту повторите выгрузку.</p></details>
+<details><summary>Окно входа Google не открывается</summary>
+<p>Браузер блокирует всплывающие окна. Разрешите всплывающие окна для своего сайта (значок в адресной строке) и нажмите «Войти Google» ещё раз.</p></details>
+<details><summary>Колоды скачиваются файлами вместо записи в папку</summary>
+<p>Браузер не умеет писать в папки (Firefox, Safari) или вы не дали разрешение. Либо откройте сайт в Chrome/Edge/Яндекс Браузере, либо положите скачанные <code>.json</code> в <code>Документы\My Games\Tabletop Simulator\Saves\Saved Objects</code>.</p></details>
+<details><summary>В TTS нет папки «Картотека»</summary>
+<p>Выбрана не та папка. В окне 🎲 В TTS нажмите «Другая папка…» и выберите «Документы» — сайт найдёт папку TTS сам. Проверьте, что TTS хранит сохранения в «Документах» (если «Документы» перенесены в OneDrive — выберите их там).</p></details>
+<details><summary>В TTS вместо картинки ошибка загрузки</summary>
+<p>Скопируйте ссылку картинки из ошибки и откройте в браузере. Если не открывается — повторите выгрузку этого сета. Если открывается — в TTS: <b>Configuration → Mod Caching</b>, отключите кэш или удалите сохранённые картинки и возьмите колоду заново.</p></details>
+<details><summary>Сайт написал, что адрес <code>…-tts</code> занят</summary>
+<p>Ничего делать не нужно: сайт сам возьмёт адрес с хвостом (например <code>проект-tts-a1b2</code>) и запомнит его.</p></details>
+
+<h2 id="t9">9. Запасной путь — программа</h2>
+<div class="card">
+<p><code>4_KARTY_V_TTS.cmd</code> делает то же самое без браузера и ещё умеет класть колоды <b>прямо на стол открытой игры</b>. Ей нужны картинки, нарисованные сайтом заранее: включите <b>Настройки → 🃏 Карточки → «Готовить картинки для программы 4_KARTY_V_TTS.cmd»</b>, откройте «Карточки» мастером и дождитесь «✓ готово для TTS». Подробно — <a href="INSTRUKCIYA.html#tts">INSTRUKCIYA.html, раздел 13</a>.</p>
+</div>
+
+<h2 id="t10">10. Что где лежит и лимиты</h2>
+<div class="card"><table>
+<tr><th>Что</th><th>Где</th></tr>
+<tr><td>Карты, сеты, справочники</td><td>база вашего проекта; скрытые сеты закрыты правилами базы</td></tr>
+<tr><td>Картинки карт для TTS</td><td><code>ваш-проект-tts.web.app</code> — открыты по ссылке (имена длинные, не угадать, но ссылку можно переслать)</td></tr>
+<tr><td>Колоды</td><td><code>Документы\My Games\Tabletop Simulator\Saves\Saved Objects\Картотека</code> — только у вас</td></tr>
+</table>
+<p class="small">Бесплатный тариф Firebase: на Hosting 10 ГБ места и 360 МБ трафика в сутки. Колода из 30 карт — около 4 МБ; каждый игрок скачивает картинки один раз, дальше TTS берёт их из своего кэша.</p></div>
+</main>
+</body>
+</html>

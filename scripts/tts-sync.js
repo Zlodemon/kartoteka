@@ -99,7 +99,7 @@ async function syncOnce(cid, quiet) {
   for (const s of sets) s._file = await file('b', s.bh, 'back_' + s.id, `campaigns/${cid}/cardsets/${s.id}`, `рубашка «${s.name}»`);
   let n = 0; for (const c of cards) { if (!c.set || !sets.some(s => s.id === c.set)) continue; c._file = await file('f', c.fh, c.id, `campaigns/${cid}/cards/${c.id}`, `«${c.name}»`); if (!quiet) process.stdout.write(`\r  Картинки: ${++n}   `); }
   if (!quiet) process.stdout.write('\n');
-  if (unready.length) warn(`Не нарисованы на сайте (${unready.length}): ${unready.slice(0, 6).join(', ')}${unready.length > 6 ? '…' : ''} — открой раздел «Карточки» на сайте под мастером и дождись «✓ готово для TTS».`);
+  if (unready.length) warn(`Не нарисованы на сайте (${unready.length}): ${unready.slice(0, 6).join(', ')}${unready.length > 6 ? '…' : ''} — на сайте включи «Настройки → 🃏 Карточки → Готовить картинки для программы», открой раздел «Карточки» под мастером и дождись «✓ готово для TTS». Или выгрузи прямо с сайта кнопкой «🎲 В TTS».`);
   if (lost.length) warn(`Нет картинки в базе (${lost.length}): ${lost.slice(0, 6).join(', ')} — сайт нарисует их заново, когда мастер откроет «Карточки».`);
   // выложить новые картинки на сайт
   if (fresh.length) {
