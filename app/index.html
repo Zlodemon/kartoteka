@@ -342,7 +342,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .cdempty{color:var(--faint);font-size:13px;padding:6px 2px}
 .cdhero{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:60px 20px;border:1px dashed var(--line2);border-radius:18px;max-width:560px;margin:20px auto}
 .cdhero .big{font-size:46px;line-height:1}.cdhero b{font-size:17px}
-#modal .box.cdbox{width:960px}
+#modal .box.wide.cdbox{width:960px}
 #modal .box.cdzbox{width:auto}
 .cdzoom canvas{display:block;margin:0 auto;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.6)}
 .cded{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start}
@@ -368,7 +368,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .cdquick .q[style*="--tc"]{border-color:color-mix(in srgb,var(--tc) 45%,transparent)}
 .cdtgt input,.cdf textarea{width:100%}
 .cdbox .modal-actions{position:sticky;bottom:-22px;background:#10142a;margin:14px -24px -22px;padding:12px 24px;border-top:1px solid var(--line);z-index:2}
-#modal .box.cdbox.cdlbox{width:700px}
+#modal .box.wide.cdbox.cdlbox{width:700px}
 .cdlbody>.btn{align-self:flex-start}
 .cdtbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}
 .sw{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.18);background:var(--c);cursor:pointer;padding:0;transition:transform .12s}
@@ -385,7 +385,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .cdlh{margin:14px 0 0;font-size:14px}
 .cdgrid2{display:grid;grid-template-columns:minmax(180px,auto) 1fr;gap:10px 14px;align-items:center;font-size:13px}.cdgrid2 select{max-width:260px}
 #modal .box.dropfile{outline:2px dashed var(--gold);outline-offset:-8px}
-@media (max-width:860px){.cded{grid-template-columns:1fr}.cdedL{position:static}#modal .box.cdbox{width:100%}}
+@media (max-width:860px){.cded{grid-template-columns:1fr}.cdedL{position:static}#modal .box.wide.cdbox{width:100%}}
 body.phone .cdgrid{gap:10px;padding:10px;justify-content:center}
 body.phone .cdsh{flex-wrap:wrap;row-gap:8px}body.phone .cdsh .grow{flex-basis:100%;height:0}
 @media (max-width:860px){.cdbox .modal-actions{flex-wrap:wrap}.cdbox .cdpos{display:none}}
@@ -413,6 +413,28 @@ body.phone .cdsh{flex-wrap:wrap;row-gap:8px}body.phone .cdsh .grow{flex-basis:10
 .cdselbar select{max-width:240px}.cdselbar[hidden]{display:none}#cdSelB.on{border-color:var(--gold);color:var(--gold)}
 .cdlib:not(.selmode) .cdsh .sall{display:none}
 .cdselbar{margin-right:62px}body.phone .cdselbar{margin-right:0;bottom:70px}
+#modal .box.wide.cdstybox{width:1180px}
+.cdsty{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;align-items:start}
+.cdstyL{display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--line);padding-right:18px;position:sticky;top:0}
+.cdstylist{display:flex;flex-direction:column;gap:6px}
+.cdstyit{display:flex;gap:8px;align-items:center;padding:7px 8px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:var(--panel)}
+.cdstyit:hover{border-color:var(--line2)}.cdstyit.on{border-color:var(--gold);background:var(--panel2)}
+.cdstyit canvas{border-radius:4px;flex:none}.cdstyit .t{display:flex;flex-direction:column;min-width:0;gap:2px}.cdstyit .t span{font-size:11px;line-height:1.35}
+.cdstyR{display:flex;flex-direction:column;gap:10px;min-width:0}
+.cdstyprev{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:16px;align-items:start}
+.cdstyuse{display:flex;flex-direction:column;gap:8px;font-size:13px;min-width:0}
+.cdchips{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.cdsty .q,.cdselbar .q{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:12.5px;cursor:pointer;color:var(--muted);transition:all .12s}
+.cdsty .q:hover{color:var(--text);border-color:var(--line2)}.cdsty .q.on{background:var(--panel2);color:#fff;border-color:var(--gold)}
+.cdsty .cdf>label{display:flex;align-items:center;gap:8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+.cdsty .cdf .lnk,.cdsec .lnk{background:none;border:none;color:var(--faint);font-size:11px;cursor:pointer;padding:0;text-transform:none;letter-spacing:0}.cdsec .lnk{margin-left:8px}
+.cdsty .cdlrow select{max-width:150px}
+.cdbkt .none{display:flex;align-items:center;justify-content:center;width:46px;height:64px;border:1px dashed var(--line2);border-radius:4px;font-size:10px;line-height:1.2;text-align:center;color:var(--muted)}
+.swi{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--c);vertical-align:-1px;margin-left:3px;border:1px solid rgba(255,255,255,.3)}
+.cdsetsty{font-size:11.5px;cursor:pointer;padding:2px 8px;border-radius:20px;border:1px dashed var(--line2)}.cdsetsty:hover{color:var(--text)}
+.cdselbar select.cdsty,.cdselbar select.cdmv{max-width:150px}
+@media(min-width:1100px){.cdselbar{flex-wrap:nowrap}.cdselbar>*{flex-shrink:0}.cdselbar>select{flex-shrink:1;min-width:90px}}
+@media (max-width:980px){.cdsty{grid-template-columns:1fr}.cdstyL{border-right:0;padding-right:0;position:static}.cdstyprev{grid-template-columns:1fr 1fr}.cdstyuse{grid-column:1/-1}#modal .box.wide.cdstybox{width:100%}}
 .seg.dirseg span.on{color:#fff;background:rgba(233,194,255,.14)}.tlpage .head .seg span.on[data-m=dm]{color:var(--gold)}
 .seg.visctl span.on[data-v=full]{color:var(--mint)}.seg.visctl span.on[data-v=brief]{color:var(--gold)}.seg.visctl span.on[data-v=hidden]{color:var(--red)}
 .eye{border:none;background:none;cursor:pointer;font-size:15px;padding:2px 6px;border-radius:6px;color:var(--faint)}.eye.on{color:var(--mint)}.eye:hover{background:var(--panel2)}
@@ -1602,10 +1624,10 @@ function wmSubMap(id){ if(!id||!me) return Promise.resolve(); let s=WMSUB.get(id
   wmMerge('wmarkers'); wmMerge('wmdraw'); return s.ready; }
 let LOGSUB=null;
 function logSub(n){ if(!realDM()||!me) return; if(LOGSUB&&LOGSUB.n>=n) return; if(LOGSUB) try{ LOGSUB.un(); }catch{} LOGSUB={n,un:DB.subscribe('log',{orderBy:'at',limit:n},docs=>applyDocs('log','log',docs))}; }
-let CDSUB=null;
-function cdSubscribe(){ if(CDSUB||!me) return; const o=realDM()?null:{where:[['pub','==',true]]}; CDSUB=[DB.subscribe('cards',o,docs=>applyDocs('cards','cards',docs)),DB.subscribe('cardsets',o,docs=>applyDocs('cardsets','cardsets',docs))]; }
+let CDSUB=null; const CD_LOADED={cards:false,sets:false}; // пришли ли карты и сеты из базы (до этого не переводим оформление на стили)
+function cdSubscribe(){ if(CDSUB||!me) return; const o=realDM()?null:{where:[['pub','==',true]]}; CDSUB=[DB.subscribe('cards',o,docs=>{ CD_LOADED.cards=true; applyDocs('cards','cards',docs); }),DB.subscribe('cardsets',o,docs=>{ CD_LOADED.sets=true; applyDocs('cardsets','cardsets',docs); })]; }
 function lazyReset(){ for(const v of WMSUB.values()) v.un.forEach(f=>{ try{ f(); }catch{} }); WMSUB.clear(); for(const k of Object.keys(world)) if(wmAlias(k)) delete world[k]; world.wmarkers=[]; world.wmdraw=[];
-  if(LOGSUB){ try{ LOGSUB.un(); }catch{} LOGSUB=null; } if(CDSUB){ CDSUB.forEach(f=>{ try{ f(); }catch{} }); CDSUB=null; } world.cards=[]; world.cardsets=[]; }
+  if(LOGSUB){ try{ LOGSUB.un(); }catch{} LOGSUB=null; } if(CDSUB){ CDSUB.forEach(f=>{ try{ f(); }catch{} }); CDSUB=null; } CD_LOADED.cards=CD_LOADED.sets=false; world.cards=[]; world.cardsets=[]; }
 function subscribeAll(){ lazyReset();
   const sub=(coll,key,opts,post)=>unsubs.push(DB.subscribe(coll,opts,docs=>{ applyDocs(key,coll,docs,post); }));
   sub('meta','_settings',null,()=>{ const s=world._settings.find(x=>x.id==='settings'); const fresh=s?{...defaultSettings(),...s}:{...defaultSettings(),id:'settings'}; if(!world.settings) world.settings=fresh; else if(!pending.has('settings')&&!(s&&s.updatedAt&&s.updatedAt===world.settings.updatedAt)){ for(const k of Object.keys(world.settings)) if(!(k in fresh)) delete world.settings[k]; Object.assign(world.settings,fresh); } const t=world._settings.find(x=>x.id==='timeline'); if(!pending.has('timeline')&&!(t&&world.timeline&&t.updatedAt&&t.updatedAt===world.timeline.updatedAt)) world.timeline=t?t:{id:'timeline',nodes:[]}; const tc=world._settings.find(x=>x.id==='techniques'); if(!pending.has('techniques')&&!(tc&&world.techniques&&tc.updatedAt&&tc.updatedAt===world.techniques.updatedAt)){ world.techniques=tc?tc:(realDM()?techBaseCatalog():{id:'techniques',branches:[],groups:[]}); techLayoutCache={}; } applySiteName(); });
@@ -7809,12 +7831,10 @@ function cdPub(c){ const s=cdSetOf(c); const v=!!(s&&s.pub&&!c.hide); if(c.pub!=
 /* элементы карты: энергия, инициатива, теги (тип), цель — цвет и подпись. Уровни: карта → сет → общий шаблон (settings.cards.el) → по умолчанию.
    пустое значение = «как уровнем выше»; подпись «-» = без подписи. Цвет тегов по умолчанию — цвет главного тега, цели — его тёмный оттенок */
 const CD_EL=[['en','Энергия','ЭНЕРГИЯ'],['ini','Инициатива','ИНИЦИАТИВА'],['tag','Теги (тип)',''],['tgt','Цель','']];
-function cdEls(c,set,upto){ const L=[(c&&c.el)||{},(set&&set.el)||{},CDS().el||{}].slice(upto||0), o={};
-  for(const [k,,dt] of CD_EL){ const pick=f=>{ for(const l of L){ const v=l[k]&&l[k][f]; if(v!=null&&v!=='') return v; } return null; };
-    let col=pick('c'); if(col==null&&(k==='en'||k==='ini')) col=cdGet(k); let t=pick('t'); if(t==null) t=dt; if(t==='-') t=''; o[k]={c:col||'',t}; if(k==='tgt') o[k].show=pick('show')||'auto'; } return o; }
+function cdEls(c,set){ return cdElsOf(cdFaceChain(c,set)); }
 /* блок цели виден? — у карт без целей (только теги) пустой блок не рисуется, теги занимают его место */
 const cdTgtOn=(c,E)=>E.tgt.show==='always'||(E.tgt.show!=='never'&&!!String(c.tgt||'').trim());
-function cdStyle(c,set){ set=set||{}; const el=cdEls(c,set); return { lay:c.lay||set.lay||cdGet('lay'), frame:c.frame||set.frame||cdGet('frame'), tf:c.tf||set.tf||cdGet('tf'), xf:c.xf||set.xf||cdGet('xf'), en:el.en.c, ini:el.ini.c, el }; }
+function cdStyle(c,set){ const L=cdFaceChain(c,set||{}), el=cdElsOf(L); return { lay:cdPickIn(L,'lay')||cdGet('lay'), frame:cdPickIn(L,'frame')||cdGet('frame'), tf:cdPickIn(L,'tf')||cdGet('tf'), xf:cdPickIn(L,'xf')||cdGet('xf'), en:el.en.c, ini:el.ini.c, el }; }
 
 /* --- цвет --- */
 function cdRgb(h){ h=String(h||'#888').replace('#',''); if(h.length===3) h=h.split('').map(x=>x+x).join(''); const n=parseInt(h.slice(0,6),16)||0; return [n>>16&255,n>>8&255,n&255]; }
@@ -7946,9 +7966,7 @@ function cdDrawScroll(x,c,S,exp,tags,tc,name){ const fr=S.frame, ink='#2b2118'; 
 
 /* --- рубашка: свои настройки, не зависят от лица (цвет и шрифт знака по умолчанию берутся у лица сета, пока не заданы свои);
    «общая рубашка» (settings.cards.back.on) — одна для всех карт всех сетов --- */
-function cdBackOf(s,mode){ const G=CDS().back||{};
-  if(mode==='g'||(mode!=='own'&&G.on&&!(s&&s.ownBack))) return {d:G.d||'b1',bg:G.bg||'#17141f',fr:G.fr||cdGet('frame'),t:G.t!=null?G.t:'✦',tf:G.tf||cdGet('tf'),img:G.img||'',art:G.art};
-  s=s||{}; const b=s.back||{}; return {d:b.d||'b1',bg:b.bg||'#17141f',fr:b.fr||s.frame||cdGet('frame'),t:b.t!=null?b.t:'✦',tf:b.tf||s.tf||cdGet('tf'),img:b.img||'',art:b.art}; }
+function cdBackOf(s){ return cdBackResolve(cdBackChain(s),cdSetFace(s||{})); }
 const cdBackImg=B=>B.d==='img'&&B.img?B.img:null;
 const cdBackFonts=B=>[[B.tf,700,B.t||'✦']];
 function cdDrawBack(x,set,W,exp){ const k=W/CD_W; const B=set&&set._b?set._b:cdBackOf(set); const fr=B.fr, d=B.d, bg=B.bg; const tf=cdFF(B.tf,700,B.t||'✦');
@@ -7977,23 +7995,23 @@ function cdUiGet(k,d){ try{ return localStorage.getItem('cd.'+k)??d; }catch{ ret
 function cdUiSet(k,v){ try{ localStorage.setItem('cd.'+k,v); }catch{} }
 function cdMatch(c){ const q=cdNorm(CD_UI.q); if(q&&!cdNorm((c.name||'')+' '+(c.text||'')+' '+(c.flav||'')+' '+(c.tags||[]).join(' ')).includes(q)) return false;
   if(CD_UI.tag&&!(c.tags||[]).some(t=>cdNorm(t)===cdNorm(CD_UI.tag))) return false; if(CD_UI.tgt&&cdNorm(c.tgt)!==cdNorm(CD_UI.tgt)) return false; if(CD_UI.en!==''&&String(c.en??'').trim().toUpperCase()!==CD_UI.en) return false; return true; }
-function renderCards(m){ cdSubscribe(); const dm=isDM(); const tw={s:150,m:200,l:270}[cdUiGet('size','m')]||200; const closed=new Set(JSON.parse(cdUiGet('closed','[]')||'[]'));
+function renderCards(m){ cdSubscribe(); const dm=isDM(); if(dm&&(world.cardsets||[]).length+(world.cards||[]).length) cdStylesInit(); const tw={s:150,m:200,l:270}[cdUiGet('size','m')]||200; const closed=new Set(JSON.parse(cdUiGet('closed','[]')||'[]'));
   const all=cdCards(); const tags=[...new Set([...cdGet('tags').map(t=>t.n),...all.flatMap(c=>c.tags||[])])]; const tgts=[...new Set([...cdGet('tgts'),...all.map(c=>c.tgt).filter(Boolean)])]; const ens=[...new Set(all.map(c=>String(c.en??'').trim().toUpperCase()).filter(Boolean))].sort();
   const opt=(L,v)=>L.map(t=>`<option ${cdNorm(t)===cdNorm(v)?'selected':''}>${esc(t)}</option>`).join('');
   const page=el(`<div class="page cdlib ${dm&&CD_SELMODE?'selmode':''}"><div class="head"><h1>Карточки</h1><span class="faint cdcnt">${all.length} ${plural(all.length,'карта','карты','карт')}</span>${dm&&CDS().bg?'<span class="cdtts" id="cdTts"></span>':''}<span class="grow"></span>
-    ${dm?`<button class="btn sm ${CD_SELMODE?'on':''}" id="cdSelB" title="Выбрать несколько карт и разом перенести в сет, разложить по сетам, скрыть, удалить. Без режима: Ctrl+клик — выбрать, Shift+клик — диапазон">☑ Выбрать</button><button class="btn sm" id="cdTtsB" title="Выгрузить сеты в Tabletop Simulator: картинки — на сайт картинок, колоды — в папку TTS">🎲 В TTS</button><button class="btn sm" id="cdLists" title="Теги, цели, цвета текста, подсветка, оформление по умолчанию">⚙ Справочники</button><button class="btn sm" id="cdIO" title="Перенести сеты с картами и артами в другую игру или на другой сайт">⇅ Импорт / экспорт</button><button class="btn" id="cdNewSet">+ Сет</button><button class="btn primary" id="cdNew">+ Карта</button>`:''}</div>
+    ${dm?`<button class="btn sm ${CD_SELMODE?'on':''}" id="cdSelB" title="Выбрать несколько карт и разом перенести в сет, разложить по сетам, скрыть, удалить. Без режима: Ctrl+клик — выбрать, Shift+клик — диапазон">☑ Выбрать</button><button class="btn sm" id="cdTtsB" title="Выгрузить сеты в Tabletop Simulator: картинки — на сайт картинок, колоды — в папку TTS">🎲 В TTS</button><button class="btn sm" id="cdStyB" title="Стили оформления: лица и рубашки, где применяются, правила по тегам">🎨 Оформление</button><button class="btn sm" id="cdLists" title="Теги, цели, цвета текста, подсветка, оформление по умолчанию">⚙ Справочники</button><button class="btn sm" id="cdIO" title="Перенести сеты с картами и артами в другую игру или на другой сайт">⇅ Импорт / экспорт</button><button class="btn" id="cdNewSet">+ Сет</button><button class="btn primary" id="cdNew">+ Карта</button>`:''}</div>
     ${dm&&!cdOn()?'<div class="cdwarn">Режим карточек выключен — у игроков раздела нет. Включить: <b>Настройки → 🃏 Карточки</b>.</div>':''}
     <div class="cdbar"><input id="cdQ" placeholder="поиск по названию, тексту, тегам…" value="${esc(CD_UI.q)}"><select id="cdT"><option value="">все теги</option>${opt(tags,CD_UI.tag)}</select><select id="cdG"><option value="">любая цель</option>${opt(tgts,CD_UI.tgt)}</select><select id="cdE"><option value="">энергия: любая</option>${ens.map(e=>`<option value="${esc(e)}" ${CD_UI.en===e?'selected':''}>энергия ${esc(e)}</option>`).join('')}</select><span class="grow"></span><span class="seg cdsz">${['s','m','l'].map(s=>`<span data-s="${s}" class="${cdUiGet('size','m')===s?'on':''}" title="Размер карт">${{s:'▪',m:'◼',l:'⬛'}[s]}</span>`).join('')}</span></div>
     <div class="cdsets"></div></div>`);
   const box=$('.cdsets',page); const filt=CD_UI.q||CD_UI.tag||CD_UI.tgt||CD_UI.en!=='';
   const sets=cdSets(); const groups=sets.map(s=>({s,cards:cdInSet(s.id)})); const loose=cdInSet(''); if(dm&&loose.length) groups.push({s:null,cards:loose});
   for(const {s,cards} of groups){ const shown=cards.filter(cdMatch); if(filt&&!shown.length) continue; const sid=s?s.id:''; const fr=s&&s.frame||cdGet('frame');
-    const sec=el(`<section class="cdset ${closed.has(sid||'_')&&!filt?'closed':''}" data-set="${esc(sid)}" style="--fc:${esc(fr)}"><div class="cdsh"><span class="chev">▾</span>${s?'<canvas class="cdmini"></canvas>':''}<b class="nm">${esc(s?s.name||'Без названия':'Без сета')}</b>${s?(s.pub?'<span class="cdpub on" title="Игроки видят этот сет в библиотеке">👁 видят игроки</span>':'<span class="cdpub" title="Сет скрыт: игроки не видят ни его, ни его карт">🔒 скрыт</span>'):'<span class="cdpub" title="Карты без сета видит только мастер">🔒 только мастер</span>'}<span class="faint">${filt?shown.length+' из '+cards.length:cards.length} ${plural(cards.length,'карта','карты','карт')}</span><span class="grow"></span>${dm?`<button class="btn sm sall" title="Выбрать все карты этого сета">☑ все</button><button class="btn sm add" title="Новая карта в этом сете">+ карта</button>${s?'<button class="btn sm ed" title="Название, видимость, рамка, шрифты, рубашка">✎ сет</button><button class="btn sm mo" title="Ещё">⋯</button>':''}`:''}</div><div class="cdgrid"></div></section>`);
+    const sec=el(`<section class="cdset ${closed.has(sid||'_')&&!filt?'closed':''}" data-set="${esc(sid)}" style="--fc:${esc(fr)}"><div class="cdsh"><span class="chev">▾</span>${s?'<canvas class="cdmini"></canvas>':''}<b class="nm">${esc(s?s.name||'Без названия':'Без сета')}</b>${s?(s.pub?'<span class="cdpub on" title="Игроки видят этот сет в библиотеке">👁 видят игроки</span>':'<span class="cdpub" title="Сет скрыт: игроки не видят ни его, ни его карт">🔒 скрыт</span>'):'<span class="cdpub" title="Карты без сета видит только мастер">🔒 только мастер</span>'}<span class="faint">${filt?shown.length+' из '+cards.length:cards.length} ${plural(cards.length,'карта','карты','карт')}</span>${dm&&s&&cdStyles().length>1?`<span class="faint cdsetsty" title="Стили этого сета — открыть оформление">🎨 ${esc(s.fstyle?cdStyleName(s.fstyle):'по умолчанию')}${s.bstyle&&s.bstyle!==s.fstyle?' · рубашка: '+esc(cdStyleName(s.bstyle)):''}${cdHasOwnFace(s)||cdHasOwnBack(s)?' ✎':''}</span>`:''}<span class="grow"></span>${dm?`<button class="btn sm sall" title="Выбрать все карты этого сета">☑ все</button><button class="btn sm add" title="Новая карта в этом сете">+ карта</button>${s?'<button class="btn sm ed" title="Название, видимость, рамка, шрифты, рубашка">✎ сет</button><button class="btn sm mo" title="Ещё">⋯</button>':''}`:''}</div><div class="cdgrid"></div></section>`);
     if(s) cdCanvas($('.cdmini',sec),24,()=>byId(world.cardsets,sid),true);
     const grid=$('.cdgrid',sec); if(!shown.length) grid.append(el(`<div class="cdempty">${dm?'Пусто. Перетащи сюда карты или нажми «+ карта».':'Пусто.'}</div>`));
     for(const c of shown) grid.append(cdTile(c,tw,shown));
     $('.cdsh',sec).onclick=e=>{ if(e.target.closest('button')) return; sec.classList.toggle('closed'); const k=sid||'_'; sec.classList.contains('closed')?closed.add(k):closed.delete(k); cdUiSet('closed',JSON.stringify([...closed])); };
-    if(dm){ $('.sall',sec).onclick=()=>{ const ids=shown.map(c=>c.id), all=ids.every(id=>CD_SEL.has(id)); for(const id of ids) all?CD_SEL.delete(id):CD_SEL.add(id); cdSelUpd(); }; $('.add',sec).onclick=()=>cdNewCard(sid); const ed=$('.ed',sec); if(ed) ed.onclick=()=>cdSetEdit(s); const mo=$('.mo',sec); if(mo) mo.onclick=e=>cdSetMenu(s,e.clientX,e.clientY);
+    if(dm){ $('.sall',sec).onclick=()=>{ const ids=shown.map(c=>c.id), all=ids.every(id=>CD_SEL.has(id)); for(const id of ids) all?CD_SEL.delete(id):CD_SEL.add(id); cdSelUpd(); }; $('.add',sec).onclick=()=>cdNewCard(sid); const ed=$('.ed',sec); if(ed) ed.onclick=()=>cdSetEdit(s); const ss=$('.cdsetsty',sec); if(ss) ss.onclick=e=>{ e.stopPropagation(); cdStylesDlg(s.fstyle||CDS().defFace); }; const mo=$('.mo',sec); if(mo) mo.onclick=e=>cdSetMenu(s,e.clientX,e.clientY);
       /* перетаскивание карт: на сет — в конец, на карту — перед ней */
       sec.ondragover=e=>{ if(!CD_DRAG) return; e.preventDefault(); sec.classList.add('dropon'); }; sec.ondragleave=e=>{ if(!sec.contains(e.relatedTarget)) sec.classList.remove('dropon'); };
       sec.ondrop=e=>{ e.preventDefault(); sec.classList.remove('dropon'); const ids=CD_DRAG; CD_DRAG=null; if(!ids) return; const t=e.target.closest('.cdtile'); cdMoveMany(ids,sid,t&&!ids.includes(t.dataset.id)?t.dataset.id:null); /* выбор не сбрасываем — можно продолжать */ }; }
@@ -8003,7 +8021,7 @@ function renderCards(m){ cdSubscribe(); const dm=isDM(); const tw={s:150,m:200,l
   const q=$('#cdQ',page); q.oninput=()=>{ CD_UI.q=q.value; clearTimeout(q._t); q._t=setTimeout(()=>{ render(); },250); };
   $('#cdT',page).onchange=e=>{ CD_UI.tag=e.target.value; render(); }; $('#cdG',page).onchange=e=>{ CD_UI.tgt=e.target.value; render(); }; $('#cdE',page).onchange=e=>{ CD_UI.en=e.target.value; render(); };
   $$('.cdsz span',page).forEach(s=>s.onclick=()=>{ cdUiSet('size',s.dataset.s); render(); });
-  if(dm){ $('#cdTtsB',page).onclick=()=>cdTtsDlg(); $('#cdNew',page).onclick=()=>cdNewCard(sets[0]?sets[0].id:''); $('#cdNewSet',page).onclick=cdNewSet; $('#cdLists',page).onclick=()=>cdListsDlg(); $('#cdIO',page).onclick=cdIODlg; const h=$('#cdHeroSet',page); if(h) h.onclick=cdNewSet; }
+  if(dm){ $('#cdStyB',page).onclick=()=>cdStylesDlg(); $('#cdTtsB',page).onclick=()=>cdTtsDlg(); $('#cdNew',page).onclick=()=>cdNewCard(sets[0]?sets[0].id:''); $('#cdNewSet',page).onclick=cdNewSet; $('#cdLists',page).onclick=()=>cdListsDlg(); $('#cdIO',page).onclick=cdIODlg; const h=$('#cdHeroSet',page); if(h) h.onclick=cdNewSet; }
   if(dm){ for(const id of [...CD_SEL]) if(!byId(world.cards,id)) CD_SEL.delete(id); page.append(el('<div class="cdselbar" hidden></div>')); $('#cdSelB',page).onclick=()=>{ CD_SELMODE=!CD_SELMODE; if(!CD_SELMODE) CD_SEL.clear(); cdSelUpd(); }; }
   m.append(page); if(dm){ cdSelUpd(); cdFaceBadge(); cdFaceSched(1200); } }
 let CD_DRAG=null, CD_SELMODE=false, CD_LAST=null; const CD_SEL=new Set();
@@ -8026,12 +8044,13 @@ function cdSelUpd(){ const page=$('.cdlib'); if(!page) return; page.classList.to
   $$('.cdtile',page).forEach(t=>t.classList.toggle('sel',CD_SEL.has(t.dataset.id)));
   const bar=$('.cdselbar',page); if(!bar) return; const n=CD_SEL.size; bar.hidden=!n&&!CD_SELMODE; if(bar.hidden) return;
   const sets=cdSets(); const sel=[...CD_SEL].map(id=>byId(world.cards,id)).filter(Boolean); const anyShown=sel.some(c=>!c.hide);
-  bar.innerHTML=n?`<b>Выбрано: ${n}</b><select class="cdmv"><option value="">→ перенести в сет…</option>${sets.map(s=>`<option value="${esc(s.id)}">${esc(s.name||'Без названия')}</option>`).join('')}<option value="__none">Без сета</option><option value="__new">＋ Новый сет из выбранных</option></select>
-      <button class="btn sm" data-a="tag" title="Каждой карте — сет по её главному (первому) тегу: «Техника» → сет «Техника». Нет такого сета — создастся">🏷 По сетам по тегу</button><button class="btn sm" data-a="hide">${anyShown?'🔒 Скрыть от игроков':'👁 Показать игрокам'}</button><button class="btn sm" data-a="dup">⧉ Дублировать</button><button class="btn sm danger" data-a="del">🗑 Удалить</button><span class="grow"></span><button class="btn sm" data-a="all" title="Выбрать все видимые карты — Ctrl+A">все</button><button class="btn sm" data-a="clr" title="Снять выбор — Esc">✕</button>`
+  bar.innerHTML=n?`<b>Выбрано: ${n}</b><select class="cdmv" title="Перенести выбранные карты в сет"><option value="">→ в сет…</option>${sets.map(s=>`<option value="${esc(s.id)}">${esc(s.name||'Без названия')}</option>`).join('')}<option value="__none">Без сета</option><option value="__new">＋ Новый сет из выбранных</option></select>
+      <select class="cdsty" title="Стиль оформления лица для выбранных карт"><option value="">🎨 стиль…</option><option value="__auto">— авто (снять стиль) —</option>${cdStyles().map(s=>`<option value="${esc(s.id)}">${esc(s.name||'Без названия')}</option>`).join('')}</select><button class="btn sm" data-a="tag" title="Разложить по сетам по тегу: каждой карте — сет по её главному (первому) тегу: «Техника» → сет «Техника». Нет такого сета — создастся">🏷 По тегу</button><button class="btn sm" data-a="hide" title="Скрыть от игроков / показать игрокам">${anyShown?'🔒 Скрыть':'👁 Показать'}</button><button class="btn sm" data-a="dup" title="Дублировать">⧉ Копия</button><button class="btn sm danger" data-a="del">🗑 Удалить</button><span class="grow"></span><button class="btn sm" data-a="all" title="Выбрать все видимые карты — Ctrl+A">все</button><button class="btn sm" data-a="clr" title="Снять выбор — Esc">✕</button>`
     :`<span class="faint">Нажимай на карты, чтобы выбрать. Shift+клик — диапазон, Ctrl+A — все. Выбранные можно перетащить на сет.</span><span class="grow"></span><button class="btn sm" data-a="all">Выбрать все</button><button class="btn sm" data-a="off">Готово</button>`;
   const done=()=>{ CD_SEL.clear(); render(); };
+  const sty=$('.cdsty',bar); if(sty) sty.onchange=async e=>{ const v=e.target.value; if(!v) return; if(await cdAssignCards([...CD_SEL],v==='__auto'?null:v)){ toast(v==='__auto'?'Стиль снят: '+CD_SEL.size:'Стиль назначен: '+CD_SEL.size); done(); } else e.target.value=''; };
   const mvs=$('.cdmv',bar); if(mvs) mvs.onchange=async e=>{ const v=e.target.value, ids=[...CD_SEL]; if(!v) return;
-    if(v==='__new'){ const L=world.cardsets||[]; const ns={id:uid(),name:'Новый сет',pub:false,frame:CD_FRAMES[L.length%CD_FRAMES.length],back:{d:'b1'},order:L.length?Math.max(...L.map(x=>x.order||0))+10:0}; try{ await createDoc('cardsets',ns); }catch{ return; } cdMoveMany(ids,ns.id,null); done(); cdSetEdit(ns,true); return; }
+    if(v==='__new'){ const L=world.cardsets||[]; const ns={id:uid(),name:'Новый сет',pub:false,order:L.length?Math.max(...L.map(x=>x.order||0))+10:0}; try{ await createDoc('cardsets',ns); }catch{ return; } cdMoveMany(ids,ns.id,null); done(); cdSetEdit(ns,true); return; }
     cdMoveMany(ids,v==='__none'?'':v,null); toast(`Перенесено: ${ids.length}`); done(); };
   $$('[data-a]',bar).forEach(b=>b.onclick=async()=>{ const a=b.dataset.a, L=[...CD_SEL].map(id=>byId(world.cards,id)).filter(Boolean);
     if(a==='all'){ $$('.cdlib .cdtile').forEach(t=>CD_SEL.add(t.dataset.id)); cdSelUpd(); return; }
@@ -8045,7 +8064,7 @@ function cdSelUpd(){ const page=$('.cdlib'); if(!page) return; page.classList.to
       const plan=[...groups.values()].map(g=>({...g,set:(world.cardsets||[]).find(s=>cdNorm(s.name)===cdNorm(g.name))}));
       if(!await confirmDlg(`Разложить ${L.length} ${plural(L.length,'карту','карты','карт')} по сетам: ${plan.map(p=>`${p.name} — ${p.cards.length}${p.set?'':' (новый сет)'}`).join('; ')}.`,'Разложить')) return;
       let ord=Math.max(0,...(world.cardsets||[]).map(x=>x.order||0));
-      for(const p of plan){ let st=p.set; if(!st){ st={id:uid(),name:p.name,pub:false,frame:p.name==='Без тега'?cdGet('frame'):cdTagColor(p.name),back:{d:'b1'},order:(ord+=10)}; try{ await createDoc('cardsets',st); }catch{ continue; } } cdMoveMany(p.cards.map(c=>c.id),st.id,null); }
+      for(const p of plan){ let st=p.set; if(!st){ st={id:uid(),name:p.name,pub:false,frame:p.name==='Без тега'?cdGet('frame'):cdTagColor(p.name),order:(ord+=10)}; try{ await createDoc('cardsets',st); }catch{ continue; } } cdMoveMany(p.cards.map(c=>c.id),st.id,null); }
       toast('Разложено по сетам: '+plan.length); done(); } }); }
 /* Esc — снять выбор, Ctrl+A — выбрать все карты на странице */
 document.addEventListener('keydown',e=>{ if(state.view!=='cards'||!isDM()||$('#modal.on')) return; const typing=/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||'');
@@ -8067,7 +8086,7 @@ async function cdNewCard(sid){ const L=cdInSet(sid); const c={id:uid(),set:sid||
 async function cdDup(c){ const n=JSON.parse(JSON.stringify(clean(c))); n.id=uid(); n.name=(c.name||'')+' (копия)'; n.order=(c.order||0)+5; delete n.createdAt; cdPub(n); try{ await createDoc('cards',n); }catch{ return; } render(); toast('Копия создана'); return n; }
 async function cdDelete(c,ask=true){ if(ask&&!await confirmDlg(`Удалить карту «${c.name||'без названия'}»? Её можно будет вернуть из корзины.`)) return false;
   if(!await trashMain('card_'+c.id,'cards',c,c.name,'карта',[c.art&&c.art.img])) return false; await removeDoc('cards',c); render(); return true; }
-async function cdNewSet(){ const L=world.cardsets||[]; const s={id:uid(),name:'Новый сет',pub:false,frame:CD_FRAMES[L.length%CD_FRAMES.length],back:{d:'b1'},order:L.length?Math.max(...L.map(x=>x.order||0))+10:0};
+async function cdNewSet(){ const L=world.cardsets||[]; const s={id:uid(),name:'Новый сет',pub:false,order:L.length?Math.max(...L.map(x=>x.order||0))+10:0};
   try{ await createDoc('cardsets',s); }catch{ return; } render(); cdSetEdit(s,true); }
 function cdSetDelete(s){ const cards=(world.cards||[]).filter(c=>c.set===s.id); const b=openModal(`<h2>Удалить сет «${esc(s.name||'')}»?</h2><p class="muted" style="line-height:1.5">${cards.length?`В сете ${cards.length} ${plural(cards.length,'карта','карты','карт')}. Их можно удалить вместе с сетом (вернуть — из корзины) или оставить в разделе «Без сета» (его видит только мастер).`:'Сет пустой.'}</p><div class="modal-actions"><button class="btn" id="no">Отмена</button>${cards.length?'<button class="btn" id="keep">Удалить сет, карты оставить</button>':''}<button class="btn danger" id="all">${cards.length?'Удалить вместе с картами':'Удалить'}</button></div>`);
   $('#no',b).onclick=closeModal;
@@ -8086,7 +8105,6 @@ function cdZoom(id,ids){ ids=ids&&ids.length?ids:[id]; let i=Math.max(0,ids.inde
 
 /* ============ конструктор карты ============ */
 function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(world.cards,id); let c=C(); if(!c) return; ids=ids&&ids.length?ids:cdInSet(c.set||'').map(x=>x.id);
-  const fontOpts=v=>`<option value="">— как у сета —</option>`+CD_FONTS.map(f=>`<option value="${esc(f)}" ${v===f?'selected':''} style="font-family:'${esc(f)}'">${esc(f)}</option>`).join('');
   const b=openModal(`<div class="cded">
     <div class="cdedL"><div class="cdpv"><canvas></canvas></div>
       <div class="cdartbar"><button class="btn sm" id="aUp" title="Загрузить арт (можно и Ctrl+V, и перетащить файл в окно)">🖼 Арт…</button><span class="faint" title="Масштаб арта">🔍</span><input type="range" id="aZ" min="1" max="4" step="0.01"><button class="btn sm" id="aRs" title="Вписать заново">⟲</button><button class="btn sm" id="aDel" title="Убрать арт">✕</button></div>
@@ -8100,22 +8118,20 @@ function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(wor
       <div class="cdf"><label>Текст <button class="lnk" data-l="pal" title="Цвета текста и правила подсветки">✎ цвета</button></label><div class="cdtbar"></div><textarea id="cText" rows="7" placeholder="Наносит 5 урона"></textarea><div class="faint cdhint">Выдели текст и нажми цвет. <code>**жирный**</code>, пустая строка — отступ между абзацами.</div></div>
       ${CDS().flav?'<div class="cdf"><label>Художественный текст</label><textarea id="cFlav" rows="2" placeholder="Глубокоземная магия ничто по сравнению с дикой магией звёзд" style="min-height:52px;font-style:italic"></textarea><div class="faint cdhint">Курсивом внизу карты, под чертой. Пусто — места на карте не занимает.</div></div>':''}
       <details class="cdmore"><summary>Оформление этой карты</summary>
-        <div class="cdf"><label>Дизайн</label><select id="cLay"><option value="">— как у сета —</option>${CD_LAYS.map(([k,n])=>`<option value="${k}" ${c.lay===k?'selected':''}>${n}</option>`).join('')}</select></div>
-        <div class="cdf"><label>Рамка</label><div class="cdfr"></div></div>
-        <div class="cdf"><label>Элементы карты</label><div class="cdelcard"></div></div>
-        <div class="cdf two"><div><label>Шрифт названия</label><select id="cTf">${fontOpts(c.tf)}</select></div><div><label>Шрифт текста</label><select id="cXf">${fontOpts(c.xf)}</select></div></div>
+        <div class="cdf"><label>Стиль лица <button class="lnk" id="cSty">🎨 стили</button></label><select id="cStyle"></select><div class="faint cdhint cstyh"></div></div>
+        <details class="cdmore"><summary>Своя настройка только этой карты <span class="faint ownc"></span></summary><div class="cface"></div><button class="btn sm" id="cFr">Сбросить</button></details>
         <label class="row cdchk"><input type="checkbox" id="cHide"> Скрыть эту карту от игроков, даже если сет открыт</label></details>
     </div></div>
     <div class="modal-actions"><button class="btn danger" id="cDel">Удалить</button><button class="btn" id="cDup">⧉ Дублировать</button><span class="grow"></span><span class="faint cdpos"></span><button class="btn" id="cPrev" title="Предыдущая карта">←</button><button class="btn" id="cNext" title="Следующая карта">→</button><button class="btn primary" id="cOk">Готово</button></div>`,true);
   b.classList.add('cdbox'); const pvW=Math.min(380,Math.max(240,innerWidth-80)); const cv=$('.cdpv canvas',b); cdCanvas(cv,pvW,C);
   const save=()=>{ const o=C(); if(!o) return; delete o._fresh; touch(o); cdRefresh(); cdFaceSched(); };
   const fill=()=>{ c=C(); if(!c) return;
-    $('#cName',b).value=c.name||''; $('#cText',b).value=c.text||''; if($('#cFlav',b)) $('#cFlav',b).value=c.flav||''; $('#cHide',b).checked=!!c.hide; $('#cTf',b).value=c.tf||''; $('#cXf',b).value=c.xf||''; $('#cLay',b).value=c.lay||'';
+    $('#cName',b).value=c.name||''; $('#cText',b).value=c.text||''; if($('#cFlav',b)) $('#cFlav',b).value=c.flav||''; $('#cHide',b).checked=!!c.hide; drawSty();
     $('#cSet',b).innerHTML=`<option value="">— без сета (видит только мастер) —</option>`+cdSets().map(s=>`<option value="${esc(s.id)}" ${s.id===c.set?'selected':''}>${esc(s.name||'Без названия')}${s.pub?'':' 🔒'}</option>`).join('');
     for(const k of ['en','ini']){ const h=$(`.cdcost[data-k="${k}"]`,b); h.innerHTML=`<input maxlength="3" value="${esc(c[k]??'')}">`+['0','1','2','3','X'].map(v=>`<button class="q ${String(c[k]??'').toUpperCase()===v?'on':''}">${v}</button>`).join('');
       const inp=$('input',h); inp.oninput=()=>{ C()[k]=inp.value.trim().toUpperCase(); save(); $$('.q',h).forEach(q=>q.classList.toggle('on',q.textContent===C()[k])); };
       $$('.q',h).forEach(q=>q.onclick=()=>{ inp.value=q.textContent; inp.oninput(); }); }
-    drawTags(); drawTgt(); drawFr(); drawArt(); const i=ids.indexOf(id); $('.cdpos',b).textContent=i>=0?(i+1)+' / '+ids.length:''; $('#cPrev',b).disabled=i<=0; $('#cNext',b).disabled=i<0||i>=ids.length-1; cv._draw(); };
+    drawTags(); drawTgt(); drawArt(); const i=ids.indexOf(id); $('.cdpos',b).textContent=i>=0?(i+1)+' / '+ids.length:''; $('#cPrev',b).disabled=i<=0; $('#cNext',b).disabled=i<0||i>=ids.length-1; cv._draw(); };
   const drawTags=()=>{ const h=$('.cdtags',b); const o=C(); const cur=o.tags||[]; const L=cdGet('tags').filter(t=>!cur.some(x=>cdNorm(x)===cdNorm(t.n)));
     h.innerHTML=cur.map((t,i)=>`<span class="cdchip" style="--tc:${esc(cdTagColor(t))}" title="${i?'Клик — сделать главным (его цвет у блока тегов)':'Главный тег: его цвет у блока тегов'}" data-i="${i}">${esc(t)}<button class="x" title="Убрать">×</button></span>`).join('')+`<input class="cdtin" placeholder="${cur.length?'ещё тег…':'тег…'}" list="cdTagL"><datalist id="cdTagL">${cdGet('tags').map(t=>`<option value="${esc(t.n)}">`).join('')}</datalist>`+(L.length?`<div class="cdquick">${L.map(t=>`<button class="q" style="--tc:${esc(t.c)}">+ ${esc(t.n)}</button>`).join('')}</div>`:'');
     const add=v=>{ v=String(v||'').trim(); if(!v) return; const o=C(); o.tags=o.tags||[]; if(!o.tags.some(x=>cdNorm(x)===cdNorm(v))){ const known=cdGet('tags').find(t=>cdNorm(t.n)===cdNorm(v)); o.tags.push(known?known.n:v); save(); } drawTags(); $('.cdtin',h)?.focus(); };
@@ -8124,8 +8140,11 @@ function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(wor
     $$('.cdchip',h).forEach(ch=>{ const i=+ch.dataset.i; $('.x',ch).onclick=e=>{ e.stopPropagation(); C().tags.splice(i,1); save(); drawTags(); }; ch.onclick=()=>{ if(!i) return; const t=C().tags; t.unshift(...t.splice(i,1)); save(); drawTags(); }; }); };
   const drawTgt=()=>{ const h=$('.cdtgt',b); const o=C(); const off=cdEls(o,cdSetOf(o)).tgt.show==='never'; h.closest('.cdf').style.display=off?'none':''; if(off) return; h.innerHTML=`<input id="cTgt" placeholder="цель…" list="cdTgtL" value="${esc(o.tgt||'')}"><datalist id="cdTgtL">${cdGet('tgts').map(t=>`<option value="${esc(t)}">`).join('')}</datalist><div class="cdquick">${cdGet('tgts').map(t=>`<button class="q ${cdNorm(t)===cdNorm(o.tgt)?'on':''}">${esc(t)}</button>`).join('')}</div>`;
     const inp=$('#cTgt',h); inp.oninput=()=>{ C().tgt=inp.value.trim(); save(); $$('.q',h).forEach(q=>q.classList.toggle('on',cdNorm(q.textContent)===cdNorm(C().tgt))); }; $$('.q',h).forEach(q=>q.onclick=()=>{ inp.value=q.textContent; inp.oninput(); }); };
-  const drawFr=()=>{ const h=$('.cdfr',b); const o=C(); const set=cdSetOf(o); const cur=o.frame||''; h.innerHTML=`<button class="q ${cur?'':'on'}" data-c="">как у сета</button>`+CD_FRAMES.map(f=>`<button class="sw ${cur===f?'on':''}" data-c="${f}" style="--c:${f}" title="${f}"></button>`).join('')+`<input type="color" value="${esc(cur||(set&&set.frame)||cdGet('frame'))}" title="Свой цвет">`;
-    $$('[data-c]',h).forEach(x=>x.onclick=()=>{ const o=C(); if(x.dataset.c) o.frame=x.dataset.c; else delete o.frame; save(); drawFr(); }); $('input',h).oninput=e=>{ C().frame=e.target.value; save(); $$('[data-c]',h).forEach(x=>x.classList.toggle('on',x.dataset.c===e.target.value)); }; };
+  /* стиль лица карты: авто (правила по тегам → сет → по умолчанию) или свой; тонкая настройка поверх */
+  const drawSty=()=>{ const o=C(), sel=$('#cStyle',b); const rs=cdRuleStyles(o)[0], set=cdSetOf(o);
+    const auto=rs?`по тегу: ${rs.name}`:set&&set.fstyle?`как у сета: ${cdStyleName(set.fstyle)}`:`по умолчанию: ${cdStyleName(CDS().defFace)||'стандарт'}`;
+    sel.innerHTML=`<option value="">— авто (${esc(auto)}) —</option>`+cdStyles().map(st=>`<option value="${esc(st.id)}" ${st.id===o.style?'selected':''}>${esc(st.name||'Без названия')}</option>`).join('');
+    $('.cstyh',b).textContent=o.style?'Свой стиль карты главнее правил по тегам и стиля сета.':'Авто — правило по тегу, иначе стиль сета, иначе стиль по умолчанию.'; $('.ownc',b).textContent=cdHasOwnFace(o)?'· задано':''; };
   const drawArt=()=>{ const o=C(); $('#aZ',b).value=o.art&&o.art.z||1; $('#aZ',b).disabled=!(o.art&&o.art.img); $('#aDel',b).disabled=$('#aRs',b).disabled=!(o.art&&o.art.img); };
   /* текст и панель цветов */
   const ta=$('#cText',b); ta.oninput=()=>{ C().text=ta.value; save(); }; const fv=$('#cFlav',b); if(fv) fv.oninput=()=>{ const o=C(); if(fv.value.trim()) o.flav=fv.value; else delete o.flav; save(); };
@@ -8136,7 +8155,10 @@ function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(wor
   drawBar();
   $('#cName',b).oninput=e=>{ C().name=e.target.value; save(); };
   $('#cSet',b).onchange=e=>{ const o=C(); o.set=e.target.value; const L=cdInSet(o.set).filter(x=>x.id!==o.id); o.order=L.length?Math.max(...L.map(x=>x.order||0))+10:0; cdPub(o); save(); render(); fill(); };
-  $('#cTf',b).onchange=e=>{ const o=C(); e.target.value?o.tf=e.target.value:delete o.tf; save(); }; const elDraw=cdElEditor($('.cdelcard',b),{get:()=>C().el,put:v=>{ const o=C(); if(v) o.el=v; else delete o.el; save(); drawTgt(); },base:()=>cdEls(null,cdSetOf(C()),1)}); $('#cLay',b).onchange=e=>{ const o=C(); e.target.value?o.lay=e.target.value:delete o.lay; save(); }; $('#cXf',b).onchange=e=>{ const o=C(); e.target.value?o.xf=e.target.value:delete o.xf; save(); };
+  const faceEd=cdFaceEditor($('.cface',b),{get:()=>C(),put:(k,v)=>{ const o=C(); if(v==null||v===''||(typeof v==='object'&&!Object.keys(v).length)) delete o[k]; else o[k]=v; save(); drawTgt(); drawSty(); },base:()=>cdFaceChain(C(),cdSetOf(C()),{noCard:true}),none:'как в стиле',sample:()=>C()});
+  $('#cStyle',b).onchange=e=>{ const o=C(); if(e.target.value) o.style=e.target.value; else delete o.style; save(); drawSty(); drawTgt(); faceEd(); };
+  $('#cFr',b).onclick=()=>{ const o=C(); for(const k of cdFaceKeys) delete o[k]; save(); faceEd(); drawSty(); drawTgt(); };
+  $('#cSty',b).onclick=e=>{ e.preventDefault(); cdStylesDlg(C().style||cdRuleStyles(C())[0]?.id||(cdSetOf(C())||{}).fstyle||CDS().defFace,()=>cdEdit(id,ids)); };
   $('#cHide',b).onchange=e=>{ const o=C(); if(e.target.checked) o.hide=true; else delete o.hide; cdPub(o); save(); render(); };
   $$('.lnk',b).forEach(x=>x.onclick=e=>{ e.preventDefault(); cdListsDlg(x.dataset.l,()=>cdEdit(id,ids)); });
   /* арт: загрузка, вставка, перетаскивание, панорама и масштаб прямо на превью */
@@ -8193,45 +8215,39 @@ function cdBackEditor(h,{get,put,res,follow,owner}){ const fontOpts=v=>CD_FONTS.
 const cdMerge=(o,p)=>{ o={...(o||{}),...p}; for(const k of Object.keys(p)) if(p[k]===undefined) delete o[k]; return o; };
 
 /* ============ настройки сета: имя, видимость, дизайн и рамка лица, шрифты, рубашка (отдельно от лица) ============ */
-function cdSetEdit(s,fresh){ if(!isDM()||!s) return; const S=()=>byId(world.cardsets,s.id)||s;
-  const fontOpts=v=>CD_FONTS.map(f=>`<option value="${esc(f)}" ${v===f?'selected':''} style="font-family:'${esc(f)}'">${esc(f)}</option>`).join('');
-  const G=()=>!!(CDS().back||{}).on;
-  const b=openModal(`<div class="cded cdsetd"><div class="cdedL"><div class="row" style="gap:12px;justify-content:center"><div class="cdpv"><canvas class="f"></canvas><div class="faint cap">лицо</div></div><div class="cdpv"><canvas class="bk"></canvas><div class="faint cap"><span class="bkcap"></span></div></div></div></div>
+function cdSetEdit(s,fresh){ if(!isDM()||!s) return; cdStylesInit(); const S=()=>byId(world.cardsets,s.id)||s;
+  const stOpts=(v,def)=>`<option value="">— по умолчанию: ${esc(cdStyleName(def)||'стандарт')} —</option>`+cdStyles().map(st=>`<option value="${esc(st.id)}" ${st.id===v?'selected':''}>${esc(st.name||'Без названия')}</option>`).join('');
+  const b=openModal(`<div class="cded cdsetd"><div class="cdedL"><div class="row" style="gap:12px;justify-content:center"><div class="cdpv"><canvas class="f"></canvas><div class="faint cap">лицо</div></div><div class="cdpv"><canvas class="bk"></canvas><div class="faint cap">рубашка</div></div></div></div>
     <div class="cdedR"><input id="sName" class="cdname" placeholder="Название сета" maxlength="60" value="${esc(S().name||'')}">
       <label class="row cdchk"><input type="checkbox" id="sPub" ${S().pub?'checked':''}> <span><b>Игроки видят этот сет</b><br><span class="faint">Скрытые сеты (например, карты врагов) видит только мастер — правилами базы, не только интерфейсом.</span></span></label>
-      <div class="cdsec">Лицо карт</div>
-      <div class="cdf"><label>Дизайн</label><div class="cdbk cdlay"></div></div>
-      <div class="cdf"><label>Цвет рамки</label><div class="cdfr"></div></div>
-      <details class="cdmore"><summary>Элементы карты: цвета и подписи энергии, инициативы, тегов, цели</summary><div class="cdelset"></div></details>
-      <div class="cdf two"><div><label>Шрифт названия</label><select id="sTf">${fontOpts(S().tf||cdGet('tf'))}</select></div><div><label>Шрифт текста</label><select id="sXf">${fontOpts(S().xf||cdGet('xf'))}</select></div></div>
-      <div class="cdsec">Рубашка <span class="faint">— настраивается отдельно от лица</span></div>
-      <div class="cdbkwrap"></div></div></div>
+      <div class="cdsec">Лицо карт <button class="lnk" data-sty="f">🎨 стили</button></div>
+      <div class="cdf"><label>Стиль лица</label><select id="sFs">${stOpts(S().fstyle,CDS().defFace)}</select><div class="faint cdhint">Карты с правилом по тегу (например, «Проклятие») берут стиль правила.</div></div>
+      <details class="cdmore" id="sFo"><summary>Своя настройка лица только этого сета <span class="faint ownf"></span></summary><div class="sface"></div><button class="btn sm" id="sFr">Сбросить свои настройки лица</button></details>
+      <div class="cdsec">Рубашка <button class="lnk" data-sty="b">🎨 стили</button></div>
+      <div class="cdf"><label>Стиль рубашки</label><select id="sBs">${stOpts(S().bstyle,CDS().defBack)}</select><div class="faint cdhint">Сет — это одна колода в TTS: у всех его карт общая рубашка.</div></div>
+      <details class="cdmore" id="sBo"><summary>Своя рубашка только этого сета <span class="faint ownb"></span></summary><div class="sback"></div><button class="btn sm" id="sBr">Сбросить свою рубашку</button></details></div></div>
     <div class="modal-actions"><button class="btn danger" id="sDel">Удалить сет</button><span class="grow"></span><button class="btn primary" id="sOk">Готово</button></div>`,true);
   b.classList.add('cdbox');
-  const sample=()=>cdInSet(s.id)[0]||{id:'_demo',set:s.id,name:'Лёгкая атака',en:'1',ini:'1',tags:[cdGet('tags')[0]?cdGet('tags')[0].n:'Техника'],tgt:cdGet('tgts')[0]||'Цель',text:'Наносит 5 урона'};
+  const sample=()=>cdInSet(s.id).find(c=>!c.style&&!cdRuleStyles(c).length)||cdInSet(s.id)[0]||{id:'_demo',set:s.id,name:'Лёгкая атака',en:'1',ini:'1',tags:[cdGet('tags')[0]?cdGet('tags')[0].n:'Техника'],tgt:cdGet('tgts')[0]||'Цель',text:'Наносит 5 урона'};
   const w=Math.min(210,(innerWidth-120)/2); cdCanvas($('canvas.f',b),w,sample); cdCanvas($('canvas.bk',b),w,S,true);
-  const save=()=>{ touch(S()); cdRefresh(); cdFaceSched(); };
-  $('#sName',b).oninput=e=>{ S().name=e.target.value; save(); };
+  const save=()=>{ touch(S()); cdRefresh(); cdFaceSched(); marks(); };
+  const marks=()=>{ $('.ownf',b).textContent=cdHasOwnFace(S())?'· задано':''; $('.ownb',b).textContent=cdHasOwnBack(S())?'· задано':''; };
+  $('#sName',b).oninput=e=>{ S().name=e.target.value; touch(S()); };
   $('#sPub',b).onchange=e=>{ cdSetPub(S(),e.target.checked); cdRefresh(); render(); };
-  $('#sTf',b).onchange=e=>{ S().tf=e.target.value; save(); }; $('#sXf',b).onchange=e=>{ S().xf=e.target.value; save(); };
-  const drawLay=()=>{ const h=$('.cdlay',b); const cur=S().lay||cdGet('lay'); h.innerHTML=CD_LAYS.map(([k,n])=>`<button class="cdbkt ${cur===k?'on':''}" data-l="${k}"><canvas></canvas><span>${n}</span></button>`).join('');
-    $$('.cdbkt',h).forEach(t=>{ const k=t.dataset.l; cdCanvas($('canvas',t),52,()=>({...sample(),lay:k}),false); t.onclick=()=>{ S().lay=k; save(); drawLay(); }; }); };
-  const drawFr=()=>{ const h=$('.cdfr',b); const cur=S().frame||cdGet('frame'); h.innerHTML=CD_FRAMES.map(f=>`<button class="sw ${cur===f?'on':''}" data-c="${f}" style="--c:${f}"></button>`).join('')+`<input type="color" value="${esc(cur)}" title="Свой цвет">`;
-    $$('[data-c]',h).forEach(x=>x.onclick=()=>{ S().frame=x.dataset.c; save(); drawFr(); }); $('input',h).oninput=e=>{ S().frame=e.target.value; save(); $$('[data-c]',h).forEach(x=>x.classList.toggle('on',x.dataset.c===e.target.value)); }; };
-  const bw=$('.cdbkwrap',b);
-  const drawBack=()=>{ bw.innerHTML=''; const own=!G()||!!S().ownBack; $('.bkcap',b).textContent=own?'рубашка':'рубашка (общая)'; cdRefresh();
-    if(G()){ const sw=el(`<div class="seg cdbkmode"><button class="btn sm ${own?'':'on'}" data-m="g">Общая рубашка</button><button class="btn sm ${own?'on':''}" data-m="o">Своя для этого сета</button></div>`); bw.append(sw);
-      $$('[data-m]',sw).forEach(x=>x.onclick=()=>{ const o=S(); if(x.dataset.m==='o') o.ownBack=true; else delete o.ownBack; save(); drawBack(); });
-      if(!own){ const n=el('<div><div class="faint cdhint">Этот сет берёт общую рубашку из справочников. «Своя для этого сета» — отдельная рубашка только у него.</div><button class="btn sm" style="margin-top:6px">⚙ Настроить общую рубашку</button></div>'); $('button',n).onclick=()=>cdListsDlg('back',()=>cdSetEdit(S())); bw.append(n); return; } }
-    const h=el('<div></div>'); bw.append(h); cdBackEditor(h,{get:()=>S().back,put:p=>{ S().back=cdMerge(S().back,p); save(); },res:()=>cdBackOf(S(),'own'),follow:true,owner:s.id}); };
-  cdElEditor($('.cdelset',b),{get:()=>S().el,put:v=>{ const o=S(); if(v) o.el=v; else delete o.el; save(); },base:()=>cdEls(null,null,2)});
-  drawLay(); drawFr(); drawBack();
+  const faceEd=cdFaceEditor($('.sface',b),{get:()=>S(),put:(k,v)=>{ const o=S(); if(v==null||v===''||(typeof v==='object'&&!Object.keys(v).length)) delete o[k]; else o[k]=v; save(); },base:()=>cdFaceChain(null,S(),{noSetOwn:true}),none:'как в стиле',sample});
+  const backEd=cdBackEditor($('.sback',b),{get:()=>S().back,put:p=>{ S().back=cdMerge(S().back,p); if(!Object.keys(S().back).length) delete S().back; save(); },res:()=>cdBackOf(S()),follow:true,owner:s.id});
+  $('#sFs',b).onchange=async e=>{ const ok=await cdAssignSets([s.id],'face',e.target.value||null); if(!ok) e.target.value=S().fstyle||''; faceEd(); marks(); cdRefresh(); };
+  $('#sBs',b).onchange=async e=>{ const ok=await cdAssignSets([s.id],'back',e.target.value||null); if(!ok) e.target.value=S().bstyle||''; backEd(); marks(); cdRefresh(); };
+  $('#sFr',b).onclick=()=>{ const o=S(); for(const k of cdFaceKeys) delete o[k]; save(); faceEd(); };
+  $('#sBr',b).onclick=()=>{ delete S().back; delete S().ownBack; save(); backEd(); };
+  $$('[data-sty]',b).forEach(x=>x.onclick=e=>{ e.preventDefault(); cdStylesDlg(x.dataset.sty==='f'?(S().fstyle||CDS().defFace):(S().bstyle||CDS().defBack),()=>cdSetEdit(S())); });
+  marks();
   $('#sOk',b).onclick=()=>{ closeModal(); render(); }; $('#sDel',b).onclick=()=>cdSetDelete(S());
   if(fresh) setTimeout(()=>{ const n=$('#sName',b); n.focus(); n.select(); },40); }
 
 /* ============ справочники: теги, цели, цвета текста, подсветка, оформление по умолчанию ============ */
-function cdListsDlg(tab='tags',back){ if(!isDM()) return; let T=tab==='hl'?'pal':tab;
-  const b=openModal(`<h2>⚙ Справочники карточек</h2><div class="mtabs cdltabs"><span data-t="tags">Теги</span><span data-t="tgts">Цели</span><span data-t="pal">Цвета текста</span><span data-t="back">Рубашка</span><span data-t="def">По умолчанию</span></div><div class="cdlbody"></div><div class="modal-actions">${back?'<button class="btn" id="lBack">← к карте</button>':''}<span class="grow"></span><button class="btn primary" id="lOk">Готово</button></div>`,true);
+function cdListsDlg(tab='tags',back){ if(!isDM()) return; if(tab==='back') return cdStylesDlg(null,back); let T=tab==='hl'?'pal':tab;
+  const b=openModal(`<h2>⚙ Справочники карточек</h2><div class="mtabs cdltabs"><span data-t="tags">Теги</span><span data-t="tgts">Цели</span><span data-t="pal">Цвета текста</span><span data-t="def">Общее</span></div><div class="cdlbody"></div><div class="modal-actions">${back?'<button class="btn" id="lBack">← к карте</button>':''}<span class="grow"></span><button class="btn primary" id="lOk">Готово</button></div>`,true);
   b.classList.add('cdbox','cdlbox'); const body=$('.cdlbody',b);
   const save=()=>{ touch(world.settings); cdRefresh(); cdFaceSched(); };
   const used=(k,n)=>(world.cards||[]).filter(c=>k==='tags'?(c.tags||[]).some(t=>cdNorm(t)===cdNorm(n)):cdNorm(c.tgt)===cdNorm(n)).length;
@@ -8255,18 +8271,11 @@ function cdListsDlg(tab='tags',back){ if(!isDM()) return; let T=tab==='hl'?'pal'
       S.hl.forEach((h,i)=>{ const r=el(`<div class="cdlrow"><select class="k"><option value="br" ${h.k==='br'?'selected':''}>[в квадратных скобках]</option><option value="caps" ${h.k==='caps'?'selected':''}>СЛОВА КАПСОМ</option><option value="w" ${h.k==='w'?'selected':''}>слова…</option></select>${h.k==='w'?`<input class="grow w" placeholder="горени, кровотечени, уязвимост" value="${esc(h.w||'')}" title="Через запятую; совпадает начало слова — «горени» подсветит «горения» и «горение»">`:'<span class="grow"></span>'}<select class="c">${palOpt(h.c)}</select><label class="row" style="gap:4px"><input type="checkbox" class="bb" ${h.b?'checked':''}><b>Ж</b></label><button class="btn sm x">✕</button></div>`);
         $('.k',r).onchange=e=>{ h.k=e.target.value; save(); draw(); }; const wi=$('.w',r); if(wi) wi.oninput=()=>{ h.w=wi.value; save(); }; $('.c',r).onchange=e=>{ h.c=e.target.value; save(); }; $('.bb',r).onchange=e=>{ h.b=e.target.checked||undefined; save(); }; $('.x',r).onclick=()=>{ S.hl.splice(i,1); save(); draw(); }; body.append(r); });
       const ah=el('<button class="btn sm">+ правило подсветки</button>'); ah.onclick=()=>{ S.hl.push({k:'br',c:(S.pal[0]||{}).id||'y'}); save(); draw(); }; body.append(ah); }
-    if(T==='back'){ const G=S.back||{}; const r=el(`<div><label class="row cdchk"><input type="checkbox" id="gOn" ${G.on?'checked':''}> <span><b>Общая рубашка для всех сетов</b><br><span class="faint">Все сеты получат эту рубашку, кроме тех, где в настройках сета выбрано «Своя для этого сета». Собственные рубашки сетов не удаляются — снимешь галочку, вернутся.</span></span></label><div class="row" style="gap:16px;align-items:flex-start;margin-top:10px"><div class="cdpv"><canvas></canvas></div><div class="grow gbe"></div></div></div>`);
-      const own=(world.cardsets||[]).filter(x=>x.ownBack); if(G.on&&own.length) r.append(el(`<div class="faint cdhint" style="margin-top:10px">Своя рубашка у сетов: ${own.map(x=>'<b>'+esc(x.name||'Без названия')+'</b>').join(', ')}. Поменять — в настройках сета (✎ сет).</div>`));
-      body.append(r); cdCanvas($('canvas',r),150,()=>({_b:cdBackOf(null,'g')}),true);
-      $('#gOn',r).onchange=e=>{ S.back=cdMerge(S.back,{on:e.target.checked||undefined}); save(); };
-      cdBackEditor($('.gbe',r),{get:()=>S.back,put:p=>{ S.back=cdMerge(S.back,p); save(); },res:()=>cdBackOf(null,'g'),follow:false,owner:'cards'}); }
-    if(T==='def'){ const fo=v=>CD_FONTS.map(f=>`<option ${v===f?'selected':''} style="font-family:'${esc(f)}'">${esc(f)}</option>`).join('');
-      const r=el(`<div><label class="row cdchk" style="margin-bottom:12px"><input type="checkbox" id="dFlav" ${CDS().flav?'checked':''}> <span><b>Художественный текст на картах</b><br><span class="faint">В конструкторе появится поле «Художественный текст» — курсивная строка внизу карты под чертой (flavor text). Выключишь — с карт пропадёт, сам текст сохранится.</span></span></label><div class="cdgrid2"><label>Дизайн лица карт</label><select id="dLay">${CD_LAYS.map(([k,n])=>`<option value="${k}" ${cdGet('lay')===k?'selected':''}>${n}</option>`).join('')}</select><label>Рамка новых сетов и карт без сета</label><input type="color" id="dFr" value="${esc(cdGet('frame'))}"><label>Блок тегов (тег не из списка)</label><input type="color" id="dTg" value="${esc(cdGet('tagc'))}"><label>Шрифт названия</label><select id="dTf">${fo(cdGet('tf'))}</select><label>Шрифт текста</label><select id="dXf">${fo(cdGet('xf'))}</select></div></div>`);
-      $('#dFlav',r).onchange=e=>{ if(e.target.checked) S.flav=true; else delete S.flav; save(); };
-      for(const [i,k] of [['dLay','lay'],['dFr','frame'],['dTg','tagc'],['dTf','tf'],['dXf','xf']]) $('#'+i,r)[r.querySelector('#'+i).tagName==='SELECT'?'onchange':'oninput']=e=>{ S[k]=e.target.value; save(); };
-      body.append(el('<div class="faint cdhint">Сеты и карты могут переопределить дизайн, рамку и шрифты у себя.</div>')); body.append(r);
-      const eh=el('<div><h3 class="cdlh">Элементы карты — общий шаблон</h3><div class="faint cdhint">Цвета и подписи блоков энергии, инициативы, тегов и цели для всех карт. Сет и отдельная карта могут переопределить их у себя (✎ сет → «Элементы карты», конструктор → «Оформление этой карты»).</div><div class="ged"></div></div>'); body.append(eh);
-      cdElEditor($('.ged',eh),{get:()=>S.el,put:v=>{ if(v) S.el=v; else delete S.el; save(); },base:()=>cdEls(null,null,3),top:true}); } };
+    if(T==='def'){ const r=el(`<div><label class="row cdchk" style="margin-bottom:12px"><input type="checkbox" id="dFlav" ${CDS().flav?'checked':''}> <span><b>Художественный текст на картах</b><br><span class="faint">В конструкторе появится поле «Художественный текст» — курсивная строка внизу карты под чертой (flavor text). Выключишь — с карт пропадёт, сам текст сохранится.</span></span></label>
+        <div class="cdgrid2"><label>Блок тегов (тег не из списка)</label><input type="color" id="dTg" value="${esc(cdGet('tagc'))}"></div>
+        <div class="cdwarn" style="margin-top:16px">Дизайн, рамки, шрифты, элементы и рубашки теперь — в <b>🎨 Оформлении</b>: стили, которые назначаются сетам, картам по тегам и отдельным картам. <button class="btn sm" id="dSty" style="margin-left:6px">🎨 Открыть</button></div></div>`);
+      $('#dFlav',r).onchange=e=>{ if(e.target.checked) S.flav=true; else delete S.flav; save(); }; $('#dTg',r).oninput=e=>{ S.tagc=e.target.value; save(); }; $('#dSty',r).onclick=()=>cdStylesDlg(null,()=>cdListsDlg('def',back));
+      body.append(r); } };
   $$('.cdltabs span',b).forEach(s=>s.onclick=()=>{ T=s.dataset.t; draw(); }); $('#lOk',b).onclick=()=>{ closeModal(); render(); }; const bb=$('#lBack',b); if(bb) bb.onclick=back; draw(); }
 
 /* ============ импорт / экспорт сетов (JSON с картинками) ============ */
@@ -8275,8 +8284,8 @@ function cdIODlg(){ const sets=cdSets(); const b=openModal(`<h2>⇅ Импорт
   <div class="cdf"><label>Импорт</label><button class="btn sm" id="iGo">⬆ Загрузить файл…</button><div class="faint iprog" style="margin-top:6px"></div></div><div class="modal-actions"><button class="btn primary" id="ok">Закрыть</button></div>`);
   $('#ok',b).onclick=closeModal;
   $('#xGo',b).onclick=async()=>{ const ids=$$('input[type=checkbox]:checked',b).map(x=>x.value); if(!ids.length) return; const S=(world.cardsets||[]).filter(s=>ids.includes(s.id)), C=(world.cards||[]).filter(c=>ids.includes(c.set)); const images={};
-    for(const id of [...C.map(c=>c.art&&c.art.img),...S.map(s=>s.back&&s.back.img),(CDS().back||{}).img].filter(Boolean)) if(!images[id]){ const u=await imgURL(id); if(u) images[id]=u; }
-    const st=CDS(); const data={kind:'kartoteka-cards',v:1,at:Date.now(),lists:{tags:cdGet('tags'),tgts:cdGet('tgts'),pal:cdGet('pal'),hl:cdGet('hl'),back:CDS().back||null,flav:!!CDS().flav},sets:S.map(clean),cards:C.map(clean),images};
+    for(const id of [...C.map(c=>c.art&&c.art.img),...S.map(s=>s.back&&s.back.img),(CDS().back||{}).img,...cdStyles().map(st=>st.back&&st.back.img)].filter(Boolean)) if(!images[id]){ const u=await imgURL(id); if(u) images[id]=u; }
+    const st=CDS(); const data={kind:'kartoteka-cards',v:1,at:Date.now(),lists:{tags:cdGet('tags'),tgts:cdGet('tgts'),pal:cdGet('pal'),hl:cdGet('hl'),back:CDS().back||null,flav:!!CDS().flav},sets:S.map(clean),cards:C.map(clean),styles:cdStyles().map(clean),images};
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'})); a.download='kartochki-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); };
   $('#iGo',b).onclick=()=>{ const fi=document.createElement('input'); fi.type='file'; fi.accept='.json,application/json'; fi.onchange=async()=>{ const f=fi.files[0]; if(!f) return; let data; try{ data=JSON.parse(await f.text()); }catch{ toast('Это не JSON',true); return; } if(data.kind!=='kartoteka-cards'){ toast('Это не файл карточек',true); return; }
       if(!await confirmDlg(`Импортировать ${(data.sets||[]).length} ${plural((data.sets||[]).length,'сет','сета','сетов')} и ${(data.cards||[]).length} карт? Они добавятся к существующим, ничего не заменится.`,'Импортировать')) return; await cdImport(data); }; fi.click(); }; }
@@ -8288,9 +8297,12 @@ async function cdImport(data,prog){ const P=t=>{ const p=$('.iprog'); if(p) p.te
   for(const t of L.tgts||[]) if(t&&!S.tgts.some(x=>cdNorm(x)===cdNorm(t))) S.tgts.push(t);
   for(const p of L.pal||[]) if(p&&p.id&&!S.pal.some(x=>x.id===p.id)) S.pal.push(p); if(L.flav) S.flav=true; // в файле есть художественный текст — включить его показ
   touch(world.settings);
+  /* стили: такой же по названию уже есть — берём его, иначе добавляем */ cdStylesInit(); const stm=new Map();
+  for(const st of data.styles||[]){ const ex=cdStyles().find(x=>cdNorm(x.name)===cdNorm(st.name)); if(ex){ stm.set(st.id,ex.id); continue; } const ns=JSON.parse(JSON.stringify(st)); ns.id=cdUid(); if(ns.back&&ns.back.img) ns.back.img=idm.get(ns.back.img)||''; S.styles.push(ns); stm.set(st.id,ns.id); }
+  touch(world.settings);
   const sm=new Map(); let ord=Math.max(0,...(world.cardsets||[]).map(s=>s.order||0)); n=0;
-  for(const s of data.sets||[]){ const ns=JSON.parse(JSON.stringify(s)); ns.id=uid(); ns.order=(ord+=10); delete ns.createdAt; delete ns.owner; if(ns.back&&ns.back.img) ns.back.img=idm.get(ns.back.img)||''; sm.set(s.id,ns.id); try{ await createDoc('cardsets',ns); }catch{} }
-  for(const c of data.cards||[]){ P(`Карты ${++n}/${(data.cards||[]).length}…`); const nc=JSON.parse(JSON.stringify(c)); nc.id=uid(); nc.set=sm.get(c.set)||''; delete nc.createdAt; delete nc.owner; delete nc.pub; if(nc.art&&nc.art.img) nc.art.img=idm.get(nc.art.img)||''; if(nc.art&&!nc.art.img) delete nc.art; cdPub(nc); try{ await createDoc('cards',nc); }catch{} }
+  for(const s of data.sets||[]){ const ns=JSON.parse(JSON.stringify(s)); ns.id=uid(); ns.order=(ord+=10); delete ns.createdAt; delete ns.owner; if(ns.back&&ns.back.img) ns.back.img=idm.get(ns.back.img)||''; for(const k of ['fstyle','bstyle']) if(ns[k]){ if(stm.has(ns[k])) ns[k]=stm.get(ns[k]); else delete ns[k]; } sm.set(s.id,ns.id); try{ await createDoc('cardsets',ns); }catch{} }
+  for(const c of data.cards||[]){ P(`Карты ${++n}/${(data.cards||[]).length}…`); const nc=JSON.parse(JSON.stringify(c)); nc.id=uid(); nc.set=sm.get(c.set)||''; delete nc.createdAt; delete nc.owner; delete nc.pub; if(nc.art&&nc.art.img) nc.art.img=idm.get(nc.art.img)||''; if(nc.art&&!nc.art.img) delete nc.art; if(nc.style){ if(stm.has(nc.style)) nc.style=stm.get(nc.style); else delete nc.style; } cdPub(nc); try{ await createDoc('cards',nc); }catch{} }
   P('Готово'); setStatus('синхронизировано'); toast(`Импортировано: ${sm.size} ${plural(sm.size,'сет','сета','сетов')}, ${n} карт`); render(); cdFaceSched(); }
 
 /* вкладка в настройках */
@@ -8351,6 +8363,129 @@ async function cdSheetDownload(s){ const cards=cdInSet(s.id); if(!cards.length){
     save(data,`${base}${cards.length>per?'-'+k:''} (${part.length} карт, ${cols}×${rows}).jpg`); }
   const B=cdBackOf(s); const back=await cdJpeg((x,w)=>cdDrawBack(x,s,w,true),[cdBackImg(B)],cdBackFonts(B),cw,ch); save(back,base+' — рубашка.jpg');
   toast('Скачано. В TTS: Объекты → Компоненты → Custom → Deck, укажи файлы и число карт по ширине/высоте из имени файла'); }
+
+/* ============ стили оформления ============
+   стиль — именованный набор: лицо {lay, frame, tf, xf, el} и рубашка {d, bg, fr, t, tf, img}; пустое поле = «как ниже по цепочке».
+   применяется: по умолчанию (settings.cards.defFace / defBack), к сету (set.fstyle — лицо, set.bstyle — рубашка),
+   правилом по тегу (settings.cards.rules [{tag, style}], выше в списке — главнее), к отдельной карте (card.style).
+   цепочка лица, от главного: своя настройка карты → стиль карты → правила по тегам → своя настройка сета → стиль сета → стиль по умолчанию → старые общие значения.
+   цепочка рубашки: своя рубашка сета → стиль рубашки сета → стиль рубашки по умолчанию. Подпись картинки считается по итогу, так что одинаковые результаты не перерисовываются */
+const cdStyles=()=>{ const s=CDS().styles; return Array.isArray(s)?s:[]; };
+const cdStyleById=id=>id?cdStyles().find(s=>s.id===id)||null:null;
+const cdStyleName=id=>{ const s=cdStyleById(id); return s?s.name||'Без названия':''; };
+function cdRuleStyles(c){ const out=[]; for(const r of CDS().rules||[]){ if(!r||!r.style) continue; if((c.tags||[]).some(t=>cdNorm(t)===cdNorm(r.tag))){ const st=cdStyleById(r.style); if(st&&!out.includes(st)) out.push(st); } } return out; }
+const cdLegacyFace=()=>({lay:CDS().lay,frame:CDS().frame,tf:CDS().tf,xf:CDS().xf,el:CDS().el});
+/* у карты действует один стиль: свой → первое подходящее правило по тегу → стиль сета → по умолчанию; пустые поля стиля берутся из стиля по умолчанию.
+   своя настройка карты — поверх всего; своя настройка сета — только у карт, которые берут стиль сета (стиль по тегу или свой стиль карты её не наследуют).
+   noCard — без своих настроек карты; noSetOwn — без своих настроек сета */
+function cdFaceChain(c,set,o={}){ const L=[]; let E=null, bySet=true;
+  if(c){ if(!o.noCard) L.push(c); E=cdStyleById(c.style)||cdRuleStyles(c)[0]||null; if(E) bySet=false; }
+  if(set&&bySet&&!o.noSetOwn) L.push(set);
+  if(!E&&set) E=cdStyleById(set.fstyle);
+  if(E) L.push(E.face||{}); const d=cdStyleById(CDS().defFace); if(d&&d!==E) L.push(d.face||{}); L.push(cdLegacyFace()); return L; }
+const cdPickIn=(L,k)=>{ for(const o of L){ const v=o&&o[k]; if(v!=null&&v!=='') return v; } return null; };
+function cdElsOf(L){ const E=L.map(o=>(o&&o.el)||{}), out={};
+  for(const [k,,dt] of CD_EL){ const pick=f=>{ for(const l of E){ const v=l[k]&&l[k][f]; if(v!=null&&v!=='') return v; } return null; };
+    let col=pick('c'); if(col==null&&(k==='en'||k==='ini')) col=cdGet(k); let t=pick('t'); if(t==null) t=dt; if(t==='-') t=''; out[k]={c:col||'',t}; if(k==='tgt') out[k].show=pick('show')||'auto'; } return out; }
+function cdBackChain(s){ const G=CDS().back||{}, L=[]; s=s||{};
+  if(s.back&&!(G.on&&!s.ownBack)) L.push(s.back); // старый режим «общая рубашка»: свои рубашки сетов без «своей» не участвуют
+  const bs=cdStyleById(s.bstyle); if(bs) L.push(bs.back||{}); if(G.on) L.push(G); const d=cdStyleById(CDS().defBack); if(d) L.push(d.back||{}); return L; }
+function cdBackResolve(L,face){ const pick=(k,empty)=>{ for(const o of L){ const v=o&&o[k]; if(v!=null&&(empty||v!=='')) return v; } return null; }; face=face||{};
+  const t=pick('t',true); return {d:pick('d')||'b1',bg:pick('bg')||'#17141f',fr:pick('fr')||face.frame||cdGet('frame'),t:t!=null?t:'✦',tf:pick('tf')||face.tf||cdGet('tf'),img:pick('img')||'',art:pick('art')}; }
+const cdSetFace=s=>{ const L=cdFaceChain(null,s); return {frame:cdPickIn(L,'frame')||cdGet('frame'),tf:cdPickIn(L,'tf')||cdGet('tf')}; };
+const cdFaceKeys=['lay','frame','tf','xf','el'];
+const cdHasOwnFace=o=>!!o&&cdFaceKeys.some(k=>o[k]!=null&&o[k]!==''&&!(typeof o[k]==='object'&&!Object.keys(o[k]).length));
+const cdHasOwnBack=s=>!!(s&&s.back&&Object.keys(s.back).length);
+function cdUsage(id){ const sets=world.cardsets||[], cards=world.cards||[]; return {
+  face:sets.filter(s=>s.fstyle===id), back:sets.filter(s=>s.bstyle===id), rules:(CDS().rules||[]).filter(r=>r.style===id), cards:cards.filter(c=>c.style===id),
+  defFace:CDS().defFace===id, defBack:CDS().defBack===id }; }
+const cdUid=()=>'st'+Math.random().toString(36).slice(2,8);
+/* первый запуск: стиль «Основной» из прежних общих настроек; старая «общая рубашка» переезжает в него (без изменения вида) */
+function cdStylesInit(){ if(!isDM()||!world.settings||window.__cdNoInit) return; if(Array.isArray(CDS().styles)&&CDS().styles.length) return;
+  if(typeof CD_LOADED==='object'&&!(CD_LOADED.cards&&CD_LOADED.sets)) return; // сеты ещё не пришли из базы — иначе старая «общая рубашка» потеряется у части сетов
+  const C=cdMut();
+  const face={}; for(const k of ['lay','frame','tf','xf']) if(C[k]) face[k]=C[k]; if(C.el&&Object.keys(C.el).length) face.el=JSON.parse(JSON.stringify(C.el));
+  const G=C.back||{}, back={}; if(G.on){ for(const k of ['d','bg','fr','t','tf','img','art']) if(G[k]!=null) back[k]=G[k];
+    for(const s of world.cardsets||[]) if(!s.ownBack&&s.back){ s.backOld=s.back; delete s.back; touch(s); } C.back={...G}; delete C.back.on; }
+  C.styles=[{id:'main',name:'Основной',face,back}]; C.defFace='main'; C.defBack='main'; C.rules=C.rules||[]; touch(world.settings); }
+function cdSampleCard(){ const L=cdCards(); return L.find(c=>c.art&&c.art.img&&(c.text||'').length>12)||L[0]||{id:'_demo',name:'Лёгкая атака',en:'1',ini:'1',tags:[cdGet('tags')[0]?cdGet('tags')[0].n:'Техника'],tgt:cdGet('tgts')[0]||'Цель',text:'Наносит 5 урона'}; }
+const cdFontOpts=(v,none)=>(none?`<option value="">${none}</option>`:'')+CD_FONTS.map(f=>`<option value="${esc(f)}" ${v===f?'selected':''} style="font-family:'${esc(f)}'">${esc(f)}</option>`).join('');
+/* правка лица (общая для стиля, сета, карты): дизайн, рамка, шрифты, элементы; get() — объект с полями лица, put(k,v) — сохранить, base() — цепочка ниже */
+function cdFaceEditor(h,{get,put,base,none,sample}){ const draw=()=>{ const o=get()||{}, B=base(); const bl=cdPickIn(B,'lay')||cdGet('lay'), bf=cdPickIn(B,'frame')||cdGet('frame');
+    h.innerHTML=`<div class="cdf"><label>Дизайн</label><div class="cdbk cdlay"><button class="cdbkt ${o.lay?'':'on'}" data-l=""><span class="none">${esc(none)}</span><span>${esc((CD_LAYS.find(x=>x[0]===bl)||[])[1]||'')}</span></button>${CD_LAYS.map(([k,n])=>`<button class="cdbkt ${o.lay===k?'on':''}" data-l="${k}"><canvas></canvas><span>${n}</span></button>`).join('')}</div></div>
+      <div class="cdf"><label>Цвет рамки</label><div class="cdfr"><button class="q ${o.frame?'':'on'}" data-c="" title="${esc(none)}">${esc(none)} <i class="swi" style="--c:${esc(bf)}"></i></button>${CD_FRAMES.map(f=>`<button class="sw ${o.frame===f?'on':''}" data-c="${f}" style="--c:${f}"></button>`).join('')}<input type="color" value="${esc(o.frame||bf)}" title="Свой цвет"></div></div>
+      <div class="cdf two"><div><label>Шрифт названия</label><select class="ftf">${cdFontOpts(o.tf||'',none+' ('+(cdPickIn(B,'tf')||cdGet('tf'))+')')}</select></div><div><label>Шрифт текста</label><select class="fxf">${cdFontOpts(o.xf||'',none+' ('+(cdPickIn(B,'xf')||cdGet('xf'))+')')}</select></div></div>
+      <details class="cdmore"><summary>Элементы карты: цвета и подписи энергии, инициативы, тегов, цели</summary><div class="cdel"></div></details>`;
+    $$('.cdlay .cdbkt',h).forEach(t=>{ const k=t.dataset.l; const cv=$('canvas',t); if(cv) cdCanvas(cv,46,()=>({...sample(),lay:k}),false); t.onclick=()=>{ put('lay',k||undefined); draw(); }; });
+    $$('.cdfr [data-c]',h).forEach(x=>x.onclick=()=>{ put('frame',x.dataset.c||undefined); draw(); }); $('.cdfr input',h).oninput=e=>{ put('frame',e.target.value); $$('.cdfr [data-c]',h).forEach(x=>x.classList.toggle('on',x.dataset.c===e.target.value)); };
+    $('.ftf',h).onchange=e=>put('tf',e.target.value||undefined); $('.fxf',h).onchange=e=>put('xf',e.target.value||undefined);
+    cdElEditor($('.cdel',h),{get:()=>(get()||{}).el,put:v=>put('el',v),base:()=>cdElsOf(base())}); };
+  draw(); return draw; }
+/* назначить стиль сетам: свои настройки сета этой же части (лицо/рубашка) уступают стилю — иначе стиль не будет виден */
+async function cdAssignSets(ids,part,styleId){ const sets=ids.map(id=>byId(world.cardsets,id)).filter(Boolean); const own=sets.filter(s=>part==='face'?cdHasOwnFace(s):cdHasOwnBack(s));
+  if(styleId&&own.length&&!await confirmDlg(`У ${own.length} ${plural(own.length,'сета','сетов','сетов')} (${own.slice(0,3).map(s=>s.name).join(', ')}${own.length>3?'…':''}) есть свои настройки ${part==='face'?'лица':'рубашки'}. Заменить их стилем?`,'Заменить')) return false;
+  for(const s of sets){ if(part==='face'){ s.fstyle=styleId||undefined; if(!styleId) delete s.fstyle; if(styleId) for(const k of cdFaceKeys) delete s[k]; } else { if(styleId) s.bstyle=styleId; else delete s.bstyle; if(styleId) delete s.back; delete s.ownBack; } touch(s); }
+  cdRefresh(); cdFaceSched(); return true; }
+async function cdAssignCards(ids,styleId){ const cards=ids.map(id=>byId(world.cards,id)).filter(Boolean); const own=cards.filter(cdHasOwnFace);
+  if(styleId&&own.length&&!await confirmDlg(`У ${own.length} ${plural(own.length,'карты','карт','карт')} есть своя настройка лица. Заменить её стилем?`,'Заменить')) return false;
+  for(const c of cards){ if(styleId){ c.style=styleId; for(const k of cdFaceKeys) delete c[k]; } else delete c.style; touch(c); } cdRefresh(); cdFaceSched(); return true; }
+
+/* ---------- окно «Оформление»: стили, где применяются, правила по тегам ---------- */
+function cdStylesDlg(selId,backFn){ if(!isDM()) return; cdStylesInit(); let cur=selId||CDS().defFace||(cdStyles()[0]||{}).id; let sampleId=null;
+  const b=openModal(`<h2>🎨 Оформление карт</h2><div class="cdsty"><div class="cdstyL"><div class="cdstylist"></div><button class="btn sm" id="stNew">+ Новый стиль</button>
+      <div class="cdsec">Правила по тегам</div><div class="faint cdhint">Карта с тегом получает стиль лица, где бы она ни лежала. Подходит несколько правил — главнее верхнее.</div><div class="cdrules"></div></div>
+    <div class="cdstyR"></div></div>
+    <div class="modal-actions">${backFn?'<button class="btn" id="stBack">← назад</button>':''}<span class="grow"></span><button class="btn primary" id="stOk">Готово</button></div>`,true);
+  b.classList.add('cdbox','cdstybox');
+  const save=()=>{ touch(world.settings); cdRefresh(); cdFaceSched(); };
+  const S=()=>cdStyleById(cur);
+  const allTags=()=>[...new Set([...cdGet('tags').map(t=>t.n),...(world.cards||[]).flatMap(c=>c.tags||[])])];
+  const sample=()=>{ const c=(sampleId&&byId(world.cards,sampleId))||cdSampleCard(); return {...c,style:cur,lay:undefined,frame:undefined,tf:undefined,xf:undefined,el:undefined}; };
+  const usageTxt=id=>{ const u=cdUsage(id), p=[]; if(u.defFace) p.push('лицо по умолчанию'); if(u.defBack) p.push('рубашка по умолчанию'); if(u.face.length) p.push('лицо: '+u.face.length+' '+plural(u.face.length,'сет','сета','сетов')); if(u.back.length) p.push('рубашка: '+u.back.length+' '+plural(u.back.length,'сет','сета','сетов')); if(u.rules.length) p.push('теги: '+u.rules.map(r=>r.tag).join(', ')); if(u.cards.length) p.push(u.cards.length+' '+plural(u.cards.length,'карта','карты','карт')); return p.join(' · ')||'нигде не используется'; };
+  const drawList=()=>{ const h=$('.cdstylist',b); h.innerHTML=cdStyles().map(s=>`<div class="cdstyit ${s.id===cur?'on':''}" data-id="${esc(s.id)}"><canvas class="f"></canvas><canvas class="k"></canvas><div class="t"><b>${esc(s.name||'Без названия')}</b><span class="faint">${esc(usageTxt(s.id))}</span></div></div>`).join('');
+    $$('.cdstyit',h).forEach(it=>{ const id=it.dataset.id; cdCanvas($('canvas.f',it),34,()=>({...cdSampleCard(),style:id,lay:undefined,frame:undefined,tf:undefined,xf:undefined,el:undefined}),false); cdCanvas($('canvas.k',it),34,()=>({_b:cdBackResolve([(cdStyleById(id)||{}).back||{},...(id===CDS().defBack?[]:[(cdStyleById(CDS().defBack)||{}).back||{}])])}),true); it.onclick=()=>{ cur=id; drawAll(); }; }); };
+  const drawRules=()=>{ const h=$('.cdrules',b); const R=CDS().rules||[];
+    h.innerHTML=(R.length?R.map((r,i)=>`<div class="cdlrow" data-i="${i}"><span class="cdchip" style="--tc:${esc(cdTagColor(r.tag))}">${esc(r.tag)}</span><span class="faint">→</span><select class="rs">${cdStyles().map(s=>`<option value="${esc(s.id)}" ${s.id===r.style?'selected':''}>${esc(s.name)}</option>`).join('')}</select><button class="btn sm up" title="Выше — главнее">↑</button><button class="btn sm x" title="Убрать правило">✕</button></div>`).join(''):'<div class="faint" style="font-size:12.5px">Правил пока нет.</div>')+
+      `<div class="cdlrow"><select class="ra"><option value="">+ правило для тега…</option>${allTags().filter(t=>!R.some(r=>cdNorm(r.tag)===cdNorm(t))).map(t=>`<option>${esc(t)}</option>`).join('')}</select></div>`;
+    $$('[data-i]',h).forEach(row=>{ const i=+row.dataset.i; $('.rs',row).onchange=e=>{ cdMut().rules[i].style=e.target.value; save(); drawAll(); }; $('.up',row).onclick=()=>{ const L=cdMut().rules; if(i){ L.splice(i-1,0,...L.splice(i,1)); save(); drawAll(); } }; $('.x',row).onclick=()=>{ cdMut().rules.splice(i,1); save(); drawAll(); }; });
+    $('.ra',h).onchange=e=>{ if(!e.target.value) return; const C=cdMut(); C.rules=C.rules||[]; C.rules.push({tag:e.target.value,style:cur}); save(); drawAll(); }; };
+  const drawEd=()=>{ const h=$('.cdstyR',b); const st=S(); if(!st){ h.innerHTML='<div class="faint">Выбери стиль слева.</div>'; return; } const u=cdUsage(st.id), isDef=u.defFace;
+    const faceBase=()=>[...(st.id===CDS().defFace?[]:[(cdStyleById(CDS().defFace)||{}).face||{}]),cdLegacyFace()];
+    const backBase=()=>st.id===CDS().defBack?[]:[(cdStyleById(CDS().defBack)||{}).back||{}];
+    const cards=cdCards().slice(0,200);
+    h.innerHTML=`<div class="row" style="gap:8px;align-items:center"><input class="cdname grow" id="stName" value="${esc(st.name||'')}" maxlength="40"><button class="btn sm" id="stDup" title="Копия стиля">⧉ Копия</button><button class="btn sm danger" id="stDel" ${isDef||u.defBack?'disabled title="Стиль по умолчанию удалить нельзя — сначала сделай основным другой"':''}>🗑</button></div>
+      <div class="cdstyprev"><div class="cdpv"><canvas class="pf"></canvas><div class="faint cap">лицо</div></div><div class="cdpv"><canvas class="pb"></canvas><div class="faint cap">рубашка</div></div><div class="cdstyuse"></div></div>
+      <div class="row" style="gap:8px;align-items:center;margin:-2px 0 4px"><span class="faint" style="font-size:12px">Пример:</span><select id="stSmp" style="max-width:260px"><option value="">— авто —</option>${cards.map(c=>`<option value="${esc(c.id)}" ${c.id===sampleId?'selected':''}>${esc(c.name||'Без названия')}</option>`).join('')}</select></div>
+      <div class="cdsec">Лицо <span class="faint">— пусто = ${isDef?'стандартное':'как в стиле по умолчанию'}</span></div><div class="stface"></div>
+      <div class="cdsec">Рубашка <span class="faint">— в TTS у колоды одна рубашка, поэтому она назначается сетам</span></div><div class="stback"></div>`;
+    cdCanvas($('canvas.pf',h),190,sample,false); cdCanvas($('canvas.pb',h),190,()=>({_b:cdBackResolve([st.back||{},...backBase()],{frame:cdPickIn([st.face||{},...faceBase()],'frame'),tf:cdPickIn([st.face||{},...faceBase()],'tf')})}),true);
+    const useBox=$('.cdstyuse',h); const sets=cdSets();
+    useBox.innerHTML=`<div class="cdsec" style="margin-top:0;border:0;padding-top:0">Где применяется</div>
+      <label class="row cdchk"><input type="checkbox" id="dF" ${u.defFace?'checked disabled':''}> Лицо по умолчанию для всех карт</label>
+      <label class="row cdchk"><input type="checkbox" id="dB" ${u.defBack?'checked disabled':''}> Рубашка по умолчанию для всех сетов</label>
+      <div class="cdf"><label>Лицо у сетов <button class="lnk" data-all="face">все</button></label><div class="cdchips">${sets.map(s=>`<button class="q ${s.fstyle===st.id?'on':''}" data-sf="${esc(s.id)}" title="${s.fstyle&&s.fstyle!==st.id?'сейчас: '+esc(cdStyleName(s.fstyle)):''}">${esc(s.name||'Без названия')}</button>`).join('')||'<span class="faint">сетов нет</span>'}</div></div>
+      <div class="cdf"><label>Рубашка у сетов <button class="lnk" data-all="back">все</button></label><div class="cdchips">${sets.map(s=>`<button class="q ${s.bstyle===st.id?'on':''}" data-sb="${esc(s.id)}" title="${s.bstyle&&s.bstyle!==st.id?'сейчас: '+esc(cdStyleName(s.bstyle)):''}">${esc(s.name||'Без названия')}</button>`).join('')||'<span class="faint">сетов нет</span>'}</div></div>
+      <div class="cdf"><label>Карты с тегами</label><div class="cdchips">${u.rules.map(r=>`<span class="cdchip" style="--tc:${esc(cdTagColor(r.tag))}">${esc(r.tag)}<button class="x" data-rx="${esc(r.tag)}">×</button></span>`).join('')}<select class="q" id="stRule"><option value="">+ тег…</option>${allTags().filter(t=>!(CDS().rules||[]).some(r=>cdNorm(r.tag)===cdNorm(t))).map(t=>`<option>${esc(t)}</option>`).join('')}</select></div></div>
+      <div class="faint cdhint">${u.cards.length?`Отдельных карт со стилем: ${u.cards.length}. <button class="lnk" id="stCardsOff">снять</button>`:'Отдельным картам стиль назначается в конструкторе («Оформление этой карты») или выбором нескольких карт в библиотеке.'}</div>`;
+    $('#dF',useBox).onchange=e=>{ if(e.target.checked){ cdMut().defFace=st.id; save(); drawAll(); } }; $('#dB',useBox).onchange=e=>{ if(e.target.checked){ cdMut().defBack=st.id; save(); drawAll(); } };
+    $$('[data-sf]',useBox).forEach(x=>x.onclick=async()=>{ const s=byId(world.cardsets,x.dataset.sf); if(await cdAssignSets([s.id],'face',s.fstyle===st.id?null:st.id)) drawAll(); });
+    $$('[data-sb]',useBox).forEach(x=>x.onclick=async()=>{ const s=byId(world.cardsets,x.dataset.sb); if(await cdAssignSets([s.id],'back',s.bstyle===st.id?null:st.id)) drawAll(); });
+    $$('[data-all]',useBox).forEach(x=>x.onclick=async e=>{ e.preventDefault(); const part=x.dataset.all; if(await cdAssignSets(sets.map(s=>s.id),part,st.id)) drawAll(); });
+    $$('[data-rx]',useBox).forEach(x=>x.onclick=()=>{ const C=cdMut(); C.rules=(C.rules||[]).filter(r=>cdNorm(r.tag)!==cdNorm(x.dataset.rx)); save(); drawAll(); });
+    $('#stRule',useBox).onchange=e=>{ if(!e.target.value) return; const C=cdMut(); C.rules=C.rules||[]; C.rules.push({tag:e.target.value,style:st.id}); save(); drawAll(); };
+    const co=$('#stCardsOff',useBox); if(co) co.onclick=async()=>{ if(await cdAssignCards(u.cards.map(c=>c.id),null)) drawAll(); };
+    $('#stName',h).oninput=e=>{ st.name=e.target.value; save(); const t=$(`.cdstyit[data-id="${st.id}"] b`,b); if(t) t.textContent=st.name||'Без названия'; };
+    $('#stSmp',h).onchange=e=>{ sampleId=e.target.value||null; cdRefresh(); };
+    $('#stDup',h).onclick=()=>{ const n=JSON.parse(JSON.stringify(st)); n.id=cdUid(); n.name=(st.name||'')+' (копия)'; cdMut().styles.push(n); save(); cur=n.id; drawAll(); };
+    $('#stDel',h).onclick=async()=>{ const u2=cdUsage(st.id); if(!await confirmDlg(`Удалить стиль «${st.name}»? ${u2.face.length+u2.back.length+u2.rules.length+u2.cards.length?'Сеты, правила и карты с ним вернутся к стилю по умолчанию.':''}`)) return;
+      for(const s of world.cardsets||[]){ let ch=false; if(s.fstyle===st.id){ delete s.fstyle; ch=true; } if(s.bstyle===st.id){ delete s.bstyle; ch=true; } if(ch) touch(s); } for(const c of world.cards||[]) if(c.style===st.id){ delete c.style; touch(c); }
+      const C=cdMut(); C.rules=(C.rules||[]).filter(r=>r.style!==st.id); C.styles=C.styles.filter(x=>x.id!==st.id); save(); cur=CDS().defFace; cdStylesDlg(cur,backFn); };
+    cdFaceEditor($('.stface',h),{get:()=>st.face,put:(k,v)=>{ st.face=st.face||{}; if(v==null||v===''||(typeof v==='object'&&!Object.keys(v).length)) delete st.face[k]; else st.face[k]=v; save(); drawList(); },base:faceBase,none:isDef?'стандарт':'как по умолчанию',sample});
+    cdBackEditor($('.stback',h),{get:()=>st.back,put:p=>{ st.back=cdMerge(st.back,p); save(); drawList(); },res:()=>cdBackResolve([st.back||{},...backBase()],{frame:cdPickIn([st.face||{},...faceBase()],'frame'),tf:cdPickIn([st.face||{},...faceBase()],'tf')}),follow:true,owner:'cards'}); };
+  const drawAll=()=>{ drawList(); drawRules(); drawEd(); };
+  $('#stNew',b).onclick=()=>{ const n={id:cdUid(),name:'Новый стиль',face:{},back:{}}; cdMut().styles.push(n); save(); cur=n.id; drawAll(); setTimeout(()=>{ const i=$('#stName',b); if(i){ i.focus(); i.select(); } },30); };
+  $('#stOk',b).onclick=()=>{ closeModal(); render(); }; const bb=$('#stBack',b); if(bb) bb.onclick=backFn;
+  drawAll(); }
 
 /* ============ выгрузка в Tabletop Simulator прямо с сайта ============
    картинки — на отдельный сайт Hosting этого же проекта (<проект>-tts.web.app) через REST API Firebase Hosting:
@@ -8648,7 +8783,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
