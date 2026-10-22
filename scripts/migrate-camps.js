@@ -3,12 +3,14 @@
 // Запуск:  node migrate-camps.js <id проекта Firebase> [папка для отчёта] [--delta] [--dry]
 //   без флагов — перенос; если в campaigns/main уже есть данные, ничего не делает (можно запускать при каждом обновлении)
 //   --delta    — после выкладки новой версии: докопировать то, что старые вкладки успели поменять в корне после переноса
-//                (берёт отчёт migrate-<проект>.json; если документ уже правили в новой папке — не трогает и сообщает)
+//                (берёт отчёт migrate-<проект>.json; если документ уже правили в новой папке — не трогает и сообщает).
+//                Делается один раз: после выкладки правила не пускают писать в корень, он больше не меняется, а перечитывать
+//                его при каждом обновлении — лишние чтения из суточного лимита. Повторить вручную — --delta --again
 //   --dry      — только показать, что будет сделано
 // Вход берётся из Firebase CLI (тот же, что для firebase deploy). Документы копируются байт в байт (поля в формате Firestore REST).
 const fs = require('fs'), path = require('path'), os = require('os');
 
-const argv = process.argv.slice(2), delta = argv.includes('--delta'), dry = argv.includes('--dry');
+const argv = process.argv.slice(2), delta = argv.includes('--delta'), dry = argv.includes('--dry'), again = argv.includes('--again');
 const pos = argv.filter(a => !a.startsWith('--'));
 const project = pos[0], outDir = path.resolve(pos[1] || 'backups');
 if (!project) { console.error('Укажите id проекта: node migrate-camps.js <projectId> [папка]'); process.exit(2); }
@@ -30,6 +32,9 @@ async function accessToken() {
 }
 
 (async () => {
+  // дельта уже была — корень с тех пор не меняется, базу не читаем вовсе
+  if (delta && !again && fs.existsSync(manifestFile)) { const m = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+    if (m.deltaAt) { console.log(`Дельта переноса уже сделана ${new Date(m.deltaAt).toLocaleString('ru-RU')} — старый корень больше не меняется, перечитывать не нужно.`); return; } }
   // FIRESTORE_EMULATOR_HOST=localhost:8080 — проверка на эмуляторе (вход не нужен)
   const EMU = process.env.FIRESTORE_EMULATOR_HOST;
   const root = `projects/${project}/databases/(default)/documents`, base = (EMU ? `http://${EMU}/v1/` : 'https://firestore.googleapis.com/v1/') + root;

@@ -44,7 +44,10 @@ if (-not ($who -and $who.result -and @($who.result).Count)) {
 }
 
 Step 2 'Бэкап данных (на случай, если что-то пойдёт не так)'
-if (Backup-Data $cfg) { Ok "Бэкап лежит в папке backups. Вернуть его: Настройки → «⬆ Восстановить из бэкапа…»" }
+# бэкап читает всю базу — это чтения из суточного лимита Firebase. Если свежий бэкап моложе 12 часов, второй подряд не делаем
+$fresh = if (Test-Path $BackupDir) { Get-ChildItem $BackupDir -Filter 'kartoteka-full-*.json' | Where-Object { $_.LastWriteTime -gt (Get-Date).AddHours(-12) } | Sort-Object LastWriteTime -Descending | Select-Object -First 1 }
+if ($fresh) { Ok ("Свежий бэкап уже есть (" + $fresh.LastWriteTime.ToString('dd.MM HH:mm') + ") — новый не делаю, чтобы не тратить лимит чтений базы. Он в папке backups.") }
+elseif (Backup-Data $cfg) { Ok "Бэкап лежит в папке backups. Вернуть его: Настройки → «⬆ Восстановить из бэкапа…»" }
 else {
   Bad 'Бэкап сделать не удалось (сообщение выше).'
   if (-not (YesNo 'Продолжить обновление БЕЗ бэкапа?' 'нет')) { Pause-Enter 'Enter — закрыть окно'; exit 1 }
