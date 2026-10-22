@@ -1640,7 +1640,9 @@ function migrateVisibility(){ if(!realDM()||migrated||!world.settings) return; m
   if(n) console.log('migrated',n); }
 const snapshots=new Map(); // id -> stableStr последних известных данных (для журнала)
 const NO_RENDER_KEYS=new Set(['_live','_chat','_chatdm']); // чат и пинги перерисовывают только себя
-const REDRAW_KEYS=new Set(['wmaps','wmarkers','wmdraw','wmpriv','_dm','characters','orgs','locations','docs']); // на открытой карте — только перерисовка холста, без пересборки страницы (иначе рвётся перетаскивание и мигают картинки)
+const REDRAW_KEYS=new Set(['wmaps','wmarkers','wmdraw','wmpriv','_dm','characters','orgs','locations','docs','users']);
+/* на открытой карте эти данные не показываются — их приход не должен пересобирать страницу (иначе левая панель прыгает наверх, открытые меню закрываются) */
+const MAP_QUIET_KEYS=new Set(['log','memberships','locLinks','relations','maps','cards','cardsets','trash','campaigns','_site']); // на открытой карте — только перерисовка холста, без пересборки страницы (иначе рвётся перетаскивание и мигают картинки)
 /* элементы массивов с id (элементы карты, полоски, статусы…) при обновлении из базы остаются теми же объектами: выделение, перетаскивание
    и открытые формы держат ссылку. Раньше чужая правка карты подменяла все элементы — начатое перетаскивание двигало «отвязанную» копию и терялось */
 function reuseArr(oa,nv){ if(!Array.isArray(nv)) return nv; const M=new Map(oa.map(x=>[x.id,x])); return nv.map(n=>{ const o=(n&&typeof n==='object'&&n.id!=null)?M.get(n.id):null; if(!o||o===n) return n; for(const k of Object.keys(o)) if(!k.startsWith('_')) delete o[k]; Object.assign(o,n); return o; }); }
@@ -1662,8 +1664,9 @@ function applyDocs(key,coll,docs,post){
     if(old){ const arrs=Object.entries(old).filter(([k,v])=>!k.startsWith('_')&&isIdArr(v)); for(const k of Object.keys(old)) if(!k.startsWith('_')) delete old[k]; Object.assign(old,d); for(const [k,oa] of arrs) old[k]=reuseArr(oa,old[k]); return old; } // тот же объект: открытые страницы и поля ввода не теряют ссылку
     return d; });
   world[key]=drafts.length?next.concat(drafts):next; if(post) post(); if(key==='characters') chatFillSpeakers();
-  const rk=(wmAlias(key)||{}).coll||key;
-  if(changed){ updateCounts(); if(NO_RENDER_KEYS.has(key)){} else if(state.view==='wmap'&&state.id&&WM.redraw&&REDRAW_KEYS.has(rk)){ WM.redraw(); if(key==='characters'&&WM.onMe) WM.onMe(); if(['wmaps','wmarkers'].includes(rk)&&WM.onInit) WM.onInit(); if(WM.onScene&&['characters','wmaps','wmarkers'].includes(rk)) WM.onScene(); } else scheduleRender(); }
+  /* части одной коллекции (у игрока персонажи приходят тремя подписками _charactersA/B/C, у карт — по картам) считаются самой коллекцией */
+  const mk=/^_(characters|orgs|locations|docs|relations|maps)[ABC]$/.exec(key); const rk=(wmAlias(key)||{}).coll||(mk&&mk[1])||key;
+  if(changed){ updateCounts(); if(NO_RENDER_KEYS.has(key)){} else if(state.view==='wmap'&&state.id&&MAP_QUIET_KEYS.has(rk)){} else if(state.view==='wmap'&&state.id&&WM.redraw&&REDRAW_KEYS.has(rk)){ WM.redraw(); if(rk==='characters'&&WM.onMe) WM.onMe(); if(['wmaps','wmarkers'].includes(rk)&&WM.onInit) WM.onInit(); if(WM.onScene&&['characters','wmaps','wmarkers'].includes(rk)) WM.onScene(); } else scheduleRender(); }
   if(realDM()&&world.settings&&world.characters.length+world.orgs.length+world.locations.length) setTimeout(migrateVisibility,1500);
 }
 let renderTimer=null;
@@ -7991,7 +7994,7 @@ function renderCards(m){ cdSubscribe(); const dm=isDM(); const tw={s:150,m:200,l
     if(dm){ $('.sall',sec).onclick=()=>{ const ids=shown.map(c=>c.id), all=ids.every(id=>CD_SEL.has(id)); for(const id of ids) all?CD_SEL.delete(id):CD_SEL.add(id); cdSelUpd(); }; $('.add',sec).onclick=()=>cdNewCard(sid); const ed=$('.ed',sec); if(ed) ed.onclick=()=>cdSetEdit(s); const mo=$('.mo',sec); if(mo) mo.onclick=e=>cdSetMenu(s,e.clientX,e.clientY);
       /* перетаскивание карт: на сет — в конец, на карту — перед ней */
       sec.ondragover=e=>{ if(!CD_DRAG) return; e.preventDefault(); sec.classList.add('dropon'); }; sec.ondragleave=e=>{ if(!sec.contains(e.relatedTarget)) sec.classList.remove('dropon'); };
-      sec.ondrop=e=>{ e.preventDefault(); sec.classList.remove('dropon'); const ids=CD_DRAG; CD_DRAG=null; if(!ids) return; const t=e.target.closest('.cdtile'); cdMoveMany(ids,sid,t&&!ids.includes(t.dataset.id)?t.dataset.id:null); CD_SEL.clear(); }; }
+      sec.ondrop=e=>{ e.preventDefault(); sec.classList.remove('dropon'); const ids=CD_DRAG; CD_DRAG=null; if(!ids) return; const t=e.target.closest('.cdtile'); cdMoveMany(ids,sid,t&&!ids.includes(t.dataset.id)?t.dataset.id:null); /* выбор не сбрасываем — можно продолжать */ }; }
     box.append(sec); }
   if(!groups.length) box.append(el(`<div class="cdhero">${dm?'<div class="big">🃏</div><b>Здесь будет библиотека карт</b><div class="faint">Сет — группа карт со своей рамкой и рубашкой (в TTS — отдельная колода). Начни с сета, потом добавляй в него карты.</div><button class="btn primary" id="cdHeroSet">+ Первый сет</button>':'<div class="big">🃏</div><b>Мастер пока не показал карт</b>'}</div>`));
   else if(filt&&!box.children.length) box.append(el('<div class="cdempty">Ничего не найдено — сбрось фильтры.</div>'));
