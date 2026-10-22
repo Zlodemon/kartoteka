@@ -64,7 +64,9 @@ const yes = a => /^(да|д|y|yes|ok|\+)$/i.test(String(a).trim());
 /* ===== TTS: сохранённые объекты и колоды ===== */
 const plain = t => String(t || '').replace(/\{(#[0-9a-fA-F]{3,8}|[\wа-яё-]{1,12})\|/gi, '').replace(/[{}]/g, '').replace(/\*\*/g, '');
 const guid = () => Math.random().toString(16).slice(2, 8).padEnd(6, '0');
-const T = (x = 0, y = 1, z = 0, s = 1.5) => ({ posX: x, posY: y, posZ: z, rotX: 0, rotY: 180, rotZ: 180, scaleX: s, scaleY: 1, scaleZ: s });
+// скейл карт — из настроек сайта (Карточки → «В TTS»: settings.cards.ttsScale {x,y,z}), по умолчанию 1.5 · 1 · 1.5
+let SC = { x: 1.5, y: 1, z: 1.5 };
+const T = (x = 0, y = 1, z = 0) => ({ posX: x, posY: y, posZ: z, rotX: 0, rotY: 180, rotZ: 180, scaleX: SC.x, scaleY: SC.y, scaleZ: SC.z });
 const COMMON = { ColorDiffuse: { r: 0.713235259, g: 0.713235259, b: 0.713235259 }, LayoutGroupSortIndex: 0, Value: 0, Locked: false, Grid: true, Snap: true, IgnoreFoW: false, MeasureMovement: false, DragSelectable: true, Autoraise: true, Sticky: true, Tooltip: true, GridProjection: false, HideWhenFaceDown: true, Hands: true, SidewaysCard: false, LuaScript: '', LuaScriptState: '', XmlUI: '' };
 const cardDesc = c => { const v = x => String(x ?? '').trim() || '—'; return [`Энергия ${v(c.en)} · Инициатива ${v(c.ini)}`, [(c.tags || []).join(', '), c.tgt].filter(Boolean).join(' · '), '', plain(c.text), c.flav ? '\n«' + String(c.flav).trim() + '»' : ''].join('\n').trim(); };
 function cardObj(c, k, face, back) { const cd = { FaceURL: face, BackURL: back, NumWidth: 1, NumHeight: 1, BackIsHidden: true, UniqueBack: false, Type: 0 };
@@ -87,6 +89,8 @@ async function syncOnce(cid, quiet) {
   const sets = (await list(`campaigns/${cid}/cardsets`)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const cards = (await list(`campaigns/${cid}/cards`)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   if (!cards.length) { warn('В этой игре пока нет карт (раздел «Карточки» на сайте).'); return null; }
+  const st = await getDoc(`campaigns/${cid}/meta/settings`).catch(() => null), sc = (st && st.cards && st.cards.ttsScale) || {};
+  SC = { x: +sc.x > 0 ? +sc.x : 1.5, y: +sc.y > 0 ? +sc.y : 1, z: +sc.z > 0 ? +sc.z : 1.5 };
   fs.mkdirSync(ttsDir, { recursive: true });
   const fresh = [], unready = [], lost = [];
   // файл картинки: имя = подпись картинки; есть на диске — не качаем
