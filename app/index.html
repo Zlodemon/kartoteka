@@ -389,6 +389,7 @@ h1,h2,h3{margin:0;font-weight:700}
 body.phone .cdgrid{gap:10px;padding:10px;justify-content:center}
 body.phone .cdsh{flex-wrap:wrap;row-gap:8px}body.phone .cdsh .grow{flex-basis:100%;height:0}
 @media (max-width:860px){.cdbox .modal-actions{flex-wrap:wrap}.cdbox .cdpos{display:none}}
+.fstab{border-collapse:collapse;margin-top:8px;font-size:12.5px;min-width:320px}.fstab th{text-align:left;font-weight:500;color:var(--muted);padding:3px 8px}.fstab td{padding:3px 8px;border-top:1px solid var(--line)}
 .cdtts{font-size:12px;padding:3px 10px;border-radius:20px;border:1px solid var(--line);color:var(--muted);cursor:help}
 .cdtts.ok{color:var(--mint);border-color:rgba(142,247,193,.3)}.cdtts.busy{color:var(--gold);border-color:rgba(255,209,102,.35)}.cdtts.err{color:var(--red);border-color:rgba(255,92,108,.4)}
 .cdttsst{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
@@ -1255,7 +1256,17 @@ let AUTH_SEEN=false; setTimeout(()=>{ const m=$('#bootMsg'); if(m) m.textContent
    AUTH.onChange(cb(user|null)) AUTH.signIn() AUTH.signOut()
    ============================================================ */
 let DB, AUTH, LIVE; // LIVE — эфемерные сигналы (линейка, пинги, следы, присутствие, перетаскивание): Realtime Database
-const STAT={w:0,r:0}; // расход Firestore за сессию: записи / чтения
+const STAT={w:0,r:0,by:{}}; // расход Firestore за сессию: записи / чтения с сервера (по коллекциям)
+/* чтения с сервера по разделам: эта вкладка (STAT) и «сегодня» в этом браузере (localStorage fsStat.<день>; день — как у лимита Firebase, по времени Калифорнии) */
+const fsDayId=()=>{ try{ return new Date().toLocaleDateString('en-CA',{timeZone:'America/Los_Angeles'}); }catch{ return new Date().toISOString().slice(0,10); } };
+let FS_DAY=null, FS_SAVE=0;
+function fsCount(coll,n){ if(!n) return; coll=String(coll).split('/').pop(); STAT.r+=n; STAT.by[coll]=(STAT.by[coll]||0)+n;
+  try{ const d=fsDayId(); if(!FS_DAY||FS_DAY.d!==d) FS_DAY=JSON.parse(localStorage.getItem('fsStat.'+d)||'null')||{d,r:0,by:{}}; FS_DAY.r+=n; FS_DAY.by[coll]=(FS_DAY.by[coll]||0)+n;
+    clearTimeout(FS_SAVE); FS_SAVE=setTimeout(()=>{ try{ localStorage.setItem('fsStat.'+FS_DAY.d,JSON.stringify(FS_DAY)); const old='fsStat.'+new Date(Date.now()-8*864e5).toISOString().slice(0,10); for(const k of Object.keys(localStorage)) if(k.startsWith('fsStat.')&&k<old) localStorage.removeItem(k); }catch{} },3000); }catch{} }
+const FS_NAMES={characters:'Персонажи',orgs:'Организации',locations:'Локации',memberships:'Членство в организациях',locLinks:'Связи с локациями',relations:'Связи',maps:'Карты связей',wmaps:'Карты местности',wmarkers:'Токены на картах',wmdraw:'Рисунки и листы на картах',wmpriv:'Личные слои карт',docs:'Документы',chat:'Чат',chatdm:'Чат мастера',log:'Журнал',users:'Участники',meta:'Настройки',dm:'Скрытое мастера',images:'Картинки',trash:'Корзина',cards:'Карточки',cardsets:'Сеты карточек',cardfaces:'Картинки карточек для TTS',campaigns:'Игры',site:'Сайт',live:'Живой слой'};
+function fsStatHTML(){ let day=null; try{ day=(FS_DAY&&FS_DAY.d===fsDayId())?FS_DAY:JSON.parse(localStorage.getItem('fsStat.'+fsDayId())||'null'); }catch{} day=day||{r:0,by:{}};
+  const rows=Object.entries(day.by).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([k,v])=>`<tr><td>${esc(FS_NAMES[k]||k)}</td><td style="text-align:right"><b>${v}</b></td><td style="text-align:right" class="faint">${STAT.by[k]||0}</td></tr>`).join('');
+  return `Чтения базы с сервера: <b>${STAT.r}</b> за эту вкладку, <b>${day.r}</b> сегодня в этом браузере; записей за вкладку — <b>${STAT.w}</b>. <span class="faint">Бесплатный лимит — 50 000 чтений и 20 000 записей в сутки на всех вместе, сбрасывается около 10:00 по Москве. Здесь только этот браузер; общий расход проекта — в Firebase Console → Firestore → Usage. Живые сигналы карты (линейка, пинги, перетаскивание) идут через Realtime Database и сюда не входят.</span>${rows?`<table class="fstab"><tr><th>На что ушли чтения сегодня (этот браузер)</th><th style="text-align:right">сегодня</th><th style="text-align:right">вкладка</th></tr>${rows}</table>`:''}`; }
 /* игры (кампании): данные каждой игры лежат в своей папке campaigns/<id>/<коллекция> той же базы (живой слой — live/<id>/…). Общие для всех игр только участники (users),
    список игр (campaigns) и выбор игры «для всех» (site). CAMP задаётся один раз при входе (campResolve) и до перезагрузки страницы не меняется — переключение игры = перезагрузка */
 let CAMP='main';
@@ -1355,7 +1366,7 @@ if(MOCK){
   DB={
     subscribe(coll,opts,cb){ let q=F.collection(db,...cpath(coll)); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts);
       let last=null, first=true; const conv=snap=>snap.docs.map(d=>({...d.data(),id:d.id,_pending:d.metadata.hasPendingWrites}));
-      return F.onSnapshot(q, snap=>{ try{ STAT.r+=snap.docChanges().filter(c=>!c.doc.metadata.hasPendingWrites).length; }catch{} last=snap;
+      return F.onSnapshot(q, snap=>{ try{ if(!snap.metadata.fromCache) fsCount(coll,snap.docChanges().filter(c=>!c.doc.metadata.hasPendingWrites).length); }catch{} last=snap;
         if(!TH_COLLS.has(coll)){ cb(conv(snap)); return; }
         const docs=conv(snap); const miss=thAttach(coll,docs); const again=()=>{ if(last!==snap) return; const d2=conv(snap); thAttach(coll,d2); cb(d2); };
         /* первый снимок чуть придерживаем, пока грузятся миниатюры (из кэша — миллисекунды), чтобы портреты не мигали буквами */
@@ -1366,11 +1377,11 @@ if(MOCK){
     /* запись с чтением свежей версии: fn(текущее на сервере) → поля для записи. Если документ успели поменять между чтением и записью, Firestore повторит сам */
     mergeUpdate:(coll,id,fn)=>F.runTransaction(db,async t=>{ const ref=F.doc(db,...cpath(coll),id); const s=await t.get(ref); STAT.r++; if(!s.exists()) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur=s.data(); const part=fn(JSON.parse(JSON.stringify(cur))); STAT.w++; t.update(ref,Object.fromEntries(Object.entries(part).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]))); const nx={...cur}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete nx[k]; else nx[k]=clean(v); } return nx; }),
     push:(coll,id,field,value,extra)=>(STAT.w++,F.setDoc(F.doc(db,...cpath(coll),id),{...clean(extra||{}),[field]:F.arrayUnion(clean(value))},{merge:true})),
-    async list(coll,opts){ let q=F.collection(db,...cpath(coll)); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts); const snap=await F.getDocs(q); return snap.docs.map(d=>({...d.data(),id:d.id})); },
-    async listServer(coll){ const snap=await F.getDocsFromServer(F.collection(db,...cpath(coll))); return snap.docs.map(d=>({...d.data(),id:d.id})); },
+    async list(coll,opts){ let q=F.collection(db,...cpath(coll)); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts); const snap=await F.getDocs(q); if(!snap.metadata.fromCache) fsCount(coll,Math.max(1,snap.size)); return snap.docs.map(d=>({...d.data(),id:d.id})); },
+    async listServer(coll){ const snap=await F.getDocsFromServer(F.collection(db,...cpath(coll))); fsCount(coll,Math.max(1,snap.size)); return snap.docs.map(d=>({...d.data(),id:d.id})); },
     DEL:Symbol('del'),
     delete:(coll,id)=>(STAT.w++,F.deleteDoc(F.doc(db,...cpath(coll),id))),
-    async get(coll,id){ const s=await F.getDoc(F.doc(db,...cpath(coll),id)); if(!s.exists()) return null; const d={...s.data(),id:s.id}; if(TH_COLLS.has(coll)) thAttach(coll,[d]); return d; },
+    async get(coll,id){ const s=await F.getDoc(F.doc(db,...cpath(coll),id)); if(!s.metadata.fromCache) fsCount(coll,1); if(!s.exists()) return null; const d={...s.data(),id:s.id}; if(TH_COLLS.has(coll)) thAttach(coll,[d]); return d; },
     async getImg(coll,id){ try{ const s=await F.getDocFromCache(F.doc(db,...cpath(coll),id)); if(s.exists()) return {...s.data(),id:s.id}; }catch{} return DB.get(coll,id); },
   };
   AUTH={
@@ -1568,17 +1579,37 @@ function campPanel(p){ const box=$('.camplist',p), ask=$('#campAskOn',p); const 
   $$('.camprow',box).forEach(r=>{ const c=r.dataset.c, a=$('.ca',r), mm=$('.cm',r); if(a) a.onclick=()=>campSetActive(c); if(mm) mm.onclick=()=>campGo(c); $('.cr',r).onclick=()=>campRename(c); });
   ask.onchange=async()=>{ try{ await DB.update('users',me.uid,{campAsk:ask.checked?DB.DEL:false}); toast(ask.checked?'При входе спрошу, в какую игру зайти':'Вход — сразу в активную игру'); }catch(e){ console.error(e); toast('Не удалось: '+(e.code||e.message),true); } };
   $('#campNew',p).onclick=campNewDialog; }
-function subscribeAll(){
+/* ===== подписки по требованию — лишнее не читаем из суточного лимита Firestore =====
+   токены и рисунки карт — только открытой карты (и 2 недавних); листы-документы на картах (рисунки t:'note') — всегда: по ним раздел «Документы» знает, что лежит на картах;
+   журнал — последние 30 записей (счётчик новых), полностью — при открытии «Журнала»; карточки — при открытии раздела «Карточки» */
+const WMSUB=new Map();
+const wmAlias=key=>{ const m=/^_(wmarkers|wmdraw)_(.+)$/.exec(key); return m?{coll:m[1],map:m[2]==='notes'?null:m[2],notes:m[2]==='notes'}:null; };
+function wmMerge(coll){ const out=[], seen=new Set(); const add=L=>{ for(const d of L||[]) if(!seen.has(d.id)){ seen.add(d.id); out.push(d); } };
+  if(coll==='wmdraw') add(world._wmdraw_notes); for(const id of WMSUB.keys()) add(world['_'+coll+'_'+id]);
+  for(const o of world[coll]||[]) if(!seen.has(o.id)&&(pending.has(o.id)||o._draft||(WMSUB.has(o.mapId)&&me&&o.owner===me.uid&&Date.now()-(o.createdAt||0)<15000))) out.push(o); /* только что созданное ещё не пришло из подписки своей карты */ world[coll]=out; }
+function wmSubMap(id){ if(!id||!me) return Promise.resolve(); let s=WMSUB.get(id); if(s){ s.at=Date.now(); return s.ready; }
+  s={at:Date.now(),un:[]}; let done=0, res; s.ready=new Promise(r=>res=r); WMSUB.set(id,s);
+  for(const coll of ['wmarkers','wmdraw']){ const key='_'+coll+'_'+id; world[key]=world[key]||[]; s.un.push(DB.subscribe(coll,{where:[['mapId','==',id]]},docs=>{ applyDocs(key,coll,docs,()=>wmMerge(coll)); if(++done===2) res(); })); }
+  setTimeout(res,8000); // без сети не ждём вечно
+  for(const [k,v] of [...WMSUB.entries()].filter(([k])=>k!==id&&k!==state.id).sort((a,b)=>b[1].at-a[1].at).slice(2)){ v.un.forEach(f=>{ try{ f(); }catch{} }); WMSUB.delete(k); delete world['_wmarkers_'+k]; delete world['_wmdraw_'+k]; }
+  wmMerge('wmarkers'); wmMerge('wmdraw'); return s.ready; }
+let LOGSUB=null;
+function logSub(n){ if(!realDM()||!me) return; if(LOGSUB&&LOGSUB.n>=n) return; if(LOGSUB) try{ LOGSUB.un(); }catch{} LOGSUB={n,un:DB.subscribe('log',{orderBy:'at',limit:n},docs=>applyDocs('log','log',docs))}; }
+let CDSUB=null;
+function cdSubscribe(){ if(CDSUB||!me) return; const o=realDM()?null:{where:[['pub','==',true]]}; CDSUB=[DB.subscribe('cards',o,docs=>applyDocs('cards','cards',docs)),DB.subscribe('cardsets',o,docs=>applyDocs('cardsets','cardsets',docs))]; }
+function lazyReset(){ for(const v of WMSUB.values()) v.un.forEach(f=>{ try{ f(); }catch{} }); WMSUB.clear(); for(const k of Object.keys(world)) if(wmAlias(k)) delete world[k]; world.wmarkers=[]; world.wmdraw=[];
+  if(LOGSUB){ try{ LOGSUB.un(); }catch{} LOGSUB=null; } if(CDSUB){ CDSUB.forEach(f=>{ try{ f(); }catch{} }); CDSUB=null; } world.cards=[]; world.cardsets=[]; }
+function subscribeAll(){ lazyReset();
   const sub=(coll,key,opts,post)=>unsubs.push(DB.subscribe(coll,opts,docs=>{ applyDocs(key,coll,docs,post); }));
   sub('meta','_settings',null,()=>{ const s=world._settings.find(x=>x.id==='settings'); const fresh=s?{...defaultSettings(),...s}:{...defaultSettings(),id:'settings'}; if(!world.settings) world.settings=fresh; else if(!pending.has('settings')&&!(s&&s.updatedAt&&s.updatedAt===world.settings.updatedAt)){ for(const k of Object.keys(world.settings)) if(!(k in fresh)) delete world.settings[k]; Object.assign(world.settings,fresh); } const t=world._settings.find(x=>x.id==='timeline'); if(!pending.has('timeline')&&!(t&&world.timeline&&t.updatedAt&&t.updatedAt===world.timeline.updatedAt)) world.timeline=t?t:{id:'timeline',nodes:[]}; const tc=world._settings.find(x=>x.id==='techniques'); if(!pending.has('techniques')&&!(tc&&world.techniques&&tc.updatedAt&&tc.updatedAt===world.techniques.updatedAt)){ world.techniques=tc?tc:(realDM()?techBaseCatalog():{id:'techniques',branches:[],groups:[]}); techLayoutCache={}; } applySiteName(); });
   CW.site=CW.camps=CW.users=false; world.campaigns=[]; world._site=[];
   sub('site','_site',null,()=>{ SITE=world._site.find(x=>x.id==='main')||null; CW.site=true; campCheck(); }); sub('campaigns','campaigns',null,()=>{ CW.camps=true; campCheck(); });
-  sub('memberships','memberships'); sub('locLinks','locLinks'); if(realDM()){ sub('cards','cards'); sub('cardsets','cardsets'); } else { sub('cards','cards',{where:[['pub','==',true]]}); sub('cardsets','cardsets',{where:[['pub','==',true]]}); } sub('users','users',null,()=>{ CW.users=true; campCheck(); }); sub('wmarkers','wmarkers'); sub('wmdraw','wmdraw');
+  sub('memberships','memberships'); sub('locLinks','locLinks'); sub('users','users',null,()=>{ CW.users=true; campCheck(); }); sub('wmdraw','_wmdraw_notes',{where:[['t','==','note']]},()=>wmMerge('wmdraw')); if(state.view==='wmap'&&state.id) setTimeout(()=>wmSubMap(state.id),0);
   world._live=[]; WM.liveStart=Date.now(); LIVE.subscribe(docs=>{ world._live=docs; liveGoto(docs); WM.onLive&&WM.onLive(); if(state.view==='wmap'&&!state.id) wmListPresence(); musSync(); }); presenceStart();
   world._chat=[]; sub('chat','_chat',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); if(realDM()){ world._chatdm=[]; sub('chatdm','_chatdm',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); }
   if(realDM()) sub('docs','docs');
   else { world._docsA=[]; world._docsB=[]; world._docsC=[]; const md=()=>mergeSrc('docs'); sub('docs','_docsA',{where:[['pub','==',true]]},md); sub('docs','_docsB',{where:[['given','array-contains',me.uid]]},md); if(myRole==='player') sub('docs','_docsC',{where:[['owner','==',me.uid]]},md); }
-  if(realDM()){ sub('characters','characters'); sub('orgs','orgs'); sub('locations','locations'); sub('relations','relations'); sub('maps','maps'); sub('log','log',{orderBy:'at',limit:500});
+  if(realDM()){ sub('characters','characters'); sub('orgs','orgs'); sub('locations','locations'); sub('relations','relations'); sub('maps','maps'); logSub(state.view==='log'?200:30);
     sub('wmaps','wmaps'); sub('wmpriv','wmpriv',null,()=>{ for(const d of world.wmpriv) if(!Array.isArray(d.uids)&&d.uid&&!pending.has(d.id)){ d.uids=[d.uid]; touch(d); } });
     sub('dm','_dm',null,()=>{ const t=world._dm.find(x=>x.id==='dmtimeline'); if(!pending.has('dmtimeline')) world.dmTimeline=t?t:{id:'dmtimeline',nodes:[]}; for(const d of world._dm) if(d.id.startsWith('wm_')&&!pending.has(d.id)) WM.secrets.set(d.id.slice(3),d); }); }
   else {
@@ -1607,7 +1638,7 @@ const REDRAW_KEYS=new Set(['wmaps','wmarkers','wmdraw','wmpriv','_dm','character
    и открытые формы держат ссылку. Раньше чужая правка карты подменяла все элементы — начатое перетаскивание двигало «отвязанную» копию и терялось */
 function reuseArr(oa,nv){ if(!Array.isArray(nv)) return nv; const M=new Map(oa.map(x=>[x.id,x])); return nv.map(n=>{ const o=(n&&typeof n==='object'&&n.id!=null)?M.get(n.id):null; if(!o||o===n) return n; for(const k of Object.keys(o)) if(!k.startsWith('_')) delete o[k]; Object.assign(o,n); return o; }); }
 function applyDocs(key,coll,docs,post){
-  const prev=world[key]||[]; const prevMap=new Map(prev.map(x=>[x.id,x]));
+  const prev=world[key]||[]; const al=wmAlias(key); const prevMap=new Map([...prev,...(al?(world[al.coll]||[]).filter(x=>al.notes?x.t==='note':x.mapId===al.map):[])].map(x=>[x.id,x]));
   const drafts=prev.filter(x=>x._draft&&!docs.some(d=>d.id===x.id)); /* черновики (ещё не в базе) не выбрасываем */
   let changed=prev.length-drafts.length!==docs.length;
   const next=docs.map(d=>{ const old=prevMap.get(d.id); const s=stableStr(clean(d));
@@ -1624,7 +1655,8 @@ function applyDocs(key,coll,docs,post){
     if(old){ const arrs=Object.entries(old).filter(([k,v])=>!k.startsWith('_')&&isIdArr(v)); for(const k of Object.keys(old)) if(!k.startsWith('_')) delete old[k]; Object.assign(old,d); for(const [k,oa] of arrs) old[k]=reuseArr(oa,old[k]); return old; } // тот же объект: открытые страницы и поля ввода не теряют ссылку
     return d; });
   world[key]=drafts.length?next.concat(drafts):next; if(post) post(); if(key==='characters') chatFillSpeakers();
-  if(changed){ updateCounts(); if(NO_RENDER_KEYS.has(key)){} else if(state.view==='wmap'&&state.id&&WM.redraw&&REDRAW_KEYS.has(key)){ WM.redraw(); if(key==='characters'&&WM.onMe) WM.onMe(); if(['wmaps','wmarkers'].includes(key)&&WM.onInit) WM.onInit(); if(WM.onScene&&['characters','wmaps','wmarkers'].includes(key)) WM.onScene(); } else scheduleRender(); }
+  const rk=(wmAlias(key)||{}).coll||key;
+  if(changed){ updateCounts(); if(NO_RENDER_KEYS.has(key)){} else if(state.view==='wmap'&&state.id&&WM.redraw&&REDRAW_KEYS.has(rk)){ WM.redraw(); if(key==='characters'&&WM.onMe) WM.onMe(); if(['wmaps','wmarkers'].includes(rk)&&WM.onInit) WM.onInit(); if(WM.onScene&&['characters','wmaps','wmarkers'].includes(rk)) WM.onScene(); } else scheduleRender(); }
   if(realDM()&&world.settings&&world.characters.length+world.orgs.length+world.locations.length) setTimeout(migrateVisibility,1500);
 }
 let renderTimer=null;
@@ -1721,7 +1753,7 @@ async function createDoc(coll,obj){ if(viewAs){ viewAsWarn(); throw new Error('v
   catch(e){ pending.delete(obj.id); world[key]=world[key].filter(x=>x!==obj); toast('Нет прав: '+(e.code||e.message),true); render(); throw e; }
   return obj;
 }
-async function removeDoc(coll,obj){ if(viewAs){ viewAsWarn(); return; } const key=Object.keys(COLLMAP).find(k=>COLLMAP[k]===coll); world[key]=world[key].filter(x=>x!==obj); pending.delete(obj.id);
+async function removeDoc(coll,obj){ if(viewAs){ viewAsWarn(); return; } const key=Object.keys(COLLMAP).find(k=>COLLMAP[k]===coll); world[key]=world[key].filter(x=>x!==obj); for(const k of Object.keys(world)) if(k.startsWith('_'+coll+'_')&&wmAlias(k)) world[k]=world[k].filter(x=>x.id!==obj.id); pending.delete(obj.id);
   try{ await DB.delete(coll,obj.id); if(isPlayer()) addLog({coll,docId:obj.id,kind:'delete',entityName:entityLabel(coll,obj),label:'удалил'+(coll==='relations'?' связь':''),before:clean(obj)}); }
   catch(e){ world[key].push(obj); toast('Нет прав: '+(e.code||e.message),true); render(); }
 }
@@ -1978,9 +2010,12 @@ async function trashRestore(list){ const main=list.find(t=>t.main)||list[0]; if(
 /* картинка ещё где-то используется (копия карты, клон персонажа, эффект…) — не удалять */
 function imgInUse(id){ const has=a=>Array.isArray(a)&&a.includes(id); const itUse=it=>it&&(it.img===id||it.image===id||has(it.images));
   for(const e of [...world.characters,...world.orgs,...world.locations]) if(e.mainImage===id||has(e.images)||(e.abilities||[]).some(x=>has(x.images))||(e.inventory||[]).some(x=>has(x.images))) return true;
-  for(const mp of world.wmaps) if(mp.image===id||(mp.items||[]).some(itUse)) return true; for(const s of WM.secrets.values()) if((s.items||[]).some(itUse)) return true; if((world.wmdraw||[]).some(itUse)) return true;
+  for(const mp of world.wmaps) if(mp.image===id||(mp.items||[]).some(itUse)) return true; for(const s of WM.secrets.values()) if((s.items||[]).some(itUse)) return true; if((world.wmdraw||[]).some(itUse)||(IMG_ALLDRAW||[]).some(itUse)) return true;
   for(const d of world.docs) if(has(d.images)) return true; for(const d of (world.settings&&world.settings.effectLib)||[]) if(d.image===id) return true; return false; }
-async function trashPurge(list){ for(const t of list){ for(const im of (t.imgs||[])) if(!imgInUse(im)) await DB.delete('images',im).catch(()=>{}); await DB.delete('trash',t.id).catch(()=>{}); } }
+let IMG_ALLDRAW=null;
+async function trashPurge(list){ IMG_ALLDRAW=null; const withImg=list.some(t=>(t.imgs||[]).length);
+  if(withImg){ try{ IMG_ALLDRAW=await DB.list('wmdraw'); }catch(e){ console.error('trash purge: wmdraw',e); } } /* не прочитали рисунки карт — картинки не трогаем, лучше оставить лишнее */
+  for(const t of list){ if(!withImg||IMG_ALLDRAW) for(const im of (t.imgs||[])) if(!imgInUse(im)) await DB.delete('images',im).catch(()=>{}); await DB.delete('trash',t.id).catch(()=>{}); } IMG_ALLDRAW=null; }
 const TRASH_KIND={c:['👤','персонаж'],o:['🛡','организация'],l:['📍','локация'],wmap:['🗺','карта'],map:['🕸','карта связей'],doc:['📜','документ']};
 function renderTrash(m){
   const page=el(`<div class="page"><div class="head"><h1>Корзина</h1><span class="grow"></span><button class="btn sm" id="trRe" title="Перечитать корзину">⟳</button><button class="btn sm danger" id="trAll">Очистить корзину</button></div>
@@ -5957,7 +5992,7 @@ function wmListPresence(root){ $$('.pres[data-map]',root||document).forEach(box=
 /* --- настройки карты (модалка) --- */
 /* удалить карту со всем её содержимым: подложка, скрытый слой, токены и рисунки игроков, личные слои */
 /* копия карты: документ карты (сетка, туман, масштаб, слои), своя копия картинки, публичные элементы, токены, рисунки, скрытый слой мастера и личные слои — с новыми id */
-async function wmCopyMap(mp){ const nm=await promptDlg('Название копии',(mp.name||'без названия')+' (копия)'); if(nm==null) return null; toast('Копирую карту…'); const idMap=new Map(); const nid=old=>{ if(!idMap.has(old)) idMap.set(old,uid()); return idMap.get(old); }; const reItems=L=>(L||[]).map(it=>{ const c=JSON.parse(JSON.stringify(clean(it))); c.id=nid(it.id); return c; }); const cp=JSON.parse(JSON.stringify(clean(mp))); cp.id=uid(); cp.name=nm; delete cp.createdAt; delete cp.updatedAt; delete cp.updatedBy; cp.items=reItems(mp.items); if(mp.image){ try{ const d=await DB.get('images',mp.image); if(d){ const iid=uid(); await DB.set('images',iid,{...d,entity:cp.id,createdAt:Date.now()}); imgCache.set(iid,d.data); imgCache.set('t:'+iid,d.thumb||d.data); cp.image=iid; } else cp.image=null; }catch{ cp.image=null; } } await createDoc('wmaps',cp); const s=wmSecret(mp); if(s&&(s.items||[]).length){ const ns=wmSecret(cp,true); ns.items=reItems(s.items); touch(ns); } for(const d of world.wmarkers.filter(d=>d.mapId===mp.id)){ const c=JSON.parse(JSON.stringify(clean(d))); c.id=nid(d.id); c.mapId=cp.id; delete c.createdAt; delete c.updatedAt; await createDoc('wmarkers',c); } for(const d of world.wmdraw.filter(d=>d.mapId===mp.id)){ const c=JSON.parse(JSON.stringify(clean(d))); c.id=nid(d.id); c.mapId=cp.id; delete c.createdAt; delete c.updatedAt; await createDoc('wmdraw',c); } for(const d of world.wmpriv.filter(d=>d.mapId===mp.id)){ const c=JSON.parse(JSON.stringify(clean(d))); c.id=cp.id+'_'+pdUids(d).join('_'); c.mapId=cp.id; c.items=reItems(d.items); delete c.createdAt; delete c.updatedAt; await createDoc('wmpriv',c); } toast('Карта скопирована'); go('wmap',cp.id); return cp; }
+async function wmCopyMap(mp){ const nm=await promptDlg('Название копии',(mp.name||'без названия')+' (копия)'); if(nm==null) return null; await wmSubMap(mp.id); toast('Копирую карту…'); const idMap=new Map(); const nid=old=>{ if(!idMap.has(old)) idMap.set(old,uid()); return idMap.get(old); }; const reItems=L=>(L||[]).map(it=>{ const c=JSON.parse(JSON.stringify(clean(it))); c.id=nid(it.id); return c; }); const cp=JSON.parse(JSON.stringify(clean(mp))); cp.id=uid(); cp.name=nm; delete cp.createdAt; delete cp.updatedAt; delete cp.updatedBy; cp.items=reItems(mp.items); if(mp.image){ try{ const d=await DB.get('images',mp.image); if(d){ const iid=uid(); await DB.set('images',iid,{...d,entity:cp.id,createdAt:Date.now()}); imgCache.set(iid,d.data); imgCache.set('t:'+iid,d.thumb||d.data); cp.image=iid; } else cp.image=null; }catch{ cp.image=null; } } await createDoc('wmaps',cp); const s=wmSecret(mp); if(s&&(s.items||[]).length){ const ns=wmSecret(cp,true); ns.items=reItems(s.items); touch(ns); } for(const d of world.wmarkers.filter(d=>d.mapId===mp.id)){ const c=JSON.parse(JSON.stringify(clean(d))); c.id=nid(d.id); c.mapId=cp.id; delete c.createdAt; delete c.updatedAt; await createDoc('wmarkers',c); } for(const d of world.wmdraw.filter(d=>d.mapId===mp.id)){ const c=JSON.parse(JSON.stringify(clean(d))); c.id=nid(d.id); c.mapId=cp.id; delete c.createdAt; delete c.updatedAt; await createDoc('wmdraw',c); } for(const d of world.wmpriv.filter(d=>d.mapId===mp.id)){ const c=JSON.parse(JSON.stringify(clean(d))); c.id=cp.id+'_'+pdUids(d).join('_'); c.mapId=cp.id; c.items=reItems(d.items); delete c.createdAt; delete c.updatedAt; await createDoc('wmpriv',c); } toast('Карта скопирована'); go('wmap',cp.id); return cp; }
 /* создать клона персонажа для карты: копия листа без боевого состояния, имя «Имя #N» */
 async function wmMakeClone(orig,mp){ const root=cloneRoot(orig); const n=world.characters.filter(c=>c.cloneOf===root.id).length+2; const c=JSON.parse(JSON.stringify(clean(root))); c.id=uid(); c.name=root.name||''; c.cloneN=n; c.cloneOf=root.id; c.cloneMap=mp.id; delete c.createdAt; delete c.updatedAt; delete c.updatedBy; c.abilities=(c.abilities||[]).map(a=>({...a,id:a.id})); /* клон — точная копия бойца на этот момент: полоски, эффекты (в том числе со сроком) и статусы переносятся,
      иначе у клона молча пропадали бы бафы и вместе с ними их прибавки к максимумам полосок;
@@ -5965,14 +6000,16 @@ async function wmMakeClone(orig,mp){ const root=cloneRoot(orig); const n=world.c
   c.statuses=(c.statuses||[]).map(s=>({...s})); c.effects=(c.effects||[]).map(e=>({...e}));
   if(c.ruina){ delete c.ruina.emo; delete c.ruina.speedN; delete c.ruina.speedEmo; delete c.ruina.scene; delete c.ruina.deck; delete c.ruina.rhand; delete c.ruina.used; delete c.ruina.counterTmp; } await createDoc('characters',c); return c; }
 /* клоны без единого токена на любой карте — удалить (мастер, при открытии/перерисовке карты) */
-let _cloneSweepT=0; function wmSweepClones(){ if(!isDM()||viewAs||Date.now()-_cloneSweepT<5000) return; _cloneSweepT=Date.now(); const refs=new Set(); for(const m of world.wmaps){ for(const it of (m.items||[])) if(it.ref) refs.add(it.ref); const sd=WM.secrets.get(m.id); if(sd) for(const it of (sd.items||[])) if(it.ref) refs.add(it.ref); } for(const d of world.wmarkers) if(d.ref) refs.add(d.ref); for(const d of world.wmpriv) for(const it of (d.items||[])) if(it.ref) refs.add(it.ref); for(const c of world.characters.filter(isClone)){ if(refs.has(c.id)) continue; if(Date.now()-(c.createdAt||0)<30000) continue; removeDoc('characters',c); } }
-async function wmDeleteMap(mp){ if(!await confirmDlg(`Удалить карту «${mp.name||'без названия'}»? Вместе с ней уйдут токены, рисунки, скрытый и личные слои. Вернуть можно из «Корзины» в течение ${TRASH_DAYS} дней.`,'Удалить')) return false;
+let _cloneSweepT=0; function wmSweepClones(){ if(!isDM()||viewAs||Date.now()-_cloneSweepT<5000) return; _cloneSweepT=Date.now(); const refs=new Set(); for(const m of world.wmaps){ for(const it of (m.items||[])) if(it.ref) refs.add(it.ref); const sd=WM.secrets.get(m.id); if(sd) for(const it of (sd.items||[])) if(it.ref) refs.add(it.ref); } for(const d of world.wmarkers) if(d.ref) refs.add(d.ref); for(const d of world.wmpriv) for(const it of (d.items||[])) if(it.ref) refs.add(it.ref); const cand=world.characters.filter(c=>isClone(c)&&!refs.has(c.id)&&Date.now()-(c.createdAt||0)>=30000); if(!cand.length) return;
+  /* токены грузятся только для открытой карты — клон может стоять на другой: удаляем, только если в базе нет ни одного его токена */
+  (async()=>{ for(let i=0;i<cand.length;i+=30){ const part=cand.slice(i,i+30); let used; try{ used=new Set((await DB.list('wmarkers',{where:[['ref','in',part.map(c=>c.id)]]})).map(d=>d.ref)); }catch{ return; } for(const c of part) if(!used.has(c.id)&&byId(world.characters,c.id)) removeDoc('characters',c); } })(); }
+async function wmDeleteMap(mp){ if(!await confirmDlg(`Удалить карту «${mp.name||'без названия'}»? Вместе с ней уйдут токены, рисунки, скрытый и личные слои. Вернуть можно из «Корзины» в течение ${TRASH_DAYS} дней.`,'Удалить')) return false; await wmSubMap(mp.id);
   const g=uid(); const s=wmSecret(mp); const imgs=[mp.image,...[...(mp.items||[]),...((s&&s.items)||[])].flatMap(it=>[it.img,it.image,...(it.images||[])])];
   if(!await trashMain(g,'wmaps',mp,mp.name,'wmap',imgs)) return false;
   const rel=[...(s?[['dm',s]]:[]),...world.wmarkers.filter(d=>d.mapId===mp.id).map(d=>['wmarkers',d]),...world.wmdraw.filter(d=>d.mapId===mp.id).map(d=>['wmdraw',d]),...world.wmpriv.filter(d=>d.mapId===mp.id).map(d=>['wmpriv',d]),...world.characters.filter(c=>c.cloneMap===mp.id).map(c=>['characters',c])];
   await Promise.all(rel.map(([c,d])=>trashPut(g,c,d)));
   if(s){ DB.delete('dm',s.id).catch(()=>{}); WM.secrets.delete(mp.id); } for(const [c,d] of rel) if(c!=='dm') removeDoc(c,d); await removeDoc('wmaps',mp); go('wmap'); toast('Карта удалена — вернуть можно в «Корзине»'); return true; }
-function wmSettings(mp,after,tab){
+function wmSettings(mp,after,tab){ wmSubMap(mp.id);
   const g=wmGrid(mp); const f=mp.fog||(mp.fog={on:false,holes:[]});
   const others=world.wmaps.filter(x=>x.id!==mp.id);
   const chk=(id,on,label)=>`<label style="display:flex;gap:5px;align-items:center;font-size:13px;text-transform:none;letter-spacing:0"><input type="checkbox" id="${id}" ${on?'checked':''}> ${label}</label>`;
@@ -6001,6 +6038,7 @@ function wmSettings(mp,after,tab){
 /* --- одна карта --- */
 function renderWorldMap(m,mp){
   if(!mp||!(isDM()||mp.visibility!=='hidden')){ go('wmap'); return; }
+  wmSubMap(mp.id);
   menuOnMap();
   WM.cardsCompact??=localStorage.getItem('wm.cardsCompact')!=='0'; if(!WM.dockSet){ let d=null; try{ d=JSON.parse(localStorage.getItem('wm.dockSet')||'null'); }catch{} if(!d&&localStorage.getItem('wm.dock')==='1') d={me:true,fight:true}; WM.dockSet=d?{me:!!d.me,fight:!!d.fight}:(innerWidth<1600?{me:true,fight:true}:{me:false,fight:false}); /* В2: без своего выбора на экранах уже 1600 px «Мой» и бой — вкладками в колонке чата, карте больше места */ } if(PHONE()) WM.dockSet={me:true,fight:true}; WM.dock=!!(WM.dockSet.me||WM.dockSet.fight); WM.initStrip??=localStorage.getItem('wm.initStrip')!=='0';
   const ed=isDM()&&!viewAs; const tok=ed||(isPlayer()&&(isHelper()||!world.settings.wmDMOnly)); const edI=ed||(isPlayer()&&!viewAs&&can('plInit')); if(!ed&&!toolOk(WM.tool)) WM.tool='select'; if(!ed&&!(tok?['marker','ruler','select','path','area','place','label','aura','note','arrow','tmpl']:['ruler','select','aura',...(ed||plOn('plArrows')?['arrow']:[]),...(isPlayer()&&plOn('plTokens')?['marker']:[])]).includes(WM.tool)) WM.tool='select'; if(WM.tool==='aura'&&!WM.auraDraw) WM.tool='select';
@@ -7537,7 +7575,7 @@ function logSummary(e){
 const LOG_MAIN=/^(name|title|brief|description|backstory\w*|abilities|progress)(?![A-Za-z])/;
 function logMain(e){ return e.coll==='characters'&&(e.kind!=='update'||LOG_MAIN.test(e.path||'')); }
 G.logAll=(()=>{ try{ return localStorage.getItem('log.all')==='1'; }catch{ return false; } })();
-function renderLog(m){
+function renderLog(m){ logSub(200); setTimeout(()=>{ const pg=m.querySelector('.page'); if(pg&&LOGSUB&&world.log.length>=LOGSUB.n&&!pg.querySelector('.logmore')){ const b=el('<button class="btn sm logmore" style="margin-top:14px">Загрузить ещё записи журнала</button>'); b.onclick=()=>logSub(LOGSUB.n+300); pg.append(b); } },0);
   const shown=G.logAll?world.log:world.log.filter(logMain), nMinor=world.log.length-world.log.filter(logMain).length;
   const page=el(`<div class="page"><div class="head"><h1>Журнал правок игроков</h1><span class="grow"></span><label class="row" style="gap:6px;font-size:12.5px;cursor:pointer" title="Перемещения, полоски, статусы, эффекты, инвентарь, карты, связи и прочие мелкие правки"><input type="checkbox" id="logAll" ${G.logAll?'checked':''}>мелкие правки${nMinor?` <span class="faint">(${nMinor})</span>`:''}</label><button class="btn sm" id="alldet" title="Показать сырые значения «было / стало» во всех записях">${G.logDetails?'скрыть детали':'показать детали'}</button><button class="btn sm" id="seen">Отметить всё прочитанным</button></div><div class="panel" style="padding:0"><div class="list ${G.logDetails?'alldet':''}"></div></div></div>`);
   $('#seen',page).onclick=async()=>{ for(const e of world.log.filter(x=>!x.seen)){ e.seen=true; DB.update('log',e.id,{seen:true}).catch(()=>{}); } render(); };
@@ -7927,7 +7965,7 @@ function cdUiGet(k,d){ try{ return localStorage.getItem('cd.'+k)??d; }catch{ ret
 function cdUiSet(k,v){ try{ localStorage.setItem('cd.'+k,v); }catch{} }
 function cdMatch(c){ const q=cdNorm(CD_UI.q); if(q&&!cdNorm((c.name||'')+' '+(c.text||'')+' '+(c.flav||'')+' '+(c.tags||[]).join(' ')).includes(q)) return false;
   if(CD_UI.tag&&!(c.tags||[]).some(t=>cdNorm(t)===cdNorm(CD_UI.tag))) return false; if(CD_UI.tgt&&cdNorm(c.tgt)!==cdNorm(CD_UI.tgt)) return false; if(CD_UI.en!==''&&String(c.en??'').trim().toUpperCase()!==CD_UI.en) return false; return true; }
-function renderCards(m){ const dm=isDM(); const tw={s:150,m:200,l:270}[cdUiGet('size','m')]||200; const closed=new Set(JSON.parse(cdUiGet('closed','[]')||'[]'));
+function renderCards(m){ cdSubscribe(); const dm=isDM(); const tw={s:150,m:200,l:270}[cdUiGet('size','m')]||200; const closed=new Set(JSON.parse(cdUiGet('closed','[]')||'[]'));
   const all=cdCards(); const tags=[...new Set([...cdGet('tags').map(t=>t.n),...all.flatMap(c=>c.tags||[])])]; const tgts=[...new Set([...cdGet('tgts'),...all.map(c=>c.tgt).filter(Boolean)])]; const ens=[...new Set(all.map(c=>String(c.en??'').trim().toUpperCase()).filter(Boolean))].sort();
   const opt=(L,v)=>L.map(t=>`<option ${cdNorm(t)===cdNorm(v)?'selected':''}>${esc(t)}</option>`).join('');
   const page=el(`<div class="page cdlib"><div class="head"><h1>Карточки</h1><span class="faint cdcnt">${all.length} ${plural(all.length,'карта','карты','карт')}</span>${dm&&CDS().bg?'<span class="cdtts" id="cdTts"></span>':''}<span class="grow"></span>
@@ -8409,7 +8447,7 @@ function renderSettings(m){
     <div class="panel dbars"><h3>Базовые полоски <button class="btn sm">+ Полоска</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Создаются у каждого нового персонажа (текущее = максимум). Дальше у персонажа правятся отдельно.</div><div class="list"></div></div>
     <div class="panel invcols"><h3>Столбцы инвентаря <button class="btn sm">+ Столбец</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Базовый набор — копируется новым персонажам. У каждого персонажа столбцы потом настраиваются отдельно (⚙ в блоке инвентаря).</div><div class="list"></div></div>
     <div class="panel sticons"><h3>Статус-эффекты (свои) <button class="btn sm">+ Статус</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Дополняют стандартный набор из ~50 иконок. Вешаются на персонажей (со счётчиком 0–99, видны на карте мира) и на элементы карт связей. Иконка — любой эмодзи или символ.</div><div class="list"></div></div>
-    <div class="panel"><h3>Данные</h3><div class="muted" style="font-size:13px;margin-bottom:10px">Расход Firestore за эту вкладку: <b>${STAT.w}</b> записей, <b>${STAT.r}</b> чтений <span class="faint">(лимит Spark — 20 000 / 50 000 в сутки на всех). Живые сигналы карты идут через Realtime Database и здесь не считаются.</span></div><div class="muted" style="line-height:1.7;font-size:13px">Импорт из локальной картотеки: выбери <code>world.json</code>, затем (по желанию) папку <code>images</code> — картинки будут сжаты и загружены.</div>
+    <div class="panel"><h3>Данные</h3><div class="muted" style="font-size:13px;margin-bottom:10px">${fsStatHTML()}</div><div class="muted" style="line-height:1.7;font-size:13px">Импорт из локальной картотеки: выбери <code>world.json</code>, затем (по желанию) папку <code>images</code> — картинки будут сжаты и загружены.</div>
       <div class="row wrap" style="margin-top:12px"><button class="btn sm" id="imp">Импорт world.json…</button><button class="btn sm" id="exp">Скачать резервную копию</button></div>
       <div class="muted" style="line-height:1.7;font-size:13px;margin-top:14px"><b>Резервный сервер.</b> Сейчас: <b>${window.LOCAL_BACKEND?'локальный ('+esc(window.LOCAL_BACKEND)+')':'облако Firebase'}</b>. Полный бэкап включает всё: участников, карты, чат, картинки. Чтобы переехать: скачай полный бэкап здесь → запусти <code>local-server.cmd</code> → зайди на резервный сервер как мастер → «Восстановить из бэкапа». Обратно — так же в облако.</div>
       <div class="row wrap" style="margin-top:10px"><button class="btn sm" id="fullExp">⬇ Полный бэкап (JSON)</button><button class="btn sm" id="fullImp">⬆ Восстановить из бэкапа…</button><button class="btn sm" id="partImp" title="Выбрать в файле бэкапа отдельных персонажей, карты, документы и вернуть только их — со связями и картинками. Остальное не меняется">⬆ Вернуть отдельные записи…</button></div><div id="bkProg" class="faint" style="font-size:12px;margin-top:6px"></div></div>
@@ -8562,7 +8600,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{cdImport,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
