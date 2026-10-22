@@ -371,6 +371,8 @@ h1,h2,h3{margin:0;font-weight:700}
 .cdcol{display:flex;flex-direction:column;align-items:center;gap:1px;padding-top:1px;flex:none}
 .cdcol input[type=color]{width:30px;height:30px;border-radius:50%;padding:0;border:2px solid rgba(255,255,255,.22);background:none;cursor:pointer}
 .cdcol input[type=color]:hover{border-color:rgba(255,255,255,.5)}.cdcol input[type=color]::-webkit-color-swatch-wrapper{padding:2px}
+.cdlrow .lnk{background:none;border:none;color:var(--faint);cursor:pointer;padding:0 2px}.cdlrow .lnk:hover{color:var(--text)}.cdlrow input[data-none]{opacity:.45}
+@keyframes cdflash{0%{box-shadow:0 0 0 2px rgba(255,214,110,.9)}100%{box-shadow:0 0 0 2px rgba(255,214,110,0)}}.cdflash{animation:cdflash 1.1s ease-out;border-radius:10px}
 .cdcol .lnk{font-size:12px;background:none;border:none;color:var(--faint);cursor:pointer;padding:0}.cdcol .lnk:hover{color:var(--text)}.cdcrow.mid{align-items:center}.cdcrow>.cdname{flex:1;min-width:0}
 .cdcol.row1{flex-direction:row;gap:3px;padding-top:0}.cdcol.row1 input[type=color]{width:26px;height:26px}
 .cdcol input.c2{width:20px!important;height:20px!important;border-width:1.5px}
@@ -7829,6 +7831,8 @@ const cdGet=k=>{ const v=CDS()[k]; return v==null||v===''?CD_DEF[k]:v; };
 function cdMut(){ const s=world.settings; s.cards??={}; const c=s.cards; for(const k of ['tags','tgts','pal','hl']) if(!Array.isArray(c[k])) c[k]=JSON.parse(JSON.stringify(CD_DEF[k])); return c; }
 const cdNorm=s=>String(s||'').trim().toLowerCase().replace(/ё/g,'е');
 function cdTagColor(n){ const t=cdGet('tags').find(x=>cdNorm(x.n)===cdNorm(n)); return t&&t.c||cdGet('tagc'); }
+/* стандартный цвет цели из справочника (settings.cards.tgtc: нормализованное имя → цвет); не задан — '' (блок темнее тегов) */
+function cdTgtColor(n){ const m=CDS().tgtc; return m&&n?m[cdNorm(n)]||'':''; }
 function cdPalC(id){ if(!id) return null; if(id[0]==='#') return id; const p=cdGet('pal').find(x=>x.id===id); return p?p.c:null; }
 const cdSetOf=c=>c&&c.set?byId(world.cardsets,c.set):null;
 const cdSets=()=>(world.cardsets||[]).filter(s=>isDM()||s.pub).sort((a,b)=>(a.order??0)-(b.order??0)||String(a.name||'').localeCompare(String(b.name||''),'ru'));
@@ -7916,6 +7920,12 @@ function cdPlaceholder(x,b,fr){ x.fillStyle='#14141b'; x.fillRect(b.x,b.y,b.w,b.
 const CD_LAYS=[['classic','Классика'],['full','Полный арт'],['scroll','Свиток']];
 function cdArtBox(lay){ return lay==='full'?{x:12,y:12,w:476,h:400}:lay==='scroll'?{x:40,y:104,w:420,h:250}:CD_ART; }
 const cdArtBoxOf=c=>cdArtBox(cdStyle(c,cdSetOf(c)).lay);
+/* какой элемент карты под точкой p (координаты 500×700): nm|en|ini|tag|tgt|text|flav — конструктор по клику переходит к его полю */
+function cdHitEl(c,p){ const S=cdStyle(c,cdSetOf(c)), E=S.el, L=S.lay, r=(X,Y,W,H)=>p.x>=X&&p.x<=X+W&&p.y>=Y&&p.y<=Y+H, d=(cx,cy,R)=>Math.hypot(p.x-cx,p.y-cy)<=R;
+  const text=(X,Y,W,H)=>r(X,Y,W,H)?(cdFlav(c)&&p.y>Y+H*.72?'flav':'text'):null, row=()=>E.tgt.show!=='never'&&p.x>(c.tgt?250:360)?'tgt':'tag';
+  if(L==='full') return d(60,62,38)?'en':d(440,62,38)?'ini':r(12,348,476,58)?'nm':r(12,410,476,44)?row():text(24,460,452,216);
+  if(L==='scroll') return d(64,58,33)?'en':d(436,58,33)?'ini':r(100,22,300,66)?'nm':r(30,360,440,34)?row():text(30,400,440,276);
+  const tg=cdTgtOn(c,E); return r(24,24,452,60)?'nm':r(342,94,134,54)?'en':r(342,154,134,54)?'ini':r(342,214,134,tg?90:142)?'tag':tg&&r(342,308,134,48)?'tgt':text(24,366,452,310); }
 const cdTexts=(c,S)=>[(c.name||'')+(c.tags||[]).join('')+(c.tgt||'')+'0123456789X—',(c.text||'').replace(/\{(#[0-9a-fA-F]{3,8}|[\wа-яё-]{1,12})\||[{}*]/gi,'')+cdFlav(c)+(S?Object.values(S.el).map(e=>e.t).join(''):'')+'ЭНЕРГИЯИНЦТ.:'];
 const cdCost=v=>{ v=String(v??'').trim(); return v===''?'—':v; };
 function cdArtDraw(x,c,A,fr,r){ x.save(); cdRR(x,A.x,A.y,A.w,A.h,r); x.clip(); const im=c.art&&c.art.img?cdImg(c.art.img):null;
@@ -7936,7 +7946,7 @@ function cdDrawClassic(x,c,S,exp,tags,tc,name){ const fr=S.frame; cdOuter(x,fr,e
     if(val!=null){ x.font=`700 31px "${S.tf}", sans-serif`; x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.shadowColor='rgba(0,0,0,.5)'; x.shadowBlur=4; x.fillText(val,409,cap?y+h/2+8:y+h/2+2); x.shadowBlur=0; } };
   const E=S.el, tgc=E.tag.c||tc; box(94,54,S.en,E.en.t,cdCost(c.en)); box(154,54,S.ini,E.ini.t,cdCost(c.ini)); const tgOn=cdTgtOn(c,E), th=tgOn?90:142; box(214,th,tgc,E.tag.t,null,E.tag.c2);
   if(tags.length){ const top=E.tag.t?234:214, hh=th-(E.tag.t?24:0); let s=26; for(;s>11;s--){ x.font=`700 ${s}px "${S.tf}", sans-serif`; if(tags.every(t=>x.measureText(t).width<=122)&&tags.length*s*1.15<=hh-8) break; } x.font=`700 ${s}px "${S.tf}", sans-serif`; x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; const lh=s*1.15, y0=top+hh/2-lh*tags.length/2+lh/2; tags.forEach((t,i)=>x.fillText(t,409,y0+i*lh)); }
-  if(tgOn){ const tgo=E.tgt.c; cdRR(x,342,308,134,48,9); x.fillStyle=tgo?cdShade(tgo,-.1):cdShade(tgc,-.45); x.fill(); if(E.tgt.c2){ cdHalf(x,342,308,134,48,cdShade(E.tgt.c2,-.1)); cdRR(x,342,308,134,48,9); } x.lineWidth=2; x.strokeStyle=tgo?cdShade(tgo,.3):cdAlpha(tgc,.9); x.stroke();
+  if(tgOn){ const tgo=E.tgt.c||cdTgtColor(c.tgt); cdRR(x,342,308,134,48,9); x.fillStyle=tgo?cdShade(tgo,-.1):cdShade(tgc,-.45); x.fill(); if(E.tgt.c2){ cdHalf(x,342,308,134,48,cdShade(E.tgt.c2,-.1)); cdRR(x,342,308,134,48,9); } x.lineWidth=2; x.strokeStyle=tgo?cdShade(tgo,.3):cdAlpha(tgc,.9); x.stroke();
   if(E.tgt.t){ cdLine(x,E.tgt.t,S.xf,124,10,7); x.fillStyle='rgba(255,255,255,.75)'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(E.tgt.t,409,319); }
   if(c.tgt){ cdLine(x,c.tgt,S.tf,122,E.tgt.t?19:24,10); x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(c.tgt,409,E.tgt.t?338:333); } }
   cdRR(x,24,366,452,310,10); g=x.createLinearGradient(0,366,0,676); g.addColorStop(0,'#1a1a22'); g.addColorStop(1,'#121218'); x.fillStyle=g; x.fill(); x.lineWidth=2; x.strokeStyle=cdAlpha(fr,.6); x.stroke();
@@ -7957,7 +7967,7 @@ function cdDrawFull(x,c,S,exp,tags,tc,name){ const fr=S.frame; cdOuter(x,fr,exp,
   const pill=(px,w,fill,stroke,txt,fill2)=>{ cdRR(x,px,py,w,ph,ph/2); x.fillStyle=fill; x.fill(); if(fill2){ cdHalf(x,px,py,w,ph,fill2); cdRR(x,px,py,w,ph,ph/2); } x.lineWidth=2; x.strokeStyle=stroke; x.stroke(); x.font=`700 ${fs}px "${S.tf}", sans-serif`; x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(txt,px+w/2,py+ph/2+1); };
   let px=24; if(cap){ x.font=`700 ${fs}px "${S.tf}", sans-serif`; x.fillStyle='rgba(236,235,242,.75)'; x.textAlign='left'; x.textBaseline='middle'; x.fillText(cap,px,py+ph/2+1); px+=mw(cap)+8; }
   for(const t of tags){ const w=mw(t)+24, col=E.tag.c||cdTagColor(t); pill(px,w,cdShade(col,-.12),cdShade(col,.3),t,E.tag.c2&&cdShade(E.tag.c2,-.12)); px+=w+6; }
-  if(tgtTxt){ const w=mw(tgtTxt)+28, tcol=E.tgt.c; pill(476-w,w,tcol?cdShade(tcol,-.1):cdShade(E.tag.c||tc,-.6),tcol?cdShade(tcol,.3):cdAlpha(E.tag.c||tc,.95),tgtTxt,E.tgt.c2&&cdShade(E.tgt.c2,-.1)); }
+  if(tgtTxt){ const w=mw(tgtTxt)+28, tcol=E.tgt.c||cdTgtColor(c.tgt); pill(476-w,w,tcol?cdShade(tcol,-.1):cdShade(E.tag.c||tc,-.6),tcol?cdShade(tcol,.3):cdAlpha(E.tag.c||tc,.95),tgtTxt,E.tgt.c2&&cdShade(E.tgt.c2,-.1)); }
   cdRR(x,24,460,452,216,10); g=x.createLinearGradient(0,460,0,676); g.addColorStop(0,'#1a1a22'); g.addColorStop(1,'#121218'); x.fillStyle=g; x.fill(); x.lineWidth=2; x.strokeStyle=cdAlpha(fr,.6); x.stroke();
   cdTextBox(x,c,S,24,460,452,216,'#ecebf2','#b9b3a6',30); }
 function cdDrawScroll(x,c,S,exp,tags,tc,name){ const fr=S.frame, ink='#2b2118'; cdOuter(x,fr,exp,['#f4ecda','#dfd0ae']);
@@ -7973,7 +7983,7 @@ function cdDrawScroll(x,c,S,exp,tags,tc,name){ const fr=S.frame, ink='#2b2118'; 
   const tg=(E.tag.t?E.tag.t+': ':'')+tags.join(' · ').toUpperCase(), tt=c.tgt&&E.tgt.show!=='never'?(E.tgt.t?E.tgt.t+': ':'')+c.tgt:''; let fs=20;
   for(;fs>10;fs--){ x.font=`700 ${fs}px "${S.tf}", sans-serif`; const a=x.measureText(tg).width; x.font=`700 ${fs}px "${S.xf}", sans-serif`; if(a+x.measureText(tt).width+30<=420) break; }
   x.textBaseline='middle'; x.font=`700 ${fs}px "${S.tf}", sans-serif`; x.textAlign='left'; x.fillStyle=cdShade(E.tag.c||tc,-.35); if(E.tag.c2) x.fillStyle=cdSplitFill(x,40,376-fs/2,x.measureText(tg).width,fs,x.fillStyle,cdShade(E.tag.c2,-.35)); x.fillText(tg,40,376);
-  if(tt){ x.font=`700 ${fs}px "${S.xf}", sans-serif`; x.textAlign='right'; x.fillStyle=E.tgt.c?cdShade(E.tgt.c,-.3):cdAlpha(ink,.75); if(E.tgt.c2){ const w=x.measureText(tt).width; x.fillStyle=cdSplitFill(x,460-w,376-fs/2,w,fs,x.fillStyle,cdShade(E.tgt.c2,-.3)); } x.fillText(tt,460,376); }
+  if(tt){ x.font=`700 ${fs}px "${S.xf}", sans-serif`; x.textAlign='right'; const tgo=E.tgt.c||cdTgtColor(c.tgt); x.fillStyle=tgo?cdShade(tgo,-.3):cdAlpha(ink,.75); if(E.tgt.c2){ const w=x.measureText(tt).width; x.fillStyle=cdSplitFill(x,460-w,376-fs/2,w,fs,x.fillStyle,cdShade(E.tgt.c2,-.3)); } x.fillText(tt,460,376); }
   x.strokeStyle=cdAlpha(ink,.3); x.lineWidth=1; x.beginPath(); x.moveTo(40,396); x.lineTo(460,396); x.stroke();
   cdTextBox(x,c,S,30,400,440,276,ink,'#6b5640',30); }
 
@@ -8154,10 +8164,10 @@ function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(wor
   /* цвет блока тегов / цели прямо у полей: своё значение карты el.<k>.c — то же, что в «Своей настройке» ниже */
   const hex=s=>{ s=String(s||'#888'); const v=s[0]==='#'?cdRgb(s):(s.match(/\d+/g)||[136,136,136]).slice(0,3).map(Number); return '#'+v.map(n=>n.toString(16).padStart(2,'0')).join(''); };
   const colOf=(o,E,k)=>{ const tg=(o.tags||[]).filter(Boolean), tc=E.tag.c||(tg.length?cdTagColor(tg[0]):cdGet('tagc'));
-    return k==='tag'?tc:k==='tgt'?E.tgt.c||cdShade(tc,-.45):k==='nm'?(E.nm?E.nm.c:'#2a2a35'):E[k].c||cdGet(k); };
+    return k==='tag'?tc:k==='tgt'?E.tgt.c||cdTgtColor(o.tgt)||cdShade(tc,-.45):k==='nm'?(E.nm?E.nm.c:'#2a2a35'):E[k].c||cdGet(k); };
   const COLN={nm:'плашки названия',en:'энергии',ini:'инициативы',tag:'блока тегов',tgt:'блока цели'};
   const drawCol=k=>{ const w=$(`.cdcol[data-k="${k}"]`,b); if(!w) return; const o=C(), E=cdEls(o,cdSetOf(o)), mine=(o.el&&o.el[k])||{}, own=mine.c, c2=(k==='tag'||k==='tgt')&&E[k].c2;
-    const from=own?'свой цвет этой карты':k==='tag'&&!E.tag.c?'по главному тегу':k==='tgt'&&!E.tgt.c?'темнее тегов':k==='nm'&&!E.nm?'стандартная тёмная':'из стиля';
+    const from=own?'свой цвет этой карты':k==='tag'&&!E.tag.c?'по главному тегу':k==='tgt'&&!E.tgt.c?(cdTgtColor(o.tgt)?'из справочника целей':'темнее тегов'):k==='nm'&&!E.nm?'стандартная тёмная':'из стиля';
     w.innerHTML=`<input type="color" class="c1" value="${hex(colOf(o,E,k))}" title="Цвет ${COLN[k]} — ${from}">`
       +(k==='tag'||k==='tgt'?(c2?`<input type="color" class="c2" value="${hex(c2)}" title="Второй цвет — блок делится по диагонали${mine.c2?'':' (из стиля)'}">${mine.c2?'<button class="lnk x2" title="Убрать второй цвет">×</button>':''}`:'<button class="add2" title="Второй цвет — блок поделится по диагонали">+</button>'):'')
       +(own?'<button class="lnk rs" title="Вернуть цвет стиля">↺</button>':'');
@@ -8168,8 +8178,8 @@ function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(wor
     const x2=$('.x2',w); if(x2) x2.onclick=e=>{ e.preventDefault(); put('c2',null); done(); };
     const rs=$('.rs',w); if(rs) rs.onclick=e=>{ e.preventDefault(); put('c',null); done(); }; };
   const drawCols=()=>['nm','en','ini','tag','tgt'].forEach(drawCol);
-  const drawTgt=()=>{ const h=$('.cdtgt',b); const o=C(); const off=cdEls(o,cdSetOf(o)).tgt.show==='never'; h.closest('.cdf').style.display=off?'none':''; if(off) return; h.innerHTML=`<input id="cTgt" placeholder="цель…" list="cdTgtL" value="${esc(o.tgt||'')}"><datalist id="cdTgtL">${cdGet('tgts').map(t=>`<option value="${esc(t)}">`).join('')}</datalist><div class="cdquick">${cdGet('tgts').map(t=>`<button class="q ${cdNorm(t)===cdNorm(o.tgt)?'on':''}">${esc(t)}</button>`).join('')}</div>`;
-    const inp=$('#cTgt',h); inp.oninput=()=>{ C().tgt=inp.value.trim(); save(); $$('.q',h).forEach(q=>q.classList.toggle('on',cdNorm(q.textContent)===cdNorm(C().tgt))); }; $$('.q',h).forEach(q=>q.onclick=()=>{ inp.value=q.textContent; inp.oninput(); }); drawCol('tgt'); };
+  const drawTgt=()=>{ const h=$('.cdtgt',b); const o=C(); const off=cdEls(o,cdSetOf(o)).tgt.show==='never'; h.closest('.cdf').style.display=off?'none':''; if(off) return; h.innerHTML=`<input id="cTgt" placeholder="цель…" list="cdTgtL" value="${esc(o.tgt||'')}"><datalist id="cdTgtL">${cdGet('tgts').map(t=>`<option value="${esc(t)}">`).join('')}</datalist><div class="cdquick">${cdGet('tgts').map(t=>`<button class="q ${cdNorm(t)===cdNorm(o.tgt)?'on':''}" ${cdTgtColor(t)?`style="--tc:${esc(cdTgtColor(t))}"`:''}>${esc(t)}</button>`).join('')}</div>`;
+    const inp=$('#cTgt',h); inp.oninput=()=>{ C().tgt=inp.value.trim(); save(); drawCol('tgt'); $$('.q',h).forEach(q=>q.classList.toggle('on',cdNorm(q.textContent)===cdNorm(C().tgt))); }; $$('.q',h).forEach(q=>q.onclick=()=>{ inp.value=q.textContent; inp.oninput(); }); drawCol('tgt'); };
   /* стиль лица карты: авто (правила по тегам → сет → по умолчанию) или свой; тонкая настройка поверх */
   const drawSty=()=>{ const o=C(), sel=$('#cStyle',b); const rs=cdRuleStyles(o)[0], set=cdSetOf(o);
     const auto=rs?`по тегу: ${rs.name}`:set&&set.fstyle?`как у сета: ${cdStyleName(set.fstyle)}`:`по умолчанию: ${cdStyleName(CDS().defFace)||'стандарт'}`;
@@ -8199,8 +8209,13 @@ function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(wor
   $('#aZ',b).oninput=e=>{ const o=C(); if(!o.art) return; o.art.z=+e.target.value; const im=cdImg(o.art.img); if(im) cdArtClamp(o.art,im,cdArtBoxOf(o)); save(); };
   const toCard=e=>{ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*CD_W/r.width,y:(e.clientY-r.top)*CD_H/r.height,k:CD_W/r.width}; };
   const inArt=p=>{ const A=cdArtBoxOf(C()); return p.x>=A.x&&p.x<=A.x+A.w&&p.y>=A.y&&p.y<=A.y+A.h; };
-  cv.onpointermove=e=>{ if(cv._drag) return; const o=C(); cv.style.cursor=o&&o.art&&o.art.img&&inArt(toCard(e))?'grab':''; };
-  cv.onpointerdown=e=>{ const o=C(); const p=toCard(e); if(!o||!inArt(p)){ return; } if(!(o.art&&o.art.img)){ pickFiles(setArt); return; } const im=cdImg(o.art.img); if(!im) return; e.preventDefault(); cv.setPointerCapture(e.pointerId); cv.style.cursor='grabbing';
+  /* клик по элементу карты — к его полю справа (элементы проверяются раньше арта: в «Полном арте» они лежат поверх него) */
+  const FOC={nm:'#cName',en:'.cdcost[data-k="en"] input',ini:'.cdcost[data-k="ini"] input',tag:'.cdtin',tgt:'#cTgt',text:'#cText',flav:'#cFlav'};
+  const field=k=>{ const f=k&&$(FOC[k],b); return f&&f.offsetParent?f:null; };
+  const jump=k=>{ const f=field(k); if(!f) return; const box=f.closest('.cdcrow')||f.closest('.cdf')||f; box.scrollIntoView({block:'nearest',behavior:'smooth'}); f.focus({preventScroll:true}); if(f.select&&k!=='text'&&k!=='flav') f.select();
+    box.classList.remove('cdflash'); void box.offsetWidth; box.classList.add('cdflash'); };
+  cv.onpointermove=e=>{ if(cv._drag) return; const o=C(), p=toCard(e); cv.style.cursor=o&&field(cdHitEl(o,p))?'pointer':o&&o.art&&o.art.img&&inArt(p)?'grab':''; };
+  cv.onpointerdown=e=>{ const o=C(); const p=toCard(e); const hk=o&&cdHitEl(o,p); if(field(hk)){ e.preventDefault(); jump(hk); return; } if(!o||!inArt(p)){ return; } if(!(o.art&&o.art.img)){ pickFiles(setArt); return; } const im=cdImg(o.art.img); if(!im) return; e.preventDefault(); cv.setPointerCapture(e.pointerId); cv.style.cursor='grabbing';
     let last=p; cv._drag=1; const mv=ev=>{ const q=toCard(ev); const a=C().art; const AB=cdArtBoxOf(C()), g=cdArtGeo(a,im,AB); a.x-=(q.x-last.x)/g.dw; a.y-=(q.y-last.y)/g.dh; cdArtClamp(a,im,AB); last=q; cv._draw(); };
     const up=()=>{ cv._drag=0; cv.style.cursor='grab'; cv.removeEventListener('pointermove',mv); cv.removeEventListener('pointerup',up); cv.removeEventListener('pointercancel',up); save(); };
     cv.addEventListener('pointermove',mv); cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up); };
@@ -8281,16 +8296,17 @@ function cdListsDlg(tab='tags',back){ if(!isDM()) return; if(tab==='back') retur
   b.classList.add('cdbox','cdlbox'); const body=$('.cdlbody',b);
   const save=()=>{ touch(world.settings); cdRefresh(); cdFaceSched(); };
   const used=(k,n)=>(world.cards||[]).filter(c=>k==='tags'?(c.tags||[]).some(t=>cdNorm(t)===cdNorm(n)):cdNorm(c.tgt)===cdNorm(n)).length;
-  const rename=(k,from,to)=>{ if(!from||cdNorm(from)===cdNorm(to)) return; for(const c of world.cards||[]){ if(k==='tags'&&(c.tags||[]).some(t=>cdNorm(t)===cdNorm(from))){ c.tags=c.tags.map(t=>cdNorm(t)===cdNorm(from)?to:t); touch(c); } if(k==='tgts'&&cdNorm(c.tgt)===cdNorm(from)){ c.tgt=to; touch(c); } } };
+  const rename=(k,from,to)=>{ if(!from||cdNorm(from)===cdNorm(to)) return; const tc=CDS().tgtc; if(k==='tgts'&&tc&&tc[cdNorm(from)]){ tc[cdNorm(to)]=tc[cdNorm(from)]; delete tc[cdNorm(from)]; } for(const c of world.cards||[]){ if(k==='tags'&&(c.tags||[]).some(t=>cdNorm(t)===cdNorm(from))){ c.tags=c.tags.map(t=>cdNorm(t)===cdNorm(from)?to:t); touch(c); } if(k==='tgts'&&cdNorm(c.tgt)===cdNorm(from)){ c.tgt=to; touch(c); } } };
   const draw=()=>{ $$('.cdltabs span',b).forEach(s=>s.classList.toggle('on',s.dataset.t===T)); const S=cdMut(); body.innerHTML='';
     if(T==='tags'){ body.append(el('<div class="faint cdhint">Цвет главного (первого) тега красит блок тегов на карте. Переименование меняет тег и на всех картах.</div>'));
       S.tags.forEach((t,i)=>{ const r=el(`<div class="cdlrow"><input type="color" value="${esc(t.c||cdGet('tagc'))}"><input class="grow" value="${esc(t.n)}"><span class="faint">${used('tags',t.n)} карт</span><button class="btn sm up" title="Выше">↑</button><button class="btn sm x" title="Убрать из списка (с карт не снимается)">✕</button></div>`);
         const [ci,ni]=$$('input',r); ci.oninput=()=>{ t.c=ci.value; save(); }; ni.onchange=()=>{ const v=ni.value.trim(); if(!v) return; rename('tags',t.n,v); t.n=v; save(); draw(); };
         $('.up',r).onclick=()=>{ if(i){ S.tags.splice(i-1,0,...S.tags.splice(i,1)); save(); draw(); } }; $('.x',r).onclick=()=>{ S.tags.splice(i,1); save(); draw(); }; body.append(r); });
       const a=el('<button class="btn sm">+ тег</button>'); a.onclick=()=>{ S.tags.push({n:'Новый тег',c:CD_FRAMES[S.tags.length%CD_FRAMES.length]}); save(); draw(); $$('.cdlrow input.grow',body).pop()?.select(); }; body.append(a); }
-    if(T==='tgts'){ body.append(el('<div class="faint cdhint">Варианты для поля «Цель». На карте можно вписать и что-то своё, например «Союзник x2».</div>'));
-      S.tgts.forEach((t,i)=>{ const r=el(`<div class="cdlrow"><input class="grow" value="${esc(t)}"><span class="faint">${used('tgts',t)} карт</span><button class="btn sm up">↑</button><button class="btn sm x">✕</button></div>`);
-        const ni=$('input',r); ni.onchange=()=>{ const v=ni.value.trim(); if(!v) return; rename('tgts',t,v); S.tgts[i]=v; save(); draw(); }; $('.up',r).onclick=()=>{ if(i){ S.tgts.splice(i-1,0,...S.tgts.splice(i,1)); save(); draw(); } }; $('.x',r).onclick=()=>{ S.tgts.splice(i,1); save(); draw(); }; body.append(r); });
+    if(T==='tgts'){ body.append(el('<div class="faint cdhint">Варианты для поля «Цель». На карте можно вписать и что-то своё, например «Союзник x2». Цвет — стандартный цвет блока цели; не задан — блок темнее тегов. Свой цвет карты или стиля важнее.</div>'));
+      S.tgts.forEach((t,i)=>{ const tc=cdTgtColor(t); const r=el(`<div class="cdlrow"><input type="color" value="${esc(tc||'#5a2a2a')}" ${tc?'':'data-none="1"'} title="${tc?'Стандартный цвет этой цели':'Цвет не задан — блок темнее тегов'}"><button class="lnk rc" ${tc?'':'hidden'} title="Убрать цвет">↺</button><input class="grow" value="${esc(t)}"><span class="faint">${used('tgts',t)} карт</span><button class="btn sm up">↑</button><button class="btn sm x">✕</button></div>`);
+        const ci=$('input[type=color]',r), ni=$('input.grow',r); ci.oninput=()=>{ S.tgtc=S.tgtc||{}; S.tgtc[cdNorm(t)]=ci.value; ci.removeAttribute('data-none'); $('.rc',r).hidden=false; save(); };
+        $('.rc',r).onclick=e=>{ e.preventDefault(); if(S.tgtc) delete S.tgtc[cdNorm(t)]; save(); draw(); }; ni.onchange=()=>{ const v=ni.value.trim(); if(!v) return; rename('tgts',t,v); S.tgts[i]=v; save(); draw(); }; $('.up',r).onclick=()=>{ if(i){ S.tgts.splice(i-1,0,...S.tgts.splice(i,1)); save(); draw(); } }; $('.x',r).onclick=()=>{ S.tgts.splice(i,1); if(S.tgtc) delete S.tgtc[cdNorm(t)]; save(); draw(); }; body.append(r); });
       const a=el('<button class="btn sm">+ вариант</button>'); a.onclick=()=>{ S.tgts.push('Новая цель'); save(); draw(); $$('.cdlrow input.grow',body).pop()?.select(); }; body.append(a); }
     if(T==='pal'){ body.append(el('<div class="faint cdhint">Цвета для раскраски текста (кнопки над полем «Текст»). Код в тексте — <code>{код|слова}</code>.</div>'));
       S.pal.forEach((p,i)=>{ const r=el(`<div class="cdlrow"><input type="color" value="${esc(p.c)}"><input class="grow" value="${esc(p.n)}"><code class="faint">{${esc(p.id)}|…}</code><button class="btn sm x" title="Удалить цвет (текст с ним станет белым)">✕</button></div>`);
@@ -8315,7 +8331,7 @@ function cdIODlg(){ const sets=cdSets(); const b=openModal(`<h2>⇅ Импорт
   $('#ok',b).onclick=closeModal;
   $('#xGo',b).onclick=async()=>{ const ids=$$('input[type=checkbox]:checked',b).map(x=>x.value); if(!ids.length) return; const S=(world.cardsets||[]).filter(s=>ids.includes(s.id)), C=(world.cards||[]).filter(c=>ids.includes(c.set)); const images={};
     for(const id of [...C.map(c=>c.art&&c.art.img),...S.map(s=>s.back&&s.back.img),(CDS().back||{}).img,...cdStyles().map(st=>st.back&&st.back.img)].filter(Boolean)) if(!images[id]){ const u=await imgURL(id); if(u) images[id]=u; }
-    const st=CDS(); const data={kind:'kartoteka-cards',v:1,at:Date.now(),lists:{tags:cdGet('tags'),tgts:cdGet('tgts'),pal:cdGet('pal'),hl:cdGet('hl'),back:CDS().back||null,flav:!!CDS().flav},sets:S.map(clean),cards:C.map(clean),styles:cdStyles().map(clean),images};
+    const st=CDS(); const data={kind:'kartoteka-cards',v:1,at:Date.now(),lists:{tags:cdGet('tags'),tgts:cdGet('tgts'),tgtc:CDS().tgtc||null,pal:cdGet('pal'),hl:cdGet('hl'),back:CDS().back||null,flav:!!CDS().flav},sets:S.map(clean),cards:C.map(clean),styles:cdStyles().map(clean),images};
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'})); a.download='kartochki-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); };
   $('#iGo',b).onclick=()=>{ const fi=document.createElement('input'); fi.type='file'; fi.accept='.json,application/json'; fi.onchange=async()=>{ const f=fi.files[0]; if(!f) return; let data; try{ data=JSON.parse(await f.text()); }catch{ toast('Это не JSON',true); return; } if(data.kind!=='kartoteka-cards'){ toast('Это не файл карточек',true); return; }
       if(!await confirmDlg(`Импортировать ${(data.sets||[]).length} ${plural((data.sets||[]).length,'сет','сета','сетов')} и ${(data.cards||[]).length} карт? Они добавятся к существующим, ничего не заменится.`,'Импортировать')) return; await cdImport(data); }; fi.click(); }; }
@@ -8325,6 +8341,7 @@ async function cdImport(data,prog){ const P=t=>{ const p=$('.iprog'); if(p) p.te
   const L=data.lists||{}; const S=cdMut();
   for(const t of L.tags||[]) if(t&&t.n&&!S.tags.some(x=>cdNorm(x.n)===cdNorm(t.n))) S.tags.push({n:t.n,c:t.c||cdGet('tagc')});
   for(const t of L.tgts||[]) if(t&&!S.tgts.some(x=>cdNorm(x)===cdNorm(t))) S.tgts.push(t);
+  for(const [k,v] of Object.entries(L.tgtc||{})) if(v&&!(S.tgtc&&S.tgtc[k])){ S.tgtc=S.tgtc||{}; S.tgtc[k]=v; }
   for(const p of L.pal||[]) if(p&&p.id&&!S.pal.some(x=>x.id===p.id)) S.pal.push(p); if(L.flav) S.flav=true; // в файле есть художественный текст — включить его показ
   touch(world.settings);
   /* стили: такой же по названию уже есть — берём его, иначе добавляем */ cdStylesInit(); const stm=new Map();
@@ -8352,7 +8369,7 @@ const CD_RVER=2, CD_EXW=750, CD_EXH=1050; // версия рендера: пом
 function cdHash(str){ let a=0x811c9dc5, b=0x01000193^0x5bd1e995; for(let i=0;i<str.length;i++){ const c=str.charCodeAt(i); a=Math.imul(a^c,16777619); b=Math.imul(b^c,0x5bd1e995)^(b>>>15); } return ((a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0')).slice(0,14); }
 /* подпись лица: только то, что видно на этой карте — цвет её главного тега, её раскрашенный текст (палитра и подсветка уже применены), итоговые дизайн/рамка/шрифты.
    Поменял цвет одного тега — перерисуются только карты с этим тегом */
-function cdSigCard(c){ const S=cdStyle(c,cdSetOf(c)), tags=(c.tags||[]).filter(Boolean); return cdHash(JSON.stringify([CD_RVER,S.lay,S.frame,S.tf,S.xf,S.en,S.ini,c.name,c.en,c.ini,tags,tags.length?cdTagColor(tags[0]):cdGet('tagc'),tags.map(cdTagColor),c.tgt,cdRuns(c.text||''),cdFlav(c),S.el,c.art])); }
+function cdSigCard(c){ const S=cdStyle(c,cdSetOf(c)), tags=(c.tags||[]).filter(Boolean); return cdHash(JSON.stringify([CD_RVER,S.lay,S.frame,S.tf,S.xf,S.en,S.ini,c.name,c.en,c.ini,tags,tags.length?cdTagColor(tags[0]):cdGet('tagc'),tags.map(cdTagColor),c.tgt,cdRuns(c.text||''),cdFlav(c),S.el,c.art,...(cdTgtColor(c.tgt)?[cdTgtColor(c.tgt)]:[])])); }
 function cdSigBack(s){ return cdHash(JSON.stringify([CD_RVER,'back',cdBackOf(s)])); }
 async function cdImgLoad(id){ const v=CD_IMG.get(id); if(v&&v.tagName) return v; try{ const u=await imgURL(id); const im=u?await loadURL(u):null; CD_IMG.set(id,im||'err'); return im; }catch{ CD_IMG.set(id,'err'); return null; } }
 /* нарисовать в JPEG: дождаться артов и шрифтов, холст — в документе (иначе текст веб-шрифтом не рисуется) */
