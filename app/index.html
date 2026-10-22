@@ -367,6 +367,14 @@ h1,h2,h3{margin:0;font-weight:700}
 .cdquick{display:flex;flex-wrap:wrap;gap:5px;width:100%;margin-top:6px}
 .cdquick .q[style*="--tc"]{border-color:color-mix(in srgb,var(--tc) 45%,transparent)}
 .cdtgt input,.cdf textarea{width:100%}
+.cdcrow{display:flex;gap:8px;align-items:flex-start}.cdcrow>.cdtags,.cdcrow>.cdtgt{flex:1;min-width:0}
+.cdcol{display:flex;flex-direction:column;align-items:center;gap:1px;padding-top:1px;flex:none}
+.cdcol input[type=color]{width:30px;height:30px;border-radius:50%;padding:0;border:2px solid rgba(255,255,255,.22);background:none;cursor:pointer}
+.cdcol input[type=color]:hover{border-color:rgba(255,255,255,.5)}.cdcol input[type=color]::-webkit-color-swatch-wrapper{padding:2px}
+.cdcol .lnk{font-size:12px;background:none;border:none;color:var(--faint);cursor:pointer;padding:0}.cdcol .lnk:hover{color:var(--text)}.cdcrow.mid{align-items:center}.cdcrow>.cdname{flex:1;min-width:0}
+.cdcol.row1{flex-direction:row;gap:3px;padding-top:0}.cdcol.row1 input[type=color]{width:26px;height:26px}
+.cdcol input.c2{width:20px!important;height:20px!important;border-width:1.5px}
+.cdcol .add2{width:20px;height:20px;border-radius:50%;border:1.5px dashed rgba(255,255,255,.3);background:none;color:var(--faint);font-size:13px;line-height:1;padding:0;cursor:pointer}.cdcol .add2:hover{color:var(--text);border-color:rgba(255,255,255,.6)}
 .cdbox .modal-actions{position:sticky;bottom:-22px;background:#10142a;margin:14px -24px -22px;padding:12px 24px;border-top:1px solid var(--line);z-index:2}
 #modal .box.wide.cdbox.cdlbox{width:700px}
 .cdlbody>.btn{align-self:flex-start}
@@ -7830,7 +7838,7 @@ const cdInSet=sid=>cdCards().filter(c=>(c.set||'')===(sid||'')&&(sid?true:!cdSet
 function cdPub(c){ const s=cdSetOf(c); const v=!!(s&&s.pub&&!c.hide); if(c.pub!==v){ c.pub=v; return true; } return false; }
 /* элементы карты: энергия, инициатива, теги (тип), цель — цвет и подпись. Уровни: карта → сет → общий шаблон (settings.cards.el) → по умолчанию.
    пустое значение = «как уровнем выше»; подпись «-» = без подписи. Цвет тегов по умолчанию — цвет главного тега, цели — его тёмный оттенок */
-const CD_EL=[['en','Энергия','ЭНЕРГИЯ'],['ini','Инициатива','ИНИЦИАТИВА'],['tag','Теги (тип)',''],['tgt','Цель','']];
+const CD_EL=[['nm','Название',''],['en','Энергия','ЭНЕРГИЯ'],['ini','Инициатива','ИНИЦИАТИВА'],['tag','Теги (тип)',''],['tgt','Цель','']];
 function cdEls(c,set){ return cdElsOf(cdFaceChain(c,set)); }
 /* блок цели виден? — у карт без целей (только теги) пустой блок не рисуется, теги занимают его место */
 const cdTgtOn=(c,E)=>E.tgt.show==='always'||(E.tgt.show!=='never'&&!!String(c.tgt||'').trim());
@@ -7840,6 +7848,10 @@ function cdStyle(c,set){ const L=cdFaceChain(c,set||{}), el=cdElsOf(L); return {
 function cdRgb(h){ h=String(h||'#888').replace('#',''); if(h.length===3) h=h.split('').map(x=>x+x).join(''); const n=parseInt(h.slice(0,6),16)||0; return [n>>16&255,n>>8&255,n&255]; }
 function cdShade(h,a){ const [r,g,b]=cdRgb(h); const f=v=>Math.round(a>=0?v+(255-v)*a:v*(1+a)); return `rgb(${f(r)},${f(g)},${f(b)})`; }
 function cdAlpha(h,a){ const [r,g,b]=cdRgb(h); return `rgba(${r},${g},${b},${a})`; }
+/* второй цвет блока — правая нижняя половина по диагонали; clip съедает путь, поэтому обводку вызывающий строит заново */
+function cdHalf(x,X,Y,W,H,fill){ x.save(); x.clip(); x.beginPath(); x.moveTo(X+W,Y); x.lineTo(X+W,Y+H); x.lineTo(X,Y+H); x.closePath(); x.fillStyle=fill; x.fill(); x.restore(); }
+/* заливка текста двумя цветами по той же диагонали рамки X,Y,W,H */
+function cdSplitFill(x,X,Y,W,H,a,b){ const cx=X+W/2, cy=Y+H/2, n=Math.hypot(W,H)||1, dx=H/n*W/2, dy=W/n*H/2; const g=x.createLinearGradient(cx-dx,cy-dy,cx+dx,cy+dy); g.addColorStop(0,a); g.addColorStop(.5,a); g.addColorStop(.5,b); g.addColorStop(1,b); return g; }
 function cdRR(x,X,Y,W,H,r){ x.beginPath(); x.moveTo(X+r,Y); x.arcTo(X+W,Y,X+W,Y+H,r); x.arcTo(X+W,Y+H,X,Y+H,r); x.arcTo(X,Y+H,X,Y,r); x.arcTo(X,Y,X+W,Y,r); x.closePath(); }
 
 /* --- ресурсы: шрифты и картинки догружаются, после загрузки все холсты перерисовываются --- */
@@ -7914,16 +7926,17 @@ function cdDraw(x,c,W,exp){ const k=W/CD_W; const set=cdSetOf(c)||{}; const S=cd
   const tags=(c.tags||[]).filter(Boolean), tc=tags.length?cdTagColor(tags[0]):cdGet('tagc'), name=c.name||'Без названия';
   x.save(); x.scale(k,k); (S.lay==='full'?cdDrawFull:S.lay==='scroll'?cdDrawScroll:cdDrawClassic)(x,c,S,exp,tags,tc,name); x.restore(); }
 function cdDrawClassic(x,c,S,exp,tags,tc,name){ const fr=S.frame; cdOuter(x,fr,exp,['#20202a','#0d0d13']);
-  cdRR(x,24,24,452,60,10); let g=x.createLinearGradient(0,24,0,84); g.addColorStop(0,'#2a2a35'); g.addColorStop(1,'#15151c'); x.fillStyle=g; x.fill(); x.lineWidth=2; x.strokeStyle=cdAlpha(fr,.9); x.stroke();
+  cdRR(x,24,24,452,60,10); let g=x.createLinearGradient(0,24,0,84); const nmc=S.el.nm&&S.el.nm.c; g.addColorStop(0,nmc?cdShade(nmc,.08):'#2a2a35'); g.addColorStop(1,nmc?cdShade(nmc,-.35):'#15151c'); x.fillStyle=g; x.fill(); x.lineWidth=2; x.strokeStyle=cdAlpha(fr,.9); x.stroke();
   for(const sx of [24,476]){ x.save(); x.translate(sx,54); x.rotate(Math.PI/4); x.fillStyle=fr; x.fillRect(-7,-7,14,14); x.restore(); }
   cdLine(x,name,S.tf,410,38,14); x.textAlign='center'; x.textBaseline='middle'; x.fillStyle='#f5f0e4'; x.shadowColor='rgba(0,0,0,.7)'; x.shadowBlur=6; x.fillText(name,250,55); x.shadowBlur=0;
   const A=CD_ART; cdArtDraw(x,c,A,fr,10); cdRR(x,A.x,A.y,A.w,A.h,10); x.lineWidth=3; x.strokeStyle=cdAlpha(fr,.95); x.stroke();
-  const box=(y,h,col,cap,val)=>{ cdRR(x,342,y,134,h,9); const gr=x.createLinearGradient(0,y,0,y+h); gr.addColorStop(0,cdShade(col,.18)); gr.addColorStop(1,cdShade(col,-.28)); x.fillStyle=gr; x.fill(); x.lineWidth=2; x.strokeStyle=cdAlpha('#000',.35); x.stroke();
+  const box=(y,h,col,cap,val,col2)=>{ cdRR(x,342,y,134,h,9); const grd=c=>{ const gr=x.createLinearGradient(0,y,0,y+h); gr.addColorStop(0,cdShade(c,.18)); gr.addColorStop(1,cdShade(c,-.28)); return gr; }; x.fillStyle=grd(col); x.fill();
+    if(col2){ cdHalf(x,342,y,134,h,grd(col2)); cdRR(x,342,y,134,h,9); } x.lineWidth=2; x.strokeStyle=cdAlpha('#000',.35); x.stroke();
     if(cap){ cdLine(x,cap,S.xf,124,11,7); x.fillStyle='rgba(255,255,255,.78)'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(cap,409,y+12); }
     if(val!=null){ x.font=`700 31px "${S.tf}", sans-serif`; x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.shadowColor='rgba(0,0,0,.5)'; x.shadowBlur=4; x.fillText(val,409,cap?y+h/2+8:y+h/2+2); x.shadowBlur=0; } };
-  const E=S.el, tgc=E.tag.c||tc; box(94,54,S.en,E.en.t,cdCost(c.en)); box(154,54,S.ini,E.ini.t,cdCost(c.ini)); const tgOn=cdTgtOn(c,E), th=tgOn?90:142; box(214,th,tgc,E.tag.t,null);
+  const E=S.el, tgc=E.tag.c||tc; box(94,54,S.en,E.en.t,cdCost(c.en)); box(154,54,S.ini,E.ini.t,cdCost(c.ini)); const tgOn=cdTgtOn(c,E), th=tgOn?90:142; box(214,th,tgc,E.tag.t,null,E.tag.c2);
   if(tags.length){ const top=E.tag.t?234:214, hh=th-(E.tag.t?24:0); let s=26; for(;s>11;s--){ x.font=`700 ${s}px "${S.tf}", sans-serif`; if(tags.every(t=>x.measureText(t).width<=122)&&tags.length*s*1.15<=hh-8) break; } x.font=`700 ${s}px "${S.tf}", sans-serif`; x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; const lh=s*1.15, y0=top+hh/2-lh*tags.length/2+lh/2; tags.forEach((t,i)=>x.fillText(t,409,y0+i*lh)); }
-  if(tgOn){ const tgo=E.tgt.c; cdRR(x,342,308,134,48,9); x.fillStyle=tgo?cdShade(tgo,-.1):cdShade(tgc,-.45); x.fill(); x.lineWidth=2; x.strokeStyle=tgo?cdShade(tgo,.3):cdAlpha(tgc,.9); x.stroke();
+  if(tgOn){ const tgo=E.tgt.c; cdRR(x,342,308,134,48,9); x.fillStyle=tgo?cdShade(tgo,-.1):cdShade(tgc,-.45); x.fill(); if(E.tgt.c2){ cdHalf(x,342,308,134,48,cdShade(E.tgt.c2,-.1)); cdRR(x,342,308,134,48,9); } x.lineWidth=2; x.strokeStyle=tgo?cdShade(tgo,.3):cdAlpha(tgc,.9); x.stroke();
   if(E.tgt.t){ cdLine(x,E.tgt.t,S.xf,124,10,7); x.fillStyle='rgba(255,255,255,.75)'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(E.tgt.t,409,319); }
   if(c.tgt){ cdLine(x,c.tgt,S.tf,122,E.tgt.t?19:24,10); x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(c.tgt,409,E.tgt.t?338:333); } }
   cdRR(x,24,366,452,310,10); g=x.createLinearGradient(0,366,0,676); g.addColorStop(0,'#1a1a22'); g.addColorStop(1,'#121218'); x.fillStyle=g; x.fill(); x.lineWidth=2; x.strokeStyle=cdAlpha(fr,.6); x.stroke();
@@ -7931,7 +7944,7 @@ function cdDrawClassic(x,c,S,exp,tags,tc,name){ const fr=S.frame; cdOuter(x,fr,e
 function cdDrawFull(x,c,S,exp,tags,tc,name){ const fr=S.frame; cdOuter(x,fr,exp,['#1c1c25','#0d0d13']);
   const A=cdArtBox('full'); x.save(); cdRR(x,12,12,476,676,18); x.clip(); cdArtDraw(x,c,A,fr,0);
   let g=x.createLinearGradient(0,290,0,412); g.addColorStop(0,'rgba(13,13,19,0)'); g.addColorStop(1,'rgba(13,13,19,1)'); x.fillStyle=g; x.fillRect(12,290,476,123); x.restore();
-  x.fillStyle='rgba(10,10,16,.74)'; x.fillRect(12,348,476,58); x.fillStyle=fr; x.fillRect(12,348,476,2); x.fillRect(12,404,476,2);
+  x.fillStyle=S.el.nm?cdAlpha(S.el.nm.c,.82):'rgba(10,10,16,.74)'; x.fillRect(12,348,476,58); x.fillStyle=fr; x.fillRect(12,348,476,2); x.fillRect(12,404,476,2);
   cdLine(x,name,S.tf,420,38,14); x.textAlign='center'; x.textBaseline='middle'; x.fillStyle='#f5f0e4'; x.shadowColor='rgba(0,0,0,.8)'; x.shadowBlur=8; x.fillText(name,250,378); x.shadowBlur=0;
   const coin=(cx,col,val,cap)=>{ x.beginPath(); x.arc(cx,62,36,0,7); const gr=x.createRadialGradient(cx-10,50,4,cx,62,36); gr.addColorStop(0,cdShade(col,.35)); gr.addColorStop(1,cdShade(col,-.3)); x.fillStyle=gr; x.fill(); x.lineWidth=4; x.strokeStyle=fr; x.stroke();
     x.beginPath(); x.arc(cx,62,30,0,7); x.lineWidth=1.5; x.strokeStyle='rgba(0,0,0,.35)'; x.stroke();
@@ -7941,10 +7954,10 @@ function cdDrawFull(x,c,S,exp,tags,tc,name){ const fr=S.frame; cdOuter(x,fr,exp,
   const py=414, ph=36; let fs=18; const mw=t=>{ x.font=`700 ${fs}px "${S.tf}", sans-serif`; return x.measureText(t).width; };
   const tgtTxt=c.tgt&&E.tgt.show!=='never'?(E.tgt.t?E.tgt.t+': ':'')+c.tgt:'', cap=E.tag.t?E.tag.t+':':'';
   for(;fs>10;fs--){ const wt=tgtTxt?mw(tgtTxt)+28:0, wg=tags.reduce((a,t)=>a+mw(t)+24+6,0)+(cap?mw(cap)+8:0); if(wt+wg<=452) break; }
-  const pill=(px,w,fill,stroke,txt)=>{ cdRR(x,px,py,w,ph,ph/2); x.fillStyle=fill; x.fill(); x.lineWidth=2; x.strokeStyle=stroke; x.stroke(); x.font=`700 ${fs}px "${S.tf}", sans-serif`; x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(txt,px+w/2,py+ph/2+1); };
+  const pill=(px,w,fill,stroke,txt,fill2)=>{ cdRR(x,px,py,w,ph,ph/2); x.fillStyle=fill; x.fill(); if(fill2){ cdHalf(x,px,py,w,ph,fill2); cdRR(x,px,py,w,ph,ph/2); } x.lineWidth=2; x.strokeStyle=stroke; x.stroke(); x.font=`700 ${fs}px "${S.tf}", sans-serif`; x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(txt,px+w/2,py+ph/2+1); };
   let px=24; if(cap){ x.font=`700 ${fs}px "${S.tf}", sans-serif`; x.fillStyle='rgba(236,235,242,.75)'; x.textAlign='left'; x.textBaseline='middle'; x.fillText(cap,px,py+ph/2+1); px+=mw(cap)+8; }
-  for(const t of tags){ const w=mw(t)+24, col=E.tag.c||cdTagColor(t); pill(px,w,cdShade(col,-.12),cdShade(col,.3),t); px+=w+6; }
-  if(tgtTxt){ const w=mw(tgtTxt)+28, tcol=E.tgt.c; pill(476-w,w,tcol?cdShade(tcol,-.1):cdShade(E.tag.c||tc,-.6),tcol?cdShade(tcol,.3):cdAlpha(E.tag.c||tc,.95),tgtTxt); }
+  for(const t of tags){ const w=mw(t)+24, col=E.tag.c||cdTagColor(t); pill(px,w,cdShade(col,-.12),cdShade(col,.3),t,E.tag.c2&&cdShade(E.tag.c2,-.12)); px+=w+6; }
+  if(tgtTxt){ const w=mw(tgtTxt)+28, tcol=E.tgt.c; pill(476-w,w,tcol?cdShade(tcol,-.1):cdShade(E.tag.c||tc,-.6),tcol?cdShade(tcol,.3):cdAlpha(E.tag.c||tc,.95),tgtTxt,E.tgt.c2&&cdShade(E.tgt.c2,-.1)); }
   cdRR(x,24,460,452,216,10); g=x.createLinearGradient(0,460,0,676); g.addColorStop(0,'#1a1a22'); g.addColorStop(1,'#121218'); x.fillStyle=g; x.fill(); x.lineWidth=2; x.strokeStyle=cdAlpha(fr,.6); x.stroke();
   cdTextBox(x,c,S,24,460,452,216,'#ecebf2','#b9b3a6',30); }
 function cdDrawScroll(x,c,S,exp,tags,tc,name){ const fr=S.frame, ink='#2b2118'; cdOuter(x,fr,exp,['#f4ecda','#dfd0ae']);
@@ -7954,13 +7967,13 @@ function cdDrawScroll(x,c,S,exp,tags,tc,name){ const fr=S.frame, ink='#2b2118'; 
     x.font=`700 26px "${S.tf}", sans-serif`; x.textAlign='center'; x.textBaseline='middle'; x.fillStyle='#fff'; x.shadowColor='rgba(0,0,0,.45)'; x.shadowBlur=3; x.fillText(val,0,2); x.shadowBlur=0; x.restore(); };
   const E=S.el; gem(64,S.en,cdCost(c.en)); gem(436,S.ini,cdCost(c.ini));
   for(const [cx,t] of [[64,E.en.t],[436,E.ini.t]]) if(t){ cdLine(x,t,S.xf,74,9,6); x.fillStyle=cdAlpha(ink,.7); x.textAlign='center'; x.textBaseline='middle'; x.fillText(t,cx,97); }
-  cdLine(x,name,S.tf,290,36,14); x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=ink; x.fillText(name,250,56);
+  cdLine(x,name,S.tf,290,36,14); x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=S.el.nm?cdShade(S.el.nm.c,-.2):ink; x.fillText(name,250,56);
   x.strokeStyle=cdShade(fr,-.2); x.lineWidth=2; x.beginPath(); x.moveTo(112,88); x.lineTo(388,88); x.stroke(); x.save(); x.translate(250,88); x.rotate(Math.PI/4); x.fillStyle=cdShade(fr,-.2); x.fillRect(-5,-5,10,10); x.restore();
   const A=cdArtBox('scroll'); cdArtDraw(x,c,A,fr,6); cdRR(x,A.x,A.y,A.w,A.h,6); x.lineWidth=3; x.strokeStyle=cdShade(fr,-.25); x.stroke();
   const tg=(E.tag.t?E.tag.t+': ':'')+tags.join(' · ').toUpperCase(), tt=c.tgt&&E.tgt.show!=='never'?(E.tgt.t?E.tgt.t+': ':'')+c.tgt:''; let fs=20;
   for(;fs>10;fs--){ x.font=`700 ${fs}px "${S.tf}", sans-serif`; const a=x.measureText(tg).width; x.font=`700 ${fs}px "${S.xf}", sans-serif`; if(a+x.measureText(tt).width+30<=420) break; }
-  x.textBaseline='middle'; x.font=`700 ${fs}px "${S.tf}", sans-serif`; x.textAlign='left'; x.fillStyle=cdShade(E.tag.c||tc,-.35); x.fillText(tg,40,376);
-  if(tt){ x.font=`700 ${fs}px "${S.xf}", sans-serif`; x.textAlign='right'; x.fillStyle=E.tgt.c?cdShade(E.tgt.c,-.3):cdAlpha(ink,.75); x.fillText(tt,460,376); }
+  x.textBaseline='middle'; x.font=`700 ${fs}px "${S.tf}", sans-serif`; x.textAlign='left'; x.fillStyle=cdShade(E.tag.c||tc,-.35); if(E.tag.c2) x.fillStyle=cdSplitFill(x,40,376-fs/2,x.measureText(tg).width,fs,x.fillStyle,cdShade(E.tag.c2,-.35)); x.fillText(tg,40,376);
+  if(tt){ x.font=`700 ${fs}px "${S.xf}", sans-serif`; x.textAlign='right'; x.fillStyle=E.tgt.c?cdShade(E.tgt.c,-.3):cdAlpha(ink,.75); if(E.tgt.c2){ const w=x.measureText(tt).width; x.fillStyle=cdSplitFill(x,460-w,376-fs/2,w,fs,x.fillStyle,cdShade(E.tgt.c2,-.3)); } x.fillText(tt,460,376); }
   x.strokeStyle=cdAlpha(ink,.3); x.lineWidth=1; x.beginPath(); x.moveTo(40,396); x.lineTo(460,396); x.stroke();
   cdTextBox(x,c,S,30,400,440,276,ink,'#6b5640',30); }
 
@@ -8110,11 +8123,11 @@ function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(wor
       <div class="cdartbar"><button class="btn sm" id="aUp" title="Загрузить арт (можно и Ctrl+V, и перетащить файл в окно)">🖼 Арт…</button><span class="faint" title="Масштаб арта">🔍</span><input type="range" id="aZ" min="1" max="4" step="0.01"><button class="btn sm" id="aRs" title="Вписать заново">⟲</button><button class="btn sm" id="aDel" title="Убрать арт">✕</button></div>
       <div class="faint cdhint">Арт двигается мышью прямо на карте, колесо — масштаб. Картинку можно вставить <b>Ctrl+V</b> или перетащить в окно.</div></div>
     <div class="cdedR">
-      <input id="cName" class="cdname" placeholder="Название карты" maxlength="60">
+      <div class="cdcrow mid"><div class="cdcol row1" data-k="nm"></div><input id="cName" class="cdname" placeholder="Название карты" maxlength="60"></div>
       <div class="cdf"><label>Сет</label><select id="cSet"></select></div>
-      <div class="cdf two"><div><label>Энергия</label><div class="cdcost" data-k="en"></div></div><div><label>Инициатива</label><div class="cdcost" data-k="ini"></div></div></div>
-      <div class="cdf"><label>Теги <button class="lnk" data-l="tags" title="Править список тегов">✎ список</button></label><div class="cdtags"></div></div>
-      <div class="cdf"><label>Цель <button class="lnk" data-l="tgts" title="Править список целей">✎ список</button></label><div class="cdtgt"></div></div>
+      <div class="cdf two"><div><label>Энергия</label><div class="cdcrow mid"><div class="cdcol row1" data-k="en"></div><div class="cdcost" data-k="en"></div></div></div><div><label>Инициатива</label><div class="cdcrow mid"><div class="cdcol row1" data-k="ini"></div><div class="cdcost" data-k="ini"></div></div></div></div>
+      <div class="cdf"><label>Теги <button class="lnk" data-l="tags" title="Править список тегов">✎ список</button></label><div class="cdcrow"><div class="cdcol" data-k="tag"></div><div class="cdtags"></div></div></div>
+      <div class="cdf"><label>Цель <button class="lnk" data-l="tgts" title="Править список целей">✎ список</button></label><div class="cdcrow"><div class="cdcol" data-k="tgt"></div><div class="cdtgt"></div></div></div>
       <div class="cdf"><label>Текст <button class="lnk" data-l="pal" title="Цвета текста и правила подсветки">✎ цвета</button></label><div class="cdtbar"></div><textarea id="cText" rows="7" placeholder="Наносит 5 урона"></textarea><div class="faint cdhint">Выдели текст и нажми цвет. <code>**жирный**</code>, пустая строка — отступ между абзацами.</div></div>
       ${CDS().flav?'<div class="cdf"><label>Художественный текст</label><textarea id="cFlav" rows="2" placeholder="Глубокоземная магия ничто по сравнению с дикой магией звёзд" style="min-height:52px;font-style:italic"></textarea><div class="faint cdhint">Курсивом внизу карты, под чертой. Пусто — места на карте не занимает.</div></div>':''}
       <details class="cdmore"><summary>Оформление этой карты</summary>
@@ -8137,9 +8150,26 @@ function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(wor
     const add=v=>{ v=String(v||'').trim(); if(!v) return; const o=C(); o.tags=o.tags||[]; if(!o.tags.some(x=>cdNorm(x)===cdNorm(v))){ const known=cdGet('tags').find(t=>cdNorm(t.n)===cdNorm(v)); o.tags.push(known?known.n:v); save(); } drawTags(); $('.cdtin',h)?.focus(); };
     const inp=$('.cdtin',h); inp.onkeydown=e=>{ if(e.key==='Enter'||e.key===','){ e.preventDefault(); add(inp.value); } if(e.key==='Backspace'&&!inp.value&&(C().tags||[]).length){ C().tags.pop(); save(); drawTags(); $('.cdtin',h).focus(); } }; inp.onchange=()=>{ if(cdGet('tags').some(t=>t.n===inp.value)) add(inp.value); };
     $$('.cdquick .q',h).forEach(q=>q.onclick=()=>add(q.textContent.replace(/^\+ /,'')));
-    $$('.cdchip',h).forEach(ch=>{ const i=+ch.dataset.i; $('.x',ch).onclick=e=>{ e.stopPropagation(); C().tags.splice(i,1); save(); drawTags(); }; ch.onclick=()=>{ if(!i) return; const t=C().tags; t.unshift(...t.splice(i,1)); save(); drawTags(); }; }); };
+    $$('.cdchip',h).forEach(ch=>{ const i=+ch.dataset.i; $('.x',ch).onclick=e=>{ e.stopPropagation(); C().tags.splice(i,1); save(); drawTags(); }; ch.onclick=()=>{ if(!i) return; const t=C().tags; t.unshift(...t.splice(i,1)); save(); drawTags(); }; }); drawCols(); };
+  /* цвет блока тегов / цели прямо у полей: своё значение карты el.<k>.c — то же, что в «Своей настройке» ниже */
+  const hex=s=>{ s=String(s||'#888'); const v=s[0]==='#'?cdRgb(s):(s.match(/\d+/g)||[136,136,136]).slice(0,3).map(Number); return '#'+v.map(n=>n.toString(16).padStart(2,'0')).join(''); };
+  const colOf=(o,E,k)=>{ const tg=(o.tags||[]).filter(Boolean), tc=E.tag.c||(tg.length?cdTagColor(tg[0]):cdGet('tagc'));
+    return k==='tag'?tc:k==='tgt'?E.tgt.c||cdShade(tc,-.45):k==='nm'?(E.nm?E.nm.c:'#2a2a35'):E[k].c||cdGet(k); };
+  const COLN={nm:'плашки названия',en:'энергии',ini:'инициативы',tag:'блока тегов',tgt:'блока цели'};
+  const drawCol=k=>{ const w=$(`.cdcol[data-k="${k}"]`,b); if(!w) return; const o=C(), E=cdEls(o,cdSetOf(o)), mine=(o.el&&o.el[k])||{}, own=mine.c, c2=(k==='tag'||k==='tgt')&&E[k].c2;
+    const from=own?'свой цвет этой карты':k==='tag'&&!E.tag.c?'по главному тегу':k==='tgt'&&!E.tgt.c?'темнее тегов':k==='nm'&&!E.nm?'стандартная тёмная':'из стиля';
+    w.innerHTML=`<input type="color" class="c1" value="${hex(colOf(o,E,k))}" title="Цвет ${COLN[k]} — ${from}">`
+      +(k==='tag'||k==='tgt'?(c2?`<input type="color" class="c2" value="${hex(c2)}" title="Второй цвет — блок делится по диагонали${mine.c2?'':' (из стиля)'}">${mine.c2?'<button class="lnk x2" title="Убрать второй цвет">×</button>':''}`:'<button class="add2" title="Второй цвет — блок поделится по диагонали">+</button>'):'')
+      +(own?'<button class="lnk rs" title="Вернуть цвет стиля">↺</button>':'');
+    const put=(f,v)=>{ const o=C(), el=JSON.parse(JSON.stringify(o.el||{})); el[k]=el[k]||{}; if(v) el[k][f]=v; else delete el[k][f]; if(!Object.keys(el[k]).length) delete el[k]; if(Object.keys(el).length) o.el=el; else delete o.el; save(); };
+    const done=()=>{ drawCols(); faceEd(); drawSty(); }, on=(sel,f)=>{ const i=$(sel,w); if(i){ i.oninput=()=>put(f,i.value); i.onchange=()=>{ put(f,i.value); done(); }; } };
+    on('.c1','c'); on('.c2','c2');
+    const a2=$('.add2',w); if(a2) a2.onclick=e=>{ e.preventDefault(); put('c2',hex(cdShade(colOf(o,E,k),-.6))); done(); const n=$(`.cdcol[data-k="${k}"] .c2`,b); if(n) palOpen(n); };
+    const x2=$('.x2',w); if(x2) x2.onclick=e=>{ e.preventDefault(); put('c2',null); done(); };
+    const rs=$('.rs',w); if(rs) rs.onclick=e=>{ e.preventDefault(); put('c',null); done(); }; };
+  const drawCols=()=>['nm','en','ini','tag','tgt'].forEach(drawCol);
   const drawTgt=()=>{ const h=$('.cdtgt',b); const o=C(); const off=cdEls(o,cdSetOf(o)).tgt.show==='never'; h.closest('.cdf').style.display=off?'none':''; if(off) return; h.innerHTML=`<input id="cTgt" placeholder="цель…" list="cdTgtL" value="${esc(o.tgt||'')}"><datalist id="cdTgtL">${cdGet('tgts').map(t=>`<option value="${esc(t)}">`).join('')}</datalist><div class="cdquick">${cdGet('tgts').map(t=>`<button class="q ${cdNorm(t)===cdNorm(o.tgt)?'on':''}">${esc(t)}</button>`).join('')}</div>`;
-    const inp=$('#cTgt',h); inp.oninput=()=>{ C().tgt=inp.value.trim(); save(); $$('.q',h).forEach(q=>q.classList.toggle('on',cdNorm(q.textContent)===cdNorm(C().tgt))); }; $$('.q',h).forEach(q=>q.onclick=()=>{ inp.value=q.textContent; inp.oninput(); }); };
+    const inp=$('#cTgt',h); inp.oninput=()=>{ C().tgt=inp.value.trim(); save(); $$('.q',h).forEach(q=>q.classList.toggle('on',cdNorm(q.textContent)===cdNorm(C().tgt))); }; $$('.q',h).forEach(q=>q.onclick=()=>{ inp.value=q.textContent; inp.oninput(); }); drawCol('tgt'); };
   /* стиль лица карты: авто (правила по тегам → сет → по умолчанию) или свой; тонкая настройка поверх */
   const drawSty=()=>{ const o=C(), sel=$('#cStyle',b); const rs=cdRuleStyles(o)[0], set=cdSetOf(o);
     const auto=rs?`по тегу: ${rs.name}`:set&&set.fstyle?`как у сета: ${cdStyleName(set.fstyle)}`:`по умолчанию: ${cdStyleName(CDS().defFace)||'стандарт'}`;
@@ -8155,9 +8185,9 @@ function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(wor
   drawBar();
   $('#cName',b).oninput=e=>{ C().name=e.target.value; save(); };
   $('#cSet',b).onchange=e=>{ const o=C(); o.set=e.target.value; const L=cdInSet(o.set).filter(x=>x.id!==o.id); o.order=L.length?Math.max(...L.map(x=>x.order||0))+10:0; cdPub(o); save(); render(); fill(); };
-  const faceEd=cdFaceEditor($('.cface',b),{get:()=>C(),put:(k,v)=>{ const o=C(); if(v==null||v===''||(typeof v==='object'&&!Object.keys(v).length)) delete o[k]; else o[k]=v; save(); drawTgt(); drawSty(); },base:()=>cdFaceChain(C(),cdSetOf(C()),{noCard:true}),none:'как в стиле',sample:()=>C()});
-  $('#cStyle',b).onchange=e=>{ const o=C(); if(e.target.value) o.style=e.target.value; else delete o.style; save(); drawSty(); drawTgt(); faceEd(); };
-  $('#cFr',b).onclick=()=>{ const o=C(); for(const k of cdFaceKeys) delete o[k]; save(); faceEd(); drawSty(); drawTgt(); };
+  const faceEd=cdFaceEditor($('.cface',b),{get:()=>C(),put:(k,v)=>{ const o=C(); if(v==null||v===''||(typeof v==='object'&&!Object.keys(v).length)) delete o[k]; else o[k]=v; save(); drawTgt(); drawSty(); drawCols(); },base:()=>cdFaceChain(C(),cdSetOf(C()),{noCard:true}),none:'как в стиле',sample:()=>C()});
+  $('#cStyle',b).onchange=e=>{ const o=C(); if(e.target.value) o.style=e.target.value; else delete o.style; save(); drawSty(); drawTgt(); drawCols(); faceEd(); };
+  $('#cFr',b).onclick=()=>{ const o=C(); for(const k of cdFaceKeys) delete o[k]; save(); faceEd(); drawSty(); drawTgt(); drawCols(); };
   $('#cSty',b).onclick=e=>{ e.preventDefault(); cdStylesDlg(C().style||cdRuleStyles(C())[0]?.id||(cdSetOf(C())||{}).fstyle||CDS().defFace,()=>cdEdit(id,ids)); };
   $('#cHide',b).onchange=e=>{ const o=C(); if(e.target.checked) o.hide=true; else delete o.hide; cdPub(o); save(); render(); };
   $$('.lnk',b).forEach(x=>x.onclick=e=>{ e.preventDefault(); cdListsDlg(x.dataset.l,()=>cdEdit(id,ids)); });
@@ -8191,11 +8221,11 @@ function cdEdit(id,ids){ if(!isDM()) return cdZoom(id,ids); const C=()=>byId(wor
 
 /* редактор элементов карты: get() — свой объект el уровня, put(el) — сохранить, base() — что получится без своих значений (уровни выше) */
 function cdElEditor(h,{get,put,base,top}){ const up=top?'по умолчанию':'как выше'; const draw=()=>{ const own=get()||{}, B=base();
-    h.innerHTML=`<table class="cdeltab"><tr><th></th><th>Цвет</th><th>Подпись</th><th>Показ</th></tr>${CD_EL.map(([k,n])=>{ const o=own[k]||{}, b=B[k], col=o.c||b.c, defc=k==='tag'?'по главному тегу':k==='tgt'?'темнее тегов':'';
+    h.innerHTML=`<table class="cdeltab"><tr><th></th><th>Цвет</th><th>Подпись</th><th>Показ</th></tr>${CD_EL.map(([k,n])=>{ const o=own[k]||{}, b=B[k]||{c:'',t:''}, col=o.c||b.c, defc=k==='tag'?'по главному тегу':k==='tgt'?'темнее тегов':k==='nm'?'тёмная плашка':'';
       return `<tr data-k="${k}"><td>${n}</td><td><span class="row" style="gap:6px;align-items:center"><input type="color" class="ec" value="${esc(col||'#888888')}" ${col?'':'data-none="1"'} title="${o.c?'Свой цвет':up+(b.c?'':' — '+defc)}"><button class="lnk er" ${o.c?'':'hidden'} title="Вернуть «${up}»">↺</button><span class="faint" style="font-size:11px">${o.c?'свой':b.c?up:defc}</span></span></td>
-        <td><input class="et" value="${esc(o.t??'')}" placeholder="${esc(b.t?b.t:'без подписи')}" title="Пусто — как выше; «-» — без подписи"></td><td>${k==='tgt'?`<select class="es" title="Когда рисовать блок цели. У карт без целей (только теги) пустой блок не нужен — теги займут его место"><option value="">${top?'если заполнена':'как выше ('+({auto:'если заполнена',always:'всегда',never:'не использовать'})[b.show||'auto']+')'}</option>${top?'':'<option value="auto">если заполнена</option>'}<option value="always" ${o.show==='always'?'selected':''}>всегда</option><option value="never" ${o.show==='never'?'selected':''}>не использовать</option></select>`:''}</td></tr>`; }).join('')}</table><div class="faint cdhint">Пусто — как в шаблоне выше. В подписи «-» — убрать подпись.</div>`;
+        <td>${k==='nm'?'':`<input class="et" value="${esc(o.t??'')}" placeholder="${esc(b.t?b.t:'без подписи')}" title="Пусто — как выше; «-» — без подписи">`}</td><td>${k==='tgt'?`<select class="es" title="Когда рисовать блок цели. У карт без целей (только теги) пустой блок не нужен — теги займут его место"><option value="">${top?'если заполнена':'как выше ('+({auto:'если заполнена',always:'всегда',never:'не использовать'})[b.show||'auto']+')'}</option>${top?'':'<option value="auto">если заполнена</option>'}<option value="always" ${o.show==='always'?'selected':''}>всегда</option><option value="never" ${o.show==='never'?'selected':''}>не использовать</option></select>`:''}</td></tr>`; }).join('')}</table><div class="faint cdhint">Пусто — как в шаблоне выше. В подписи «-» — убрать подпись.</div>`;
     $$('tr[data-k]',h).forEach(r=>{ const k=r.dataset.k, mut=f=>{ const el=JSON.parse(JSON.stringify(get()||{})); el[k]=el[k]||{}; f(el[k]); if(!el[k].c) delete el[k].c; if(el[k].t==null||el[k].t==='') delete el[k].t; if(!el[k].show) delete el[k].show; if(!Object.keys(el[k]).length) delete el[k]; put(Object.keys(el).length?el:undefined); };
-      $('.ec',r).onchange=e=>{ mut(o=>o.c=e.target.value); draw(); }; $('.er',r).onclick=e=>{ e.preventDefault(); mut(o=>delete o.c); draw(); }; $('.et',r).oninput=e=>mut(o=>o.t=e.target.value); const es=$('.es',r); if(es){ if(own[k]&&own[k].show==='auto') es.value=top?'':'auto'; es.onchange=e=>{ mut(o=>o.show=e.target.value||undefined); draw(); }; } }); };
+      $('.ec',r).onchange=e=>{ mut(o=>o.c=e.target.value); draw(); }; $('.er',r).onclick=e=>{ e.preventDefault(); mut(o=>delete o.c); draw(); }; const et=$('.et',r); if(et) et.oninput=e=>mut(o=>o.t=e.target.value); const es=$('.es',r); if(es){ if(own[k]&&own[k].show==='auto') es.value=top?'':'auto'; es.onchange=e=>{ mut(o=>o.show=e.target.value||undefined); draw(); }; } }); };
   draw(); return draw; }
 
 /* редактор рубашки: get() — свои настройки рубашки, put(изм.) — сохранить, res() — что реально рисуется; follow — у сета цвет/шрифт можно «как у лица» */
@@ -8386,7 +8416,9 @@ function cdFaceChain(c,set,o={}){ const L=[]; let E=null, bySet=true;
 const cdPickIn=(L,k)=>{ for(const o of L){ const v=o&&o[k]; if(v!=null&&v!=='') return v; } return null; };
 function cdElsOf(L){ const E=L.map(o=>(o&&o.el)||{}), out={};
   for(const [k,,dt] of CD_EL){ const pick=f=>{ for(const l of E){ const v=l[k]&&l[k][f]; if(v!=null&&v!=='') return v; } return null; };
-    let col=pick('c'); if(col==null&&(k==='en'||k==='ini')) col=cdGet(k); let t=pick('t'); if(t==null) t=dt; if(t==='-') t=''; out[k]={c:col||'',t}; if(k==='tgt') out[k].show=pick('show')||'auto'; } return out; }
+    let col=pick('c'); if(col==null&&(k==='en'||k==='ini')) col=cdGet(k); let t=pick('t'); if(t==null) t=dt; if(t==='-') t='';
+    if(k==='nm'){ if(col) out.nm={c:col}; continue; } // нет своего цвета — ключа нет, подписи старых карт не меняются
+    out[k]={c:col||'',t}; if(k==='tgt') out[k].show=pick('show')||'auto'; const c2=(k==='tag'||k==='tgt')&&pick('c2'); if(c2) out[k].c2=c2; } return out; }
 function cdBackChain(s){ const G=CDS().back||{}, L=[]; s=s||{};
   if(s.back&&!(G.on&&!s.ownBack)) L.push(s.back); // старый режим «общая рубашка»: свои рубашки сетов без «своей» не участвуют
   const bs=cdStyleById(s.bstyle); if(bs) L.push(bs.back||{}); if(G.on) L.push(G); const d=cdStyleById(CDS().defBack); if(d) L.push(d.back||{}); return L; }
