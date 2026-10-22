@@ -66,7 +66,7 @@ const plain = t => String(t || '').replace(/\{(#[0-9a-fA-F]{3,8}|[\wа-яё-]{1,
 const guid = () => Math.random().toString(16).slice(2, 8).padEnd(6, '0');
 const T = (x = 0, y = 1, z = 0, s = 1.5) => ({ posX: x, posY: y, posZ: z, rotX: 0, rotY: 180, rotZ: 180, scaleX: s, scaleY: 1, scaleZ: s });
 const COMMON = { ColorDiffuse: { r: 0.713235259, g: 0.713235259, b: 0.713235259 }, LayoutGroupSortIndex: 0, Value: 0, Locked: false, Grid: true, Snap: true, IgnoreFoW: false, MeasureMovement: false, DragSelectable: true, Autoraise: true, Sticky: true, Tooltip: true, GridProjection: false, HideWhenFaceDown: true, Hands: true, SidewaysCard: false, LuaScript: '', LuaScriptState: '', XmlUI: '' };
-const cardDesc = c => { const v = x => String(x ?? '').trim() || '—'; return [`Энергия ${v(c.en)} · Инициатива ${v(c.ini)}`, [(c.tags || []).join(', '), c.tgt].filter(Boolean).join(' · '), '', plain(c.text)].join('\n').trim(); };
+const cardDesc = c => { const v = x => String(x ?? '').trim() || '—'; return [`Энергия ${v(c.en)} · Инициатива ${v(c.ini)}`, [(c.tags || []).join(', '), c.tgt].filter(Boolean).join(' · '), '', plain(c.text), c.flav ? '\n«' + String(c.flav).trim() + '»' : ''].join('\n').trim(); };
 function cardObj(c, k, face, back) { const cd = { FaceURL: face, BackURL: back, NumWidth: 1, NumHeight: 1, BackIsHidden: true, UniqueBack: false, Type: 0 };
   return { GUID: guid(), Name: 'CardCustom', Transform: T(), Nickname: c.name || '', Description: cardDesc(c), GMNotes: JSON.stringify({ kartoteka: c.id, en: c.en ?? '', ini: c.ini ?? '', tags: c.tags || [], tgt: c.tgt || '' }),
     Tags: (c.tags || []).filter(Boolean).map(String), ...COMMON, CardID: k * 100, CustomDeck: { [k]: cd } }; }
