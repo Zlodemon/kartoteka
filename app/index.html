@@ -8274,7 +8274,7 @@ function cdIODlg(){ const sets=cdSets(); const b=openModal(`<h2>⇅ Импорт
   $('#ok',b).onclick=closeModal;
   $('#xGo',b).onclick=async()=>{ const ids=$$('input[type=checkbox]:checked',b).map(x=>x.value); if(!ids.length) return; const S=(world.cardsets||[]).filter(s=>ids.includes(s.id)), C=(world.cards||[]).filter(c=>ids.includes(c.set)); const images={};
     for(const id of [...C.map(c=>c.art&&c.art.img),...S.map(s=>s.back&&s.back.img),(CDS().back||{}).img].filter(Boolean)) if(!images[id]){ const u=await imgURL(id); if(u) images[id]=u; }
-    const st=CDS(); const data={kind:'kartoteka-cards',v:1,at:Date.now(),lists:{tags:cdGet('tags'),tgts:cdGet('tgts'),pal:cdGet('pal'),hl:cdGet('hl'),back:CDS().back||null},sets:S.map(clean),cards:C.map(clean),images};
+    const st=CDS(); const data={kind:'kartoteka-cards',v:1,at:Date.now(),lists:{tags:cdGet('tags'),tgts:cdGet('tgts'),pal:cdGet('pal'),hl:cdGet('hl'),back:CDS().back||null,flav:!!CDS().flav},sets:S.map(clean),cards:C.map(clean),images};
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'})); a.download='kartochki-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); };
   $('#iGo',b).onclick=()=>{ const fi=document.createElement('input'); fi.type='file'; fi.accept='.json,application/json'; fi.onchange=async()=>{ const f=fi.files[0]; if(!f) return; let data; try{ data=JSON.parse(await f.text()); }catch{ toast('Это не JSON',true); return; } if(data.kind!=='kartoteka-cards'){ toast('Это не файл карточек',true); return; }
       if(!await confirmDlg(`Импортировать ${(data.sets||[]).length} ${plural((data.sets||[]).length,'сет','сета','сетов')} и ${(data.cards||[]).length} карт? Они добавятся к существующим, ничего не заменится.`,'Импортировать')) return; await cdImport(data); }; fi.click(); }; }
@@ -8284,7 +8284,7 @@ async function cdImport(data,prog){ const P=t=>{ const p=$('.iprog'); if(p) p.te
   const L=data.lists||{}; const S=cdMut();
   for(const t of L.tags||[]) if(t&&t.n&&!S.tags.some(x=>cdNorm(x.n)===cdNorm(t.n))) S.tags.push({n:t.n,c:t.c||cdGet('tagc')});
   for(const t of L.tgts||[]) if(t&&!S.tgts.some(x=>cdNorm(x)===cdNorm(t))) S.tgts.push(t);
-  for(const p of L.pal||[]) if(p&&p.id&&!S.pal.some(x=>x.id===p.id)) S.pal.push(p);
+  for(const p of L.pal||[]) if(p&&p.id&&!S.pal.some(x=>x.id===p.id)) S.pal.push(p); if(L.flav) S.flav=true; // в файле есть художественный текст — включить его показ
   touch(world.settings);
   const sm=new Map(); let ord=Math.max(0,...(world.cardsets||[]).map(s=>s.order||0)); n=0;
   for(const s of data.sets||[]){ const ns=JSON.parse(JSON.stringify(s)); ns.id=uid(); ns.order=(ord+=10); delete ns.createdAt; delete ns.owner; if(ns.back&&ns.back.img) ns.back.img=idm.get(ns.back.img)||''; sm.set(s.id,ns.id); try{ await createDoc('cardsets',ns); }catch{} }
