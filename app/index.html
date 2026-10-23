@@ -575,7 +575,7 @@ body.fight #fightBtn{background:rgba(255,209,102,.2);border-color:rgba(255,209,1
 .epwin{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:800;background:rgba(0,0,0,.4);z-index:4;pointer-events:none;text-shadow:0 3px 10px #000}.epwin.a{color:var(--gold)}.epwin.e{color:#ff6b5e}
 .epact{margin-top:10px;padding:10px 12px;border:1px solid var(--line2);border-radius:12px;background:#0f1422;display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:58px}.epact .epwho{margin-right:6px}.epact .epsep{margin-left:10px;font-size:12px;color:#7ae0ff}.epact .eppk{color:#ffb070;font-weight:600}
 .epsk{display:inline-flex;gap:6px;align-items:center;padding:8px 12px;border-radius:10px;border:1px solid var(--line2);background:rgba(255,255,255,.05);color:inherit;cursor:pointer;font:inherit;font-size:13px}.epsk:hover{border-color:var(--gold)}.epsk b{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#111;align-items:center;justify-content:center;font-size:11px;flex:none}.epsk.pos b{background:#7ae0ff}.epsk.dis{opacity:.42}.epsk .cd{color:#ff9a7a;font-size:11.5px}.epsk.sb{border-color:#c04be0;padding:8px 9px;margin-left:-4px}
-.eppick{display:flex;gap:8px;flex-wrap:wrap}.epufx{display:flex;flex-wrap:wrap;gap:4px}.epfxc.buff{border-left:3px solid #4fb3ff}.epfxc.debuff{border-left:3px solid #ff5c6c}.epfxc.sp{border-left:3px solid var(--gold)}
+.eppick{display:flex;gap:8px;flex-wrap:wrap}.epufx{display:flex;flex-wrap:wrap;gap:4px}.epfxn{width:52px;padding:1px 4px;margin:0 2px;font-size:12.5px;text-align:center;border-radius:6px}.epfxn.ov{border-color:var(--gold);color:var(--gold)}.epfxc .epchip .epfxn{width:44px}.epfxc.buff{border-left:3px solid #4fb3ff}.epfxc.debuff{border-left:3px solid #ff5c6c}.epfxc.sp{border-left:3px solid var(--gold)}
 #ruhandside .dhint{padding:7px 10px 0;font-size:10.5px;color:#98a0b8;line-height:1.5}
 #ruhandside .dhint b{color:#c9cee0}
 #ruhand .hh{display:flex;gap:8px;align-items:center;justify-content:center;font-size:12px;color:#d6dae6;margin-bottom:4px;flex-wrap:wrap}#ruhand .hh select{font-size:11px;padding:2px 18px 2px 6px}#ruhand .hh .mode{color:var(--faint)}
@@ -7766,7 +7766,7 @@ function effLibEditor(d,opts={}){ const chg=()=>opts.onChange&&opts.onChange(); 
 function renderEffLib(m){ const s=world.settings; effSeedWounds(); s.effectLib??=[]; const lib=s.effectLib;
   const page=el(`<div class="page efflib"><div class="head"><h1>Библиотека эффектов</h1><span class="grow"></span><span class="seg" id="emode" style="margin-right:10px"><button class="btn sm on" data-m="all">Все эффекты</button>${ruOn()?'<button class="btn sm" data-m="emo" title="Карты эмоций по ярусам и полярности; предлагаются при росте уровня эмоций">😈 Карты эмоций</button>':''}</span><button class="btn" id="addF" title="Папка для эффектов. Эффекты перетаскиваются мышью между папками и внутри них; ПКМ по эффекту — меню «в папку / закрепить»" style="margin-right:6px">+ Папка</button><button class="btn primary" id="addE">+ Эффект</button></div>
     <details class="hintd"><summary>ⓘ Что это и как вешать — подробнее</summary>Готовые эффекты для всей игры: название, значок (эмодзи или своя картинка), срок в раундах (0 — бессрочно, ⏳ считает трекер инициативы), описание, модификаторы характеристик/полосок, пока эффект висит, <b>стаки</b> (до скольких копится при повторном наложении; в формулах — переменная <code>стаки</code>) и <b>программы хода</b>: что выполнить в начале и в конце хода персонажа (трекер инициативы на карте; например <code>hp -= 2 * стаки</code>). Вешаются с листа персонажа («+ Эффект» → из библиотеки), с карты (панель «Мой» → Эффекты → +) и формулами: <code>наложить('Ярость')</code>, <code>цель.наложить('Оглушение', 2)</code>, <code>снять_эффект('Ярость')</code>. В конструкторе — блок «наложить эффект». Изменение записи в библиотеке не трогает уже повешенные эффекты.</details>
-    <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><input id="eq" placeholder="поиск…" style="flex:1 1 260px;max-width:420px;margin:0"><span class="seg esrc"><button class="btn sm on" data-s="">все</button><button class="btn sm" data-s="tpl" title="Скопированы из готовых шаблонов Руины">📚 из шаблонов</button><button class="btn sm" data-s="own" title="Созданы вручную">✍ свои</button></span></div>${ruOn()?`<details class="rutpl" ${localStorage.getItem('rutplOpen')==='1'?'open':''}><summary><b>📚 Шаблоны Руины</b> <span class="faint">— ${RU_TPL.length} готовых статусов из Library of Ruina и в её духе. «→ в библиотеку» делает копию, которую можно править как обычный эффект; ссылки на другие статусы (например «наложить('Сила')») докидывают их автоматически</span> <button type="button" class="btn sm" id="tplAll" style="margin-left:8px">+ все недостающие</button></summary><div class="tplgrid"></div></details>`:''}${epOn()?`<details class="rutpl eptpl" ${localStorage.getItem('eptplOpen')==='0'?'':'open'}><summary><b>✦ Эффекты Эпик-боя</b> <span class="faint">— ${EP_FX.length} встроенных эффектов из таблицы. Их механику считает бой сам; на скилл они ставятся во вкладке «✦ Эпик» редактора способности. Свой эффект — «+ Эффект» ниже, с модификаторами «Эпик: …» (например «Эпик: Атака × 1.2»); он тоже появится в списке эффектов скилла</span></summary><div class="tplgrid epfxgrid"></div></details>`:''}<div class="effgrid"></div></div>`);
+    <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><input id="eq" placeholder="поиск…" style="flex:1 1 260px;max-width:420px;margin:0"><span class="seg esrc"><button class="btn sm on" data-s="">все</button><button class="btn sm" data-s="tpl" title="Скопированы из готовых шаблонов Руины">📚 из шаблонов</button><button class="btn sm" data-s="own" title="Созданы вручную">✍ свои</button></span></div>${ruOn()?`<details class="rutpl" ${localStorage.getItem('rutplOpen')==='1'?'open':''}><summary><b>📚 Шаблоны Руины</b> <span class="faint">— ${RU_TPL.length} готовых статусов из Library of Ruina и в её духе. «→ в библиотеку» делает копию, которую можно править как обычный эффект; ссылки на другие статусы (например «наложить('Сила')») докидывают их автоматически</span> <button type="button" class="btn sm" id="tplAll" style="margin-left:8px">+ все недостающие</button></summary><div class="tplgrid"></div></details>`:''}${epOn()?`<details class="rutpl eptpl" ${localStorage.getItem('eptplOpen')==='0'?'':'open'}><summary><b>✦ Эффекты Эпик-боя</b> <span class="faint">— ${EP_FX.length} встроенных эффектов из таблицы. Числа в описаниях можно править прямо здесь (↺ — вернуть как в таблице), бой сразу считает по ним; на скилл они ставятся во вкладке «✦ Эпик» редактора способности. Свой эффект — «+ Эффект» ниже, с модификаторами «Эпик: …» (например «Эпик: Атака × 1.2»); он тоже появится в списке эффектов скилла</span></summary><div class="tplgrid epfxgrid"></div></details>`:''}<div class="effgrid"></div></div>`);
   const grid=$('.effgrid',page); const tplBox=$('.tplgrid',page);
   const drawTpl=q=>{ if(!tplBox) return; tplBox.innerHTML=''; const T=RU_TPL.filter(t=>!q||fxNorm(t.name).includes(q)||(t.description||'').toLowerCase().includes(q)||t.g.toLowerCase().includes(q)); if(!T.length){ tplBox.innerHTML='<div class="faint" style="grid-column:1/-1">Ничего не найдено.</div>'; return; }
     for(const g of [...new Set(T.map(t=>t.g))]){ tplBox.append(el(`<div class="tiny" style="grid-column:1/-1;margin-top:4px">${esc(g)}</div>`)); for(const t of T.filter(x=>x.g===g)){ const has=ruTplHas(t); const lines=[]; if((t.mods||[]).length) lines.push('⚙ '+modsSummary(t.mods)); for(const [k,l] of EFF_TRIGS) if(t[k]) lines.push(l+': '+t[k]); for(const k of Object.keys(t.ev||{})) lines.push(ruEvName(k)+': '+t.ev[k]); if(t.emo) lines.push(t.emo==='pos'?'🌞 карта эмоции — светлая':'🌑 карта эмоции — тёмная');
@@ -7938,17 +7938,17 @@ const EP_SETS_DEF=[
 const epSets=()=>Array.isArray(EPS().sets)?EPS().sets:EP_SETS_DEF;
 /* каталог эффектов из таблицы: k — buff/debuff/sp, inst — мгновенное действие (без срока), n — число по умолчанию и что оно значит; механику исполняет бой */
 const EP_FX=[
-  {id:'atkUp',k:'buff',icon:'⚔️',name:'Повышение атаки',d:'атака +50%'},
-  {id:'atkUp2',k:'buff',icon:'🔥',name:'БОЛЬШОЕ повышение атаки',d:'атака +75%'},
-  {id:'defUp',k:'buff',icon:'🛡️',name:'Повышение защиты',d:'защита +50%'},
-  {id:'resUp',k:'buff',icon:'🔰',name:'Повышение эффект резиста',d:'эффект резист +60'},
-  {id:'accUp',k:'buff',icon:'🎯',name:'Повышение попадания',d:'попадание +50'},
-  {id:'evaUp',k:'buff',icon:'💨',name:'Повышение уклонения',d:'уклонение +50'},
-  {id:'ccUp',k:'buff',icon:'✴️',name:'Повышение крит шанса',d:'крит шанс +50'},
-  {id:'cdUp',k:'buff',icon:'💥',name:'Повышение крит урона',d:'крит урон +0.7'},
-  {id:'effUp',k:'buff',icon:'🔮',name:'Повышение эффективности',d:'эффективность +50'},
+  {id:'atkUp',k:'buff',icon:'⚔️',name:'Повышение атаки',d:'атака +{v}%'},
+  {id:'atkUp2',k:'buff',icon:'🔥',name:'БОЛЬШОЕ повышение атаки',d:'атака +{v}%'},
+  {id:'defUp',k:'buff',icon:'🛡️',name:'Повышение защиты',d:'защита +{v}%'},
+  {id:'resUp',k:'buff',icon:'🔰',name:'Повышение эффект резиста',d:'эффект резист +{v}'},
+  {id:'accUp',k:'buff',icon:'🎯',name:'Повышение попадания',d:'попадание +{v}'},
+  {id:'evaUp',k:'buff',icon:'💨',name:'Повышение уклонения',d:'уклонение +{v}'},
+  {id:'ccUp',k:'buff',icon:'✴️',name:'Повышение крит шанса',d:'крит шанс +{v}'},
+  {id:'cdUp',k:'buff',icon:'💥',name:'Повышение крит урона',d:'крит урон +{v}'},
+  {id:'effUp',k:'buff',icon:'🔮',name:'Повышение эффективности',d:'эффективность +{v}'},
   {id:'immortal',k:'buff',icon:'♾️',name:'Бессмертие',d:'ХП не опускается ниже 1, пока действует'},
-  {id:'riposte',k:'buff',icon:'↩️',name:'Рипост',d:'шанс контратаки +30'},
+  {id:'riposte',k:'buff',icon:'↩️',name:'Рипост',d:'шанс контратаки +{v}'},
   {id:'barrier',k:'buff',icon:'🔵',name:'Барьер',d:'щит поверх ХП',n:20,nl:'единиц барьера'},
   {id:'immunity',k:'buff',icon:'✨',name:'Иммунитет',d:'пока действует, на цель не накладываются дебаффы'},
   {id:'invinc',k:'buff',icon:'💠',name:'Неуязвимость',d:'не получает урон'},
@@ -7956,44 +7956,44 @@ const EP_FX=[
   {id:'stealth',k:'buff',icon:'👤',name:'Стелс',d:'нельзя выбрать целью одиночной атаки; спадает от урона или своего скилла'},
   {id:'stealth2',k:'buff',icon:'🌫️',name:'Улучшенный стелс',d:'нельзя выбрать целью одиночной атаки; не спадает от урона и не-атакующих скиллов'},
   {id:'dmgcap',k:'buff',icon:'🧱',name:'Дмг лимит',d:'урон одной атаки не больше N% макс. ХП',n:30,nl:'% макс. ХП'},
-  {id:'haste',k:'buff',icon:'🐎',name:'Ускорение',d:'бонус скорости +2'},
+  {id:'haste',k:'buff',icon:'🐎',name:'Ускорение',d:'бонус скорости +{v}'},
   {id:'cascade',k:'buff',icon:'🌊',name:'Каскад',d:'следующая атака наносит ещё N фиксированного урона',n:20,nl:'фикс. урон'},
-  {id:'regen',k:'buff',icon:'💚',name:'Регенерация',d:'в конце хода восстанавливает 15% макс. ХП'},
-  {id:'critprot',k:'buff',icon:'⛑️',name:'Защита от критов',d:'при атаке по цели вычитается 50 из крит шанса'},
-  {id:'barricade',k:'buff',icon:'🏰',name:'Баррикада',d:'защита +30%, эффект резист +30'},
-  {id:'rage',k:'buff',icon:'😡',name:'Ярость',d:'атака +20%, бонус скорости +1'},
-  {id:'focus',k:'buff',icon:'👁️',name:'Внимательность',d:'крит шанс +15, крит урон +0.15'},
-  {id:'vigor',k:'buff',icon:'💪',name:'Вигор',d:'атака +30%, защита +30%'},
+  {id:'regen',k:'buff',icon:'💚',name:'Регенерация',d:'в конце хода восстанавливает {v}% макс. ХП'},
+  {id:'critprot',k:'buff',icon:'⛑️',name:'Защита от критов',d:'при атаке по цели вычитается {v} из крит шанса'},
+  {id:'barricade',k:'buff',icon:'🏰',name:'Баррикада',d:'защита +{v}%, эффект резист +{w}'},
+  {id:'rage',k:'buff',icon:'😡',name:'Ярость',d:'атака +{v}%, бонус скорости +{w}'},
+  {id:'focus',k:'buff',icon:'👁️',name:'Внимательность',d:'крит шанс +{v}, крит урон +{w}'},
+  {id:'vigor',k:'buff',icon:'💪',name:'Вигор',d:'атака +{v}%, защита +{w}%'},
   {id:'extra',k:'buff',icon:'⏩',name:'Экстра ход',d:'сразу ещё один ход вне инициативы',inst:1},
   {id:'advance',k:'buff',icon:'⏫',name:'Продвижение',d:'+N к инициативе',inst:1,n:2,nl:'к инициативе'},
   {id:'cleanse',k:'buff',icon:'🧼',name:'Очищение',d:'снимает N дебаффов',inst:1,n:1,nl:'дебаффов'},
   {id:'cdreset',k:'buff',icon:'🔄',name:'Ресет КД',d:'убирает КД со скиллов',inst:1},
-  {id:'atkDown',k:'debuff',icon:'📉',name:'Понижение атаки',d:'атака −50%'},
-  {id:'defDown',k:'debuff',icon:'🪓',name:'Пробитие защиты',d:'защита −75%'},
-  {id:'slow',k:'debuff',icon:'🐌',name:'Замедление',d:'бонус скорости −2'},
-  {id:'blind',k:'debuff',icon:'🙈',name:'Ослепление',d:'попадание −50'},
+  {id:'atkDown',k:'debuff',icon:'📉',name:'Понижение атаки',d:'атака −{v}%'},
+  {id:'defDown',k:'debuff',icon:'🪓',name:'Пробитие защиты',d:'защита −{v}%'},
+  {id:'slow',k:'debuff',icon:'🐌',name:'Замедление',d:'бонус скорости −{v}'},
+  {id:'blind',k:'debuff',icon:'🙈',name:'Ослепление',d:'попадание −{v}'},
   {id:'cdUpD',k:'debuff',icon:'⏳',name:'Увеличение КД',d:'КД скиллов цели +N',inst:1,n:1,nl:'к КД'},
   {id:'silence',k:'debuff',icon:'🤐',name:'Немота',d:'можно использовать только 1-й скилл'},
   {id:'seal',k:'debuff',icon:'🔏',name:'Печать',d:'пассивки не работают'},
   {id:'nocounter',k:'debuff',icon:'🚷',name:'Запрет контр атак',d:'не может контратаковать'},
   {id:'nobuff',k:'debuff',icon:'⛔',name:'Запрет бафов',d:'на цель не накладываются баффы'},
   {id:'noheal',k:'debuff',icon:'💔',name:'Запрет лечения',d:'цель не лечится'},
-  {id:'poison',k:'debuff',icon:'🧪',name:'Отравление',d:'в конце хода урон 5% макс. ХП; складывается',dot:1},
-  {id:'toxin',k:'debuff',icon:'☠️',name:'ЯД',d:'в конце хода урон 10% макс. ХП; складывается',dot:1},
-  {id:'bleed',k:'debuff',icon:'🩸',name:'Кровотечение',d:'в конце хода урон 0.3 атаки наложившего сквозь броню; складывается',dot:1},
-  {id:'burn',k:'debuff',icon:'♨️',name:'Горение',d:'в конце хода урон 0.5 атаки наложившего сквозь броню; складывается',dot:1},
-  {id:'bomb',k:'debuff',icon:'💣',name:'Бомба',d:'в конце срока урон 1.0 атаки наложившего сквозь броню и 40% стан; складывается',dot:1},
+  {id:'poison',k:'debuff',icon:'🧪',name:'Отравление',d:'в конце хода урон {v}% макс. ХП; складывается',dot:1},
+  {id:'toxin',k:'debuff',icon:'☠️',name:'ЯД',d:'в конце хода урон {v}% макс. ХП; складывается',dot:1},
+  {id:'bleed',k:'debuff',icon:'🩸',name:'Кровотечение',d:'в конце хода урон {v} атаки наложившего сквозь броню; складывается',dot:1},
+  {id:'burn',k:'debuff',icon:'♨️',name:'Горение',d:'в конце хода урон {v} атаки наложившего сквозь броню; складывается',dot:1},
+  {id:'bomb',k:'debuff',icon:'💣',name:'Бомба',d:'в конце срока урон {v} атаки наложившего сквозь броню и {w}% стан; складывается',dot:1},
   {id:'stun',k:'debuff',icon:'💫',name:'Стан',d:'пропускает ход'},
   {id:'strip',k:'debuff',icon:'🧹',name:'Снятие бафов',d:'снимает N баффов',inst:1,n:1,nl:'баффов'},
   {id:'taunt',k:'debuff',icon:'🤬',name:'Провокация',d:'атакует наложившего 1-м скиллом'},
   {id:'restrict',k:'debuff',icon:'⛓️',name:'Рестрикт',d:'цель нельзя продвигать по инициативе'},
   {id:'push',k:'debuff',icon:'⏬',name:'Отталкивание',d:'−N к инициативе',inst:1,n:2,nl:'от инициативы'},
-  {id:'fear',k:'debuff',icon:'😱',name:'Страх',d:'пропускает ход; в начале хода 40% что спадёт само'},
+  {id:'fear',k:'debuff',icon:'😱',name:'Страх',d:'пропускает ход; в начале хода {v}% что спадёт само'},
   {id:'trauma',k:'debuff',icon:'🦴',name:'Травма',d:'макс. ХП −N%',n:10,nl:'% макс. ХП'},
   {id:'curse',k:'debuff',icon:'🕯️',name:'Проклятие',d:'когда другую цель бьют одиночной атакой, проклятый получает половину этого урона'},
   {id:'sleep',k:'debuff',icon:'😴',name:'Сон',d:'пропускает ход; по спящему всегда крит и он не уклоняется; урон будит'},
-  {id:'mark',k:'debuff',icon:'🎯',name:'Метка',d:'урон по цели +0.1, попадание по ней +30'},
-  {id:'mark2',k:'debuff',icon:'📍',name:'Улучшенная метка',d:'урон по цели +0.2, попадание +50, цель можно атаковать всегда'},
+  {id:'mark',k:'debuff',icon:'🎯',name:'Метка',d:'урон по цели +{v}, попадание по ней +{w}'},
+  {id:'mark2',k:'debuff',icon:'📍',name:'Улучшенная метка',d:'урон по цели +{v}, попадание +{w}, цель можно атаковать всегда'},
   {id:'miss',k:'debuff',icon:'❌',name:'Промах',d:'наносит половину базового урона, без крита и без эффектов'},
   {id:'revive',k:'sp',icon:'🕊️',name:'Воскрешение',d:'воскрешает цель с N% ХП',inst:1,n:30,nl:'% ХП'},
   {id:'execute',k:'sp',icon:'⚰️',name:'Казнь',d:'не даёт цели воскреснуть'},
@@ -8065,7 +8065,7 @@ function epFxOptions(v){ let h='<option value="">— эффект —</option>';
   const L=effLib(); if(L.length) h+=`<optgroup label="Библиотека эффектов">${L.map(d=>`<option value="lib:${d.id}" ${v==='lib:'+d.id?'selected':''}>${esc(d.icon||'✨')} ${esc(d.name)}</option>`).join('')}</optgroup>`; return h; }
 /* строки эффектов скилла: эффект, срок, шанс, N, на кого, до/после удара */
 function epFxRows(box,arr,onChange,opts={}){ const draw=()=>{ box.innerHTML=''; arr.forEach((r,i)=>{ const f=epFx(r.id);
-      const row=el(`<div class="epfxr"><select class="id" title="${esc(f?f.d:'')}">${epFxOptions(r.id)}</select>${f&&f.inst?'':`<label title="сколько ходов держится">⏳<input class="dur" type="number" min="0" max="99" value="${r.dur??2}"></label>`}<label title="шанс, %. Для дебаффов: шанс + эффективность − эффект резист цели против d100">🎲<input class="ch" type="number" min="0" max="999" value="${r.ch??100}">%</label>${f&&f.n!=null?`<label title="${esc(f.nl||'')}">N<input class="n" type="number" step="any" value="${r.n??f.n}"></label>`:''}${epSel(EP_FXON,r.on||'tgt','on')}${opts.noWhen?'':epSel([['post','после удара'],['pre','до удара']],r.when||'post','wh')}<button class="x-btn" title="убрать">×</button></div>`);
+      const row=el(`<div class="epfxr"><select class="id" title="${esc(epFxD(f))}">${epFxOptions(r.id)}</select>${f&&f.inst?'':`<label title="сколько ходов держится">⏳<input class="dur" type="number" min="0" max="99" value="${r.dur??2}"></label>`}<label title="шанс, %. Для дебаффов: шанс + эффективность − эффект резист цели против d100">🎲<input class="ch" type="number" min="0" max="999" value="${r.ch??100}">%</label>${f&&f.n!=null?`<label title="${esc(f.nl||'')}">N<input class="n" type="number" step="any" value="${r.n??epP(f.id,'n')}"></label>`:''}${epSel(EP_FXON,r.on||'tgt','on')}${opts.noWhen?'':epSel([['post','после удара'],['pre','до удара']],r.when||'post','wh')}<button class="x-btn" title="убрать">×</button></div>`);
       $('.id',row).onchange=e=>{ r.id=e.target.value; delete r.n; onChange(); draw(); };
       const du=$('.dur',row); if(du) du.oninput=()=>{ r.dur=Math.max(0,Math.round(+du.value||0)); onChange(); };
       $('.ch',row).oninput=e=>{ r.ch=Math.max(0,+e.target.value||0); onChange(); };
@@ -8160,7 +8160,12 @@ const EP_POSK={
   right:[{id:'p_prep',name:'Подготовка к атаке',d:'БОЛЬШОЕ повышение атаки, крит шанса и крит урона на 2 хода, НО уклонение 0, пробитие защиты и метка на себя (не очищаются) и ходит последним в следующей фазе',ep:{type:'sup',tgt:'s',sp:'prep',fx:[{id:'atkUp2',dur:2,on:'self'},{id:'ccUp',dur:2,on:'self'},{id:'cdUp',dur:2,on:'self'},{id:'noEva',dur:2,on:'self',nd:1},{id:'defDown',dur:2,on:'self',nd:1},{id:'mark',dur:2,on:'self',nd:1}]}},{id:'p_rit',name:'Ритуал',d:'следующий соул бёрн без душ (1 раз за бой)',ep:{type:'sup',tgt:'s',sp:'ritual'}}],
   rear:[{id:'p_rest',name:'Отдых',d:'регенерация на 2 хода и снять 1 дебафф',ep:{type:'sup',tgt:'s',fx:[{id:'regen',dur:2,on:'self'},{id:'cleanse',n:1,on:'self'}]}},{id:'p_sup',name:'Огонь на подавление',d:'60%: понижение атаки, слепота и замедление всем врагам на 2 хода; КД 6 фаз, общий для стороны',ep:{type:'sup',tgt:'eA',sp:'supp',fx:[{id:'atkDown',ch:60,dur:2,on:'tgt'},{id:'blind',ch:60,dur:2,on:'tgt'},{id:'slow',ch:60,dur:2,on:'tgt'}]}}]};
 const EP_FX_INT=[{id:'noEva',k:'debuff',icon:'🎯',name:'Без уклонения',d:'уклонение 0, нельзя повысить'}];
-const EP_FXSTAT={atkUp:[['atk',50,1]],atkUp2:[['atk',75,1]],defUp:[['def',50,1]],resUp:[['res',60]],accUp:[['acc',50]],evaUp:[['eva',50]],ccUp:[['cc',50]],cdUp:[['cd',0.7]],effUp:[['eff',50]],riposte:[['ctr',30]],haste:[['spd',2]],barricade:[['def',30,1],['res',30]],rage:[['atk',20,1],['spd',1]],focus:[['cc',15],['cd',0.15]],vigor:[['atk',30,1],['def',30,1]],atkDown:[['atk',-50,1]],defDown:[['def',-75,1]],slow:[['spd',-2]],blind:[['acc',-50]]};
+/* числа встроенных эффектов по умолчанию; мастер правит их в каталоге (settings.epic.fx[id][ключ]), «n» — N по умолчанию для скилла */
+const EP_FXP={atkUp:{v:50},atkUp2:{v:75},defUp:{v:50},resUp:{v:60},accUp:{v:50},evaUp:{v:50},ccUp:{v:50},cdUp:{v:0.7},effUp:{v:50},riposte:{v:30},haste:{v:2},barricade:{v:30,w:30},rage:{v:20,w:1},focus:{v:15,w:0.15},vigor:{v:30,w:30},atkDown:{v:50},defDown:{v:75},slow:{v:2},blind:{v:50},regen:{v:15},critprot:{v:50},poison:{v:5},toxin:{v:10},bleed:{v:0.3},burn:{v:0.5},bomb:{v:1,w:40},fear:{v:40},mark:{v:0.1,w:30},mark2:{v:0.2,w:50}};
+const epP=(id,k)=>{ const o=EPS().fx&&EPS().fx[id]; const v=o&&o[k]; if(v!=null&&v!==''&&!isNaN(+v)) return +v; if(k==='n'){ const f=EP_FX.find(x=>x.id===id); return f?f.n:undefined; } return (EP_FXP[id]||{})[k]; };
+const epFxD=f=>f?String(f.d||'').replace(/\{(\w)\}/g,(m,k)=>{ const v=epP(f.id,k); return v==null?m:String(v); }):'';
+/* эффект → статы: ключ числа, '-' спереди — со знаком минус, 1 — в процентах (атака/защита) */
+const EP_FXSTAT={atkUp:[['atk','v',1]],atkUp2:[['atk','v',1]],defUp:[['def','v',1]],resUp:[['res','v']],accUp:[['acc','v']],evaUp:[['eva','v']],ccUp:[['cc','v']],cdUp:[['cd','v']],effUp:[['eff','v']],riposte:[['ctr','v']],haste:[['spd','v']],barricade:[['def','v',1],['res','w']],rage:[['atk','v',1],['spd','w']],focus:[['cc','v'],['cd','w']],vigor:[['atk','v',1],['def','w',1]],atkDown:[['atk','-v',1]],defDown:[['def','-v',1]],slow:[['spd','-v']],blind:[['acc','-v']]};
 const EP_DOT=new Set(['poison','toxin','bleed','burn','bomb']); // складываются: каждое наложение — отдельный экземпляр
 const epFxAny=id=>epFx(id)||EP_FX_INT.find(f=>f.id===id)||null;
 const epD100=()=>1+Math.floor(Math.random()*100);
@@ -8174,7 +8179,7 @@ function epSsp(u,sp){ let v=0; for(const x of (u.ssp||[])) if(x.sp===sp) v+=(+x.
 /* статы юнита в бою: снимок листа + позиция + эффекты (атака/защита в процентах, остальное в единицах) + особые свойства сетов */
 function epUS(u){ const s={...(u.s||{})}; const pct={atk:0,def:0}; const add=(k,v,p)=>{ if(p&&k in pct) pct[k]+=v; else s[k]=(+s[k]||0)+v; };
   if(u.pos==='right') add('spd',1); if(u.pos==='rear') add('eva',30);
-  for(const e of (u.fx||[])){ for(const [k,v,p] of (EP_FXSTAT[e.id]||[])) add(k,v,p); for(const m of (e.mods||[])){ const k=String(m.t||'').slice(3), v=+m.v||0; if(!(k in s)) continue; if(m.op==='*') s[k]*=v; else if(m.op==='=') s[k]=v; else add(k,m.op==='-'?-v:v,false); } }
+  for(const e of (u.fx||[])){ for(const [k,q,p] of (EP_FXSTAT[e.id]||[])) add(k,q[0]==='-'?-(+epP(e.id,q.slice(1))||0):(+epP(e.id,q)||0),p); for(const m of (e.mods||[])){ const k=String(m.t||'').slice(3), v=+m.v||0; if(!(k in s)) continue; if(m.op==='*') s[k]*=v; else if(m.op==='=') s[k]=v; else add(k,m.op==='-'?-v:v,false); } }
   for(const k in pct) if(pct[k]) s[k]=Math.max(0,s[k]*(1+pct[k]/100));
   let mh=+s.hp||1; const tr=(u.fx||[]).filter(e=>e.id==='trauma').reduce((a,e)=>a+(+e.n||0),0); mh*=Math.max(.1,1-tr/100)*Math.max(.1,1-(+u.cut||0)/100); s.mhp=Math.max(1,Math.round(mh));
   if(epHas(u,'noEva')) s.eva=0; s.dmg=epSsp(u,'dmg'); return s; }
@@ -8186,9 +8191,13 @@ function epSnap(ch){ const S=epStats(ch); const s={}; for(const k in S) s[k]=S[k
   return {nm:ch.name||'без имени',nm0:ch.name||'без имени',img:ch.mainImage||null,col:ch.color||null,el:E.el||null,cls:E.cls||null,st:+E.stars||0,s,sk,pas,ssp:epSetsOn(ch).filter(x=>x.sp).map(x=>({sp:x.sp,v:+x.spv||0,t:x.times})),rs,rs0:cp(rs)}; }
 /* каталог эффектов Эпик-боя на странице «Эффекты» */
 function epTplDraw(page,q){ const box=$('.epfxgrid',page); if(!box) return; box.innerHTML=''; const KN={buff:'Баффы',debuff:'Дебаффы',sp:'Особые'};
-  const T=EP_FX.filter(f=>!q||f.name.toLowerCase().includes(q)||f.d.toLowerCase().includes(q)); if(!T.length){ box.innerHTML='<div class="faint" style="grid-column:1/-1">Ничего не найдено.</div>'; return; }
+  const T=EP_FX.filter(f=>!q||f.name.toLowerCase().includes(q)||epFxD(f).toLowerCase().includes(q)); if(!T.length){ box.innerHTML='<div class="faint" style="grid-column:1/-1">Ничего не найдено.</div>'; return; }
   for(const k of ['buff','debuff','sp']){ const L=T.filter(f=>f.k===k); if(!L.length) continue; box.append(el(`<div class="tiny" style="grid-column:1/-1;margin-top:4px">${KN[k]} · ${L.length}</div>`));
-    for(const f of L) box.append(el(`<div class="tplcard epfxc ${k}"><div class="row" style="gap:8px;align-items:center"><span style="font-size:20px">${f.icon}</span><b>${esc(f.name)}</b><span class="grow"></span>${f.inst?'<span class="epchip" title="срабатывает сразу, без срока">мгновенно</span>':''}${EP_DOT.has(f.id)?'<span class="epchip" title="каждое наложение — отдельный стак">складывается</span>':''}${f.n!=null?`<span class="epchip" title="число по умолчанию; на скилле можно поменять">N = ${f.n}</span>`:''}</div><div class="ds">${esc(f.d)}</div></div>`)); } }
+    for(const f of L) box.append(el(`<div class="tplcard epfxc ${k}"><div class="row" style="gap:8px;align-items:center"><span style="font-size:20px">${f.icon}</span><b>${esc(f.name)}</b><span class="grow"></span>${f.inst?'<span class="epchip" title="срабатывает сразу, без срока">мгновенно</span>':''}${EP_DOT.has(f.id)?'<span class="epchip" title="каждое наложение — отдельный стак">складывается</span>':''}${f.n!=null?`<span class="epchip" title="${esc((f.nl||'')+' — по умолчанию для новых строк скилла; на скилле можно поменять')}">N = ${epNum(f.id,'n')}</span>`:''}${epFxEdited(f.id)?`<button class="x-btn eprs" data-id="${f.id}" title="Вернуть числа как в таблице">↺</button>`:''}</div><div class="ds">${esc(f.d).replace(/\{(\w)\}/g,(m,k)=>epNum(f.id,k))}</div></div>`)); }
+  $$('.epfxn',box).forEach(i=>i.onchange=()=>{ const id=i.dataset.id, k=i.dataset.k, v=i.value.trim().replace(',','.'); const S=world.settings; S.epic??={}; S.epic.fx??={}; const o=S.epic.fx[id]??={}; const def=k==='n'?(EP_FX.find(x=>x.id===id)||{}).n:(EP_FXP[id]||{})[k]; if(v===''||isNaN(+v)||+v===def) delete o[k]; else o[k]=+v; if(!Object.keys(o).length) delete S.epic.fx[id]; touch(S); epTplDraw(page,q); });
+  $$('.eprs',box).forEach(b=>b.onclick=()=>{ const S=world.settings; if(S.epic&&S.epic.fx){ delete S.epic.fx[b.dataset.id]; touch(S); } epTplDraw(page,q); }); }
+const epFxEdited=id=>!!(EPS().fx&&EPS().fx[id]&&Object.keys(EPS().fx[id]).length);
+const epNum=(id,k)=>{ const ov=EPS().fx&&EPS().fx[id]&&EPS().fx[id][k]!=null; return `<input class="epfxn ${ov?'ov':''}" data-id="${id}" data-k="${k}" value="${epP(id,k)}" title="${ov?'изменено мастером':'как в таблице'}">`; };
 /* одинаковые бойцы на одной стороне: «Гоблин #1», «Гоблин #2» */
 function epNames(B){ const g={}; for(const u of B.units){ u.nm0??=u.nm; (g[u.ref+':'+u.side]??=[]).push(u); } for(const L of Object.values(g)) L.forEach((u,i)=>{ u.nm=L.length>1?u.nm0+' #'+(i+1):u.nm0; }); }
 function epFl(B,u,v,c){ (B.fl??=[]).push({u:u.id,v:String(v),c}); }
@@ -8207,7 +8216,7 @@ function epDie(B,t,log,src){ t.hp=0; t.dead=1; t.bar=0; if(epHas(t,'execute')) t
   if(src&&!src.dead) epTrig(B,src,'kill',log,{other:t}); for(const a of epLive(B,t.side)) epTrig(B,a,'allyDead',log,{other:t}); }
 /* наложить эффект/действие: шанс дебаффа = шанс + эффективность − резист цели против d100; иммунитет, запрет бафов, стаки ДоТов */
 function epApply(B,A,t,r,log){ const f=epFxAny(r.id); if(!f||!t) return; if(t.dead&&r.id!=='revive') return;
-  const foe=A.side!==t.side; const kind=f.k==='lib'?(foe?'debuff':'buff'):f.k==='sp'?(r.id==='execute'?'debuff':'buff'):f.k; const n=r.n??f.n;
+  const foe=A.side!==t.side; const kind=f.k==='lib'?(foe?'debuff':'buff'):f.k==='sp'?(r.id==='execute'?'debuff':'buff'):f.k; const n=r.n??(f.n!=null?epP(f.id,'n'):undefined);
   if(kind==='debuff'&&foe){ if(epHas(t,'immunity')){ log.push(`✨ ${t.nm}: иммунитет — ${f.name} не наложен`); return; } const c=(r.ch??100)+(+epUS(A).eff||0)-(+epUS(t).res||0), roll=epD100(); if(roll>c){ log.push(`🛡 ${t.nm} сопротивляется: ${f.name} (d100 ${roll} > ${Math.round(c)})`); return; } }
   else if((r.ch??100)<100){ const roll=epD100(); if(roll>(r.ch??100)){ log.push(`· ${f.name} не сработал (d100 ${roll})`); return; } }
   if(kind==='buff'&&epHas(t,'nobuff')){ log.push(`⛔ ${t.nm}: баффы запрещены — ${f.name} не наложен`); return; }
@@ -8232,9 +8241,9 @@ function epApply(B,A,t,r,log){ const f=epFxAny(r.id); if(!f||!t) return; if(t.de
 function epDetonate(B,t,log){ const L=(t.fx||[]).filter(e=>EP_DOT.has(e.id)); if(!L.length){ log.push(`🧨 ${t.nm}: детонировать нечего`); return; } log.push(`🧨 Детонация на ${t.nm}`); for(const e of L){ epDotTick(B,t,e,log,true); if(t.dead) break; } t.fx=(t.fx||[]).filter(e=>e.id!=='bomb'); }
 /* тик ДоТа (в конце хода носителя) или взрыв бомбы */
 function epDotTick(B,t,e,log,boom){ const m=epUS(t).mhp; let d=0;
-  if(e.id==='poison') d=m*.05; else if(e.id==='toxin') d=m*.1; else if(e.id==='bleed') d=(+e.sa||0)*.3; else if(e.id==='burn') d=(+e.sa||0)*.5; else if(e.id==='bomb'){ if(!boom) return; d=+e.sa||0; }
+  const P=k=>+epP(e.id,k)||0; if(e.id==='poison'||e.id==='toxin') d=m*P('v')/100; else if(e.id==='bleed'||e.id==='burn') d=(+e.sa||0)*P('v'); else if(e.id==='bomb'){ if(!boom) return; d=(+e.sa||0)*P('v'); }
   const f=epFxAny(e.id); log.push(`${f.icon} ${f.name}: ${t.nm} −${Math.round(d)}`); const src=epU(B,e.src); epHurt(B,t,d,log,{src});
-  if(e.id==='bomb'&&!t.dead&&epD100()<=40){ t.fx.push({i:uid(),id:'stun',k:'debuff',dur:1,src:e.src}); log.push(`💫 ${t.nm} оглушён взрывом`); } }
+  if(e.id==='bomb'&&!t.dead&&epD100()<=(+epP('bomb','w')||0)){ t.fx.push({i:uid(),id:'stun',k:'debuff',dur:1,src:e.src}); log.push(`💫 ${t.nm} оглушён взрывом`); } }
 /* строки эффектов скилла: на кого */
 function epApplyRows(B,A,rows,T,log,hits){ for(const r of rows){ if(!r.id) continue; const f=epFxAny(r.id); if(!f) continue; const on=r.on||'tgt'; let L;
     if(on==='self') L=[A]; else if(on==='aA') L=epLive(B,A.side); else if(on==='eA') L=epLive(B,epFoeSide(A)); else if(on==='a1') L=T.filter(t=>t.side===A.side).slice(0,1); else L=T;
@@ -8242,11 +8251,11 @@ function epApplyRows(B,A,rows,T,log,hits){ for(const r of rows){ if(!r.id) conti
 /* одиночный удар по цели: попадание (d100 > уклонение − попадание), крит, урон × K/(K+защита), промах = половина урона */
 function epStrike(B,A,t,P,o,log){ const sa=epUS(A), st=epUS(t); const adv=epElAdv(A.el,t.el); const K=+EPS().defK||100;
   const mk=epHas(t,'mark2')?2:epHas(t,'mark')?1:0; const asleep=epHas(t,'sleep');
-  const eva=(+st.eva||0)+(adv<0?50:0), acc=(+sa.acc||0)+(adv>0?15:0)+(mk===2?50:mk?30:0); let miss=false, roll=null;
+  const eva=(+st.eva||0)+(adv<0?50:0), acc=(+sa.acc||0)+(adv>0?15:0)+(mk===2?+epP('mark2','w'):mk?+epP('mark','w'):0); let miss=false, roll=null;
   if(epHas(A,'miss')) miss=true; else if(!asleep){ roll=epD100(); miss=!(roll>eva-acc); }
-  let crit=false; if(!miss){ if(asleep||epTake(A,'guarCrit')) crit=true; else crit=epD100()<=(+sa.cc||0)-(epHas(t,'critprot')?50:0); }
+  let crit=false; if(!miss){ if(asleep||epTake(A,'guarCrit')) crit=true; else crit=epD100()<=(+sa.cc||0)-(epHas(t,'critprot')?+epP('critprot','v'):0); }
   let base=0; for(const s of (P.scale&&P.scale.length?P.scale:[{k:'atk',m:1}])) base+=(s.k==='hp'?sa.mhp:(+sa[s.k]||0))*(+s.m||0); if(o.sbM) base+=(+sa.atk||0)*o.sbM;
-  const mult=1+(adv>0?.1:0)+(mk===2?.2:mk?.1:0)+(+sa.dmg||0);
+  const mult=1+(adv>0?.1:0)+(mk===2?+epP('mark2','v'):mk?+epP('mark','v'):0)+(+sa.dmg||0);
   let dmg=base*mult*(crit?1+(+sa.cd||0):1)*K/(K+Math.max(0,+st.def||0)); if(miss) dmg*=.5; const cas=epTake(A,'cascade'); if(cas&&!miss) dmg+=+cas.n||0;
   log.push(`→ ${t.nm}: ${miss?'промах'+(roll!=null?` (d100 ${roll} ≤ ${Math.round(eva-acc)})`:'')+' — половина урона':crit?'КРИТ!':'попадание'}${adv>0?' · элемент сильнее':adv<0?' · элемент слабее':''}`);
   const li=log.length; const r=epHurt(B,t,dmg,log,{src:A,crit}); if(r.dealt) log.splice(li,0,`   ${t.nm}: −${r.dealt} ХП${t.dead?'':` (${t.hp}/${epUS(t).mhp}${t.bar?', барьер '+t.bar:''})`}`);
@@ -8305,12 +8314,12 @@ function epNext(B,log,g=0){ if(g>60) return; const w=epOver(B); if(w){ B.win=w; 
   while(!id&&(B.queue||[]).length){ const x=B.queue.shift(); if(epU(B,x)&&!epU(B,x).dead) id=x; }
   if(!id){ epPhase(B,log); return; }
   const u=epU(B,id); B.cur=id; for(const k of Object.keys(u.cd||{})) if(u.cd[k]>0) u.cd[k]--;
-  if(epHas(u,'fear')&&epD100()<=40){ epTake(u,'fear'); log.push(`😱 ${u.nm}: страх спал сам`); }
+  if(epHas(u,'fear')&&epD100()<=(+epP('fear','v')||0)){ epTake(u,'fear'); log.push(`😱 ${u.nm}: страх спал сам`); }
   const skip=['stun','sleep','fear'].find(x=>epHas(u,x)); if(skip){ log.push(`${epFxAny(skip).icon} ${u.nm} пропускает ход (${epFxAny(skip).name})`); epEnd(B,u,log); epNext(B,log,g+1); return; }
   if(ex) log.push(`⏩ ${u.nm}: экстра ход`); epTrig(B,u,'turn',log); if(u.dead) epNext(B,log,g+1); }
 /* конец хода юнита: ДоТы и регенерация, затем −1 ход всем его эффектам (бомба взрывается в конце срока) */
 function epEnd(B,u,log){ if(u.dead) return; for(const e of (u.fx||[]).slice()){ if(u.dead) break; if(EP_DOT.has(e.id)&&e.id!=='bomb') epDotTick(B,u,e,log); }
-  if(!u.dead&&epHas(u,'regen')){ const h=epHeal(B,u,epUS(u).mhp*.15,log); if(h) log.push(`💚 ${u.nm}: регенерация +${h}`); }
+  if(!u.dead&&epHas(u,'regen')){ const h=epHeal(B,u,epUS(u).mhp*(+epP('regen','v')||0)/100,log); if(h) log.push(`💚 ${u.nm}: регенерация +${h}`); }
   if(u.dead) return; for(const e of (u.fx||[])) if(e.dur<99) e.dur--; for(const e of (u.fx||[]).filter(e=>e.dur<=0)){ u.fx=u.fx.filter(x=>x!==e); if(e.id==='bomb') epDotTick(B,u,e,log,true); if(u.dead) return; }
   if(u.bar&&!epHas(u,'barrier')&&!epSsp(u,'barrier')&&!(B.units||[]).some(a=>a.side===u.side&&epSsp(a,'barrier'))) u.bar=0;
   epTrig(B,u,'tend',log); }
@@ -8346,7 +8355,7 @@ function epUnitHTML(B,u,fl){ const s=epUS(u); const mh=s.mhp, hp=Math.max(0,u.hp
     <div class="pw"><div class="por">${u.img?`<img data-img="${esc(u.img)}" data-thumb="1" style="display:none">`:`<span>${esc(initials(u.nm))}</span>`}</div>${el_?`<i class="el" title="${el_[1]}">${el_[2]}</i>`:''}${u.st?`<i class="stars" title="уровень">${'★'.repeat(u.st)}</i>`:''}</div>
     <div class="nm" title="${esc(u.nm+(cl?' · '+cl[1]:''))}">${cl?cl[2]+' ':''}${esc(u.nm)}</div>
     ${set?`<div class="ppos">${EP_POS.find(p=>p[0]===u.pos)[1]}</div>`:`<div class="hpb"><i style="width:${Math.round(100*hp/mh)}%"></i>${u.bar?`<b style="width:${Math.min(100,Math.round(100*u.bar/mh))}%"></b>`:''}<span>${hp} / ${mh}${u.bar?' · 🔵'+u.bar:''}</span></div>`}
-    <div class="fxs">${(u.fx||[]).map(e=>{ const f=epFxAny(e.id); return f?`<span class="${e.k}" title="${esc(f.name+' — '+f.d+(e.n!=null?' (N='+e.n+')':'')+(e.dur<99?' · ходов: '+e.dur:'')+(e.nd?' · не очищается':''))}">${f.icon}${e.dur<99?`<sub>${e.dur}</sub>`:''}</span>`:''; }).join('')}</div>
+    <div class="fxs">${(u.fx||[]).map(e=>{ const f=epFxAny(e.id); return f?`<span class="${e.k}" title="${esc(f.name+' — '+epFxD(f)+(e.n!=null?' (N='+e.n+')':'')+(e.dur<99?' · ходов: '+e.dur:'')+(e.nd?' · не очищается':''))}">${f.icon}${e.dur<99?`<sub>${e.dur}</sub>`:''}</span>`:''; }).join('')}</div>
     ${set?'':`<div class="meta">${+u.sp?`<span title="боевой дух">🔥 ${u.sp}</span>`:''}${B.ph==='fight'&&!u.dead?`<span title="инициатива этой фазы (1d4 = ${u.ir||'?'} + скорость)">⚡ ${u.init||0}</span>`:''}${Object.entries(u.rs||{}).filter(([k])=>(u.sk||[]).some(s=>s.ep.cost&&s.ep.cost.bar===k)).map(([k,v])=>`<span title="${esc(k)}">${esc(k.slice(0,3))} ${v}</span>`).join('')}</div>`}
     ${(fl||[]).map((f,i)=>`<div class="epfl ${f.c}" style="animation-delay:${i*.22}s">${esc(f.v)}</div>`).join('')}</div>`; }
 function epSkillBtn(B,A,s,pos){ const why=epWhyNot(B,A,s); const P=s.ep||{}; const sbOk=P.sb&&P.sb.on&&!why&&(A.sbFree||(+B.souls||0)>=(+P.sb.cost||0));
