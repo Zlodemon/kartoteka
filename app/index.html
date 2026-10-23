@@ -2287,6 +2287,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-24',t:'Эпик-бой: удары со спины и выстрелы на перебежках',items:['Удары со спины и с флангов: Теневой шаг, Удар со спины, Удар убийцы, Удар с фланга сверху, Мираж, Обход по дуге, Клещи; ульта Танец теней (пять заходов с разных сторон).','Выстрелы на перебежках «двинулся — выстрел»: Обстрел с флангов, Выстрелы с боков (с позиций над и под целью), Перебежка с огнём, Стрельба на отходе, Танец стрелка, Ножи на бегу, Огонь с флангов, Магический обстрел; ульта Шквальный обстрел.','По всем врагам герой бегает один раз, а удары и выстрелы достаются каждой цели.']},
   {d:'2026-10-24',t:'Эпик-бой: кровь у режущих ударов',items:['Удары мечом, секирой, кинжалом, когтями и копьём оставляют порез, брызги крови по ходу удара, кровавую дымку и пятна на земле.','Обезглавливание, Казнь и Мгновенный разрез — фонтан крови толчками и багровая вспышка по краям экрана.','Кровь можно выключить: Настройки → ✦ Эпик-бой → «🩸 Кровь в анимациях».']},
   {d:'2026-10-24',t:'Эпик-бой: удары, молот, трещины и цвет анимаций',items:['Удары руками и ногами без картинок кулаков: герой подскакивает к цели и бьёт сериями, каждый удар — вспышка-звезда, ударная волна и воздушный хлопок, последний — тяжёлый.','Новые: вихрь пинков, удар ладонью.','Молот и сокрушение — тяжёлый удар в землю: вспышка, волна по земле, стена пыли, летящие камни, сильная тряска.','Трещины по земле переделаны: воронка в перспективе, широкие разломы с раскалённым ядром.','У любой анимации можно выбрать цвет стихии: во вкладке «✦ Эпик» → «Анимация» — 🎨 в окне выбора (огонь, лёд, молния, свет, тьма, кровь и т.д.).']},
   {d:'2026-10-24',t:'Эпик-бой: копья, движения героя, новые удары и баффы',items:['Герой двигается: прыжок с броском, отскок назад, прыжок к цели с ударом сверху, рывок насквозь, исчезновение в тени.','Копья: бросок, бросок с прыжка, пронзающий бросок, град копий, удар с разбега, вихрь копья, шквал уколов, прыжок с копьём; ульты — падение гигантского копья, драконий прыжок, небесный град копий.','Новые удары: удар с прыжка, рассекающий рывок, мгновенный разрез, двойной, звёздный, обезглавливание, сокрушающий, контрудар, крестовый рывок, клинок ветра, тысяча кулаков; шквал и серия ударов переделаны.','Новые баффы: уход в тень, перезарядка, концентрация, накопление силы, щит маны, шипастая и ледяная броня, огненное оружие, второе дыхание, боевая стойка, невидимость, кровавый ритуал, попутный ветер, сплочение, волна исцеления.','АОЕ-баффы: кастер играет свою часть один раз, к каждому союзнику летит сгусток силы и раскрывается аурой.','Драконы смотрят мордой вперёд; кровавые пики — два веера огромных шипов; дождь клинков — мечи падают из порталов и вонзаются.']},
@@ -8971,6 +8972,8 @@ function epGLStep(S,k,s,at,p,q,t,c,c2,sg,P){ const K=S.K, E=o=>epGLEmit(S,o), d0
   case 'orbit': epGLOrbit(S,at,t,s,c,c2); break;
   case 'impact': epGLImpact(S,at.x,at.y,sg,t,c,s.k||1); if(S.tEl) epGLRecoil(S,S.tEl,p,q,t,1.2); epGLPunch(S,t,1.03); break;
   case 'slam': epGLSlam(S,p,q,at,t,s,c,c2); break;
+  case 'blink': epGLBlink(S,p,q,t,s,c,c2); break;
+  case 'volley': epGLVolley(S,p,q,t,s,c,c2,P); break;
   case 'blood': if(EPS().gore!==false) epGLBlood(S,at,t,sg,s.k||1,s.heavy); break;
   case 'flash': epGLFull(S,t,t+.32,s.c||c,.5,'flash'); break;
   case 'shake': epGLShake(S,t,s.k||1); break;
@@ -9293,6 +9296,61 @@ function epGLBlood(S,at,t,dir,k=1,heavy){ const E=o=>epGLEmit(S,o), gy=at.y+46, 
     ['st_axe',{k:1.3}],['st_cleave',{k:1.2}],['st_bloodsw',{k:1.4}],['st_sword',{k:.75}],['st_cross',{k:.9}],['st_triple',{k:.9}],['st_double',{k:.8,dl:.14}],['st_upper',{k:.8}],['st_z',{k:.8}],
     ['st_claw',{k:1}],['st_bite',{k:1}],['st_backstab',{k:1.1}],['st_dagger',{k:.6}],['st_poisdag',{k:.5}],['st_reap',{k:1}],['st_whirl',{k:1}],['st_spin',{k:.8}],['st_flurry',{k:.8,dl:.4}],['st_dance',{k:.8,dl:.45}],
     ['st_star',{k:1,dl:.36}],['st_dashcut',{k:1,dl:.25}],['st_cross2',{k:1.1,dl:.2}],['st_leap',{k:.9}],['st_counter',{k:.8}],['sp_thrust',{k:.9}],['sp_pierce',{k:.9}],['st_spear',{k:.8}],['st_pierce',{k:1}],['ul_worldslash',{k:1.2}],['ul_bloodspikes',{k:1.2}],['ul_spearstorm',{k:.8,dl:.5}]]) add(id,o);
+})();
+/* ---------- заход за спину / с фланга (blink) и «перебежка — выстрел» (volley): герой ходит по точкам вокруг цели ---------- */
+/* ключевые кадры карточки по точкам: [время, x, y, видимость] в координатах сцены; карточка двигается относительно своего места p */
+function epGLRoute(S,el,p,pts){ if(S.sub||!el||pts.length<2) return; /* на остальных целях АОЕ герой не бегает второй раз */ const t0=pts[0][0], D=pts[pts.length-1][0]-t0; if(D<=0) return; const k=S.sc, T=(x,y)=>`translate(calc(-50% + ${(x-p.x)*k}px),calc(-50% + ${(y-p.y)*k}px))`;
+  const kf=pts.map(([tm,x,y,op])=>({transform:T(x,y),opacity:op??1,zIndex:6,offset:Math.min(1,Math.max(0,(tm-t0)/D))})); kf[0].offset=0; kf[kf.length-1].offset=1; for(let i=1;i<kf.length;i++) if(kf[i].offset<kf[i-1].offset) kf[i].offset=kf[i-1].offset;
+  try{ el.animate(kf,{duration:D*1000,delay:(t0-S.ago)*1000,fill:'none',easing:'linear'}); }catch{} epGLGhosts(S,el,kf,D,t0); }
+/* дымка телепорта */
+function epGLPuff(S,x,y,t,c){ if(S.sub) return; epGLEmit(S,{x,y,t,n:8,tx:['smoke_07','smoke_09','smoke_10'],c:'#120a1c',bl:'n',sz:[50,90],sp:[30,110],dr:2,life:[.45,.75],g0:.5,g1:1.6,al:[.6,.85],rot:true,vr:2}); epGLEmit(S,{x,y,t,n:10,tx:'star_04',c:[c,'#ffffff'],sz:[10,20],sp:[120,260],dr:3,life:[.25,.45]}); epGLEmit(S,{x,y,t,n:1,tx:'ring',c,sz:24,g1:4,life:.3,sp:0}); }
+/* точки вокруг цели: behind — за спиной, front — перед, above/below — сверху/снизу (фланги) */
+function epGLSpots(names,p,q,R=105,W=1e4,H=1e4){ const dir=Math.sign(q.x-p.x)||1, cl=o=>({x:Math.max(46,Math.min(W-46,o.x)),y:Math.max(46,Math.min(H-46,o.y))}); return names.split(',').map(n=>{ n=n.trim(); return cl(n==='behind'?{x:q.x+dir*R,y:q.y}:n==='front'?{x:q.x-dir*R,y:q.y}:n==='above'?{x:q.x-dir*20,y:q.y-R*1.05}:n==='below'?{x:q.x-dir*20,y:q.y+R*1.05}:n==='bhigh'?{x:q.x+dir*R*.8,y:q.y-R*.7}:{x:q.x+dir*R,y:q.y}); }); }
+function epGLBlink(S,p,q,t,s,c,c2){ const spots=epGLSpots(s.pts||'behind',p,q,s.r||105,S.W,S.H), iv=s.iv||.26, tp=!!s.tp, dir=Math.sign(q.x-p.x)||1, route=[];
+  const t0=t-(tp?.3:.42); route.push([t0,p.x,p.y,1]);
+  if(tp){ route.push([t0+.08,p.x,p.y,0]); epGLPuff(S,p.x,p.y,t0+.04,c); } else { const f=spots[0]; route.push([t0+.2,(p.x+q.x)/2,Math.min(p.y,q.y)-130,1]); epGLOne(S,'beam',c,t0,t0+.32,ff=>({x:(p.x+f.x)/2,y:Math.min(p.y,q.y)-60,w:Math.abs(f.x-p.x)*Math.min(1,ff*2),h:10,r:0,a:.4*epEnv(ff,.1,.5)})); }
+  spots.forEach((sp,i)=>{ const ts=t+i*iv, ta=ts-.1;
+    if(tp){ route.push([ta-.01,sp.x,sp.y,0]); route.push([ta+.03,sp.x,sp.y,1]); epGLPuff(S,sp.x,sp.y,ta,c); } else route.push([ta,sp.x,sp.y,1]);
+    route.push([ts+.12,sp.x,sp.y,1]); if(tp&&i<spots.length-1) route.push([ts+.16,sp.x,sp.y,0]);
+    const sg=Math.sign(q.x-sp.x)||dir, last=i===spots.length-1; const pat=sp.y<q.y-40?'down':sp.y>q.y+40?'up':(s.p||'x');
+    epGLSlash(S,{p:pat,w:s.w||8,sz:s.sz||1.3},q,ts,c,c2,sg); if(S.tEl) epGLRecoil(S,S.tEl,sp,q,ts+.03,last?1.4:.7);
+    if(EPS().gore!==false&&s.bk) epGLBlood(S,q,ts+.04,sg,s.bk*(last?1:.6),last&&s.heavy); if(last) epGLPunch(S,ts,1.04); });
+  const te=t+(spots.length-1)*iv+.28, lp=spots[spots.length-1]; if(tp){ route.push([te,lp.x,lp.y,0]); epGLPuff(S,lp.x,lp.y,te-.04,c); route.push([te+.18,p.x,p.y,0]); route.push([te+.3,p.x,p.y,1]); epGLPuff(S,p.x,p.y,te+.22,c); }
+  else route.push([te+.3,p.x,p.y,1]);
+  epGLRoute(S,S.aEl,p,route); }
+/* перебежки с выстрелами: pat — рисунок точек; первый снаряд прилетает в момент попадания t */
+const EP_VOLLEY={flank:(p,q,d)=>[[d*30,-110],[d*30,110],[d*70,-50]].map(([x,y])=>({x:p.x+x,y:p.y+y})),
+  run:(p,q,d)=>[[d*60,-50],[d*130,40],[d*200,-30],[d*260,30]].map(([x,y])=>({x:p.x+x,y:p.y+y})),
+  retreat:(p,q,d)=>[[-d*40,-60],[-d*80,50],[-d*115,-25]].map(([x,y])=>({x:p.x+x,y:p.y+y})),
+  sides:(p,q,d)=>[[-d*170,-135],[-d*170,135],[-d*250,0]].map(([x,y])=>({x:q.x+x,y:q.y+y})),
+  dance:(p,q,d,n=5)=>Array.from({length:n},(_,i)=>({x:p.x+d*(15+i*22),y:p.y+(i%2?1:-1)*(70+i*6)}))};
+function epGLVolley(S,p,q,t,s,c,c2,P){ const dir=Math.sign(q.x-p.x)||1, stops=(EP_VOLLEY[s.pat]||EP_VOLLEY.flank)(p,q,dir,s.n||5).map(o=>({x:Math.max(46,Math.min(S.W-46,o.x)),y:Math.max(46,Math.min(S.H-46,o.y))})), dur=s.dur||.28, iv=s.iv||.27, route=[];
+  const tf0=t-dur, t0=tf0-.2; route.push([t0,p.x,p.y,1]);
+  stops.forEach((sp,i)=>{ const tf=tf0+i*iv, last=i===stops.length-1; route.push([tf-.02,sp.x,sp.y,1]); route.push([tf+.06,sp.x-dir*8,sp.y,1]); /* отдача стрелка */
+    epGLStep(S,'proj',{sh:s.sh||'arrow',sz:s.sz||13,dur,tr:s.tr||0,h:s.h||0},sp,sp,q,tf,c,c2,dir,P);
+    const th=tf+dur; if(S.K&&S.K.st!=='steel') epGLBoom(S,q.x,q.y,last?36:22,th,S.K,c); else { epGLImpact(S,q.x-dir*8,q.y+(epRnd(i+2)-.5)*30,dir,th,c,last?1:.55); }
+    if(S.tEl) epGLRecoil(S,S.tEl,sp,q,th,last?1.2:.5); });
+  route.push([tf0+(stops.length-1)*iv+.14,stops[stops.length-1].x,stops[stops.length-1].y,1]); route.push([tf0+(stops.length-1)*iv+.5,p.x,p.y,1]);
+  epGLRoute(S,S.aEl,p,route); }
+/* ---------- удары со спины и с флангов, выстрелы на перебежках ---------- */
+(()=>{ const A=(g,id,n,c,c2,st,o={})=>{ const P={id,g,n,c,c2,st,...o}; const i=EP_AN.findIndex(x=>x.id===id); if(i>=0) EP_AN[i]=P; else EP_AN.push(P); EP_ANM[id]=P; };
+  A('strike','st_shadowstep','Теневой шаг','#a06bff','#ffffff',[['blink',{pts:'behind',tp:1,p:'thrust',w:7,sz:1.5,bk:1.1}]],{cast:.35,el:'dark'});
+  A('strike','st_backflank','Удар со спины','#ffffff','#ff6b5e',[['blink',{pts:'behind',p:'x',w:8,sz:1.3,bk:1}]],{cast:.45});
+  A('strike','st_assassin','Удар убийцы','#ff3b4f','#ffffff',[['dim',{a:.55,dur:1.3,ph:'cast',fld:1}],['blink',{pts:'behind',tp:1,p:'thrust',w:5,sz:1.8,bk:1.5,heavy:1}],['flash',{dl:.02}]],{cast:.35});
+  A('strike','st_sidestrike','Удар с фланга сверху','#ffd166','#ffffff',[['blink',{pts:'above',tp:1,w:10,sz:1.4,bk:1}]],{cast:.35});
+  A('strike','st_mirage','Мираж','#7ae0ff','#ffffff',[['blink',{pts:'behind,front',tp:1,p:'x',w:7,sz:1.2,iv:.3,bk:.9}]],{cast:.35});
+  A('strike','st_arcround','Обход по дуге','#ffffff','#7ae0ff',[['blink',{pts:'bhigh,behind',p:'1',w:8,sz:1.3,iv:.24,bk:.9}]],{cast:.45});
+  A('strike','st_pincer','Клещи','#ffd166','#ff6b5e',[['blink',{pts:'above,below,behind',tp:1,w:8,sz:1.2,iv:.22,bk:.8}]],{cast:.35});
+  A('ult','ul_shadowdance','Танец теней','#a06bff','#ffffff',[['dim',{fld:1,a:.6,dur:2}],['blink',{pts:'behind,above,front,below,behind',tp:1,p:'x',w:8,sz:1.3,iv:.2,bk:1,heavy:1}],['shake',{k:1.6,dl:.85}]],{cast:.4,el:'dark'});
+  A('shot','sh_flank','Обстрел с флангов','#ffd166','#ff8a6a',[['volley',{pat:'flank',sh:'arrow',sz:14,dur:.3}]],{cast:.45});
+  A('shot','sh_sides','Выстрелы с боков','#ffd166','#ffffff',[['volley',{pat:'sides',sh:'arrow',sz:14,dur:.24}]],{cast:.45});
+  A('shot','sh_runfire','Перебежка с огнём','#ffd166','#ffffff',[['volley',{pat:'run',sh:'bullet',sz:11,dur:.15}]],{cast:.45});
+  A('shot','sh_retreat','Стрельба на отходе','#ffd166','#ff8a6a',[['volley',{pat:'retreat',sh:'arrow',sz:14,dur:.3}]],{cast:.45});
+  A('shot','sh_dance','Танец стрелка','#7ae0ff','#ffffff',[['volley',{pat:'dance',sh:'arrow',sz:13,dur:.24,n:5,iv:.22}]],{cast:.5});
+  A('shot','sh_knifefan','Ножи на бегу','#c9d3e6','#ff6b5e',[['volley',{pat:'run',sh:'knife',sz:13,dur:.22}]],{cast:.45});
+  A('shot','sh_sidesgun','Огонь с флангов','#ff7a3d','#ffd166',[['volley',{pat:'sides',sh:'bullet',sz:11,dur:.14}]],{cast:.45,el:'fire'});
+  A('magic','mg_arcane_flank','Магический обстрел','#c78bff','#ffffff',[['volley',{pat:'sides',sh:'orb',sz:11,dur:.3,tr:1}]],{cast:.45,el:'arcane'});
+  A('ult','ul_barrage','Шквальный обстрел','#ffd166','#ffffff',[['dim',{fld:1,a:.5,dur:2.2}],['volley',{pat:'dance',sh:'arrow',sz:14,dur:.22,n:7,iv:.15}],['rain',{sh:'arrow',n:10,sp:60,dl:1}]],{cast:.6});
 })();
 /* проиграть пресет: p — кто применяет, q — цель, d — секунда действия; o.aEl — элемент бойца для подскока */
 function epAnDraw(X,P,p,q,d,o={}){ const cast=P.cast||0, hit=epAnHitP(P), sg=q.x<p.x?-1:1; X.K=epKitOf(P); X.m=o.m||1; X.sd=(Math.floor(d*1000)*31+Math.floor(p.x)*7+Math.floor(q.y)*13)%2147483646+1;
