@@ -575,7 +575,7 @@ body.fight #fightBtn{background:rgba(255,209,102,.2);border-color:rgba(255,209,1
 .epwin{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:800;background:rgba(0,0,0,.4);z-index:4;pointer-events:none;text-shadow:0 3px 10px #000}.epwin.a{color:var(--gold)}.epwin.e{color:#ff6b5e}
 .epact{margin-top:10px;padding:10px 12px;border:1px solid var(--line2);border-radius:12px;background:#0f1422;display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:58px}.epact .epwho{margin-right:6px}.epact .epsep{margin-left:10px;font-size:12px;color:#7ae0ff}.epact .eppk{color:#ffb070;font-weight:600}
 .epsk{display:inline-flex;gap:6px;align-items:center;padding:8px 12px;border-radius:10px;border:1px solid var(--line2);background:rgba(255,255,255,.05);color:inherit;cursor:pointer;font:inherit;font-size:13px}.epsk:hover{border-color:var(--gold)}.epsk b{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#111;align-items:center;justify-content:center;font-size:11px;flex:none}.epsk.pos b{background:#7ae0ff}.epsk.dis{opacity:.42}.epsk .cd{color:#ff9a7a;font-size:11.5px}.epsk.sb{border-color:#c04be0;padding:8px 9px;margin-left:-4px}
-.eppick{display:flex;gap:8px;flex-wrap:wrap}.epufx{display:flex;flex-wrap:wrap;gap:4px}
+.eppick{display:flex;gap:8px;flex-wrap:wrap}.epufx{display:flex;flex-wrap:wrap;gap:4px}.epfxc.buff{border-left:3px solid #4fb3ff}.epfxc.debuff{border-left:3px solid #ff5c6c}.epfxc.sp{border-left:3px solid var(--gold)}
 #ruhandside .dhint{padding:7px 10px 0;font-size:10.5px;color:#98a0b8;line-height:1.5}
 #ruhandside .dhint b{color:#c9cee0}
 #ruhand .hh{display:flex;gap:8px;align-items:center;justify-content:center;font-size:12px;color:#d6dae6;margin-bottom:4px;flex-wrap:wrap}#ruhand .hh select{font-size:11px;padding:2px 18px 2px 6px}#ruhand .hh .mode{color:var(--faint)}
@@ -7766,18 +7766,19 @@ function effLibEditor(d,opts={}){ const chg=()=>opts.onChange&&opts.onChange(); 
 function renderEffLib(m){ const s=world.settings; effSeedWounds(); s.effectLib??=[]; const lib=s.effectLib;
   const page=el(`<div class="page efflib"><div class="head"><h1>Библиотека эффектов</h1><span class="grow"></span><span class="seg" id="emode" style="margin-right:10px"><button class="btn sm on" data-m="all">Все эффекты</button>${ruOn()?'<button class="btn sm" data-m="emo" title="Карты эмоций по ярусам и полярности; предлагаются при росте уровня эмоций">😈 Карты эмоций</button>':''}</span><button class="btn" id="addF" title="Папка для эффектов. Эффекты перетаскиваются мышью между папками и внутри них; ПКМ по эффекту — меню «в папку / закрепить»" style="margin-right:6px">+ Папка</button><button class="btn primary" id="addE">+ Эффект</button></div>
     <details class="hintd"><summary>ⓘ Что это и как вешать — подробнее</summary>Готовые эффекты для всей игры: название, значок (эмодзи или своя картинка), срок в раундах (0 — бессрочно, ⏳ считает трекер инициативы), описание, модификаторы характеристик/полосок, пока эффект висит, <b>стаки</b> (до скольких копится при повторном наложении; в формулах — переменная <code>стаки</code>) и <b>программы хода</b>: что выполнить в начале и в конце хода персонажа (трекер инициативы на карте; например <code>hp -= 2 * стаки</code>). Вешаются с листа персонажа («+ Эффект» → из библиотеки), с карты (панель «Мой» → Эффекты → +) и формулами: <code>наложить('Ярость')</code>, <code>цель.наложить('Оглушение', 2)</code>, <code>снять_эффект('Ярость')</code>. В конструкторе — блок «наложить эффект». Изменение записи в библиотеке не трогает уже повешенные эффекты.</details>
-    <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><input id="eq" placeholder="поиск…" style="flex:1 1 260px;max-width:420px;margin:0"><span class="seg esrc"><button class="btn sm on" data-s="">все</button><button class="btn sm" data-s="tpl" title="Скопированы из готовых шаблонов Руины">📚 из шаблонов</button><button class="btn sm" data-s="own" title="Созданы вручную">✍ свои</button></span></div>${ruOn()?`<details class="rutpl" ${localStorage.getItem('rutplOpen')==='1'?'open':''}><summary><b>📚 Шаблоны Руины</b> <span class="faint">— ${RU_TPL.length} готовых статусов из Library of Ruina и в её духе. «→ в библиотеку» делает копию, которую можно править как обычный эффект; ссылки на другие статусы (например «наложить('Сила')») докидывают их автоматически</span> <button type="button" class="btn sm" id="tplAll" style="margin-left:8px">+ все недостающие</button></summary><div class="tplgrid"></div></details>`:''}<div class="effgrid"></div></div>`);
+    <div class="row" style="gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><input id="eq" placeholder="поиск…" style="flex:1 1 260px;max-width:420px;margin:0"><span class="seg esrc"><button class="btn sm on" data-s="">все</button><button class="btn sm" data-s="tpl" title="Скопированы из готовых шаблонов Руины">📚 из шаблонов</button><button class="btn sm" data-s="own" title="Созданы вручную">✍ свои</button></span></div>${ruOn()?`<details class="rutpl" ${localStorage.getItem('rutplOpen')==='1'?'open':''}><summary><b>📚 Шаблоны Руины</b> <span class="faint">— ${RU_TPL.length} готовых статусов из Library of Ruina и в её духе. «→ в библиотеку» делает копию, которую можно править как обычный эффект; ссылки на другие статусы (например «наложить('Сила')») докидывают их автоматически</span> <button type="button" class="btn sm" id="tplAll" style="margin-left:8px">+ все недостающие</button></summary><div class="tplgrid"></div></details>`:''}${epOn()?`<details class="rutpl eptpl" ${localStorage.getItem('eptplOpen')==='0'?'':'open'}><summary><b>✦ Эффекты Эпик-боя</b> <span class="faint">— ${EP_FX.length} встроенных эффектов из таблицы. Их механику считает бой сам; на скилл они ставятся во вкладке «✦ Эпик» редактора способности. Свой эффект — «+ Эффект» ниже, с модификаторами «Эпик: …» (например «Эпик: Атака × 1.2»); он тоже появится в списке эффектов скилла</span></summary><div class="tplgrid epfxgrid"></div></details>`:''}<div class="effgrid"></div></div>`);
   const grid=$('.effgrid',page); const tplBox=$('.tplgrid',page);
   const drawTpl=q=>{ if(!tplBox) return; tplBox.innerHTML=''; const T=RU_TPL.filter(t=>!q||fxNorm(t.name).includes(q)||(t.description||'').toLowerCase().includes(q)||t.g.toLowerCase().includes(q)); if(!T.length){ tplBox.innerHTML='<div class="faint" style="grid-column:1/-1">Ничего не найдено.</div>'; return; }
     for(const g of [...new Set(T.map(t=>t.g))]){ tplBox.append(el(`<div class="tiny" style="grid-column:1/-1;margin-top:4px">${esc(g)}</div>`)); for(const t of T.filter(x=>x.g===g)){ const has=ruTplHas(t); const lines=[]; if((t.mods||[]).length) lines.push('⚙ '+modsSummary(t.mods)); for(const [k,l] of EFF_TRIGS) if(t[k]) lines.push(l+': '+t[k]); for(const k of Object.keys(t.ev||{})) lines.push(ruEvName(k)+': '+t.ev[k]); if(t.emo) lines.push(t.emo==='pos'?'🌞 карта эмоции — светлая':'🌑 карта эмоции — тёмная');
       const card=el(`<div class="tplcard"><div class="row" style="gap:8px;align-items:center"><span style="font-size:20px">${esc(t.icon||'✨')}</span><b>${esc(t.name)}</b><span class="faint" style="font-size:11.5px">${t.dur?'⏳ '+t.dur+' р.':'бессрочно'}${t.stack?' · до '+t.stack+' ст.':''}</span><span class="grow"></span><button type="button" class="btn sm add" title="${has?'Уже есть в библиотеке — добавить ещё одну копию':'Скопировать в библиотеку эффектов'}">${has?'✓ есть · копия':'→ в библиотеку'}</button>${has?'<button type="button" class="btn sm rmt" title="Убрать копии этого шаблона из библиотеки (у персонажей уже наложенные эффекты остаются)">убрать</button>':''}</div><div class="ds">${esc(t.description||'')}</div>${lines.length?'<div class="sum">'+lines.map(esc).join('<br>')+'</div>':''}${t.note?'<div class="note">⚠ '+esc(t.note)+'</div>':''}</div>`);
       $('.add',card).onclick=()=>{ const added=ruTplAdd(t); toast('В библиотеку: '+added.map(d=>d.name).join(', ')); draw($('#eq',page).value.trim().toLowerCase()); }; const rmt=$('.rmt',card); if(rmt) rmt.onclick=async()=>{ const L=effLib(); const gone=L.filter(d=>d.tpl===t.k||fxNorm(d.name)===fxNorm(t.name)); if(!gone.length) return; if(!await confirmDlg(`Убрать из библиотеки: ${gone.map(d=>'«'+d.name+'»').join(', ')}? Уже наложенные эффекты у персонажей останутся.`,'Убрать')) return; for(const d of gone){ if(d.image) DB.delete('images',d.image).catch(()=>{}); L.splice(L.indexOf(d),1); } touch(s); draw($('#eq',page).value.trim().toLowerCase()); }; tplBox.append(card); } } };
-  { const d=$('details.rutpl',page); if(d) d.ontoggle=()=>localStorage.setItem('rutplOpen',d.open?'1':'0'); const b=$('#tplAll',page); if(b) b.onclick=ev=>{ ev.preventDefault(); const n=ruSeedEffects(true); toast(n?'Добавлено эффектов: '+n:'Все шаблоны уже в библиотеке'); draw($('#eq',page).value.trim().toLowerCase()); }; }
+  { const e=$('details.eptpl',page); if(e) e.ontoggle=()=>localStorage.setItem('eptplOpen',e.open?'1':'0'); }
+  { const d=$('details.rutpl:not(.eptpl)',page); if(d) d.ontoggle=()=>localStorage.setItem('rutplOpen',d.open?'1':'0'); const b=$('#tplAll',page); if(b) b.onclick=ev=>{ ev.preventDefault(); const n=ruSeedEffects(true); toast(n?'Добавлено эффектов: '+n:'Все шаблоны уже в библиотеке'); draw($('#eq',page).value.trim().toLowerCase()); }; }
   /* режим страницы = раздел меню: «Эффекты» — все эффекты, «Карты эмоций» — только карты; кнопки просто переходят между разделами */
   const mode=state.view==='emocards'&&ruOn()?'emo':'all'; const seg=$('#emode',page); if(seg) $$('button',seg).forEach(x=>{ x.classList.toggle('on',x.dataset.m===mode); x.onclick=()=>{ if(x.dataset.m!==mode) go(x.dataset.m==='emo'?'emocards':'efflib'); }; });
   if(mode==='emo'){ const ab=$('#addE',page); if(ab) ab.style.display='none'; const h1=$('h1',page); if(h1) h1.textContent='Карты эмоций'; }
   let src=''; { const sg=$('.esrc',page); if(sg) $$('button',sg).forEach(b=>b.onclick=()=>{ src=b.dataset.s; $$('button',sg).forEach(x=>x.classList.toggle('on',x===b)); draw($('#eq',page).value.trim().toLowerCase()); }); }
-  const draw=q=>{ drawTpl(q); grid.innerHTML=''; let L=lib.filter(d=>!q||(d.name||'').toLowerCase().includes(q)||(d.description||'').toLowerCase().includes(q));
+  const draw=q=>{ drawTpl(q); epTplDraw(page,q); grid.innerHTML=''; let L=lib.filter(d=>!q||(d.name||'').toLowerCase().includes(q)||(d.description||'').toLowerCase().includes(q));
     if(src==='tpl') L=L.filter(d=>d.tpl); else if(src==='own') L=L.filter(d=>!d.tpl);
     if(mode!=='emo'&&ruOn()){ const emo=L.filter(d=>d.emo); L=L.filter(d=>!d.emo);
       const all=lib.filter(d=>d.emo).length;
@@ -7948,7 +7949,7 @@ const EP_FX=[
   {id:'effUp',k:'buff',icon:'🔮',name:'Повышение эффективности',d:'эффективность +50'},
   {id:'immortal',k:'buff',icon:'♾️',name:'Бессмертие',d:'ХП не опускается ниже 1, пока действует'},
   {id:'riposte',k:'buff',icon:'↩️',name:'Рипост',d:'шанс контратаки +30'},
-  {id:'barrier',k:'buff',icon:'🫧',name:'Барьер',d:'щит поверх ХП',n:20,nl:'единиц барьера'},
+  {id:'barrier',k:'buff',icon:'🔵',name:'Барьер',d:'щит поверх ХП',n:20,nl:'единиц барьера'},
   {id:'immunity',k:'buff',icon:'✨',name:'Иммунитет',d:'пока действует, на цель не накладываются дебаффы'},
   {id:'invinc',k:'buff',icon:'💠',name:'Неуязвимость',d:'не получает урон'},
   {id:'nullify',k:'buff',icon:'🚫',name:'Скилл нулифаер',d:'игнорирует следующий скилл врага (и урон, и эффекты)'},
@@ -7958,7 +7959,7 @@ const EP_FX=[
   {id:'haste',k:'buff',icon:'🐎',name:'Ускорение',d:'бонус скорости +2'},
   {id:'cascade',k:'buff',icon:'🌊',name:'Каскад',d:'следующая атака наносит ещё N фиксированного урона',n:20,nl:'фикс. урон'},
   {id:'regen',k:'buff',icon:'💚',name:'Регенерация',d:'в конце хода восстанавливает 15% макс. ХП'},
-  {id:'critprot',k:'buff',icon:'🪖',name:'Защита от критов',d:'при атаке по цели вычитается 50 из крит шанса'},
+  {id:'critprot',k:'buff',icon:'⛑️',name:'Защита от критов',d:'при атаке по цели вычитается 50 из крит шанса'},
   {id:'barricade',k:'buff',icon:'🏰',name:'Баррикада',d:'защита +30%, эффект резист +30'},
   {id:'rage',k:'buff',icon:'😡',name:'Ярость',d:'атака +20%, бонус скорости +1'},
   {id:'focus',k:'buff',icon:'👁️',name:'Внимательность',d:'крит шанс +15, крит урон +0.15'},
@@ -7988,14 +7989,14 @@ const EP_FX=[
   {id:'restrict',k:'debuff',icon:'⛓️',name:'Рестрикт',d:'цель нельзя продвигать по инициативе'},
   {id:'push',k:'debuff',icon:'⏬',name:'Отталкивание',d:'−N к инициативе',inst:1,n:2,nl:'от инициативы'},
   {id:'fear',k:'debuff',icon:'😱',name:'Страх',d:'пропускает ход; в начале хода 40% что спадёт само'},
-  {id:'trauma',k:'debuff',icon:'🩼',name:'Травма',d:'макс. ХП −N%',n:10,nl:'% макс. ХП'},
+  {id:'trauma',k:'debuff',icon:'🦴',name:'Травма',d:'макс. ХП −N%',n:10,nl:'% макс. ХП'},
   {id:'curse',k:'debuff',icon:'🕯️',name:'Проклятие',d:'когда другую цель бьют одиночной атакой, проклятый получает половину этого урона'},
   {id:'sleep',k:'debuff',icon:'😴',name:'Сон',d:'пропускает ход; по спящему всегда крит и он не уклоняется; урон будит'},
   {id:'mark',k:'debuff',icon:'🎯',name:'Метка',d:'урон по цели +0.1, попадание по ней +30'},
   {id:'mark2',k:'debuff',icon:'📍',name:'Улучшенная метка',d:'урон по цели +0.2, попадание +50, цель можно атаковать всегда'},
   {id:'miss',k:'debuff',icon:'❌',name:'Промах',d:'наносит половину базового урона, без крита и без эффектов'},
   {id:'revive',k:'sp',icon:'🕊️',name:'Воскрешение',d:'воскрешает цель с N% ХП',inst:1,n:30,nl:'% ХП'},
-  {id:'execute',k:'sp',icon:'🪦',name:'Казнь',d:'не даёт цели воскреснуть'},
+  {id:'execute',k:'sp',icon:'⚰️',name:'Казнь',d:'не даёт цели воскреснуть'},
   {id:'guarCrit',k:'sp',icon:'🎇',name:'Гарантированный крит',d:'следующая атака точно критует'},
   {id:'detonate',k:'sp',icon:'🧨',name:'Детонация',d:'моментально срабатывают все ДоТы и бомбы на цели',inst:1},
   {id:'spirit',k:'sp',icon:'🔥',name:'Боевой дух',d:'дать N боевого духа',inst:1,n:1,nl:'боевого духа'}];
@@ -8183,6 +8184,11 @@ function epSnap(ch){ const S=epStats(ch); const s={}; for(const k in S) s[k]=S[k
   const pas=(ch.abilities||[]).filter(a=>a.ep&&a.ep.type==='pas'&&(a.ep.trig||'always')!=='always').map(a=>({id:a.id,name:a.name||'пассивка',ep:cp(a.ep)}));
   const rs={}; for(const b of (ch.bars||[])) if(b.name) rs[b.name]=+b.max||0;
   return {nm:ch.name||'без имени',nm0:ch.name||'без имени',img:ch.mainImage||null,col:ch.color||null,el:E.el||null,cls:E.cls||null,st:+E.stars||0,s,sk,pas,ssp:epSetsOn(ch).filter(x=>x.sp).map(x=>({sp:x.sp,v:+x.spv||0,t:x.times})),rs,rs0:cp(rs)}; }
+/* каталог эффектов Эпик-боя на странице «Эффекты» */
+function epTplDraw(page,q){ const box=$('.epfxgrid',page); if(!box) return; box.innerHTML=''; const KN={buff:'Баффы',debuff:'Дебаффы',sp:'Особые'};
+  const T=EP_FX.filter(f=>!q||f.name.toLowerCase().includes(q)||f.d.toLowerCase().includes(q)); if(!T.length){ box.innerHTML='<div class="faint" style="grid-column:1/-1">Ничего не найдено.</div>'; return; }
+  for(const k of ['buff','debuff','sp']){ const L=T.filter(f=>f.k===k); if(!L.length) continue; box.append(el(`<div class="tiny" style="grid-column:1/-1;margin-top:4px">${KN[k]} · ${L.length}</div>`));
+    for(const f of L) box.append(el(`<div class="tplcard epfxc ${k}"><div class="row" style="gap:8px;align-items:center"><span style="font-size:20px">${f.icon}</span><b>${esc(f.name)}</b><span class="grow"></span>${f.inst?'<span class="epchip" title="срабатывает сразу, без срока">мгновенно</span>':''}${EP_DOT.has(f.id)?'<span class="epchip" title="каждое наложение — отдельный стак">складывается</span>':''}${f.n!=null?`<span class="epchip" title="число по умолчанию; на скилле можно поменять">N = ${f.n}</span>`:''}</div><div class="ds">${esc(f.d)}</div></div>`)); } }
 /* одинаковые бойцы на одной стороне: «Гоблин #1», «Гоблин #2» */
 function epNames(B){ const g={}; for(const u of B.units){ u.nm0??=u.nm; (g[u.ref+':'+u.side]??=[]).push(u); } for(const L of Object.values(g)) L.forEach((u,i)=>{ u.nm=L.length>1?u.nm0+' #'+(i+1):u.nm0; }); }
 function epFl(B,u,v,c){ (B.fl??=[]).push({u:u.id,v:String(v),c}); }
@@ -8213,7 +8219,7 @@ function epApply(B,A,t,r,log){ const f=epFxAny(r.id); if(!f||!t) return; if(t.de
     case 'strip': { const L=(t.fx||[]).filter(e=>e.k==='buff'&&!e.nd).slice(-(+n||1)); t.fx=t.fx.filter(e=>!L.includes(e)); if(L.some(e=>e.id==='barrier')&&!epHas(t,'barrier')) t.bar=0; log.push(`🧹 ${t.nm}: снято баффов — ${L.length}`); break; }
     case 'cdreset': t.cd={}; log.push(`🔄 ${t.nm}: КД скиллов сброшены`); break;
     case 'cdUpD': for(const s of (t.sk||[])) if(+s.ep.cd) t.cd[s.id]=(+t.cd[s.id]||0)+(+n||1); log.push(`⏳ ${t.nm}: КД скиллов +${n}`); break;
-    case 'revive': if(!t.dead) break; if(t.ex){ log.push(`🪦 ${t.nm}: казнён — воскресить нельзя`); break; } t.dead=0; t.fx=[]; t.hp=Math.max(1,Math.round(epUS(t).mhp*(+n||30)/100)); log.push(`🕊️ ${t.nm} воскресает с ${t.hp} ХП`); epFl(B,t,'+'+t.hp,'heal'); break;
+    case 'revive': if(!t.dead) break; if(t.ex){ log.push(`⚰️ ${t.nm}: казнён — воскресить нельзя`); break; } t.dead=0; t.fx=[]; t.hp=Math.max(1,Math.round(epUS(t).mhp*(+n||30)/100)); log.push(`🕊️ ${t.nm} воскресает с ${t.hp} ХП`); epFl(B,t,'+'+t.hp,'heal'); break;
     case 'detonate': epDetonate(B,t,log); break;
     case 'spirit': t.sp=(+t.sp||0)+(+n||1); log.push(`🔥 ${t.nm}: боевой дух +${n}`); break; }
     return; }
@@ -8245,7 +8251,7 @@ function epStrike(B,A,t,P,o,log){ const sa=epUS(A), st=epUS(t); const adv=epElAd
   log.push(`→ ${t.nm}: ${miss?'промах'+(roll!=null?` (d100 ${roll} ≤ ${Math.round(eva-acc)})`:'')+' — половина урона':crit?'КРИТ!':'попадание'}${adv>0?' · элемент сильнее':adv<0?' · элемент слабее':''}`);
   const li=log.length; const r=epHurt(B,t,dmg,log,{src:A,crit}); if(r.dealt) log.splice(li,0,`   ${t.nm}: −${r.dealt} ХП${t.dead?'':` (${t.hp}/${epUS(t).mhp}${t.bar?', барьер '+t.bar:''})`}`);
   const ls=epSsp(A,'lifesteal'); if(ls&&r.dealt){ const h=epHeal(B,A,r.dealt*ls/100,log); if(h) log.push(`🩸 ${A.nm}: вампиризм +${h}`); }
-  const inj=epSsp(A,'injury'); if(inj&&r.dealt&&!t.dead){ t.cut=Math.min(90,(+t.cut||0)+inj); if(t.hp>epUS(t).mhp) t.hp=epUS(t).mhp; log.push(`🩼 ${t.nm}: макс. ХП −${inj}% (травма)`); }
+  const inj=epSsp(A,'injury'); if(inj&&r.dealt&&!t.dead){ t.cut=Math.min(90,(+t.cut||0)+inj); if(t.hp>epUS(t).mhp) t.hp=epUS(t).mhp; log.push(`🦴 ${t.nm}: макс. ХП −${inj}% (травма)`); }
   if(o.st&&r.dealt) for(const c of epLive(B,t.side)) if(c!==t&&epHas(c,'curse')){ log.push(`🕯️ Проклятие: ${c.nm} получает половину`); epHurt(B,c,r.dealt/2,log,{src:A}); }
   if(!t.dead&&!epHas(t,'nocounter')&&(o.depth||0)<3){ if(r.dealt>0&&+st.ctr>0&&epD100()<=+st.ctr) o.ctrQ.push(t); else if(miss&&epSsp(t,'riposte')&&epD100()<=epSsp(t,'riposte')) o.ctrQ.push(t); }
   return {miss,crit,dealt:r.dealt}; }
@@ -8287,7 +8293,7 @@ function epSortIds(B,ids){ return ids.map(id=>epU(B,id)).filter(u=>u&&!u.dead).s
 function epResort(B){ B.queue=epSortIds(B,B.queue||[]); }
 function epStart(B,log){ for(const u of B.units){ u.rs0??=JSON.parse(JSON.stringify(u.rs||{})); Object.assign(u,{bar:0,sp:0,cd:{},fx:[],dead:0,ex:0,once:{},rit:0,sbFree:0,cut:0,lastNext:0,init:0}); u.rs=JSON.parse(JSON.stringify(u.rs0||u.rs||{})); u.hp=epUS(u).mhp; }
   Object.assign(B,{ph:'fight',round:0,souls:0,supCd:{a:0,e:0},extra:[],queue:[],cur:null,win:null}); log.push(`⚔ Бой начался: ${epLive(B,'a').map(u=>u.nm).join(', ')} против ${epLive(B,'e').map(u=>u.nm).join(', ')}`);
-  for(const u of B.units){ const v=epSsp(u,'barrier'); if(v) for(const a of epLive(B,u.side)){ const n=Math.round(epUS(a).mhp*v/100); a.bar=(+a.bar||0)+n; } if(v) log.push(`🫧 ${u.nm} (Потенкция): барьер союзникам ${v}% ХП`); }
+  for(const u of B.units){ const v=epSsp(u,'barrier'); if(v) for(const a of epLive(B,u.side)){ const n=Math.round(epUS(a).mhp*v/100); a.bar=(+a.bar||0)+n; } if(v) log.push(`🔵 ${u.nm} (Потенкция): барьер союзникам ${v}% ХП`); }
   for(const u of B.units) epTrig(B,u,'start',log); epPhase(B,log); }
 function epPhase(B,log){ B.round=(+B.round||0)+1; for(const k of ['a','e']) if(B.supCd&&B.supCd[k]>0) B.supCd[k]--;
   const L=B.units.filter(u=>!u.dead); for(const u of L){ const r=1+Math.floor(Math.random()*4); u.init=r+Math.round(+epUS(u).spd||0); u.ir=r; }
@@ -8339,7 +8345,7 @@ function epUnitHTML(B,u,fl){ const s=epUS(u); const mh=s.mhp, hp=Math.max(0,u.hp
   return `<div class="epu s-${u.side} ${B.cur===u.id?'cur':''} ${u.dead?'dead':''} ${pk?'pk':''} ${pick?'picked':''}" data-u="${u.id}" style="left:${x}%;top:${y}%;--c:${esc(u.col||(u.side==='a'?'#4fb3ff':'#ff6b5e'))}">
     <div class="pw"><div class="por">${u.img?`<img data-img="${esc(u.img)}" data-thumb="1" style="display:none">`:`<span>${esc(initials(u.nm))}</span>`}</div>${el_?`<i class="el" title="${el_[1]}">${el_[2]}</i>`:''}${u.st?`<i class="stars" title="уровень">${'★'.repeat(u.st)}</i>`:''}</div>
     <div class="nm" title="${esc(u.nm+(cl?' · '+cl[1]:''))}">${cl?cl[2]+' ':''}${esc(u.nm)}</div>
-    ${set?`<div class="ppos">${EP_POS.find(p=>p[0]===u.pos)[1]}</div>`:`<div class="hpb"><i style="width:${Math.round(100*hp/mh)}%"></i>${u.bar?`<b style="width:${Math.min(100,Math.round(100*u.bar/mh))}%"></b>`:''}<span>${hp} / ${mh}${u.bar?' · 🫧'+u.bar:''}</span></div>`}
+    ${set?`<div class="ppos">${EP_POS.find(p=>p[0]===u.pos)[1]}</div>`:`<div class="hpb"><i style="width:${Math.round(100*hp/mh)}%"></i>${u.bar?`<b style="width:${Math.min(100,Math.round(100*u.bar/mh))}%"></b>`:''}<span>${hp} / ${mh}${u.bar?' · 🔵'+u.bar:''}</span></div>`}
     <div class="fxs">${(u.fx||[]).map(e=>{ const f=epFxAny(e.id); return f?`<span class="${e.k}" title="${esc(f.name+' — '+f.d+(e.n!=null?' (N='+e.n+')':'')+(e.dur<99?' · ходов: '+e.dur:'')+(e.nd?' · не очищается':''))}">${f.icon}${e.dur<99?`<sub>${e.dur}</sub>`:''}</span>`:''; }).join('')}</div>
     ${set?'':`<div class="meta">${+u.sp?`<span title="боевой дух">🔥 ${u.sp}</span>`:''}${B.ph==='fight'&&!u.dead?`<span title="инициатива этой фазы (1d4 = ${u.ir||'?'} + скорость)">⚡ ${u.init||0}</span>`:''}${Object.entries(u.rs||{}).filter(([k])=>(u.sk||[]).some(s=>s.ep.cost&&s.ep.cost.bar===k)).map(([k,v])=>`<span title="${esc(k)}">${esc(k.slice(0,3))} ${v}</span>`).join('')}</div>`}
     ${(fl||[]).map((f,i)=>`<div class="epfl ${f.c}" style="animation-delay:${i*.22}s">${esc(f.v)}</div>`).join('')}</div>`; }
