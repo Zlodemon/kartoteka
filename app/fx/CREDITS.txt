@@ -1,3 +1,10 @@
-kenney.webp — текстуры частиц из «Particle Pack» (Kenney, www.kenney.nl), лицензия Creative Commons Zero (CC0):
-http://creativecommons.org/publicdomain/zero/1.0/  — можно использовать где угодно, указание автора не обязательно.
-Собраны в один атлас 8×8 по 128 px (белый цвет, прозрачность = яркость) для эффектов Эпик-боя.
+Эффекты Эпик-боя — сторонние материалы (все лежат на самом сайте, база данных не используется):
+
+kenney.webp — текстуры частиц из «Particle Pack» (Kenney, www.kenney.nl), лицензия CC0 (public domain):
+  http://creativecommons.org/publicdomain/zero/1.0/ — собраны в атлас 8×8 по 128 px (белый, прозрачность = яркость).
+
+icons.json — 62 силуэта с game-icons.net (авторы: Lorc, Delapouite, Faithtoken), лицензия CC BY 3.0:
+  https://creativecommons.org/licenses/by/3.0/ — пути SVG без изменений формы, перекрашиваются в цвет эффекта.
+
+lib/pixi-7.4.2.min.js — PixiJS 7.4.2 (https://pixijs.com), лицензия MIT.
+lib/pixi-filters-5.3.0.js — pixi-filters 5.3.0 (https://github.com/pixijs/filters), лицензия MIT.

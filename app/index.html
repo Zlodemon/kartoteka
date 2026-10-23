@@ -606,6 +606,7 @@ body.fight #fightBtn{background:rgba(255,209,102,.2);border-color:rgba(255,209,1
 .epult.band .txt{position:absolute;left:7%;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center}.epult .who{font-size:15px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:#fff;opacity:.85;text-shadow:0 2px 6px #000}
 .epult .sk{font-size:46px;font-weight:900;font-style:italic;line-height:1.05;color:#fff;-webkit-text-stroke:1.5px var(--uc);text-shadow:0 0 18px var(--uc),0 4px 10px #000;white-space:nowrap}
 .epsk .ultm{font-size:12px;margin-left:-2px}
+.epstage>canvas.epgl,.epanst>canvas.epgl{position:absolute;left:0;top:0;z-index:4;pointer-events:none}.epghost{pointer-events:none!important}.epanst .d{z-index:1}
 .epglyph{position:absolute;transform:translate(-50%,-50%);line-height:1;pointer-events:none;white-space:nowrap;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}.epflash{position:absolute;inset:0;pointer-events:none}
 .epanbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.epanbar .q{width:240px}.epanbar .chips{display:flex;gap:5px;flex-wrap:wrap}.epanbar .btn.on,.epanspec .btn.on{border-color:var(--gc,var(--gold));color:var(--gc,var(--gold));background:rgba(255,255,255,.06)}
 .epanspec{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
@@ -2286,6 +2287,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-23',t:'Эпик-бой: эффекты нового уровня и 30 ультимейтов',items:['Эффекты рисуются видеокартой: настоящее свечение, тысячи частиц, тряска и рывки камеры.','Мили-удары переделаны: замах, рывок с остаточными изображениями, замирание в момент удара, светящиеся разрезы.','Стихии теперь разные: земля поднимает пыль и камни с трещинами, лёд разлетается осколками, вода брызгами, тьма закручивается воронкой.','Вместо эмодзи — силуэты: драконы, крылья, черепа, щиты, молоты.','Новая группа «★ Ультимейты» — 30 кинематик: драконы, кровавые пики, разрез мира, чёрная дыра, казнь, феникс, воскрешение, благословение и другие.']},
   {d:'2026-10-23',t:'Эпик-бой: частицы и ультимейты',items:['Все анимации скиллов получили частицы: огонь, дым, искры, молнии, звёзды — у каждой стихии свои.','Галка «⭐ Ультимейт» у скилла: перед ним врезка на весь экран с портретом героя и названием скилла, эффекты вдвое ярче.','Текстуры — бесплатный пак Kenney (CC0), грузятся с самого сайта один раз и не нагружают базу.']},
   {d:'2026-10-23',t:'Эпик-бой: 198 анимаций и музыка',items:['Библиотека из 198 анимаций скиллов: удары, выстрелы, магия 12 стихий, баффы, лечение и дебаффы.','Скиллу анимация выбирается во вкладке «✦ Эпик» → «🎬 Анимация»: галерея, наведи — проиграется, клик — выбрать.','Не атакующие скиллы тоже анимируются: лечение, щиты, проклятия — на каждой цели.','Посмотреть все анимации: Настройки → ✦ Эпик-бой → «🎬 Анимации».','На экране боя у мастера «♫ Музыка»: трек или плейлист YouTube играет у всех; выключается настройкой «🎵 Музыка в бою».']},
   {d:'2026-10-23',t:'Эпик-бой: позиции, анимации, фазы',items:['Вместо скилла можно «⇄ Сменить позицию» — на свободное место или местами с союзником, без его согласия.','У скиллов 10 слотов вместо 4.','Новый бафф «🧛 Вампиризм»: атака лечит на N% от нанесённого урона.','Клик по бойцу в бою — наложить или снять эффект вручную (мастер — любому, игрок — своему).','Анимации ударов по классу: меч, стрела, луч, щит, кинжал, молния; COUNTER красным над контратакующим.','Фаза меняется только по кнопке мастера «⏭ Закончить фазу»; мастер меняет порядок ходов перетаскиванием или кнопкой ⇅.']},
@@ -8171,7 +8173,7 @@ function epSettingsPanel(s){ const E=s.epic||{}; return `<div class="settings ep
     <div class="row" style="gap:8px;align-items:center;margin-top:8px"><span>Константа брони K</span><input id="epK" type="number" min="1" max="10000" value="${+E.defK||100}" style="width:90px"><span class="faint" style="font-size:12px">— при защите = K урон режется вдвое</span></div></div>
   <div class="panel epclsp" style="--sc:#ff8a3d"><h3>Классы <button class="btn sm" id="epClsReset" title="Вернуть бонусы из таблицы">↺ как в таблице</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Прибавки к базе персонажа. Уникальные механики класса описываются в его скиллах.</div><div class="list"></div></div>
   <div class="panel epposp" style="--sc:#7ae0ff"><h3>Позиции</h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Бонус бойцу на позиции и две способности позиции (тратят ход). Числа, эффекты и названия правятся здесь; ↺ — вернуть как в таблице. Игроки видят это на экране боя кнопкой «ℹ Позиции».</div><div class="list"></div></div>
-  <div class="panel epanp" style="--sc:#ff9cf5"><h3>Анимации скиллов</h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Библиотека: ${EP_AN.length} анимаций — наведи на карточку, чтобы посмотреть.</div><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Скиллу анимация выбирается во вкладке «✦ Эпик» → «Основное» → «Анимация». Не выбрана — атака играет анимацию класса (Воин — меч, Рейнджер — стрела, Маг — луч, Рыцарь — щит, Вор — кинжал, Лекарь — молния), поддержка — сияние на союзнике или сглаз на враге. У способностей позиций свои анимации.</div><div class="epangal"></div></div>
+  <div class="panel epanp" style="--sc:#ff9cf5"><h3>Анимации скиллов</h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Библиотека: ${EP_AN.length} анимаций — наведи на карточку, чтобы посмотреть.</div><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Скиллу анимация выбирается во вкладке «✦ Эпик» → «Основное» → «Анимация». Не выбрана — атака играет анимацию класса (Воин — меч, Рейнджер — стрела, Маг — луч, Рыцарь — щит, Вор — кинжал, Лекарь — молния), поддержка — сияние на союзнике или сглаз на враге. У способностей позиций свои анимации. «★ Ультимейты» — кинематики на всё поле: драконы, кровавые пики, разрез мира, казнь, благословение, воскрешение… — им лучше ставить галку «⭐ Ультимейт».</div><div class="faint" style="font-size:11px;margin-bottom:10px">Движок эффектов — PixiJS (MIT), частицы — Kenney Particle Pack (CC0), силуэты — game-icons.net (Lorc, Delapouite, Faithtoken; CC BY 3.0).</div><div class="epangal"></div></div>
   <div class="panel epsetp" style="--sc:#c04be0"><h3>Сеты снаряжения <button class="btn sm" id="epSetAdd">+ Сет</button><button class="btn sm" id="epSetReset" title="Вернуть сеты из таблицы">↺ как в таблице</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Сет собирается из одинаковых вещей в 6 слотах (артефакт не считается). Сет на 2 слота может сработать до трёх раз. Бонус ХП/атаки/защиты — в процентах, если стоит «%».</div><div class="list"></div></div></div>`; }
 function epSettingsBind(page,s){ const on=$('#epOn',page); if(!on) return; const E=()=>(s.epic??={});
   on.onchange=e=>{ E().on=e.target.checked; if(E().on&&s.ruina&&s.ruina.on){ s.ruina.on=false; toast('Руина выключена — вместе с Эпик-боем она не работает'); } touch(s); applyNav(); render(); };
@@ -8299,7 +8301,7 @@ const epNum=(id,k)=>{ const ov=EPS().fx&&EPS().fx[id]&&EPS().fx[id][k]!=null; re
 /* одинаковые бойцы на одной стороне: «Гоблин #1», «Гоблин #2» */
 function epNames(B){ const g={}; for(const u of B.units){ u.nm0??=u.nm; (g[u.ref+':'+u.side]??=[]).push(u); } for(const L of Object.values(g)) L.forEach((u,i)=>{ u.nm=L.length>1?u.nm0+' #'+(i+1):u.nm0; }); }
 /* анимации действия: EPTL — таймлайн текущего действия (сек); B.an — удары и надписи, B.fl — всплывающие числа; d — когда показать */
-let EPTL=0;
+let EPTL=0, EPI=0; // EPI — номер цели в текущем скилле (общие для поля шаги анимации играются только на первой)
 const epT=()=>Math.round(EPTL*100)/100;
 function epFl(B,u,v,c){ (B.fl??=[]).push({u:u.id,v:String(v),c,d:epT()}); }
 function epAn(B,o){ (B.an??=[]).push({...o,d:epT()}); }
@@ -8361,7 +8363,7 @@ function epStrike(B,A,t,P,o,log){ const sa=epUS(A), st=epUS(t); const adv=epElAd
   const mult=1+(adv>0?.1:0)+(mk===2?+epP('mark2','v'):mk?+epP('mark','v'):0)+(+sa.dmg||0);
   let dmg=base*mult*(crit?1+(+sa.cd||0):1)*K/(K+Math.max(0,+st.def||0)); if(miss) dmg*=.5; const cas=epTake(A,'cascade'); if(cas&&!miss) dmg+=+cas.n||0;
   log.push(`→ ${t.nm}: ${miss?'промах'+(roll!=null?` (d100 ${roll} ≤ ${Math.round(eva-acc)})`:'')+' — половина урона':crit?'КРИТ!':'попадание'}${adv>0?' · элемент сильнее':adv<0?' · элемент слабее':''}`);
-  { const an=epAnId(A,P,t); if(an){ epAn(B,{k:'atk',a:A.id,t:t.id,c:A.cls||'',an,...(P.ult?{ult:1}:{})}); EPTL+=epAnHit(an); } }
+  { const an=epAnId(A,P,t); if(an){ epAn(B,{k:'atk',a:A.id,t:t.id,c:A.cls||'',an,...(P.ult?{ult:1}:{}),...(EPI?{sub:1}:{})}); EPTL+=epAnHit(an); } }
   const li=log.length; const r=epHurt(B,t,dmg,log,{src:A,crit}); if(r.dealt) log.splice(li,0,`   ${t.nm}: −${r.dealt} ХП${t.dead?'':` (${t.hp}/${epUS(t).mhp}${t.bar?', барьер '+t.bar:''})`}`);
   const ls=epSsp(A,'lifesteal')+(A.fx||[]).filter(e=>e.id==='vamp').reduce((v,e)=>v+(+e.n||0),0); if(ls&&r.dealt){ const h=epHeal(B,A,r.dealt*ls/100,log); if(h) log.push(`🧛 ${A.nm}: вампиризм +${h}`); }
   const inj=epSsp(A,'injury'); if(inj&&r.dealt&&!t.dead){ t.cut=Math.min(90,(+t.cut||0)+inj); if(t.hp>epUS(t).mhp) t.hp=epUS(t).mhp; log.push(`🦴 ${t.nm}: макс. ХП −${inj}% (травма)`); }
@@ -8385,10 +8387,10 @@ async function epUse(B,A,sk,T,o={}){ const P=sk.ep||{}; const log=o.log; const t
   const rows=[...(P.fx||[]),...(sbOn?(P.sb.fx||[]):[])]; const hits=new Map(); const ctrQ=[];
   /* нулифаер на цели съедает скилл врага целиком */ for(const t of T) if(t.side!==A.side&&epHas(t,'nullify')){ epTake(t,'nullify'); hits.set(t.id,{nul:1}); log.push(`🚫 ${t.nm}: скилл нулифаер — скилл не подействовал`); }
   /* поддержка: анимация на каждой цели (бафф союзнику, дебафф врагу) */
-  if(tp!=='atk'&&T.length){ const t0=EPTL; let tE=t0; T.forEach((t,i)=>{ const an=epAnId(A,P,t); if(!an) return; EPTL=t0+i*.08; epAn(B,{k:'atk',a:A.id,t:t.id,an,...(P.ult?{ult:1}:{})}); tE=Math.max(tE,EPTL+epAnHit(an)); }); EPTL=tE; }
+  if(tp!=='atk'&&T.length){ const t0=EPTL; let tE=t0; T.forEach((t,i)=>{ const an=epAnId(A,P,t); if(!an) return; EPTL=t0+i*.08; epAn(B,{k:'atk',a:A.id,t:t.id,an,...(P.ult?{ult:1}:{}),...(i?{sub:1}:{})}); tE=Math.max(tE,EPTL+epAnHit(an)); }); EPTL=tE; }
   epApplyRows(B,A,rows.filter(r=>r.when==='pre'),T,log,hits);
   if(tp==='atk'){ const t0=EPTL; let tE=t0, i=0; /* по нескольким целям удары почти одновременно */
-    for(const t of T){ if(t.dead||hits.has(t.id)) continue; EPTL=t0+(i++)*.12; const h=epStrike(B,A,t,P,{sbM:sbOn?+P.sb.m||0:0,st:(P.tgt||'e1')==='e1',depth:o.depth||0,ctrQ},log); hits.set(t.id,h); if(h.dealt>0&&!A.dead) epTrig(B,A,'hit',log,{other:t}); tE=Math.max(tE,EPTL); } EPTL=tE; }
+    for(const t of T){ if(t.dead||hits.has(t.id)) continue; EPI=i; EPTL=t0+(i++)*.12; const h=epStrike(B,A,t,P,{sbM:sbOn?+P.sb.m||0:0,st:(P.tgt||'e1')==='e1',depth:o.depth||0,ctrQ},log); hits.set(t.id,h); if(h.dealt>0&&!A.dead) epTrig(B,A,'hit',log,{other:t}); tE=Math.max(tE,EPTL); } EPTL=tE; EPI=0; }
   epApplyRows(B,A,rows.filter(r=>r.when!=='pre'),T,log,hits);
   if(A.side==='a'&&+P.souls){ B.souls=(+B.souls||0)+(+P.souls); log.push(`👻 Души команды +${P.souls} (${B.souls})`); }
   if(+P.spirit){ A.sp=(+A.sp||0)+(+P.spirit); log.push(`🔥 ${A.nm}: боевой дух +${P.spirit} (${A.sp})`); }
@@ -8681,7 +8683,7 @@ function epAnStep(X,k,s,at,p,q,t,c,c2,sg){ const tr=(x,y,extra='')=>`translate($
   case 'sigil': { const R=s.r||40, g=X.sv('g',{}); X.sv('circle',{cx:0,cy:0,r:R,fill:'none',stroke:c,'stroke-width':2.5,style:`filter:drop-shadow(0 0 6px ${c})`},g,1); X.sv('circle',{cx:0,cy:0,r:R*.78,fill:'none',stroke:c2,'stroke-width':1.5,'stroke-dasharray':'6 5'},g,1);
     let d=''; for(let i=0;i<=5;i++){ const a=(i*2%5)/5*Math.PI*2-Math.PI/2; d+=(i?'L':'M')+(Math.cos(a)*R*.78).toFixed(1)+','+(Math.sin(a)*R*.78).toFixed(1); } X.sv('path',{d,fill:'none',stroke:c,'stroke-width':1.8},g,1);
     const y=s.flat?at.y+30:at.y, f=s.flat?'scale(1,.42) ':''; X.run(g,[{transform:tr(at.x,y,f+'rotate(0deg) scale(.2)'),opacity:0},{transform:tr(at.x,y,f+'rotate(100deg) scale(1)'),opacity:1,offset:.3},{transform:tr(at.x,y,f+'rotate(220deg) scale(1)'),opacity:1,offset:.8},{transform:tr(at.x,y,f+'rotate(280deg) scale(1.1)'),opacity:0}],s.dur||.8,t,{e:'ease-out'}); break; }
-  case 'glyph': { const sz=s.sz||40; const mk=(dx,dy,dd)=>{ const n=X.dv('epglyph',s.ch||'✨',at.x+dx,at.y+dy,`font-size:${sz}px`); const m=s.m||'pop';
+  case 'glyph': { if(!s.ch) break; const sz=s.sz||40; const mk=(dx,dy,dd)=>{ const n=X.dv('epglyph',s.ch||'✨',at.x+dx,at.y+dy,`font-size:${sz}px`); const m=s.m||'pop';
       const kf=m==='rise'?[{opacity:0,transform:'translate(-50%,-30%) scale(.6)'},{opacity:1,transform:'translate(-50%,-60%) scale(1.1)',offset:.2},{opacity:1,transform:'translate(-50%,-120%) scale(1)',offset:.7},{opacity:0,transform:'translate(-50%,-170%) scale(1)'}]
         :m==='drop'?[{opacity:0,transform:'translate(-50%,-260%) scale(1)'},{opacity:1,transform:'translate(-50%,-260%)',offset:.05},{opacity:1,transform:'translate(-50%,-50%) scale(1.2,.85)',offset:.4},{opacity:1,transform:'translate(-50%,-60%) scale(1)',offset:.55},{opacity:0,transform:'translate(-50%,-60%) scale(1.3)'}]
         :m==='spin'?[{opacity:0,transform:'translate(-50%,-150%) rotate(0deg) scale(.4)'},{opacity:1,transform:'translate(-50%,-150%) rotate(240deg) scale(1)',offset:.25},{opacity:1,transform:'translate(-50%,-150%) rotate(600deg) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-150%) rotate(720deg) scale(.8)'}]
@@ -8691,7 +8693,7 @@ function epAnStep(X,k,s,at,p,q,t,c,c2,sg){ const tr=(x,y,extra='')=>`translate($
   case 'aura': { const col=s.c||c; X.run(X.sv('ellipse',{cx:0,cy:0,rx:36,ry:12,fill:col,'fill-opacity':.18,stroke:col,'stroke-width':2.5,style:`filter:drop-shadow(0 0 8px ${col})`}),[{transform:tr(at.x,at.y+34,'scale(.3)'),opacity:0},{transform:tr(at.x,at.y+30,'scale(1)'),opacity:1,offset:.3},{transform:tr(at.x,at.y-10,'scale(.8)'),opacity:0}],.9,t,{e:'ease-out'});
     X.run(X.sv('circle',{cx:0,cy:0,r:10,fill:col,style:`filter:blur(6px)`}),[{transform:tr(at.x,at.y,'scale(1)'),opacity:0},{transform:tr(at.x,at.y,'scale(4)'),opacity:.35,offset:.35},{transform:tr(at.x,at.y,'scale(4.4)'),opacity:0}],.9,t);
     for(let i=0;i<8;i++){ const x=at.x+(epRnd(i)-.5)*64; X.run(X.sv('circle',{cx:0,cy:0,r:3,fill:i%2?col:c2}),[{transform:tr(x,at.y+34),opacity:0},{transform:tr(x,at.y+20),opacity:1,offset:.2},{transform:tr(x,at.y-50-epRnd(i+5)*20),opacity:0}],.85,t+i*.05,{e:'ease-out'}); } break; }
-  case 'rise': for(let i=0;i<(s.n||6);i++){ const x=(epRnd(i+2)-.5)*70, y0=at.y+20, y1=at.y-50-epRnd(i+4)*30; const n=s.ch?X.dv('epglyph',s.ch,at.x+x,y0,`font-size:${s.sz||20}px`):X.sv('circle',{cx:0,cy:0,r:s.sz||4,fill:'none',stroke:i%2?c:c2,'stroke-width':2});
+  case 'rise': s={...s,ch:''}; for(let i=0;i<(s.n||6);i++){ const x=(epRnd(i+2)-.5)*70, y0=at.y+20, y1=at.y-50-epRnd(i+4)*30; const n=s.ch?X.dv('epglyph',s.ch,at.x+x,y0,`font-size:${s.sz||20}px`):X.sv('circle',{cx:0,cy:0,r:s.sz||4,fill:'none',stroke:i%2?c:c2,'stroke-width':2});
       X.run(n,s.ch?[{opacity:0,transform:'translate(-50%,-50%)'},{opacity:1,transform:'translate(-50%,-150%)',offset:.25},{opacity:0,transform:`translate(-50%,${(y1-y0)/((s.sz||20))*100-50}%)`}]:[{transform:tr(at.x+x,y0),opacity:0},{transform:tr(at.x+x,y0-14),opacity:1,offset:.25},{transform:tr(at.x+x,y1),opacity:0}],.9,t+i*.07,{e:'ease-out'}); } break;
   case 'swirl': for(let i=0;i<(s.n||10);i++){ const a0=i/(s.n||10)*360, R=s.r||70; const n=X.sv('circle',{cx:0,cy:0,r:3.5,fill:i%2?c:c2,style:`filter:drop-shadow(0 0 4px ${c})`}); const kf=[]; for(let j=0;j<=6;j++){ const f=j/6; kf.push({transform:tr(at.x,at.y,`rotate(${a0+f*300}deg) translate(${R*(1-f)}px,0)`),opacity:j===0?0:j===6?0:1}); } X.run(n,kf,.7,t+i*.02,{e:'ease-in'}); } break;
   case 'spikes': for(let i=0;i<(s.n||5);i++){ const x=at.x+((i/((s.n||5)-1||1))-.5)*84, h=.6+epRnd(i+11)*.6; const n=X.sv('path',{d:'M-7,0 L0,-36 L7,0 Z',fill:c,stroke:c2,'stroke-width':1.5,style:`filter:drop-shadow(0 0 5px ${c})`}); X.run(n,[{transform:tr(x,at.y+40,'scale(1,0)'),opacity:1},{transform:tr(x,at.y+40,`scale(1,${h*1.15})`),opacity:1,offset:.2},{transform:tr(x,at.y+40,`scale(1,${h})`),opacity:1,offset:.75},{transform:tr(x,at.y+40,'scale(1,0)'),opacity:0}],.8,t+i*.03,{e:'ease-out'}); } break;
@@ -8796,19 +8798,273 @@ function epUlt(X,el_,u,a,d){ const col=(EP_EL.find(e=>e[0]===(u&&u.el))||[])[3]|
   const cy=X.H/2; epEmit(X,{x:X.W/2,y:cy,t:d+.1,n:46,tx:['trace_01','trace_04'],c:['#ffffff',col],w:X.W,h:X.H*.5,sz:[60,120],sp:0,vx:-1400,life:[.25,.45],dt:[0,1.1],rot:Math.PI/2,sx:.35,al:[.4,.9]});
   epEmit(X,{x:X.W*.62,y:cy,t:d+.2,n:24,tx:['star_04','flare_01','star_06'],c:[col,'#ffffff'],w:X.W*.6,h:X.H*.4,sz:[14,30],sp:[10,40],life:[.4,.8],dt:[0,1]});
   X.run(X.dv('epflash','',0,0,'background:#ffffff'),[{opacity:0},{opacity:.55,offset:.3},{opacity:0}],.3,d+D-.12); }
+/* ========== ЭФФЕКТЫ НА WebGL (PixiJS 7 + pixi-filters, MIT): свечение (bloom), частицы, силуэты game-icons.net (CC BY 3.0) ==========
+   Библиотеки и иконки лежат на самом сайте (fx/lib, fx/icons.json) и грузятся при первом бое — база не участвует.
+   Один холст Pixi на всё приложение: при каждом проигрывании он переезжает в текущую сцену боя или карточку галереи.
+   Всё считается от времени (как и раньше): объект сцены = {a,b — секунды действия, d — спрайт, u(f,возраст,t)} */
+const EPG={st:0,p:null,ic:null,app:null,T:null,S:null};
+for(const k in EP_KIT) EP_KIT[k].st=k; // стиль взрыва = стихия набора
+function epGLLoad(){ if(EPG.p) return EPG.p; const js=src=>new Promise((ok,no)=>{ const s=document.createElement('script'); s.src=src; s.onload=ok; s.onerror=no; document.head.append(s); });
+  EPG.p=(async()=>{ try{ epTxLoad(); if(!window.PIXI) await js('fx/lib/pixi-7.4.2.min.js'); if(!(PIXI.filters&&PIXI.filters.AdvancedBloomFilter)) await js('fx/lib/pixi-filters-5.3.0.js'); EPG.ic=await (await fetch('fx/icons.json?v=1')).json();
+      const c=document.createElement('canvas'); if(!(c.getContext('webgl2')||c.getContext('webgl'))) throw new Error('нет WebGL'); EPG.st=1; }catch(e){ console.warn('Эпик: эффекты WebGL недоступны —',e&&e.message); EPG.st=-1; } })(); return EPG.p; }
+const epHx=c=>{ c=String(c||'#ffffff'); if(c[0]==='#') c=c.slice(1); if(c.length===3) c=c.split('').map(x=>x+x).join(''); const v=parseInt(c.slice(0,6),16); return isNaN(v)?0xffffff:v; };
+/* текстуры: рисуются один раз на canvas белым — цвет даёт tint */
+function epGLTex(){ if(EPG.T) return EPG.T; const P=PIXI, T={}; const cv=(w,h,f)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d'); f(g,w,h); return P.Texture.from(c); };
+  const rad=(g,w,stops)=>{ const r=g.createRadialGradient(w/2,w/2,0,w/2,w/2,w/2); for(const [o,a] of stops) r.addColorStop(o,`rgba(255,255,255,${a})`); g.fillStyle=r; g.fillRect(0,0,w,w); };
+  T.glow=cv(128,128,(g,w)=>rad(g,w,[[0,1],[.2,.75],[.5,.25],[1,0]]));
+  T.soft=cv(128,128,(g,w)=>rad(g,w,[[0,.6],[.5,.2],[1,0]]));
+  T.dot=cv(32,32,(g,w)=>rad(g,w,[[0,1],[.5,1],[.75,.4],[1,0]]));
+  T.beam=cv(256,64,(g,w,h)=>{ const v=g.createLinearGradient(0,0,0,h); v.addColorStop(0,'rgba(255,255,255,0)'); v.addColorStop(.35,'rgba(255,255,255,.5)'); v.addColorStop(.5,'rgba(255,255,255,1)'); v.addColorStop(.65,'rgba(255,255,255,.5)'); v.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=v; g.fillRect(0,0,w,h);
+    g.globalCompositeOperation='destination-in'; const u=g.createLinearGradient(0,0,w,0); u.addColorStop(0,'rgba(0,0,0,0)'); u.addColorStop(.06,'#000'); u.addColorStop(.94,'#000'); u.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=u; g.fillRect(0,0,w,h); });
+  T.cres=cv(256,256,g=>{ g.lineCap='round'; for(let i=0;i<=70;i++){ const f=i/70, a0=-1.9+f*3.4; g.strokeStyle=`rgba(255,255,255,${Math.pow(f,1.4)})`; g.lineWidth=1+20*Math.pow(f,2.6); g.beginPath(); g.arc(128,128,96,a0,a0+.06); g.stroke(); } });
+  T.spike=cv(64,256,(g,w,h)=>{ const v=g.createLinearGradient(0,h,0,0); v.addColorStop(0,'rgba(255,255,255,.55)'); v.addColorStop(.7,'rgba(255,255,255,.95)'); v.addColorStop(1,'#fff'); g.fillStyle=v; g.beginPath(); g.moveTo(6,h); g.lineTo(30,4); g.lineTo(34,4); g.lineTo(58,h); g.closePath(); g.fill(); g.fillStyle='rgba(255,255,255,.5)'; g.beginPath(); g.moveTo(32,8); g.lineTo(46,h); g.lineTo(34,h); g.closePath(); g.fill(); });
+  T.shard=cv(64,32,g=>{ g.fillStyle='#fff'; g.beginPath(); g.moveTo(62,16); g.lineTo(20,2); g.lineTo(2,16); g.lineTo(20,30); g.closePath(); g.fill(); g.fillStyle='rgba(255,255,255,.55)'; g.beginPath(); g.moveTo(62,16); g.lineTo(20,2); g.lineTo(26,16); g.closePath(); g.fill(); });
+  T.rock=cv(64,64,g=>{ g.fillStyle='#9a9a9a'; g.beginPath(); [[8,22],[22,6],[46,8],[60,26],[54,50],[30,60],[8,48]].forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y)); g.closePath(); g.fill(); g.fillStyle='#e6e6e6'; g.beginPath(); g.moveTo(22,6); g.lineTo(46,8); g.lineTo(36,28); g.lineTo(8,22); g.closePath(); g.fill(); g.fillStyle='#5a5a5a'; g.beginPath(); g.moveTo(60,26); g.lineTo(54,50); g.lineTo(30,60); g.lineTo(36,28); g.closePath(); g.fill(); });
+  T.arrow=cv(96,32,g=>{ g.fillStyle='#fff'; g.fillRect(8,14,64,4); g.beginPath(); g.moveTo(94,16); g.lineTo(68,5); g.lineTo(72,16); g.lineTo(68,27); g.closePath(); g.fill(); g.fillRect(4,8,10,4); g.fillRect(4,20,10,4); });
+  T.knife=cv(64,24,g=>{ g.fillStyle='#fff'; g.beginPath(); g.moveTo(62,12); g.lineTo(22,4); g.lineTo(22,20); g.closePath(); g.fill(); g.fillStyle='rgba(255,255,255,.6)'; g.fillRect(4,8,18,8); });
+  T.bullet=cv(64,16,g=>{ const u=g.createLinearGradient(0,0,64,0); u.addColorStop(0,'rgba(255,255,255,0)'); u.addColorStop(.7,'rgba(255,255,255,.8)'); u.addColorStop(1,'#fff'); g.fillStyle=u; g.beginPath(); g.ellipse(32,8,31,5,0,0,7); g.fill(); });
+  T.star=cv(64,64,g=>{ g.fillStyle='#fff'; g.beginPath(); for(let i=0;i<8;i++){ const a=i*Math.PI/4, r=i%2?9:30; g.lineTo(32+Math.cos(a)*r,32+Math.sin(a)*r); } g.closePath(); g.fill(); });
+  T.drop=cv(48,32,g=>{ g.fillStyle='#fff'; g.beginPath(); g.moveTo(46,16); g.bezierCurveTo(30,2,4,4,4,16); g.bezierCurveTo(4,28,30,30,46,16); g.fill(); });
+  T.plus=cv(64,64,g=>{ g.fillStyle='#fff'; g.beginPath(); g.roundRect(24,6,16,52,6); g.roundRect(6,24,52,16,6); g.fill(); });
+  T.bubble=cv(256,256,(g,w)=>{ rad(g,w,[[0,0],[.72,.08],[.92,.55],[.98,.9],[1,0]]); g.fillStyle='rgba(255,255,255,.45)'; g.beginPath(); g.ellipse(88,80,34,18,-.6,0,7); g.fill(); });
+  T.vign=cv(256,256,(g,w)=>rad(g,w,[[0,0],[.55,0],[.85,.55],[1,.95]]));
+  T.ring=cv(256,256,g=>{ g.strokeStyle='#fff'; g.lineWidth=10; g.beginPath(); g.arc(128,128,112,0,7); g.stroke(); g.globalAlpha=.4; g.lineWidth=24; g.beginPath(); g.arc(128,128,108,0,7); g.stroke(); });
+  T.sigil=cv(256,256,g=>{ g.strokeStyle='#fff'; g.lineWidth=5; g.beginPath(); g.arc(128,128,120,0,7); g.stroke(); g.lineWidth=2; g.beginPath(); g.arc(128,128,104,0,7); g.stroke(); g.beginPath(); g.arc(128,128,70,0,7); g.stroke();
+    for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; g.save(); g.translate(128+Math.cos(a)*112,128+Math.sin(a)*112); g.rotate(a); g.fillStyle='#fff'; g.fillRect(-2,-5,4,10); if(i%3===0) g.fillRect(-5,-2,10,4); g.restore(); }
+    g.lineWidth=3; g.beginPath(); for(let i=0;i<=5;i++){ const a=(i*2%5)/5*Math.PI*2-Math.PI/2; g.lineTo(128+Math.cos(a)*104,128+Math.sin(a)*104); } g.stroke(); g.beginPath(); for(let i=0;i<=6;i++){ const a=i/6*Math.PI*2; g.lineTo(128+Math.cos(a)*70,128+Math.sin(a)*70); } g.stroke(); });
+  T.reticle=cv(128,128,g=>{ g.strokeStyle='#fff'; g.lineWidth=4; g.beginPath(); g.arc(64,64,40,0,7); g.stroke(); g.lineWidth=3; for(const [a,b,c,d] of [[64,4,64,30],[64,98,64,124],[4,64,30,64],[98,64,124,64]]){ g.beginPath(); g.moveTo(a,b); g.lineTo(c,d); g.stroke(); } g.beginPath(); g.arc(64,64,4,0,7); g.fillStyle='#fff'; g.fill(); });
+  T.scale=cv(64,64,(g,w)=>{ rad(g,w,[[0,1],[.5,.85],[.8,.4],[1,0]]); g.fillStyle='rgba(255,255,255,.9)'; g.beginPath(); g.moveTo(10,32); g.quadraticCurveTo(32,6,54,32); g.quadraticCurveTo(32,20,10,32); g.fill(); });
+  T.ic={}; T.icon=n=>{ if(T.ic[n]) return T.ic[n]; const d=EPG.ic&&EPG.ic[n]; if(!d) return T.glow; return T.ic[n]=cv(256,256,g=>{ g.scale(.5,.5); g.fillStyle='#fff'; g.fill(new Path2D(d[0])); }); };
+  T.kc={}; T.kn=n=>{ if(T.kc[n]) return T.kc[n]; const i=EP_TX.indexOf(n); if(i<0||!EPX.ok) return T.glow; T.kb??=P.BaseTexture.from(EPX.img); return T.kc[n]=new P.Texture(T.kb,new P.Rectangle((i%8)*128,(i>>3)*128,128,128)); };
+  T.get=n=>{ if(!n) return T.glow; if(n.startsWith('ic:')) return T.icon(n.slice(3)); if(T[n]&&T[n] instanceof P.Texture) return T[n]; return T.kn(n); };
+  return EPG.T=T; }
+function epGLApp(){ if(EPG.app) return EPG.app; const app=new PIXI.Application({backgroundAlpha:0,antialias:true,resolution:Math.min(2,window.devicePixelRatio||1),autoDensity:true,width:300,height:200});
+  app.view.className='epgl'; app.ticker.stop(); app.ticker.add(epGLTick); EPG.app=app; return app; }
+/* сцена: холст переезжает в host, root — контейнер с bloom; sc — масштаб (мини-сцена галереи) */
+function epGLScene(host,W,H,ago,sc=1){ const app=epGLApp(), T=epGLTex(); if(EPG.S&&!EPG.S.dead){ EPG.S.dead=1; EPG.S.root.destroy({children:true}); }
+  if(app.view.parentNode!==host) host.append(app.view); app.renderer.resize(W,H); const root=new PIXI.Container(); root.scale.set(sc); app.stage.addChild(root);
+  try{ const F=PIXI.filters; root.filters=[new F.AdvancedBloomFilter({threshold:.55,bloomScale:.8,brightness:1,blur:6,quality:4})]; root.filterArea=app.screen; }catch{}
+  const S={app,root,T,W:W/sc,H:H/sc,sc,ago,t0:performance.now(),objs:[],end:0,sd:1,m:1,host,lay:null};
+  S.ob=(a,b,d,u,par=root)=>{ d.visible=false; par.addChild(d); S.objs.push({a,b,d,u}); if(b>S.end) S.end=b; return d; };
+  S.spr=(tex,c,bl)=>{ const s=new PIXI.Sprite(typeof tex==='string'?T.get(tex):tex); s.anchor.set(.5); s.tint=epHx(c); s.blendMode=bl==='n'?PIXI.BLEND_MODES.NORMAL:PIXI.BLEND_MODES.ADD; return s; };
+  S.R=()=>{ S.sd=(S.sd*16807)%2147483647; return (S.sd-1)/2147483646; };
+  EPG.S=S; app.ticker.start(); return S; }
+function epGLTick(){ const S=EPG.S, app=EPG.app; if(!S||S.dead){ app.ticker.stop(); return; } const t=S.ago+(performance.now()-S.t0)/1000;
+  for(const o of S.objs){ if(t<o.a||t>o.b){ if(o.d.visible) o.d.visible=false; continue; } o.d.visible=true; try{ o.u(Math.min(1,(t-o.a)/Math.max(.001,o.b-o.a)),t-o.a,t); }catch(e){ o.b=-1; } }
+  if(t>S.end+.2||!S.host.isConnected){ S.dead=1; S.root.destroy({children:true}); app.ticker.stop(); app.render(); } }
+/* огибающая прозрачности: появление fi, исчезание с fo (доли жизни) */
+const epEnv=(f,fi=.12,fo=.5)=>(f<fi?f/fi:1)*(f>fo?Math.max(0,1-(f-fo)/(1-fo)):1);
+/* частицы: те же параметры, что у epEmit; al — повернуть по скорости (штрихи) */
+function epGLEmit(S,o){ const n=Math.round((o.n||1)*(S.m||1)*(S.pq||1)); const R=S.R, pk=v=>Array.isArray(v)?v[(R()*v.length)|0]:v, rg=(v,d)=>{ const x=v??d; return Array.isArray(x)?x[0]+(x[1]-x[0])*R():x; };
+  for(let i=0;i<n;i++){ const a=rg(o.ang,[0,360])*Math.PI/180, sp=rg(o.sp,60), sz=rg(o.sz,30), tx=pk(o.tx||'glow'); const tex=S.T.get(tx); const tw=tex.width||128;
+    const p={t:o.t+rg(o.dt,0),life:rg(o.life,.6),x:o.x+(R()-.5)*(o.w||0),y:o.y+(R()-.5)*(o.h||0),vx:Math.cos(a)*sp+(o.vx||0),vy:Math.sin(a)*sp+(o.vy||0),ax:o.ax||0,ay:o.ay||0,dr:o.dr||0,s0:sz*(o.g0??1),s1:sz*(o.g1??1.5),al:rg(o.al,1),fi:o.fi??.12,fo:o.fo??.45,r:o.rot===true?R()*6.28:(o.rot||0),vr:o.vr?(R()-.5)*o.vr:0,sx:o.sx||1};
+    const s=S.spr(tex,pk(o.c||'#ffffff'),o.bl); S.ob(p.t,p.t+p.life,s,(f,ag)=>{ const e=p.dr?(1-Math.exp(-p.dr*ag))/p.dr:ag; s.x=p.x+p.vx*e+.5*p.ax*ag*ag; s.y=p.y+p.vy*e+.5*p.ay*ag*ag; const k=(p.s0+(p.s1-p.s0)*f)/tw; s.scale.set(k*p.sx,k); s.alpha=Math.min(1,p.al*epEnv(f,p.fi,p.fo));
+      if(o.align){ const d2=p.dr?Math.exp(-p.dr*ag):1; s.rotation=Math.atan2(p.vy*d2+p.ay*ag,p.vx*d2+p.ax*ag)+Math.PI/2; } else s.rotation=p.r+p.vr*ag; }); } }
+/* один спрайт с ключевыми кадрами: kf(f) → {x,y,s|sx,sy,r,a} */
+function epGLOne(S,tex,c,a,b,kf,bl){ const s=S.spr(tex,c,bl); const tw=s.texture.width||128; S.ob(a,b,s,(f,ag,t)=>{ const k=kf(f,ag,t); s.x=k.x; s.y=k.y; const sc=(k.s??1); s.scale.set((k.sx??sc)*(k.w?k.w/tw:1),(k.sy??sc)*(k.h?k.h/(s.texture.height||tw):1)); s.rotation=k.r||0; s.alpha=k.a??1; if(k.c) s.tint=epHx(k.c); }); return s; }
+/* ломаная молния (перерисовка ~30 раз в секунду) */
+function epGLBolt(S,x1,y1,x2,y2,a,b,c,w=5,J=30){ const g=new PIXI.Graphics(); S.ob(a,b,g,(f,ag)=>{ const fr=Math.floor(ag*30); g.clear(); const n=Math.max(5,Math.round(Math.hypot(x2-x1,y2-y1)/26)), nx=-(y2-y1), ny=x2-x1, l=Math.hypot(nx,ny)||1; const pts=[]; let sd=fr*977+((x1*13+y2*7)|0); const R=()=>{ sd=(sd*16807)%2147483647; return (sd-1)/2147483646; };
+    for(let i=0;i<=n;i++){ const t=i/n, j=(i&&i<n)?(R()-.5)*J:0; pts.push([x1+(x2-x1)*t+nx/l*j,y1+(y2-y1)*t+ny/l*j]); } const al=(fr%3===1?.35:1)*(1-f*.6);
+    for(const [ww,cc] of [[w*2.2,c],[w*.5,'#ffffff']]){ g.lineStyle(ww,epHx(cc),al); g.moveTo(pts[0][0],pts[0][1]); for(const p of pts) g.lineTo(p[0],p[1]); } }); g.blendMode=PIXI.BLEND_MODES.ADD; return g; }
+/* полноэкранные слои: затемнение, виньетка, вспышка */
+function epGLFull(S,a,b,c,amax,kind){ const tex=kind==='vign'?S.T.vign:PIXI.Texture.WHITE; const s=S.spr(tex,c,kind==='flash'?'':'n'); s.anchor.set(0); S.ob(a,b,s,f=>{ s.x=0; s.y=0; s.width=S.W; s.height=S.H; s.alpha=amax*epEnv(f,kind==='flash'?.2:.15,kind==='flash'?.25:.75); }); return s; }
+/* взрыв по стихии набора X.K.st — главное, что делает стихии разными */
+function epGLBoom(S,x,y,r,t,K,c){ const E=o=>epGLEmit(S,o), st=K.st||'steel', kc=K.c;
+  E({x,y,t,n:1,tx:'glow',c:'#ffffff',sz:r*2.2,g0:.3,g1:1.1,life:.18,sp:0,fi:.05,fo:.2,al:.75}); E({x,y,t,n:1,tx:'glow',c:kc[0],sz:r*3.4,g0:.4,g1:1.3,life:.45,sp:0,fi:.08,fo:.3,al:.6});
+  E({x,y,t,n:1,tx:'ring',c:kc[0],sz:r*.6,g1:4.2,life:.42,sp:0,fo:.25,al:.9});
+  const sparks=n=>E({x,y,t,n,tx:['trace_01','trace_04'],c:kc,sz:[r*.5,r*.9],sp:[260,520],dr:3.2,life:[.3,.55],g1:.5,sx:.35,align:1,ay:K.grav?400:0});
+  if(st==='fire'){ E({x,y,t,n:12+r/5,tx:['fire_01','fire_02','flame_01','flame_03','scorch_01'],c:kc,sz:[r*1.1,r*2.2],sp:[40,180],dr:3,life:[.55,1],g0:.4,g1:1.7,rot:true,vr:3,ay:-120}); E({x,y,t:t+.05,n:14,tx:'star_04',c:['#ffd166','#ff7a3d'],sz:[10,18],sp:[120,320],dr:2.2,life:[.6,1.1],ay:-160,g1:.4}); E({x,y,t:t+.1,n:6,tx:['smoke_03','smoke_05','smoke_07'],c:'#2a2320',bl:'n',sz:[r*1.4,r*2.2],sp:[15,50],dr:1.5,life:[1,1.6],g1:2,al:[.45,.65],ay:-50,rot:true,vr:1,fo:.3}); E({x,y:y+30,t:t+.05,n:1,tx:'scorch_02',c:'#1a0f08',bl:'n',sz:r*2.2,g0:.6,g1:1,life:1.4,sp:0,al:.7,fo:.6,rot:true}); }
+  else if(st==='earth'){ E({x,y:y+34,t,n:10,tx:['smoke_04','smoke_05','smoke_03'],c:'#6b5236',bl:'n',w:r,sz:[r*1.2,r*1.8],sp:[60,160],ang:[150,210],dr:2,life:[.8,1.3],g1:1.8,al:[.6,.85],sx:1.6,rot:0,fo:.4}); E({x,y:y+34,t,n:10,tx:['smoke_04','smoke_05'],c:'#6b5236',bl:'n',w:r,sz:[r*1.2,r*1.8],sp:[60,160],ang:[-30,30],dr:2,life:[.8,1.3],g1:1.8,al:[.6,.85],sx:1.6,fo:.4});
+    E({x,y,t,n:14,tx:'rock',c:['#a07a4a','#8a6a3a','#c8a070'],bl:'n',sz:[r*.25,r*.55],sp:[180,420],ang:[200,340],ay:1100,life:[.6,1],rot:true,vr:10,fo:.8,g1:1}); epGLCrack(S,x,y+34,r*1.8,t,'#2a1a0c','#ffb070'); epGLShake(S,t,1.4); }
+  else if(st==='ice'){ E({x,y,t,n:16,tx:'shard',c:['#e8fbff','#8fe3ff','#5ec8ff'],sz:[r*.4,r*.8],sp:[200,420],dr:2.5,life:[.5,.8],align:1,g1:.8}); E({x,y,t,n:8,tx:['star_06','star_08'],c:kc,sz:[r*.5,r*.9],sp:[20,80],life:[.4,.7],g1:.4}); E({x,y,t:t+.05,n:6,tx:'smoke_09',c:'#cfefff',sz:[r*1.5,r*2.2],sp:[10,40],life:[.8,1.2],al:.4,g1:1.8,rot:true}); E({x,y,t,n:1,tx:'ic:snowflake',c:'#e8fbff',sz:r*1.3,g0:.5,g1:1.3,life:.6,sp:0,vr:2,fo:.3}); }
+  else if(st==='water'){ E({x,y,t,n:22,tx:'drop',c:kc,sz:[r*.2,r*.45],sp:[180,400],ang:[200,340],ay:900,life:[.5,.9],align:1,g1:1,fo:.7}); for(let i=0;i<3;i++) E({x,y:y+34,t:t+i*.1,n:1,tx:'ring',c:kc[1],sz:r*.6,g1:4,sx:1,life:.6,sp:0,al:.8}); E({x,y,t,n:8,tx:['circle_05','smoke_10'],c:kc,sz:[r*.8,r*1.4],sp:[30,90],life:[.5,.8],g1:1.6}); }
+  else if(st==='wind'){ for(let i=0;i<10;i++){ const a0=S.R()*6.28; E({x:x+Math.cos(a0)*r*.6,y:y+Math.sin(a0)*r*.4,t:t+i*.02,n:1,tx:['twirl_01','twirl_02','twirl_03'],c:kc,sz:r*1.6,g0:.6,g1:1.4,life:.6,sp:0,rot:a0,vr:14}); } E({x,y,t,n:14,tx:'trace_04',c:kc,sz:[r*.6,r*1],sp:[200,380],dr:2,life:[.35,.6],align:1,sx:.4}); }
+  else if(st==='light'){ for(let i=0;i<10;i++){ const a0=i/10*Math.PI*2+S.R()*.3; epGLOne(S,'beam','#fff3b0',t,t+.5,f=>({x:x+Math.cos(a0)*r*.9*f*1.6,y:y+Math.sin(a0)*r*.9*f*1.6,w:r*2.6*(.4+f),h:14,r:a0,a:epEnv(f,.1,.4)})); } E({x,y,t,n:12,tx:['star_06','star_09','flare_01'],c:kc,sz:[r*.5,r*1.1],sp:[60,220],dr:2,life:[.4,.8],g1:.4}); }
+  else if(st==='dark'||st==='void'){ E({x,y,t:t-.18,n:16,tx:'glow',c:kc,sz:[14,26],sp:0,vx:0,vy:0,life:.18,w:r*3,h:r*3,g1:.2}); E({x,y,t,n:10,tx:['smoke_07','smoke_09','smoke_10'],c:st==='void'?'#05060c':'#140a20',bl:'n',sz:[r*1.3,r*2.2],sp:[40,140],dr:2,life:[.8,1.3],g0:.4,g1:1.9,al:[.7,.9],rot:true,vr:2}); E({x,y,t,n:8,tx:['twirl_01','twirl_03'],c:kc,sz:[r*1.2,r*2],sp:[10,40],life:[.5,.8],rot:true,vr:10,g1:1.5}); E({x,y,t,n:1,tx:'glow',c:'#000000',bl:'n',sz:r*1.6,g0:.2,g1:1.1,life:.6,sp:0,al:.9,fo:.5}); }
+  else if(st==='storm'){ for(let i=0;i<6;i++){ const a0=S.R()*6.28, L=r*(1.2+S.R()); epGLBolt(S,x,y,x+Math.cos(a0)*L,y+Math.sin(a0)*L,t+i*.03,t+.3+i*.03,kc[0],3,22); } E({x,y,t,n:4,tx:['spark_01','spark_02'],c:kc,sz:[r*1.6,r*2.4],sp:0,life:[.2,.35],rot:true,fo:.3}); epGLFull(S,t,t+.18,'#dff8ff',.1,'flash'); }
+  else if(st==='poison'){ E({x,y,t,n:16,tx:'circle_02',c:kc,sz:[10,24],w:r,h:r*.6,sp:[20,60],vy:-70,life:[.7,1.2],g1:1.3,al:.9}); E({x,y,t,n:8,tx:['smoke_02','smoke_04','smoke_05'],c:['#4f8f2a','#6fbf3a'],sz:[r*1.3,r*2],sp:[15,45],life:[1.2,1.8],al:[.5,.7],g1:1.8,rot:true,vr:.6,fo:.5}); }
+  else if(st==='arcane'){ E({x,y,t,n:1,tx:'sigil',c:kc[0],sz:r*2.4,g0:.4,g1:1.2,life:.7,sp:0,vr:3,fo:.4}); E({x,y,t,n:18,tx:['star_01','star_04','magic_05'],c:kc,sz:[12,26],sp:[100,300],dr:2.5,life:[.5,.9],g1:.4}); }
+  else if(st==='blood'){ E({x,y,t,n:24,tx:'drop',c:['#ff3b4f','#b3001b','#7a0010'],sz:[r*.18,r*.4],sp:[200,460],ang:[190,350],ay:1000,life:[.5,.9],align:1,g1:1,fo:.7}); E({x,y:y+30,t:t+.15,n:4,tx:['scorch_03','dirt_02'],c:'#5a0008',bl:'n',w:r,sz:[r*.6,r*1.1],sp:0,life:1.2,al:.8,rot:true,fo:.6}); }
+  else { E({x,y,t,n:8,tx:['star_06','flare_01','scorch_01'],c:kc,sz:[r*.8,r*1.5],sp:[40,160],dr:3,life:[.35,.6],g0:.5,g1:1.5,rot:true}); }
+  if(st!=='storm'&&st!=='earth') sparks(10); }
+/* трещины по земле из точки */
+function epGLCrack(S,x,y,R,t,c,c2){ const g=new PIXI.Graphics(); let sd=((x*7+y*13)|0)+5; const Rn=()=>{ sd=(sd*16807)%2147483647; return (sd-1)/2147483646; }; const br=[];
+  for(let i=0;i<7;i++){ const a=Math.PI+i/6*Math.PI+(Rn()-.5)*.3; const pts=[[0,0]]; let px=0,py=0; for(let j=0;j<6;j++){ px+=Math.cos(a+(Rn()-.5)*.8)*R/6; py+=Math.sin(a+(Rn()-.5)*.8)*R/6*.45; pts.push([px,py]); } br.push(pts); }
+  S.ob(t,t+1.3,g,f=>{ g.clear(); const n=Math.min(1,f*5); for(const [w,cc,al] of [[5,c,.9],[1.6,c2,.8*(1-f)]]){ g.lineStyle(w,epHx(cc),al*(f>.7?(1-f)/.3:1)); for(const pts of br){ const m=Math.max(1,Math.round(pts.length*n)); g.moveTo(x,y); for(let j=1;j<m;j++) g.lineTo(x+pts[j][0],y+pts[j][1]); } } }); }
+/* тряска и «рывок камеры» — двигается сама сцена боя (DOM), как раньше */
+function epGLShake(S,t,k=1){ const st=S.stage; if(!st) return; const m=6*k*S.sc; try{ st.animate([{transform:'translate(0,0)'},{transform:`translate(${m}px,${-m/2}px)`},{transform:`translate(${-m}px,${m/2}px)`},{transform:`translate(${m/2}px,${m/2}px)`},{transform:`translate(${-m/2}px,${-m/2}px)`},{transform:'translate(0,0)'}],{duration:340,delay:(t-S.ago)*1000,fill:'none'}); }catch{} }
+function epGLPunch(S,t,k=1.03){ const st=S.stage; if(!st) return; try{ st.animate([{transform:'scale(1)'},{transform:`scale(${k})`,offset:.25},{transform:'scale(1)'}],{duration:260,delay:(t-S.ago)*1000,fill:'none',easing:'ease-out'}); }catch{} }
+/* значки вместо эмодзи (силуэты game-icons) */
+const EP_EMO={'🛡️':'shield','🔨':'hammer','👊':'fist','🦶':'mfist','💢':'skull2','💥':'',"⚔️":'swords','💨':'tornado','✴️':'sparkles','📢':'lion','🕊️':'wings','↩️':'shieldbash','🧛':'drop','🗡️':'dagger','⏩':'hourglass','💀':'skull','💫':'spiral','😱':'skull2','🐌':'snail','🤐':'padlock','🙈':'eye','📉':'brokenshield','⛓️':'chains','🔏':'padlock','🌀':'spiral','💣':'bomb','⚰️':'coffin','💤':'sleepy','🎵':'music'};
+/* частицы для «rise» вместо эмодзи */
+const EP_RISE={'🔥':['flame_05','flame_06','fire_01'],'✨':['star_04','star_06','flare_01'],'➕':['plus'],'🍃':['star_04','circle_05'],'💤':['ic:sleepy'],'🎵':['ic:music']};
+/* снаряд → текстура и базовый размер */
+const EP_SHT={orb:['glow',46],arrow:['arrow',70],bolt:['beam',80],star:['star',40],shard:['shard',44],rock:['rock',40],knife:['knife',44],bullet:['bullet',46],wave:['cres',90],spear:['arrow',90],drop:['drop',30]};
+/* кривая полёта: дуга вверх на h, смещение веера off */
+function epArc(p,q,h,off){ const dx=q.x-p.x, dy=q.y-p.y, L=Math.hypot(dx,dy)||1; let ux=-dy/L, uy=dx/L; if(uy>0){ ux=-ux; uy=-uy; } const qe={x:q.x+ux*off*.25,y:q.y+uy*off*.25}, m={x:(p.x+qe.x)/2+ux*(h+off)*2,y:(p.y+qe.y)/2+uy*(h+off)*2};
+  return t=>{ const u=1-t; return {x:u*u*p.x+2*u*t*m.x+t*t*qe.x,y:u*u*p.y+2*u*t*m.y+t*t*qe.y,a:Math.atan2(2*u*(m.y-p.y)+2*t*(qe.y-m.y),2*u*(m.x-p.x)+2*t*(qe.x-m.x))}; }; }
+/* разрез: светящийся серп проходит дугой; узор задаёт углы и смещения */
+const EP_SLGL={'1':[[-.75,0,0]],x:[[-.75,0,0],[.75,0,.1]],'3':[[-.7,-18,0],[-.7,0,.05],[-.7,18,.1]],claw:[[-1.2,-16,0],[-1.2,0,.04],[-1.2,16,.08]],cross:[[0,0,0],[1.57,0,.1]],v:[[-.9,0,0],[.9,0,.08]],up:[[-2.3,0,0]],down:[[1.57,0,0]],z:[[0,-24,0],[-.75,0,.07],[0,24,.14]],thrust:[[0,0,0]],multi:[[-.7,0,0],[.6,0,.06],[-1.9,0,.12],[2.2,0,.18],[.1,0,.24]]};
+function epGLSlash(S,s,q,t,c,c2,sg){ const k=(s.sz||1)*1.25, w=s.w||6, dur=s.dur||.3;
+  if(s.p==='spin'){ for(let i=0;i<2;i++) epGLOne(S,'cres',i?'#ffffff':c,t+i*.03,t+dur*1.6,f=>({x:q.x,y:q.y,s:(1.3+.2*i)*k*(i?.85:1),r:-2+f*9*sg,a:epEnv(f,.05,.55)})); epGLEmit(S,{x:q.x,y:q.y,t:t+.1,n:14,tx:'trace_01',c:[c,'#ffffff'],sz:[40,70],sp:[260,480],dr:3,life:[.25,.45],align:1,sx:.35}); return; }
+  if(s.p==='thrust'){ const a0=sg>0?0:Math.PI; for(const [cc,hh,ww] of [[c,22+w*2,260*k],['#ffffff',8+w,220*k]]) epGLOne(S,'beam',cc,t,t+dur,f=>({x:q.x-Math.cos(a0)*60*(1-f),y:q.y,w:ww*(.4+f*.8),h:hh*(1-f*.5),r:a0,a:epEnv(f,.08,.4)})); epGLEmit(S,{x:q.x,y:q.y,t:t+.05,n:1,tx:'flare_01',c:'#ffffff',sz:160*k,g0:.4,g1:1.2,life:.25,sp:0}); epGLEmit(S,{x:q.x,y:q.y,t:t+.05,n:12,tx:'trace_01',c:[c,'#fff'],sz:[40,70],sp:[260,520],ang:sg>0?[-30,30]:[150,210],dr:3,life:[.25,.45],align:1,sx:.35}); return; }
+  for(const [a,off,dl] of (EP_SLGL[s.p]||EP_SLGL['1'])){ const ang=(sg>0?a:Math.PI-a), tt=t+dl, ox=-Math.sin(ang)*off, oy=Math.cos(ang)*off;
+    /* серп: сначала поворот (замах), потом гаснет; два слоя — цвет и белая сердцевина */
+    for(const [cc,sc,al] of [[c,1,.95],['#ffffff',.8,.9]]) epGLOne(S,'cres',cc,tt,tt+dur+.12,f=>({x:q.x+ox,y:q.y+oy,s:sc*k*(.9+f*.25),sy:sc*k*(.9+f*.25)*(.45+w/40),r:ang-1.1*sg+Math.min(1,f*3)*1.3*sg,a:al*epEnv(f,.04,.35)}));
+    epGLEmit(S,{x:q.x+ox,y:q.y+oy,t:tt+.05,n:1,tx:['slash_01','slash_02','slash_03','slash_04'],c,sz:200*k,g0:.85,g1:1.1,life:.28,sp:0,rot:ang+(sg>0?0:Math.PI),fo:.3});
+    epGLEmit(S,{x:q.x+ox,y:q.y+oy,t:tt+.06,n:10,tx:'trace_01',c:[c,'#ffffff',c2],sz:[34,64],sp:[240,520],dr:3.2,life:[.22,.42],align:1,sx:.32}); }
+  epGLEmit(S,{x:q.x,y:q.y,t:t+.05,n:1,tx:'glow',c,sz:120*k,g0:.3,g1:1,life:.2,sp:0,al:.55}); }
+/* подскок с «остаточными изображениями» и хит-стопом */
+function epGLLunge(S,n,p,q,d,dur,hit){ if(!n) return; const dx=q.x-p.x, dy=q.y-p.y, len=Math.hypot(dx,dy); if(len<60) return; const stop=Math.min(110,len*.45), k=(len-stop)/len*S.sc; const T=(x,y)=>`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;
+  const kf=[{transform:T(-dx*.04*S.sc,-dy*.04*S.sc),zIndex:6,offset:0},{transform:T(-dx*.07*S.sc,-dy*.07*S.sc),zIndex:6,offset:Math.max(.05,(hit-.16)/dur)},{transform:T(dx*k,dy*k),zIndex:6,offset:Math.min(.7,hit/dur)},{transform:T(dx*k,dy*k),zIndex:6,offset:Math.min(.8,(hit+.09)/dur)},{transform:T(0,0),zIndex:6,offset:1}];
+  const run=(el,dl,op)=>{ try{ el.animate(op?kf.map(x=>({...x,opacity:op})):kf,{duration:dur*1000,delay:(d+dl-S.ago)*1000,fill:op?'both':'none',easing:'ease-in-out'}); }catch{} };
+  run(n,0); if(S.lay&&n.parentNode){ for(let i=1;i<=3;i++){ const g=n.cloneNode(true); g.classList.add('epghost'); g.removeAttribute('data-u'); g.style.opacity=0; S.lay.append(g); run(g,i*.035,.34-i*.09); setTimeout(()=>g.remove(),(d+dur+.2-S.ago)*1000+200); } }
+  epGLPunch(S,d+hit,1.035); }
+const EP_GLPH={proj:'go',beam:'go',chain:'go',charge:'cast',nova:'cast',dim:'cast',vign:'cast',dragon:'cast',wslash:'cast',moon:'cast',rays:'cast',wave:'cast',bhole:'cast'};
+/* шаг пресета на WebGL */
+function epGLStep(S,k,s,at,p,q,t,c,c2,sg,P){ const K=S.K, E=o=>epGLEmit(S,o), d0=t;
+  switch(k){
+  case 'proj': { if(Math.hypot(q.x-p.x,q.y-p.y)<20) break; const n=s.n||1, dur=s.dur||.4, [tx,base]=s.ic?['ic:'+s.ic,60]:(EP_SHT[s.sh]||EP_SHT.orb), sz=base*((s.sz||10)/10)*(s.sh==='orb'?1.4:1);
+    for(let i=0;i<n;i++){ const off=n>1?(i-(n-1)/2)*(s.sp??16):0, tt=t+i*(s.st??0), path=epArc(p,q,s.h||0,off);
+      epGLOne(S,'glow',c,tt,tt+dur,f=>{ const z=path(f); return {x:z.x,y:z.y,s:sz*2.2/128,a:.75*epEnv(f,.08,.92)}; });
+      epGLOne(S,tx,s.sh==='rock'?(s.tc||c):(s.sh==='orb'?'#ffffff':c2),tt,tt+dur,f=>{ const z=path(f); return {x:z.x,y:z.y,s:sz/((S.T.get(tx).width)||64)*(s.sh==='wave'?1:1),r:s.spin?f*16:z.a+(s.sh==='wave'?Math.PI/2*0:0),a:epEnv(f,.06,.95)}; },s.sh==='rock'?'n':'');
+      if(K) for(let j=1;j<=12;j++){ const z0=path((j-1)/12), z1=path(j/12), seg=Math.hypot(z1.x-z0.x,z1.y-z0.y); E({x:(z0.x+z1.x)/2,y:(z0.y+z1.y)/2,w:seg,h:seg*.5,t:tt+dur*(j-.5)/12,dt:[0,dur/12],n:4,tx:K.trail,c:K.c,sz:[sz*.7,sz*1.3],sp:[5,45],life:[.3,.6],g1:.3,fo:.2,rot:true,vr:3,ay:K.up?-90:K.grav?120:0,bl:K.st==='earth'?'n':''}); } } break; }
+  case 'beam': { const L=Math.hypot(q.x-p.x,q.y-p.y); if(L<20) break; const a=Math.atan2(q.y-p.y,q.x-p.x), w=(s.w||16)*1.6, pu=s.pulse;
+    for(const [cc,ww] of [[c,w*2.2],['#ffffff',w*.6]]){ const b=epGLOne(S,'beam',cc,t,t+.75,f=>({x:p.x+(q.x-p.x)*Math.min(1,f*3)/2,y:p.y+(q.y-p.y)*Math.min(1,f*3)/2,w:L*Math.min(1,f*3)*1.08,h:ww*(f<.3?.6+f:pu?1+.25*Math.sin(f*40):1)*(f>.7?(1-f)/.3:1),r:a,a:1})); }
+    E({x:p.x,y:p.y,t,n:1,tx:'glow',c,sz:w*5,g0:.4,g1:1.2,life:.7,sp:0}); for(let i=0;i<28;i++){ const f=S.R(); E({x:p.x+(q.x-p.x)*f,y:p.y+(q.y-p.y)*f,t:t+.1+f*.15,n:1,tx:K?K.spark:'star_04',c:K?K.c:c,sz:[12,24],sp:[20,90],life:[.3,.55],g1:.3,rot:true}); }
+    if(K) epGLBoom(S,q.x,q.y,30,t+.24,K,c); break; }
+  case 'chain': { if(Math.hypot(q.x-p.x,q.y-p.y)<20) break; for(let i=0;i<Math.max(2,s.n||2);i++) epGLBolt(S,p.x,p.y,q.x,q.y,t+i*.07,t+.45+i*.07,i%2?c2:c,4,s.j||34); if(K) epGLBoom(S,q.x,q.y,26,t+.15,K,c); break; }
+  case 'boom': epGLBoom(S,at.x,at.y,(s.r||40)*1.15,t,s.c?{...K,c:[s.c,s.c2||c2,'#ffffff']}:K,c); if((s.r||40)>=60) epGLShake(S,t,1); break;
+  case 'ring': for(let i=0;i<(s.n||1);i++) E({x:at.x,y:at.y,t:t+i*.09,n:1,tx:'ring',c,sz:(s.r||34)*.5,g1:5,life:s.dur||.45,sp:0,fo:.25,al:.95}); break;
+  case 'sparks': E({x:at.x,y:at.y,t,n:(s.n||8)*1.4,tx:['trace_01','trace_04'],c:K?K.c:[c,c2],sz:[30,60],sp:[220,480],dr:3,life:[.3,.55],align:1,sx:.35,ay:K&&K.grav?400:0}); E({x:at.x,y:at.y,t,n:(s.n||8)*.6,tx:'star_04',c:'#ffffff',sz:[12,22],sp:[100,260],dr:3,life:[.25,.45]}); break;
+  case 'slash': epGLSlash(S,s,at,t,c,c2,sg); break;
+  case 'pillar': { const w=(s.w||40)*1.4, h=at.y+80; for(const [cc,ww] of [[c,w*2.4],['#ffffff',w*.7]]) epGLOne(S,'beam',cc,t,t+(s.dur||.8),f=>({x:at.x,y:at.y+40-h/2,w:h,h:ww*(f<.2?f*5:f>.7?(1-f)/.3:1),r:Math.PI/2,a:1}));
+    E({x:at.x,y:at.y+30,t,n:30,tx:K?K.trail.concat(K.spark):'star_04',c:K?K.c:c,w,sz:[16,32],sp:0,vy:-380,ay:-260,life:[.45,.8],dt:[0,.45],g1:.4,rot:true}); if(K) epGLBoom(S,at.x,at.y+30,w*.7,t,K,c); break; }
+  case 'sigil': { const R=(s.r||40)*1.3, y=s.flat?at.y+32:at.y; epGLOne(S,'sigil',c,t,t+(s.dur||.9),f=>({x:at.x,y,sx:R*2/256*(.2+Math.min(1,f*4)*.8),sy:R*2/256*(.2+Math.min(1,f*4)*.8)*(s.flat?.42:1),r:f*2.4,a:epEnv(f,.15,.7)}));
+    E({x:at.x,y,t:t+.1,n:16,tx:'star_04',c,w:R*1.6,h:s.flat?R*.6:R*1.6,sz:[10,18],sp:0,vy:-60,life:[.5,.9],g1:.4}); break; }
+  case 'glyph': { const ic=s.ic||EP_EMO[s.ch]; if(!ic) break; const sz=(s.sz||40)*2.2, m=s.m||'pop', go=(dx,dy,tt)=>{ epGLOne(S,'glow',c,tt,tt+.7,f=>({x:at.x+dx,y:at.y+dy,s:sz*2.4/128,a:.7*epEnv(f,.1,.4)}));
+      epGLOne(S,'ic:'+ic,c,tt,tt+(m==='drop'?.75:m==='spin'?1.1:.85),f=>{ const e=epEnv(f,.1,.6); if(m==='rise') return {x:at.x+dx,y:at.y+dy-30-f*70,s:sz/256*(.7+.3*Math.min(1,f*5)),a:e};
+        if(m==='drop') return {x:at.x+dx,y:at.y+dy-Math.max(0,1-f*2.4)*240,s:sz/256*(f>.4&&f<.5?1.15:1),a:epEnv(f,.02,.7)}; if(m==='spin') return {x:at.x+dx,y:at.y-60,s:sz/256*.8,r:f*12,a:e};
+        return {x:at.x+dx,y:at.y+dy,s:sz/256*(f<.2?.4+f*4.5:1.3-Math.min(.3,(f-.2)*1.5)),a:e}; }); };
+    if(m==='multi') for(let i=0;i<(s.n||3);i++) go((epRnd(i+3)-.5)*70,(epRnd(i+7)-.5)*50,t+i*.09); else go(0,0,t); if(m==='drop') epGLShake(S,t+.3,1.2); break; }
+  case 'aura': { const col=s.c||c; E({x:at.x,y:at.y+34,t,n:1,tx:'ring',c:col,sz:50,g1:2.6,sx:1,life:.9,sp:0,al:.9}); epGLOne(S,'ring',col,t,t+1,f=>({x:at.x,y:at.y+34-f*40,sx:(.5+f*.5)*110/256*1.6,sy:(.5+f*.5)*110/256*.5,a:epEnv(f,.15,.5)}));
+    epGLOne(S,'beam',col,t,t+1,f=>({x:at.x,y:at.y-20,w:200,h:120*(.6+f*.6),r:Math.PI/2,a:.55*epEnv(f,.2,.6)}));
+    E({x:at.x,y:at.y+20,t,n:16,tx:['flame_05','flame_06'],c:[col,c2],w:90,h:20,sz:[50,90],sp:0,vy:-140,life:[.45,.75],dt:[0,.5],g0:.8,g1:.3,al:.9}); E({x:at.x,y:at.y+30,t,n:20,tx:['star_04','dot'],c:[col,'#ffffff'],w:100,h:20,sz:[8,16],sp:[0,20],vy:-110,life:[.6,1],dt:[0,.5],g1:.4}); break; }
+  case 'rise': { const tx=(s.ch&&EP_RISE[s.ch])||(s.ic?['ic:'+s.ic]:['dot','star_04']); const ico=tx[0].startsWith('ic:')||tx[0]==='plus'; E({x:at.x,y:at.y+10,t,n:s.n||8,tx,c:[c,c2],w:80,h:30,sz:ico?[26,40]:[(s.sz||10)*2,(s.sz||10)*4],sp:[0,15],vy:-90,life:[.7,1.1],dt:[0,.55],g0:.6,g1:ico?1:.5,fo:.6}); break; }
+  case 'swirl': { const R=(s.r||70)*1.2, n=(s.n||10)*2; for(let i=0;i<n;i++){ const a0=i/n*6.283, tt=t+i*.012; epGLOne(S,'star_04',i%2?c:c2,tt,tt+.7,f=>({x:at.x+Math.cos(a0+f*5)*R*(1-f),y:at.y+Math.sin(a0+f*5)*R*(1-f)*.7,s:.22,a:epEnv(f,.15,.8)})); }
+    E({x:at.x,y:at.y,t:t+.55,n:1,tx:'twirl_02',c,sz:160,g0:1.4,g1:.3,life:.45,sp:0,vr:0}); if(K) epGLBoom(S,at.x,at.y,30,t+.65,K,c); break; }
+  case 'spikes': { const n=s.n||5; for(let i=0;i<n;i++){ const x=at.x+((i/((n-1)||1))-.5)*110, hh=(.7+epRnd(i+11)*.7)*90, tt=t+i*.03; epGLOne(S,'spike',c,tt,tt+.85,f=>({x,y:at.y+44-hh*Math.min(1,f*5)/2,sx:.55,h:hh*Math.min(1,f*5)*(f>.75?(1-f)/.25:1)+.01,a:1}),K&&K.st==='earth'?'n':''); }
+    if(K) E({x:at.x,y:at.y+44,t,n:10,tx:K.st==='earth'?['rock','smoke_04']:K.burst,c:K.c,w:110,sz:[20,36],sp:[40,120],ang:[200,340],ay:K.grav?600:0,life:[.4,.7],rot:true,bl:K.st==='earth'?'n':''}); break; }
+  case 'nova': { E({x:at.x,y:at.y,t,n:1,tx:'ring',c,sz:40,g1:(s.r||90)/6,life:.55,sp:0,fo:.2}); E({x:at.x,y:at.y,t,n:1,tx:'glow',c,sz:160,g0:.5,g1:1.4,life:.4,sp:0}); E({x:at.x,y:at.y,t,n:18,tx:['trace_01','star_04'],c:[c,'#ffffff'],sz:[20,44],sp:[220,380],dr:2,life:[.35,.55],align:1,sx:.4}); break; }
+  case 'charge': { for(let i=0;i<22;i++){ const a=S.R()*6.283, R=80+S.R()*60, l=.32+S.R()*.18, tt=t+S.R()*.14; epGLOne(S,'star_04',i%2?c:c2,tt,tt+l,f=>({x:at.x+Math.cos(a)*R*(1-f),y:at.y+Math.sin(a)*R*(1-f),s:.18+f*.1,a:epEnv(f,.2,.9)})); }
+    epGLOne(S,'glow',c,t,t+.5,f=>({x:at.x,y:at.y,s:(.5+f*1.8),a:epEnv(f,.3,.8)})); break; }
+  case 'bubble': { const r=(s.r||46)*1.35, col=s.c||c; epGLOne(S,'bubble',col,t,t+(s.dur||1),f=>({x:at.x,y:at.y,s:r*2/256*(f<.25?.3+f*3.2:1.1-Math.min(.1,(f-.25)*.4)),a:epEnv(f,.15,.7)})); epGLOne(S,'ic:shield',col,t+.05,t+.6,f=>({x:at.x,y:at.y,s:r*1.1/256,a:.35*epEnv(f,.2,.5)})); break; }
+  case 'reticle': epGLOne(S,'reticle',c,t,t+(s.dur||.8),f=>({x:at.x,y:at.y,s:(f<.45?2.4-f*3.1:1)*.9,r:(1-Math.min(1,f*2.2))*1.6,a:epEnv(f,.15,.85)})); break;
+  case 'cloud': E({x:at.x,y:at.y,t,n:10,tx:['smoke_03','smoke_04','smoke_05','smoke_09'],c:s.c||c,w:80,h:40,sz:[60,110],sp:[5,25],life:[.9,1.4],g0:.5,g1:1.6,al:[.4,.65],rot:true,vr:1,dt:[0,.2]}); break;
+  case 'drain': { for(let i=0;i<(s.n||12)*1.5;i++){ const path=epArc(q,p,(epRnd(i)-.5)*120,0), tt=t+i*.025; epGLOne(S,'glow',i%2?c:c2,tt,tt+.55,f=>{ const z=path(f); return {x:z.x,y:z.y,s:.28,a:epEnv(f,.1,.85)}; }); }
+    E({x:p.x,y:p.y,t:t+.6,n:1,tx:'glow',c,sz:120,g1:1.6,life:.4,sp:0}); E({x:p.x,y:p.y,t:t+.6,n:8,tx:'plus',c,sz:[16,24],w:50,h:20,vy:-70,sp:0,life:.7}); break; }
+  case 'rain': { const n=s.n||8, st=s.st??.045, sp=s.sp??50, dur=.34; for(let i=0;i<n;i++){ const x=at.x+(n>1?(epRnd(i+1)*2-1)*sp:0), y=at.y+(epRnd(i+4)-.5)*20, tl=t+i*st-(n-1)*st/2;
+      if(s.sh==='zap'){ epGLBolt(S,x+(epRnd(i)-.5)*60,-20,x,y,tl-.05,tl+.35,c,5,40); if(K) epGLBoom(S,x,y,30,tl,K,c); if(!i) epGLFull(S,tl,tl+.15,'#dff8ff',.12,'flash'); continue; }
+      const sx=x-70*sg, sy=y-280, a=Math.atan2(y-sy,x-sx), [tx,base]=s.ic?['ic:'+s.ic,70]:(EP_SHT[s.sh]||EP_SHT.orb), sz=base*((s.sz||(s.sh==='rock'?14:10))/10);
+      epGLOne(S,'glow',c,tl-dur,tl,f=>({x:sx+(x-sx)*f,y:sy+(y-sy)*f,s:sz*2/128,a:.7})); epGLOne(S,tx,s.sh==='rock'?(s.tc||c):(s.sh==='orb'?'#ffffff':c2),tl-dur,tl,f=>({x:sx+(x-sx)*f,y:sy+(y-sy)*f,s:sz/(S.T.get(tx).width||64),r:a+(s.irot||0),a:1}),s.sh==='rock'?'n':'');
+      if(K) epGLEmit(S,{x:(sx+x)/2,y:(sy+y)/2,w:Math.abs(x-sx),h:Math.abs(y-sy),t:tl-dur,dt:[0,dur],n:3,tx:K.trail,c:K.c,sz:[sz*.4,sz*.7],sp:[5,30],life:[.15,.3],g1:.3,rot:true,al:.7});
+      if(K&&i%2===0) epGLBoom(S,x,y,24,tl,K,c); else epGLEmit(S,{x,y,t:tl,n:1,tx:'ring',c,sz:20,g1:3,life:.3,sp:0}); } break; }
+  case 'flash': epGLFull(S,t,t+.32,s.c||c,.5,'flash'); break;
+  case 'shake': epGLShake(S,t,s.k||1); break;
+  /* ---- кинематика ультимейтов ---- */
+  case 'dim': epGLFull(S,t,t+(s.dur||2),s.c||'#000000',s.a??.62,'dim'); break;
+  case 'vign': epGLFull(S,t,t+(s.dur||2),s.c||c,s.a??.85,'vign'); break;
+  case 'crack': epGLCrack(S,at.x,at.y+40,(s.r||90),t,s.c||'#1a0d05',s.c2||c); break;
+  case 'giant': { const ic=s.ic||'sword', H=s.sz||260; epGLOne(S,'glow',c,t,t+.75,f=>({x:at.x,y:at.y-Math.max(0,1-f*2.2)*400,s:H*1.4/128,a:.7*epEnv(f,.1,.7)}));
+    epGLOne(S,'ic:'+ic,c2,t,t+.85,f=>({x:at.x,y:at.y-30-Math.max(0,1-f*2.2)*420,s:H/256,r:s.r||0,a:epEnv(f,.05,.75)})); const th=t+.45; if(K) epGLBoom(S,at.x,at.y,70,th,K,c); epGLCrack(S,at.x,at.y+40,120,th,'#120a04',c); epGLShake(S,th,2.2); epGLFull(S,th,th+.25,'#ffffff',.55,'flash'); break; }
+  case 'wings': { const ic=s.ic||'wings', W0=s.sz||240; epGLOne(S,'ic:'+ic,c,t,t+(s.dur||1.6),f=>({x:at.x,y:at.y-20,sx:W0/256*Math.min(1,f*3),sy:W0/256*(.8+.2*Math.min(1,f*3)),a:.9*epEnv(f,.1,.7)}));
+    E({x:at.x,y:at.y-30,t:t+.2,n:14,tx:'ic:feather',c:[c,'#ffffff'],w:W0,h:60,sz:[22,34],sp:[10,40],vy:60,life:[1,1.6],dt:[0,.6],rot:true,vr:3,fo:.6}); break; }
+  case 'feathers': E({x:at.x,y:at.y-120,t,n:s.n||20,tx:'ic:feather',c:[c,'#ffffff'],w:220,h:60,sz:[22,36],sp:[0,20],vy:90,life:[1.2,1.8],dt:[0,.8],rot:true,vr:3,fo:.6}); break;
+  case 'icon': epGLOne(S,'ic:'+s.ic,c,t,t+(s.dur||1),f=>({x:at.x+(s.dx||0),y:at.y+(s.dy||0)-(s.up||0)*f,s:(s.sz||120)/256*(f<.2?.5+f*2.5:1),r:(s.rot||0)*f,a:(s.a??1)*epEnv(f,.15,.6)})); break;
+  case 'moon': { const x=s.x!=null?S.W*s.x:S.W/2, y=S.H*.2; epGLOne(S,'glow',c,t,t+(s.dur||2),f=>({x,y:y+40*(1-Math.min(1,f*2)),s:3.4,a:.8*epEnv(f,.2,.8)})); epGLOne(S,'ic:'+(s.ic||'moon'),c2,t,t+(s.dur||2),f=>({x,y:y+40*(1-Math.min(1,f*2)),s:.75,a:epEnv(f,.2,.8)})); break; }
+  case 'rays': for(let i=0;i<7;i++){ const x=S.W*(.1+i*.13)+(epRnd(i)-.5)*40; epGLOne(S,'beam',i%2?c:c2,t+i*.05,t+(s.dur||1.6),f=>({x,y:S.H*.45,w:S.H*1.2,h:40+30*Math.sin(f*8+i),r:Math.PI/2+.18-(i*.06),a:.28*epEnv(f,.2,.7)})); } break;
+  case 'dragon': { /* змей из светящихся сегментов, голова — силуэт; летит над полем справа налево (или наоборот) */
+    const dir=q.x>p.x?1:-1, y0=S.H*(s.y??.32), dur=s.dur||1.5, N=34, x0=dir>0?-160:S.W+160, x1=dir>0?S.W+220:-220; const path=u=>({x:x0+(x1-x0)*u,y:y0+Math.sin(u*Math.PI*3)*S.H*.12+Math.sin(u*Math.PI)*S.H*.18});
+    for(let i=N;i>=0;i--){ const lag=i*.022, sz=(i===0?0:(1-i/N)*60+18); if(i) epGLOne(S,'scale',i%3?c:c2,t+lag,t+dur+lag,f=>{ const z=path(f), z2=path(Math.max(0,f-.01)); return {x:z.x,y:z.y,s:sz/64,r:Math.atan2(z.y-z2.y,z.x-z2.x),a:epEnv(f,.03,.9)}; });
+    }
+    epGLOne(S,'glow',c,t,t+dur,f=>{ const z=path(f); return {x:z.x,y:z.y,s:2.4,a:.8}; }); epGLOne(S,'ic:'+(s.ic||'dragon'),c2,t,t+dur,f=>{ const z=path(f), z2=path(Math.max(0,f-.01)); const a=Math.atan2(z.y-z2.y,z.x-z2.x); return {x:z.x,y:z.y,sx:(dir>0?-1:1)*.62,sy:.62,r:dir>0?a+Math.PI:a,a:epEnv(f,.03,.92)}; });
+    if(K) for(let j=0;j<40;j++){ const f=j/40, z=path(f); E({x:z.x,y:z.y,t:t+dur*f,n:3,tx:K.trail,c:K.c,sz:[30,60],sp:[10,50],life:[.4,.8],g1:.3,rot:true,ay:K.up?-60:0}); }
+    epGLShake(S,t+dur*.5,1); break; }
+  case 'breath': { /* дыхание дракона: поток частиц сверху на цель */ const sx=at.x+(q.x>p.x?-120:120), sy=S.H*.25; for(let i=0;i<26;i++){ const tt=t+i*.012; E({x:sx,y:sy,t:tt,n:1,tx:K?K.burst:'glow',c:K?K.c:c,sz:[40,70],sp:0,vx:(at.x-sx)/.35,vy:(at.y-sy)/.35,life:.35,g0:.5,g1:1.8,rot:true}); } if(K) epGLBoom(S,at.x,at.y,48,t+.35,K,c); break; }
+  case 'wslash': { /* разрез мира: гигантские разрезы через всю сцену, потом осколки */ const n=s.n||4; epGLFull(S,t,t+1.4,'#000000',.75,'dim');
+    for(let i=0;i<n;i++){ const tt=t+.15+i*.12, a=(i%2?-.35:.4)+(epRnd(i)-.5)*.3, cx=S.W*(.3+epRnd(i+5)*.4), cy=S.H*(.3+epRnd(i+9)*.4); for(const [cc,hh] of [[c,30],['#ffffff',8]]) epGLOne(S,'beam',cc,tt,tt+.55,f=>({x:cx,y:cy,w:S.W*1.6*Math.min(1,f*6),h:hh*(f>.4?(1-f)/.6:1)+1,r:a,a:1})); }
+    const ts=t+.15+n*.12+.1; epGLFull(S,ts,ts+.3,'#ffffff',.8,'flash'); for(let i=0;i<26;i++){ const x=S.R()*S.W, y=S.R()*S.H; E({x,y,t:ts,n:1,tx:'shard',c:['#ffffff',c],sz:[40,90],sp:[80,260],ay:500,life:[.6,1],rot:true,vr:6,fo:.5}); } epGLShake(S,ts,2.5); break; }
+  case 'bhole': { const x=q.x>S.W/2?S.W*.75:S.W*.25, y=S.H*.48, dur=s.dur||1.6; epGLOne(S,'glow','#000000',t,t+dur,f=>({x,y,s:2.2*Math.min(1,f*3),a:1}),'n'); epGLOne(S,'ring',c,t,t+dur,f=>({x,y,sx:.9*Math.min(1,f*3),sy:.3*Math.min(1,f*3),r:f*4,a:epEnv(f,.1,.8)}));
+    for(let i=0;i<60;i++){ const a0=S.R()*6.28, R=150+S.R()*200, tt=t+S.R()*dur*.8; epGLOne(S,'star_04',i%2?c:c2,tt,tt+.6,f=>({x:x+Math.cos(a0+f*4)*R*(1-f),y:y+Math.sin(a0+f*4)*R*(1-f)*.5,s:.2,a:epEnv(f,.1,.9)})); }
+    E({x,y,t:t+dur-.2,n:1,tx:'glow',c,sz:300,g0:.3,g1:1.6,life:.35,sp:0}); epGLShake(S,t+dur-.2,2); break; }
+  case 'wave': { const dir=q.x>p.x?1:-1, dur=s.dur||1.1; for(let i=0;i<5;i++) epGLOne(S,'cres',i%2?c2:c,t+i*.05,t+dur+i*.05,f=>({x:(dir>0?-100:S.W+100)+dir*(S.W+200)*f,y:S.H*.55-i*14,sx:dir*1.8,sy:2.6,r:Math.PI/2*dir*0,a:.9*epEnv(f,.1,.85)}));
+    E({x:S.W/2,y:S.H*.6,w:S.W,h:60,t,n:60,tx:'drop',c:[c,c2],sz:[16,30],sp:[100,300],ang:[220,320],ay:700,life:[.6,1],dt:[0,dur],align:1}); break; }
+  case 'tentacle': { const n=s.n||3; for(let i=0;i<n;i++){ const g=new PIXI.Graphics(), bx=at.x+(i-(n-1)/2)*44, sgn=i%2?1:-1; S.ob(t+i*.06,t+1.3,g,f=>{ g.clear(); const h=Math.min(1,f*3)*130*(f>.75?(1-f)/.25:1); let px=bx, py=at.y+50; for(let j=1;j<=24;j++){ const u=j/24, x=bx+Math.sin(u*5+f*7)*26*sgn*u, y=at.y+50-h*u; g.lineStyle((1-u)*16+2,epHx(c),.95); g.moveTo(px,py); g.lineTo(x,y); g.lineStyle((1-u)*5+1,epHx(c2),.9); g.moveTo(px,py); g.lineTo(x,y); px=x; py=y; } }); g.blendMode=PIXI.BLEND_MODES.NORMAL; } break; }
+  } }
+/* проиграть пресет на WebGL; o.sub — не первая цель (общие для поля шаги не повторяются) */
+function epGLDraw(S,P,p,q,d,o={}){ const cast=P.cast||0, hit=epAnHitP(P), sg=q.x<p.x?-1:1; S.K=epKitOf(P); S.m=o.m||1; S.sd=(Math.floor(d*1000)*31+Math.floor(p.x)*7+Math.floor(q.y)*13)%2147483646+1;
+  if(P.lunge) epGLLunge(S,o.aEl,p,q,d+cast,P.lunge===2?.46:.68,hit-cast);
+  for(const [k,s] of P.st){ if(o.sub&&s.fld) continue; const ph=s.ph||EP_GLPH[k]||EP_ANPH[k]||'hit'; const t=d+(ph==='cast'?0:ph==='go'?cast:hit)+(s.dl||0); const at=s.on==='p'?p:s.on==='q'?q:ph==='cast'&&k!=='dragon'&&k!=='wslash'&&k!=='dim'&&k!=='vign'?p:q;
+    try{ epGLStep(S,k,s,at,p,q,t,s.c||P.c,s.c2||P.c2||'#ffffff',sg,P); }catch(e){ console.warn('anim',P.id,k,e); } } }
+/* ---------- ★ Ультимейты: кинематики на всё поле; шаги с fld:1 играются один раз за действие (на первой цели) ---------- */
+EP_ANG.unshift(['ult','★','Ультимейты','#ffd166']);
+(()=>{ const U=(id,n,c,c2,st,o={})=>{ const P={id,g:'ult',n,c,c2,st,...o}; EP_AN.push(P); EP_ANM[id]=P; };
+  const dim=(a=.55,dur=2.2)=>['dim',{fld:1,a,dur}], vig=(c,dur=2.2,a=.75)=>['vign',{fld:1,c,dur,a}];
+  /* атакующие по всем */
+  U('ul_dragon_fire','Пламя дракона','#ff7a3d','#ffd166',[dim(.5,2.6),vig('#ff4b2b',2.6,.6),['dragon',{fld:1,ic:'dragon',dur:1.5}],['breath',{dl:-.35}],['shake',{k:1.5}]],{el:'fire',cast:1});
+  U('ul_dragon_ice','Ледяной дракон','#8fe3ff','#ffffff',[dim(.5,2.6),vig('#5ec8ff',2.6,.55),['dragon',{fld:1,ic:'dragon2',dur:1.5}],['breath',{dl:-.35}],['spikes',{n:7,c:'#cff4ff'}]],{el:'ice',cast:1});
+  U('ul_dragon_dark','Дракон бездны','#a06bff','#ff5cf0',[dim(.65,2.6),vig('#3a0a5a',2.6),['dragon',{fld:1,ic:'wyvern',dur:1.5}],['breath',{dl:-.35}],['swirl',{n:10}]],{el:'dark',cast:1});
+  U('ul_dragon_storm','Громовой змей','#7ae0ff','#ffffff',[dim(.6,2.6),['dragon',{fld:1,ic:'serpent',dur:1.5}],['rain',{sh:'zap',n:2,sp:20}],['shake',{k:1.5}]],{el:'storm',cast:1});
+  U('ul_bloodspikes','Кровавые пики','#ff3b4f','#7a0010',[dim(.55,2),vig('#b3001b',2),['crack',{ph:'cast',on:'q',dl:.15,c2:'#ff3b4f',r:120}],['spikes',{n:9,c:'#ff3b4f'}],['spikes',{n:6,c:'#9a0016',dl:.08}],['boom',{r:55}],['shake',{k:2}]],{el:'blood',cast:.5});
+  U('ul_worldslash','Разрез мира','#ffffff','#7ae0ff',[['wslash',{fld:1,n:5}],['slash',{p:'x',w:9,sz:1.5}],['boom',{r:40}]],{cast:1});
+  U('ul_meteor','Метеоритный шторм','#ff7a3d','#ffd166',[vig('#ff4b2b',2.4,.65),dim(.4,2.4),['rain',{sh:'rock',sz:28,n:3,sp:40,tc:'#6a4028'}],['boom',{r:80}],['shake',{k:2.5}]],{el:'fire',cast:.6});
+  U('ul_judgment','Небесный суд','#ffe27a','#ffffff',[dim(.5,2.2),['rays',{fld:1,dur:2}],['sigil',{r:50,flat:1,on:'q',ph:'cast'}],['pillar',{w:62}],['icon',{ic:'holy',sz:120,dy:-100,dur:1.2}],['flash',{c:'#fff7d6'}]],{el:'light',cast:.6});
+  U('ul_blackhole','Чёрная дыра','#5d6bff','#ff9cf5',[dim(.55,2.6),['bhole',{fld:1,dur:1.6}],['swirl',{n:12,ph:'cast',on:'q',dl:.6}],['boom',{r:55}]],{el:'void',cast:1.4});
+  U('ul_thunder','Гнев громовержца','#7ae0ff','#ffffff',[dim(.65,2),['icon',{ic:'bolt',sz:190,ph:'cast',on:'q',dy:-150,dur:.9}],['rain',{sh:'zap',n:3,sp:30}],['shake',{k:2}]],{el:'storm',cast:.5});
+  U('ul_iceprison','Ледяная тюрьма','#8fe3ff','#ffffff',[dim(.4,2.2),vig('#5ec8ff',2.2,.5),['spikes',{n:8,c:'#cff4ff',ph:'cast',on:'q',dl:.1}],['bubble',{r:52,c:'#8fe3ff',ph:'cast',on:'q',dl:.2,dur:.9}],['icon',{ic:'ice',sz:120,ph:'cast',on:'q',dl:.2,dur:.7,a:.6}],['boom',{r:62}]],{el:'ice',cast:.8});
+  U('ul_tsunami','Цунами','#3fa9ff','#bfe8ff',[dim(.35,2),['wave',{fld:1,dur:1.2}],['boom',{r:58}],['shake',{k:1.5}]],{el:'water',cast:1});
+  U('ul_earthquake','Разлом земли','#c08a4a','#f0d29a',[dim(.35,2),['crack',{on:'q',ph:'cast',r:170}],['spikes',{n:6,c:'#a07a4a'}],['rain',{sh:'rock',sz:22,n:3,sp:50,tc:'#9a7a4a'}],['boom',{r:72}],['shake',{k:3}]],{el:'earth',cast:.6});
+  U('ul_swordrain','Тысяча клинков','#cfe9ff','#ffffff',[dim(.5,2),['sigil',{r:70,on:'q',ph:'cast'}],['rain',{ic:'sword',irot:2.36,n:10,sp:60,sz:12}],['sparks',{n:16}],['shake',{k:1.5}]],{cast:.6});
+  U('ul_tentacles','Щупальца бездны','#a06bff','#5a2a8a',[dim(.6,2),vig('#2a0a40',2),['sigil',{r:50,flat:1,on:'q',ph:'cast'}],['tentacle',{n:4,c:'#5a2a8a',c2:'#a06bff'}],['boom',{r:42,dl:.4}]],{el:'dark',cast:.5});
+  /* одиночные */
+  U('ul_execute','Казнь','#ff3b4f','#ffffff',[dim(.7,1.9),['reticle',{ph:'cast',on:'q',dur:.6}],['giant',{ic:'sword',sz:320,r:2.36,dl:-.45}]],{cast:.5});
+  U('ul_dash','Пронзающий клинок','#7ae0ff','#ffffff',[dim(.5,1.8),['slash',{p:'multi',w:5}],['slash',{p:'x',w:10,sz:1.6,dl:.3}],['boom',{r:52,dl:.3}],['flash',{dl:.3}],['shake',{k:2,dl:.3}]],{lunge:1});
+  U('ul_snipe','Смертельный выстрел','#ff3b4f','#ffffff',[dim(.65,1.8),['reticle',{ph:'cast',on:'q',dur:.8}],['charge',{n:14}],['beam',{w:6}],['flash',{c:'#ffffff'}],['boom',{r:56}],['shake',{k:1.5}]],{cast:.7});
+  U('ul_bloodmoon','Кровавая луна','#ff3b4f','#ff9aa5',[dim(.6,2.4),vig('#b3001b',2.4),['moon',{fld:1,dur:2.3,ic:'moon'}],['pillar',{w:46,c:'#ff3b4f'}],['boom',{r:60}],['drain',{n:12,dl:.2}]],{el:'blood',cast:.8});
+  U('ul_hammer','Молот небес','#7ae0ff','#ffffff',[dim(.55,1.7),['giant',{ic:'hammer',sz:270,dl:-.45}],['rain',{sh:'zap',n:2,sp:20}]],{el:'storm',cast:.5});
+  U('ul_reaper','Жатва смерти','#a06bff','#ffffff',[dim(.65,1.9),['icon',{ic:'scythe',sz:290,ph:'cast',on:'q',rot:-2.5,dur:.7}],['slash',{p:'spin',w:10,sz:1.6}],['icon',{ic:'skull',sz:130,dur:.9,up:40}],['boom',{r:50}]],{el:'dark',cast:.4});
+  /* баффы, лечение, воскрешение */
+  U('ul_bless','Благословение небес','#ffe27a','#ffffff',[dim(.35,2.2),['rays',{fld:1,dur:2}],['wings',{ic:'wings',sz:270}],['aura',{}],['feathers',{n:16}]],{el:'light'});
+  U('ul_warcry','Боевой гимн','#ff6b5e','#ffd166',[['nova',{r:220,on:'p'}],['icon',{ic:'lion',sz:160,on:'p',ph:'cast',dy:-90,dur:.9}],['aura',{}],['rise',{ic:'swords',n:4}],['ring',{r:60,n:2}]],{cast:.4});
+  U('ul_aegis','Эгида','#4fb3ff','#cfe9ff',[['sigil',{r:62,flat:1}],['bubble',{r:72,dur:1.6}],['icon',{ic:'shield',sz:150,dur:1.2,a:.85}],['sparks',{n:10}]]);
+  U('ul_phoenix','Возрождение феникса','#ff7a3d','#ffd166',[dim(.5,2.4),['pillar',{w:52}],['icon',{ic:'eagle',sz:300,up:130,dur:1.5}],['rise',{ch:'🔥',n:14}],['icon',{ic:'ankh',sz:100,dy:-40,dur:1.2,a:.9}],['flash',{c:'#ffd166',dl:.3}]],{el:'fire',cast:.3});
+  U('ul_resurrect','Воскрешение','#ffffff','#ffe27a',[dim(.45,2.4),['rays',{fld:1,dur:2.2}],['pillar',{w:72}],['wings',{ic:'wings',sz:290}],['icon',{ic:'ankh',sz:120,dy:-60,dur:1.4}],['feathers',{n:20}]],{el:'light',cast:.3});
+  U('ul_sanctuary','Святое исцеление','#8ef7c1','#ffffff',[['sigil',{r:62,flat:1,ph:'cast',on:'q'}],['rain',{sh:'drop',n:8,sp:50,c:'#8ef7c1'}],['rise',{ch:'➕',n:12}],['icon',{ic:'heart',sz:110,dy:-70,dur:1.1}],['aura',{}]],{cast:.3});
+  U('ul_berserk','Ярость берсерка','#ff3b4f','#ff7a3d',[vig('#ff2a2a',1.9),['aura',{}],['aura',{c:'#ff7a3d',dl:.2}],['icon',{ic:'skull2',sz:150,dy:-80,dur:1}],['rise',{ch:'🔥',n:16}],['shake',{k:2}]],{el:'fire'});
+  /* дебаффы */
+  U('ul_curse','Проклятие бездны','#a06bff','#ff3b4f',[dim(.55,2.2),['icon',{ic:'eye',sz:230,fld:1,on:'q',dy:-160,ph:'cast',dur:1.9,a:.85}],['sigil',{r:56,flat:1,c:'#ff3b4f'}],['swirl',{n:14}],['icon',{ic:'pentagram',sz:120,dur:1}]],{el:'dark',cast:.6});
+  U('ul_timestop','Остановка времени','#9fdcff','#ffffff',[dim(.5,2.4),vig('#4fb3ff',2.4,.5),['icon',{ic:'hourglass',sz:210,fld:1,on:'q',dy:-150,ph:'cast',rot:3.14,dur:1.9}],['ring',{r:62,n:3}],['icon',{ic:'padlock',sz:90,dur:1}]],{cast:.5});
+  /* эмодзи → силуэты во всех пресетах; «💥» становится вспышкой-взрывом */
+  for(const P of EP_AN) P.st=P.st.map(([k,s])=>{ if(k==='glyph'&&s.ch){ const ic=EP_EMO[s.ch]; if(ic===''||ic==null) return ['boom',{r:28,dl:s.dl||0}]; const o={...s,ic}; delete o.ch; return ['glyph',o]; } return [k,s]; });
+})();
 /* проиграть пресет: p — кто применяет, q — цель, d — секунда действия; o.aEl — элемент бойца для подскока */
 function epAnDraw(X,P,p,q,d,o={}){ const cast=P.cast||0, hit=epAnHitP(P), sg=q.x<p.x?-1:1; X.K=epKitOf(P); X.m=o.m||1; X.sd=(Math.floor(d*1000)*31+Math.floor(p.x)*7+Math.floor(q.y)*13)%2147483646+1;
   if(P.lunge) epLunge(X,o.aEl,p,q,d+cast,P.lunge===2?.42:.62,hit-cast);
   for(const [k,s] of P.st){ const ph=s.ph||EP_ANPH[k]||'hit'; const t=d+(ph==='cast'?0:ph==='go'?cast:hit)+(s.dl||0); const at=s.on==='p'?p:s.on==='q'?q:ph==='cast'?p:q;
     try{ epAnStep(X,k,s,at,p,q,t,s.c||P.c,s.c2||P.c2||'#ffffff',sg); epPxStep(X,k,s,at,p,q,t,s.c||P.c,s.c2||P.c2||'#ffffff'); }catch(e){ console.warn('anim',P.id,k,e); } } }
 /* ---------- библиотека анимаций: сетка карточек с мини-сценой (наведи — проиграется) ---------- */
-function epAnPlayCard(card){ const P=EP_ANM[card.dataset.id]; const st=$('.epanst',card); if(!P||!st) return; epTxLoad(); $$('.epfxl',st).forEach(x=>x.remove()); const R=st.getBoundingClientRect(); if(!R.width) return; const sc=.5, W=R.width/sc, H=R.height/sc;
+function epAnPlayCard(card){ const P=EP_ANM[card.dataset.id]; const st=$('.epanst',card); if(!P||!st) return; epTxLoad();
+  if(EPG.st===1){ $$('.epfxl',st).forEach(x=>x.remove()); const R=st.getBoundingClientRect(); if(!R.width) return; const sc=.5, W=R.width/sc, H=R.height/sc;
+    const lay=document.createElement('div'); lay.className='epfxl'; lay.style.cssText=`inset:auto;left:0;top:0;width:${W}px;height:${H}px;transform:scale(${sc});transform-origin:0 0`; st.append(lay);
+    const S=epGLScene(st,R.width,R.height,0,sc); S.stage=st; S.lay=lay; const cen=e=>{ const r=e.getBoundingClientRect(); return {x:(r.left+r.width/2-R.left)/sc,y:(r.top+r.height/2-R.top)/sc,top:(r.top-R.top)/sc}; };
+    const a=$('.d.a',st), b=$('.d.b',st); epGLDraw(S,P,cen(a),cen(b),.05,{aEl:a}); return; }
+  epGLLoad(); $$('.epfxl',st).forEach(x=>x.remove()); const R=st.getBoundingClientRect(); if(!R.width) return; const sc=.5, W=R.width/sc, H=R.height/sc;
   const lay=document.createElement('div'); lay.className='epfxl'; lay.style.cssText=`inset:auto;left:0;top:0;width:${W}px;height:${H}px;transform:scale(${sc});transform-origin:0 0`; st.append(lay);
   const X=epFxCtx(lay,0,W,H); X.st=st; X.k=sc; X.pq=.6; const cen=e=>{ const r=e.getBoundingClientRect(); return {x:(r.left+r.width/2-R.left)/sc,y:(r.top+r.height/2-R.top)/sc,top:(r.top-R.top)/sc}; };
   const a=$('.d.a',st), b=$('.d.b',st); epAnDraw(X,P,cen(a),cen(b),.05,{aEl:a}); }
 function epAnCard(P,cur){ const g=EP_ANG.find(x=>x[0]===P.g)||EP_ANG[0]; const E=P.el?EP_ANEL[P.el]:null;
   return `<div class="epanc ${P.g==='buff'?'ally':''} ${cur===P.id?'cur':''}" data-id="${P.id}" style="--ac:${P.c}" title="${esc(P.n)}"><div class="epanst"><i class="d a"></i><i class="d b"></i></div><div class="nm">${esc(P.n)}</div><div class="tg">${g[1]} ${esc(E?E[0]:g[2])}</div></div>`; }
-function epAnGallery(box,o={}){ let grp='', q=''; try{ grp=localStorage.getItem('epAnG')||''; }catch{} if(grp&&!EP_ANG.some(g=>g[0]===grp)) grp='';
+function epAnGallery(box,o={}){ epGLLoad(); let grp='', q=''; try{ grp=localStorage.getItem('epAnG')||''; }catch{} if(grp&&!EP_ANG.some(g=>g[0]===grp)) grp='';
   box.innerHTML=`<div class="epanbar"><input class="q" placeholder="🔍 поиск: огонь, стрела, лечение…"><span class="chips"></span></div>${o.pick?`<div class="epanspec"><button class="btn sm ${!o.cur?'on':''}" data-v="">${o.isAtk?'⚔ По классу бойца':'✨ По умолчанию (сияние / сглаз)'}</button><button class="btn sm ${o.cur==='none'?'on':''}" data-v="none">∅ Без анимации</button></div>`:''}<div class="epangrid"></div>`;
   const chips=$('.chips',box), grid=$('.epangrid',box);
   const drawChips=()=>{ chips.innerHTML=[['','Все',EP_AN.length,'#ffd166'],...EP_ANG.map(g=>[g[0],g[1]+' '+g[2],EP_AN.filter(P=>P.g===g[0]).length,g[3]])].map(([k,n,c,col])=>`<button class="btn sm ${grp===k?'on':''}" data-g="${k}" style="--gc:${col}">${esc(n)} <span class="faint">${c}</span></button>`).join('');
@@ -8828,8 +9084,9 @@ function epAnPicker(cur,isAtk,onPick){ const ov=el(`<div class="epanov"><div cla
   epAnGallery($('.gal',ov),{pick:1,cur,isAtk,onPick:id=>{ close(); onPick(id); }}); const c=cur&&$(`.epanc[data-id="${cur}"]`,ov); if(c) c.scrollIntoView({block:'center'}); }
 /* анимации действия поверх сцены: удары и заклинания (пресеты EP_AN), COUNTER/DUO, переход на другую позицию.
    Время считается от момента, когда этот зритель увидел действие, — перерисовка страницы продолжает анимацию с того же места */
-function epPlay(page,B){ const sn=EP_SEEN[B.id]; const ago=sn&&sn.at?(Date.now()-sn.at)/1000:1e9; const st=$('.epstage',page); const L=(B.an||[]).filter(a=>a.d+2.2>ago); if(!st||!L.length) return; const R=st.getBoundingClientRect(); if(!R.width) return;
-  epTxLoad(); const lay=document.createElement('div'); lay.className='epfxl'; st.append(lay); const X=epFxCtx(lay,ago,R.width,R.height); X.st=st;
+function epPlay(page,B){ const sn=EP_SEEN[B.id]; const ago=sn&&sn.at?(Date.now()-sn.at)/1000:1e9; const st=$('.epstage',page); const L=(B.an||[]).filter(a=>a.d+3.5>ago); if(!st||!L.length) return; const R=st.getBoundingClientRect(); if(!R.width) return;
+  epTxLoad(); epGLLoad(); const lay=document.createElement('div'); lay.className='epfxl'; st.append(lay); const X=epFxCtx(lay,ago,R.width,R.height); X.st=st;
+  let S=null; if(EPG.st===1&&L.some(a=>a.k==='atk')){ try{ S=epGLScene(st,R.width,R.height,ago,1); S.stage=st; S.lay=lay; }catch(e){ console.warn('Эпик WebGL',e); S=null; } }
   const U=id=>$(`.epu[data-u="${id}"]`,st); const C=id=>{ const u=U(id); if(!u) return null; const r=($('.por',u)||u).getBoundingClientRect(); return {x:r.left+r.width/2-R.left,y:r.top+r.height/2-R.top,top:u.getBoundingClientRect().top-R.top}; };
   const T=(x,y)=>`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;
   for(const a of L){ const d=a.d;
@@ -8838,7 +9095,7 @@ function epPlay(page,B){ const sn=EP_SEEN[B.id]; const ago=sn&&sn.at?(Date.now()
       X.run(n,[{transform:T((f[0]-t[0])*R.width/100,(f[1]-t[1])*R.height/100),zIndex:6},{transform:T(0,0),zIndex:6}],.6,d,{keep:1,fill:'backwards',e:'ease-in-out'}); continue; }
     if(a.k==='ult'){ epUlt(X,U(a.u),epU(B,a.u),a,d); continue; }
     if(a.k!=='atk') continue; const p=C(a.a), q=C(a.t); if(!p||!q) continue;
-    const P=EP_ANM[a.an]||EP_ANM[EP_CLSAN[a.c]]||EP_ANM.st_basic; epAnDraw(X,P,p,q,d,{aEl:U(a.a),m:a.ult?1.8:1}); } }
+    const P=EP_ANM[a.an]||EP_ANM[EP_CLSAN[a.c]]||EP_ANM.st_basic; if(S) epGLDraw(S,P,p,q,d,{aEl:U(a.a),m:a.ult?1.8:1,sub:a.sub}); else epAnDraw(X,P,p,q,d,{aEl:U(a.a),m:a.ult?1.8:1}); } }
 /* ---------- карточка юнита на сцене ---------- */
 function epUnitHTML(B,u,fl,ago=0){ const s=epUS(u); const mh=s.mhp, hp=Math.max(0,u.hp??mh); const [x,y]=EP_POSXY[u.side][u.pos]; const el_=EP_EL.find(e=>e[0]===u.el); const cl=EP_CLS.find(e=>e[0]===u.cls);
   const A=EPT.bid===B.id?epU(B,EPT.uid):null; const pk=A?epPickable(B,A,EPT.sk,EPT.code,u):false; const pick=(EPT.picks||[]).includes(u.id); const set=B.ph==='setup';
@@ -8853,7 +9110,7 @@ function epSkillBtn(B,A,s,pos){ const why=epWhyNot(B,A,s); const P=s.ep||{}; con
   const tip=pos?epPosSkTxt(s):epSkillSummary(s); const cd=(A.cd||{})[s.id]>0?A.cd[s.id]:(s.id==='p_sup'&&(B.supCd||{})[A.side]>0?B.supCd[A.side]:0);
   return `<button class="epsk ${pos?'pos':''} ${why?'dis':''}" data-s="${s.id}" title="${esc(tip.replace(/<[^>]+>/g,'')+(why?'\n\n✗ '+why:''))}"><b>${pos?'◇':P.slot}</b>${P.ult?'<span class="ultm" title="ультимейт">⭐</span>':''}${img?`<img class="ski" data-img="${esc(img)}" data-thumb="1" style="display:none">`:''}${esc(nm)}${cd?`<span class="cd">КД ${cd}</span>`:''}</button>${P.sb&&P.sb.on?`<button class="epsk sb ${sbOk?'':'dis'}" data-s="${s.id}" data-sb="1" title="${esc('Соул бёрн: '+(A.sbFree?'бесплатно (Ритуал)':(P.sb.cost||0)+' душ')+(P.sb.desc?' — '+P.sb.desc:''))}">🔥${A.sbFree?'0':P.sb.cost||0}</button>`:''}`; }
 /* ---------- страница ---------- */
-function renderBattle(m){ epSubscribe(); const dm=isDM()&&!viewAs; const B=state.id?byId(world.battles,state.id):null;
+function renderBattle(m){ epSubscribe(); epGLLoad(); const dm=isDM()&&!viewAs; const B=state.id?byId(world.battles,state.id):null;
   if(!B){ const L=(world.battles||[]).filter(b=>dm||b.ph!=='end').sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)); const PH={setup:'подготовка',fight:'идёт бой',end:'завершён'};
     const page=el(`<div class="page"><div class="head"><h1>Бой</h1><span class="grow"></span>${dm?'<button class="btn primary" id="epNew">+ Новый бой</button>':''}</div><div class="faint" style="font-size:13px;margin-bottom:12px">Пошаговый бой «строй на строй». ${dm?'Создай бой, расставь союзников и врагов по позициям и начни — игроки увидят его здесь.':'Здесь появляются бои, которые завёл мастер.'}</div><div class="eplist">${!EP_LOADED?'<div class="faint">загрузка…</div>':L.length?L.map(b=>`<div class="epbrow" data-b="${b.id}"><b>${esc(b.name||'Бой')}</b><span class="faint">${PH[b.ph]||''}${b.ph==='fight'?' · фаза '+(b.round||1):''} · ${(b.units||[]).filter(u=>u.side==='a').length} на ${(b.units||[]).filter(u=>u.side==='e').length}</span><span class="grow"></span>${dm?'<button class="x-btn del" title="удалить бой">×</button>':''}</div>`).join(''):'<div class="faint">Боёв пока нет.</div>'}</div></div>`);
     $$('.epbrow',page).forEach(r=>{ r.onclick=e=>{ if(e.target.closest('.del')) return; go('battle',r.dataset.b); }; const d=$('.del',r); if(d) d.onclick=async()=>{ const b=byId(world.battles,r.dataset.b); if(!b||!await confirmDlg(`Удалить бой «${b.name||'Бой'}»?`)) return; await removeDoc('battles',b); render(); }; });
@@ -10039,7 +10296,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{EPX,epTex,epEmit,epPx,epFxCtx,epAnDraw,epUlt,EP_ANM,wmTmplGeo,wmTmplHandles,fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{EPX,epTex,epEmit,epPx,epFxCtx,epAnDraw,epUlt,EP_ANM,EPG,epGLLoad,epGLScene,epGLDraw,epGLTex,wmTmplGeo,wmTmplHandles,fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
