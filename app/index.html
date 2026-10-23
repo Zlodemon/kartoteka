@@ -552,6 +552,30 @@ body.fight #fightBtn{background:rgba(255,209,102,.2);border-color:rgba(255,209,1
 .epchip{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.07);font-size:12px;margin:2px 4px 2px 0}.epchip.on{background:rgba(255,209,102,.14);color:var(--gold)}
 .epfxr{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:5px}.epfxr select.id{max-width:240px}.epfxr label{display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--muted)}.epfxr input{width:68px;padding:3px 6px}.epsk .seg span{min-width:26px;text-align:center}.epsb{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:6px 10px}.epsb summary{cursor:pointer}
 .epset .eprules{font-size:12.5px;line-height:1.6;margin:8px 0 0 18px;padding:0}.epclsrow,.epsetrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line)}.epclsrow>b{width:130px}.epbon{display:inline-flex;gap:3px;align-items:center;padding:2px 4px;border:1px solid var(--line2);border-radius:8px;margin:2px}.epbon select{font-size:12px;padding:3px 20px 3px 6px}.epbon input.v{width:60px;padding:3px 5px}.epbon label{display:inline-flex;gap:2px;align-items:center;font-size:12px}.epsetrow .bons{display:contents}
+.epcard .eph{font-weight:600;margin-bottom:3px}.epcard .epl{font-size:12px;line-height:1.45;white-space:pre-wrap;word-break:break-word}.epcard .epl.ph{color:var(--gold)}.epcard .epl.hit{color:#ffb4a8;margin-top:2px}.epcard .epl.dmg{color:#ff8a7a;padding-left:12px}
+.eplist{display:flex;flex-direction:column;gap:6px;max-width:760px}.eprow{display:flex;gap:10px;align-items:center;padding:10px 14px;border:1px solid var(--line2);border-radius:10px;cursor:pointer;background:rgba(255,255,255,.03)}.eprow:hover{border-color:var(--gold)}
+.epbpage .head .epname{font-size:20px;font-weight:700;background:none;border:1px solid transparent;padding:4px 8px;max-width:420px}.epbpage .head .epname:hover,.epbpage .head .epname:focus{border-color:var(--line2)}
+.epstage{position:relative;height:min(66vh,640px);min-height:470px;border-radius:14px;overflow:hidden;border:1px solid var(--line2);background:radial-gradient(ellipse at 50% 65%,#2b3150,#0f1422 72%);user-select:none}
+.epstage .epbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.epstage .epmid{position:absolute;left:50%;top:13%;bottom:6%;border-left:1px dashed rgba(255,255,255,.14)}
+.epu{position:absolute;transform:translate(-50%,-50%);width:152px;padding:8px 8px 6px;border-radius:12px;background:#0f1422;border:1px solid var(--line2);text-align:center;transition:box-shadow .2s,opacity .2s;z-index:1}
+.epu .pw{position:relative;width:62px;height:62px;margin:0 auto 4px}.epu .por{width:62px;height:62px;border-radius:50%;overflow:hidden;border:2px solid var(--c);background:#1a1f30;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px}.epu .por img{width:100%;height:100%;object-fit:cover}
+.epu .el{position:absolute;right:-6px;bottom:-4px;font-style:normal;font-size:13px;background:#0f1422;border:1px solid var(--line2);border-radius:50%;width:24px;height:24px;line-height:22px}.epu .stars{position:absolute;left:50%;top:-9px;transform:translateX(-50%);font-style:normal;font-size:9.5px;color:var(--gold);letter-spacing:-1px;white-space:nowrap;text-shadow:0 1px 2px #000}
+.epu .nm{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.epu .ppos{font-size:11px;color:var(--gold)}
+.epu .hpb{position:relative;height:15px;border-radius:8px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:4px}.epu .hpb i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#2f9e5f,#8ef7c1);transition:width .4s}.epu.s-e .hpb i{background:linear-gradient(90deg,#c0392b,#ff7a6e)}.epu .hpb b{position:absolute;right:0;top:0;bottom:0;background:rgba(170,220,255,.5)}.epu .hpb span{position:relative;font-size:10.5px;line-height:15px;font-weight:700;text-shadow:0 1px 2px #000}
+.epu .fxs{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;margin-top:4px}.epu .fxs span{font-size:13px;padding:0 3px;border-radius:5px;background:rgba(255,255,255,.07);cursor:help}.epu .fxs .buff{box-shadow:inset 0 -2px 0 #4fb3ff}.epu .fxs .debuff{box-shadow:inset 0 -2px 0 #ff5c6c}.epu .fxs sub{font-size:9px;color:var(--muted)}
+.epu .meta{font-size:11px;color:var(--muted);display:flex;gap:8px;justify-content:center;margin-top:2px;min-height:4px}
+.epu.cur{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold),0 0 26px rgba(255,209,102,.45);z-index:2}.epu.dead{opacity:.4;filter:grayscale(1)}
+.epstage.picking .epu{opacity:.5}.epstage.picking .epu.pk{opacity:1;cursor:crosshair;border-color:#ff8a3d;box-shadow:0 0 0 2px #ff8a3d}.epstage.picking .epu.pk:hover{box-shadow:0 0 0 3px #ff8a3d,0 0 20px rgba(255,138,61,.5)}.epu.picked{box-shadow:0 0 0 3px #ff5c6c!important;opacity:1!important}
+.epu.empty{border-style:dashed;cursor:pointer;opacity:.8;background:rgba(15,20,34,.75)}.epu.empty:hover{border-color:var(--gold);opacity:1}.epu.empty .plus{font-size:26px;color:var(--faint);line-height:1.2}
+.epfl{position:absolute;left:50%;top:6px;font-weight:800;font-size:21px;pointer-events:none;animation:epfl 1.8s ease-out forwards;text-shadow:0 2px 4px #000;opacity:0;white-space:nowrap}.epfl.dmg{color:#ff6b5e}.epfl.crit{color:#ffd166;font-size:27px}.epfl.heal{color:#8ef7c1}.epfl.miss{color:#b8bdd6}
+@keyframes epfl{0%{opacity:0;transform:translate(-50%,0)}12%{opacity:1}100%{opacity:0;transform:translate(-50%,-52px)}}
+.eptop{position:absolute;left:10px;right:10px;top:8px;display:flex;gap:8px;align-items:center;z-index:3}.epround{padding:3px 10px;border-radius:999px;background:#0f1422;border:1px solid var(--gold);color:var(--gold);font-size:12.5px;font-weight:700;flex:none}
+.epord{display:flex;gap:4px;flex-wrap:wrap;align-items:center;font-size:12px}.epord .oc{padding:2px 8px;border-radius:999px;background:#0f1422;border:1px solid var(--line2)}.epord .oc.a{border-color:#4fb3ff}.epord .oc.e{border-color:#ff6b5e}.epord .oc.cur{background:var(--gold);border-color:var(--gold);color:#111;font-weight:700}.epord .epsw{font-size:12px;padding:0 4px}
+.epsouls{margin-left:auto;padding:3px 10px;border-radius:999px;background:#0f1422;border:1px solid #c04be0;font-size:12.5px;flex:none}
+.epwin{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:800;background:rgba(0,0,0,.4);z-index:4;pointer-events:none;text-shadow:0 3px 10px #000}.epwin.a{color:var(--gold)}.epwin.e{color:#ff6b5e}
+.epact{margin-top:10px;padding:10px 12px;border:1px solid var(--line2);border-radius:12px;background:#0f1422;display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:58px}.epact .epwho{margin-right:6px}.epact .epsep{margin-left:10px;font-size:12px;color:#7ae0ff}.epact .eppk{color:#ffb070;font-weight:600}
+.epsk{display:inline-flex;gap:6px;align-items:center;padding:8px 12px;border-radius:10px;border:1px solid var(--line2);background:rgba(255,255,255,.05);color:inherit;cursor:pointer;font:inherit;font-size:13px}.epsk:hover{border-color:var(--gold)}.epsk b{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#111;align-items:center;justify-content:center;font-size:11px;flex:none}.epsk.pos b{background:#7ae0ff}.epsk.dis{opacity:.42}.epsk .cd{color:#ff9a7a;font-size:11.5px}.epsk.sb{border-color:#c04be0;padding:8px 9px;margin-left:-4px}
+.eppick{display:flex;gap:8px;flex-wrap:wrap}.epufx{display:flex;flex-wrap:wrap;gap:4px}
 #ruhandside .dhint{padding:7px 10px 0;font-size:10.5px;color:#98a0b8;line-height:1.5}
 #ruhandside .dhint b{color:#c9cee0}
 #ruhand .hh{display:flex;gap:8px;align-items:center;justify-content:center;font-size:12px;color:#d6dae6;margin-bottom:4px;flex-wrap:wrap}#ruhand .hh select{font-size:11px;padding:2px 18px 2px 6px}#ruhand .hh .mode{color:var(--faint)}
@@ -1245,6 +1269,7 @@ body.phone #modal .box{max-height:calc(100dvh - 20px)}
     <div class="nav" data-view="docs"><span class="dot" style="color:#e8d5a8;background:#e8d5a8"></span><span class="t">Документы</span><span class="n" id="nDocs"></span></div>
     <div class="nav" data-view="skills"><span class="dot" style="color:var(--gold);background:var(--gold)"></span><span class="t">Техники</span></div>
     <div class="nav" data-view="timeline"><span class="dot" style="color:#f1e6ff;background:#f1e6ff"></span><span class="t">Таймлайн</span></div>
+    <div class="nav eponly" data-view="battle"><span class="dot" style="color:#ffd166;background:#ffd166"></span><span class="t">Бой</span></div>
     <div class="nav cdonly" data-view="cards"><span class="dot" style="color:#ff9f6e;background:#ff9f6e"></span><span class="t">Карточки</span></div>
     <div class="nav dmonly" data-view="log"><span class="dot" style="color:var(--gold);background:var(--gold)"></span><span class="t">Журнал</span><span class="n" id="nLog"></span></div>
     <div class="nav dmonly" data-view="trash" title="Удалённое за последние 30 дней — можно вернуть"><span class="dot" style="color:#9aa3bf;background:#9aa3bf"></span><span class="t">Корзина</span><span class="n" id="nTrash"></span></div>
@@ -1447,7 +1472,7 @@ if(MOCK){
    ============================================================ */
 let me=null;            // {uid,email,name,photo}
 let myRole='observer';  // 'dm' | 'player' | 'observer'
-const world={ settings:null, timeline:null, dmTimeline:null, techniques:null, characters:[], orgs:[], locations:[], memberships:[], locLinks:[], relations:[], maps:[], wmaps:[], wmarkers:[], wmdraw:[], wmpriv:[], users:[], log:[], docs:[], cards:[], cardsets:[] };
+const world={ settings:null, timeline:null, dmTimeline:null, techniques:null, characters:[], orgs:[], locations:[], memberships:[], locLinks:[], relations:[], maps:[], wmaps:[], wmarkers:[], wmdraw:[], wmpriv:[], users:[], log:[], docs:[], cards:[], cardsets:[], battles:[] };
 const state={ view:'characters', id:null, q:'' };
 const imgCache=new Map(); // imgId -> dataURL
 let lastInputAt=0, unsubs=[];
@@ -1644,10 +1669,10 @@ function wmSubMap(id){ if(!id||!me) return Promise.resolve(); let s=WMSUB.get(id
   wmMerge('wmarkers'); wmMerge('wmdraw'); return s.ready; }
 let LOGSUB=null;
 function logSub(n){ if(!realDM()||!me) return; if(LOGSUB&&LOGSUB.n>=n) return; if(LOGSUB) try{ LOGSUB.un(); }catch{} LOGSUB={n,un:DB.subscribe('log',{orderBy:'at',limit:n},docs=>applyDocs('log','log',docs))}; }
-let CDSUB=null; const CD_LOADED={cards:false,sets:false}; // пришли ли карты и сеты из базы (до этого не переводим оформление на стили)
+let CDSUB=null, EPSUB=null; const CD_LOADED={cards:false,sets:false}; // пришли ли карты и сеты из базы (до этого не переводим оформление на стили)
 function cdSubscribe(){ if(CDSUB||!me) return; const o=realDM()?null:{where:[['pub','==',true]]}; CDSUB=[DB.subscribe('cards',o,docs=>{ CD_LOADED.cards=true; applyDocs('cards','cards',docs); }),DB.subscribe('cardsets',o,docs=>{ CD_LOADED.sets=true; applyDocs('cardsets','cardsets',docs); })]; }
 function lazyReset(){ for(const v of WMSUB.values()) v.un.forEach(f=>{ try{ f(); }catch{} }); WMSUB.clear(); for(const k of Object.keys(world)) if(wmAlias(k)) delete world[k]; world.wmarkers=[]; world.wmdraw=[];
-  if(LOGSUB){ try{ LOGSUB.un(); }catch{} LOGSUB=null; } if(CDSUB){ CDSUB.forEach(f=>{ try{ f(); }catch{} }); CDSUB=null; } CD_LOADED.cards=CD_LOADED.sets=false; world.cards=[]; world.cardsets=[]; }
+  if(LOGSUB){ try{ LOGSUB.un(); }catch{} LOGSUB=null; } if(CDSUB){ CDSUB.forEach(f=>{ try{ f(); }catch{} }); CDSUB=null; } CD_LOADED.cards=CD_LOADED.sets=false; world.cards=[]; world.cardsets=[]; if(EPSUB){ try{ EPSUB(); }catch{} EPSUB=null; } EP_LOADED=false; world.battles=[]; }
 function subscribeAll(){ lazyReset();
   const sub=(coll,key,opts,post)=>unsubs.push(DB.subscribe(coll,opts,docs=>{ applyDocs(key,coll,docs,post); }));
   sub('meta','_settings',null,()=>{ const s=world._settings.find(x=>x.id==='settings'); const fresh=s?{...defaultSettings(),...s}:{...defaultSettings(),id:'settings'}; if(!world.settings) world.settings=fresh; else if(!pending.has('settings')&&!(s&&s.updatedAt&&s.updatedAt===world.settings.updatedAt)){ for(const k of Object.keys(world.settings)) if(!(k in fresh)) delete world.settings[k]; Object.assign(world.settings,fresh); } const t=world._settings.find(x=>x.id==='timeline'); if(!pending.has('timeline')&&!(t&&world.timeline&&t.updatedAt&&t.updatedAt===world.timeline.updatedAt)) world.timeline=t?t:{id:'timeline',nodes:[]}; const tc=world._settings.find(x=>x.id==='techniques'); if(!pending.has('techniques')&&!(tc&&world.techniques&&tc.updatedAt&&tc.updatedAt===world.techniques.updatedAt)){ world.techniques=tc?tc:(realDM()?techBaseCatalog():{id:'techniques',branches:[],groups:[]}); techLayoutCache={}; } applySiteName(); });
@@ -1684,7 +1709,7 @@ const snapshots=new Map(); // id -> stableStr последних известн�
 const NO_RENDER_KEYS=new Set(['_live','_chat','_chatdm']); // чат и пинги перерисовывают только себя
 const REDRAW_KEYS=new Set(['wmaps','wmarkers','wmdraw','wmpriv','_dm','characters','orgs','locations','docs','users']);
 /* на открытой карте эти данные не показываются — их приход не должен пересобирать страницу (иначе левая панель прыгает наверх, открытые меню закрываются) */
-const MAP_QUIET_KEYS=new Set(['log','memberships','locLinks','relations','maps','cards','cardsets','trash','campaigns','_site']); // на открытой карте — только перерисовка холста, без пересборки страницы (иначе рвётся перетаскивание и мигают картинки)
+const MAP_QUIET_KEYS=new Set(['log','memberships','locLinks','relations','maps','cards','cardsets','battles','trash','campaigns','_site']); // на открытой карте — только перерисовка холста, без пересборки страницы (иначе рвётся перетаскивание и мигают картинки)
 /* элементы массивов с id (элементы карты, полоски, статусы…) при обновлении из базы остаются теми же объектами: выделение, перетаскивание
    и открытые формы держат ссылку. Раньше чужая правка карты подменяла все элементы — начатое перетаскивание двигало «отвязанную» копию и терялось */
 function reuseArr(oa,nv){ if(!Array.isArray(nv)) return nv; const M=new Map(oa.map(x=>[x.id,x])); return nv.map(n=>{ const o=(n&&typeof n==='object'&&n.id!=null)?M.get(n.id):null; if(!o||o===n) return n; for(const k of Object.keys(o)) if(!k.startsWith('_')) delete o[k]; Object.assign(o,n); return o; }); }
@@ -1790,7 +1815,7 @@ let inflight=0;
 function saveStatus(){ if(pending.size) return; if(inflight) setStatus(navigator.onLine===false?'нет сети — сохранится, когда появится':'сохраняю…','dirty'); else setStatus('синхронизировано'); }
 async function saveFail(e,coll,docId,id){ console.error(e); toast(e.code==='permission-denied'?'Нет прав на это изменение — откатываю':'Ошибка сохранения: '+(e.code||e.message),true); const fresh=await DB.get(coll,docId).catch(()=>null); if(fresh){ snapshots.set(docId,stableStr(clean(fresh))); const arr=world[Object.keys(COLLMAP).find(k=>COLLMAP[k]===coll)]; const i=arr?arr.findIndex(x=>x.id===id):-1; if(i>=0){ arr[i]=fresh; } } render(); }
 window.addEventListener('offline',saveStatus); window.addEventListener('online',saveStatus);
-const COLLMAP={characters:'characters',orgs:'orgs',locations:'locations',memberships:'memberships',locLinks:'locLinks',relations:'relations',maps:'maps',wmaps:'wmaps',wmarkers:'wmarkers',wmdraw:'wmdraw',wmpriv:'wmpriv',docs:'docs',cards:'cards',cardsets:'cardsets'};
+const COLLMAP={characters:'characters',orgs:'orgs',locations:'locations',memberships:'memberships',locLinks:'locLinks',relations:'relations',maps:'maps',wmaps:'wmaps',wmarkers:'wmarkers',wmdraw:'wmdraw',wmpriv:'wmpriv',docs:'docs',cards:'cards',cardsets:'cardsets',battles:'battles'};
 window.addEventListener('beforeunload',e=>{ if(pending.size||inflight){ e.preventDefault(); e.returnValue=''; } });
 document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='s'){ e.preventDefault(); clearTimeout(saveTimer); flush(); } });
 
@@ -2186,11 +2211,11 @@ function uiPanelsEditor(host){ const draw=()=>{ const H=uiHide(); host.innerHTML
     $$('[data-p]',host).forEach(b=>b.onclick=()=>{ uiHideSave(b.dataset.p==='all'?{}:Object.fromEntries(UI_NOVICE.map(k=>[k,true]))); draw(); }); };
   draw(); }
 function uiPanelsDialog(){ const b=openModal(`<h2>🧩 Мои панели на карте</h2><div class="faint" style="font-size:12.5px;margin-bottom:8px">Сними галочку — кнопка или раздел пропадёт с панелей. Остальным ничего не меняется.</div><div class="uiped"></div><div class="modal-actions"><button class="btn primary" id="uok">Готово</button></div>`,true); uiPanelsEditor($('.uiped',b)); $('#uok',b).onclick=closeModal; }
-function applyNav(){ applyUiHide(); document.body.classList.toggle('noAbDone',!!(world.settings&&world.settings.noAbDone)); const H=myNavHide(); $$('.nav[data-view]').forEach(n=>{ const v=n.dataset.view; if(n.classList.contains('cdonly')&&!cdOn()&&!(isDM()&&state.view==='cards')){ n.style.display='none'; return; } if(H[v]&&v!=='settings'){ n.style.display='none'; return; } if(n.classList.contains('dmonly')){ n.style.display=(isDM()&&(!n.classList.contains('ruonly')||ruOn()))?'':'none'; return; } n.style.display=sectionOn(v)?'':'none'; }); }
+function applyNav(){ applyUiHide(); document.body.classList.toggle('noAbDone',!!(world.settings&&world.settings.noAbDone)); const H=myNavHide(); $$('.nav[data-view]').forEach(n=>{ const v=n.dataset.view; if(n.classList.contains('eponly')&&!epOn()){ n.style.display='none'; return; } if(n.classList.contains('cdonly')&&!cdOn()&&!(isDM()&&state.view==='cards')){ n.style.display='none'; return; } if(H[v]&&v!=='settings'){ n.style.display='none'; return; } if(n.classList.contains('dmonly')){ n.style.display=(isDM()&&(!n.classList.contains('ruonly')||ruOn()))?'':'none'; return; } n.style.display=sectionOn(v)?'':'none'; }); }
 /* ошибка при отрисовке страницы — показать, а не пустой экран */
 window.addEventListener('error',e=>{ try{ if(document.body&&!document.body.dataset.errShown){ document.body.dataset.errShown='1'; setTimeout(()=>{ delete document.body.dataset.errShown; },3000); toast('Ошибка: '+(e.message||'?')+' (строка '+(e.lineno||'?')+')',true); } }catch{} });
 /* ===== адреса страниц: #/раздел/id/вкладка. F5 возвращает на ту же страницу, «Назад»/«Вперёд» браузера и мыши работают, ссылкой можно поделиться ===== */
-const ROUTE_VIEWS=new Set(['characters','orgs','locations','graph','wmap','docs','skills','timeline','log','trash','users','stlib','efflib','emocards','settings','cards']);
+const ROUTE_VIEWS=new Set(['characters','orgs','locations','graph','wmap','docs','skills','timeline','log','trash','users','stlib','efflib','emocards','settings','cards','battle']);
 const ROUTE={want:null}; let RENDER_DEPTH=0;
 function routeHash(view,id,tab){ let h='#/'+view; if(id) h+='/'+encodeURIComponent(id); if(id&&tab) h+='/'+encodeURIComponent(tab); return h; }
 function routeParse(h){ const m=String(h||'').match(/^#\/([a-z]+)(?:\/([^/?#]+))?(?:\/([^/?#]+))?/); if(!m||!ROUTE_VIEWS.has(m[1])) return null; let id=null, tab=null; try{ id=m[2]?decodeURIComponent(m[2]):null; tab=m[3]?decodeURIComponent(m[3]):null; }catch{} return {view:m[1],id,tab}; }
@@ -2221,6 +2246,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-23',t:'Эпик-бой: экран боя',items:['Раздел «Бой»: строй на строй как в Epic Seven — 4 позиции у союзников и врагов, свой фон, порядок ходов сверху, кнопки скиллов внизу.','Приложение само кидает попадание, крит, урон и эффекты, лог каждого действия — в чат. Дуо и контратаки, ДоТы, сон, стелс, провокация, бессмертие, барьер, соул бёрн, способности позиций.','Игрок ходит своими персонажами, мастер — врагами; у мастера ⏭ пропуск, ↶ отмена и правка бойца. ХП в начале боя полное, ресурсы боя обнуляются.']},
   {d:'2026-10-23',t:'Эпик-бой: персонаж и скиллы',items:['Новый доп. режим «Эпик-бой» — пошаговый бой в духе Epic Seven (Настройки → ✦ Эпик-бой; вместе с Руиной не включается).','На листе персонажа: элемент, класс, звёзды и характеристики с итогом, вкладка «Снаряжение» — 7 слотов и сеты.','У способностей вкладка «✦ Эпик»: слот 1–4, КД, цели, урон, эффекты из таблицы, души, боевой дух, соул бёрн. Сам экран боя — следующим обновлением.']},
   {d:'2026-10-23',t:'Быстрее отклик, шаблоны и отмена',items:['Шаблоны на карте больше не прыгают назад у других, когда отпускаешь ручку, и не мигают при создании.','Ctrl+Z на карте отменяет только твоё действие: чужие шаблоны, рисунки и токены, которые двигали другие, больше не откатываются.','Клики, выбор в списках и Enter сохраняются почти сразу (около 0,1 с вместо 0,7 с) — другие игроки видят изменение быстрее.','Набор текста по-прежнему сохраняется через 0,7 с после последней буквы, чтобы не тратить лимит базы на каждую букву.','После своего клика чужие правки на странице персонажа больше не ждут лишние 2 секунды.']},
   {d:'2026-10-22',t:'Карточки: арт, текст, палитра, TTS',items:['Арт можно отдалить, чтобы картинка влезла целиком (⤢ — вписать), пустые поля заливаются крайними пикселями, размытием или своим цветом.','Справочники → Общее: размер художественного текста относительно основного и его наибольшая доля поля — с превью.','Палитра цветов (кружки при выборе цвета) — правится мастером прямо в ней (✎): менять, добавлять сколько угодно, убирать, переставлять.','Скейл карт в TTS задаётся в окне «🎲 В TTS».','Порядок сетов — перетаскиванием за заголовок.','Энергия и инициатива без подписи — число по центру блока.']},
@@ -2391,6 +2417,7 @@ function renderPage(){
   else if(v==='users'&&isDM()) renderUsers(m);
   else if(v==='settings'&&isDM()) renderSettings(m);
   else if(v==='settings') renderMySettings(m);
+  else if(v==='battle'&&epOn()) renderBattle(m);
   else if(v==='efflib'&&isDM()) renderEffLib(m); else if(v==='stlib'&&isDM()) renderStLib(m); else if(v==='emocards'&&isDM()) renderEffLib(m);
   else renderList(m,'c');
   if(v==='wmap'&&state.id&&CHAT.mapAuto&&!CHAT.open&&!PHONE()&&$('#chatBtn').style.display!=='none') chatOpen(true);
@@ -7420,7 +7447,7 @@ function ruRefresh(){ drawInit(); draw(); if(WM.onMe) WM.onMe(); if(WM.onHand) W
    в исходные (origUid), на локальном — в local_<почта>; ссылки на uid во всех документах заменяются.
    ============================================================ */
 /* все коллекции Firestore (сверено с firestore.rules; live — в Realtime Database, его не сохраняем: там только временное) */
-const BK_COLLS=['users','meta','dm','characters','orgs','locations','memberships','locLinks','relations','maps','wmaps','wmarkers','wmdraw','wmpriv','docs','images','log','chat','chatdm','trash','cards','cardsets','cardfaces'];
+const BK_COLLS=['users','meta','dm','characters','orgs','locations','memberships','locLinks','relations','maps','wmaps','wmarkers','wmdraw','wmpriv','docs','images','log','chat','chatdm','trash','cards','cardsets','cardfaces','battles'];
 async function fullBackup(prog){ if(!realDM()) return; const data={}, errs=[]; let n=0;
   for(const c of BK_COLLS){ prog.textContent='Читаю '+c+'…'; try{ data[c]=await (DB.listServer||DB.list)(c,{}); n+=data[c].length; }catch(e){ console.error(c,e); errs.push(c+': '+(e.code||e.message)); data[c]=[]; } }
   if(errs.length&&!await confirmDlg(`Не удалось прочитать: ${errs.join('; ')}. Бэкап будет НЕПОЛНЫМ. Всё равно сохранить?`,'Сохранить неполный')){ prog.textContent='Бэкап отменён: '+errs.join('; '); return; }
@@ -7562,7 +7589,7 @@ function chatAll(){ const docs=[...(world._chat||[]),...(world._chatdm||[]).map(
 function chatAvatar(m){ const e=m.c&&byId(world.characters,m.c); if(!e||!visibleEnt(e)) return ''; const col=e.color||typeColor.c||'#fff'; const src=e.thumb?`<img src="${e.thumb}">`:(e.mainImage?`<img data-img="${e.mainImage}" data-thumb="1" style="display:none">`:''); return `<span class="cav" style="--tc:${esc(col)}" data-open="${e.id}" title="${esc(e.name||'')}"><span class="ini">${esc(entAbbr(e))}</span>${src}</span>`; }
 function chatRender(){ const box=$('#chat .msgs'); if(!box) return; const all=chatAll(); const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<40; box.innerHTML=''; let day=null;
   for(const m of all){ const d=dayId(m.t); if(d!==day){ day=d; box.append(el(`<div class="day">${fmtDate(m.t).slice(0,5)}</div>`)); }
-    const mine=m.u===me?.uid; const cst=m.col?`style="color:${esc(m.col)}"`:''; const who=m.c?`<span class="who ch" ${cst} title="${esc(userName(m.u))}">${esc((()=>{ const cc=byId(world.characters,m.c); return cc&&isClone(cc)?chLabel(cc):(m.n||'?'); })())}</span>`:`<span class="who" ${cst}>${esc(m.n||userName(m.u))}</span>`; const av=chatAvatar(m); box.append(el(`<div class="msg ${mine?'mine':''} ${m.g?'gm':''} ${av?'hasav':''} ${CHAT.undone&&CHAT.undone.has(m.i)?'undone':''}">${av}${who}<span class="when">${new Date(m.t).toTimeString().slice(0,5)}${m.g?' · мастеру':''}</span>${m.r?rollHTML(m.r):m.k==='fx'?fxCardHTML(m):m.k==='ruina'?ruCardHTML(m):m.k==='stat'?`<div class="statcard"><span class="ct">${esc(m.ti||'')}</span><span class="num">${esc(m.v??'')}</span>${m.L?`<span class="L big" data-l="${esc(m.L)}">${esc(m.L)}</span>`:''}</div>`:m.k==='card'?`<div class="card"><div class="ct">${esc(m.ti||'')}</div>${m.su?`<div class="cs">${esc(m.su)}</div>`:''}<div class="cb">${rich(m.m||'')}</div></div>`:m.a?`<div><i>${esc(m.n)} ${esc(m.m||'')}</i></div>`:`<div>${esc(m.m||'')}</div>`}</div>`)); }
+    const mine=m.u===me?.uid; const cst=m.col?`style="color:${esc(m.col)}"`:''; const who=m.c?`<span class="who ch" ${cst} title="${esc(userName(m.u))}">${esc((()=>{ const cc=byId(world.characters,m.c); return cc&&isClone(cc)?chLabel(cc):(m.n||'?'); })())}</span>`:`<span class="who" ${cst}>${esc(m.n||userName(m.u))}</span>`; const av=chatAvatar(m); box.append(el(`<div class="msg ${mine?'mine':''} ${m.g?'gm':''} ${av?'hasav':''} ${CHAT.undone&&CHAT.undone.has(m.i)?'undone':''}">${av}${who}<span class="when">${new Date(m.t).toTimeString().slice(0,5)}${m.g?' · мастеру':''}</span>${m.r?rollHTML(m.r):m.k==='fx'?fxCardHTML(m):m.k==='ruina'?ruCardHTML(m):m.k==='ep'?epCardHTML(m):m.k==='stat'?`<div class="statcard"><span class="ct">${esc(m.ti||'')}</span><span class="num">${esc(m.v??'')}</span>${m.L?`<span class="L big" data-l="${esc(m.L)}">${esc(m.L)}</span>`:''}</div>`:m.k==='card'?`<div class="card"><div class="ct">${esc(m.ti||'')}</div>${m.su?`<div class="cs">${esc(m.su)}</div>`:''}<div class="cb">${rich(m.m||'')}</div></div>`:m.a?`<div><i>${esc(m.n)} ${esc(m.m||'')}</i></div>`:`<div>${esc(m.m||'')}</div>`}</div>`)); }
   hydrate(box); bindOpen(box);
   if(!all.length) box.append(el('<div class="sys">Пока тихо. Напиши что-нибудь или брось кубик: /roll d20</div>'));
   $('#chatMore').style.display=CHAT.noMore?'none':''; if(atBottom||CHAT.open) box.scrollTop=box.scrollHeight;
@@ -7986,7 +8013,7 @@ function epStats(ch){ const E=(ch&&ch.epic)||{}; const out={};
   for(const [k,,def] of EP_STATS){ const b=E.base&&E.base[k]!=null&&E.base[k]!==''?+E.base[k]:def; out[k]={base:b,flat:0,pct:0,mul:1,set:null,src:['база: '+b]}; }
   const add=(k,v,pct,src)=>{ const o=out[k]; if(!o||!v) return; const p=pct&&EP_PCTABLE.has(k); if(p) o.pct+=v; else o.flat+=v; o.src.push(src+': '+(v>0?'+':'')+Math.round(v*100)/100+(p?'%':'')); };
   for(const [k,v] of Object.entries(epClsBonus(E.cls))) add(k,+v||0,false,'класс');
-  for(const [sl,sn] of EP_SLOTS){ const g=E.gear&&E.gear[sl]; if(!g) continue; const nm=g.name||sn; if(g.k) add(g.k,+g.v||0,!!g.pct,nm); for(const s of (g.subs||[])) if(s.k) add(s.k,+s.v||0,!!s.pct,nm); }
+  for(const [sl,sn] of EP_SLOTS){ const g=E.gear&&E.gear[sl]; if(!g) continue; const nm=g.name||sn; if(g.k) add(g.k,+g.v||0,!!g.pct,nm); }
   for(const S of epSetsOn(ch)) for(const b of (S.bon||[])) add(b.k,(+b.v||0)*S.times,!!b.pct,'сет «'+S.name+'»'+(S.times>1?' ×'+S.times:''));
   for(const m of fxMods(ch)){ const t=String(m.t||''); if(!t.startsWith('ep:')) continue; const o=out[t.slice(3)]; if(!o) continue; const v=fxNumber(m.v,ch,m.rank,m.stacks);
     if(m.op==='*'){ o.mul*=v; o.src.push(m.src+': ×'+v); } else if(m.op==='='){ o.set=v; o.src.push(m.src+': = '+v); } else add(t.slice(3),m.op==='-'?-v:v,false,m.src); }
@@ -8014,27 +8041,22 @@ function epElNote(el){ const n=x=>{ const e=EP_EL.find(y=>y[0]===x); return e?e[
 function epGearBlock(ch){ const ed=canEdit(ch); const G=(ch.epic&&ch.epic.gear)||{}; const on=epSetsOn(ch);
   const statTxt=s=>s&&s.k?`${epStatName(s.k)} ${+s.v>=0?'+':''}${+s.v||0}${s.pct&&EP_PCTABLE.has(s.k)?'%':''}`:'';
   const p=el(`<div class="panel epg ${ed?'':'ro'}"><h3>Снаряжение</h3><div class="epgear">${EP_SLOTS.map(([sl,sn,ic])=>{ const g=G[sl]; const set=g&&g.set?epSets().find(s=>s.id===g.set):null;
-      return `<div class="epslot ${g?'':'empty'}" data-sl="${sl}" title="${g&&g.desc?esc(g.desc):''}"><span class="ic">${ic}</span><div class="t"><div class="sn">${sn}</div><div class="nm">${g?esc(g.name||'без названия'):'<span class="faint">пусто</span>'}</div>${g?`<div class="ms">${[statTxt(g),...(g.subs||[]).map(statTxt)].filter(Boolean).map(esc).join(' · ')}</div>`:''}${set?`<div class="set">◆ ${esc(set.name)}</div>`:''}</div></div>`; }).join('')}</div>
+      return `<div class="epslot ${g?'':'empty'}" data-sl="${sl}" title="${g&&g.desc?esc(g.desc):''}"><span class="ic">${ic}</span><div class="t"><div class="sn">${sn}</div><div class="nm">${g?esc(g.name||'без названия'):'<span class="faint">пусто</span>'}</div>${g?`<div class="ms">${[statTxt(g)].filter(Boolean).map(esc).join(' · ')}</div>`:''}${set?`<div class="set">◆ ${esc(set.name)}</div>`:''}</div></div>`; }).join('')}</div>
     <div class="epsets">${on.length?on.map(S=>`<span class="epchip on" title="${esc(epSetText(S))}">◆ ${esc(S.name)}${S.times>1?' ×'+S.times:''}</span>`).join(''):'<span class="faint" style="font-size:12px">Сет собирается из одинаковых вещей: 2 или 4 слота (артефакт не считается).</span>'}</div></div>`);
   $$('.epslot',p).forEach(x=>x.onclick=()=>{ if(ed) epGearDialog(ch,x.dataset.sl); });
   return p; }
 function epSetText(S){ const b=(S.bon||[]).map(x=>`${epStatName(x.k)} ${+x.v>=0?'+':''}${x.v}${x.pct&&EP_PCTABLE.has(x.k)?'%':''}`); const sp=EP_SETSP.find(x=>x[0]===S.sp); if(sp&&sp[0]) b.push(sp[1]+(sp[2]?' ('+String(sp[2]).replace('N',S.spv??'N')+')':'')); return `${S.n||2} слота: ${b.join(', ')||'—'}`; }
-function epGearDialog(ch,sl){ const SL=EP_SLOTS.find(x=>x[0]===sl); const G=(ch.epic&&ch.epic.gear)||{}; const g=JSON.parse(JSON.stringify(G[sl]||{name:'',k:SL[3]?SL[3][0]:'',v:0,subs:[]})); g.subs??=[];
-  const allK=EP_STATS.map(s=>[s[0],s[1]]);
+function epGearDialog(ch,sl){ const SL=EP_SLOTS.find(x=>x[0]===sl); const G=(ch.epic&&ch.epic.gear)||{}; const g=JSON.parse(JSON.stringify(G[sl]||{name:'',k:SL[3]?SL[3][0]:'',v:0,subs:[]})); delete g.subs;
   const box=openModal(`<h2>${SL[2]} ${esc(SL[1])}</h2><div class="field"><label>Название</label><input id="gn" value="${esc(g.name||'')}" placeholder="${esc(SL[1])}"></div>
     ${SL[3]?`<div class="field"><label>Главная характеристика</label><div class="row" style="gap:6px;align-items:center">${epSel(SL[3].map(k=>[k,epStatName(k)]),g.k,'gk')}<input id="gv" type="number" step="any" value="${+g.v||0}" style="width:90px"><label class="row gpw" style="gap:4px"><input type="checkbox" id="gp" ${g.pct?'checked':''}> %</label></div></div>`:''}
     ${sl!=='artifact'?`<div class="field"><label>Сет</label>${epSel([['','— без сета —'],...epSets().map(s=>[s.id,s.name+' ('+(s.n||2)+')'])],g.set||'','gset')}</div>`:''}
-    <div class="field"><label>Доп. характеристики</label><div class="gsubs"></div></div>
     <div class="field"><label>${sl==='artifact'?'Эффект артефакта (воспоминания, сила)':'Описание'}</label><textarea id="gd" rows="${sl==='artifact'?4:2}">${esc(g.desc||'')}</textarea></div>
     <div class="modal-actions">${G[sl]?'<button class="btn danger" id="gdel" style="margin-right:auto">Снять</button>':''}<button class="btn" id="cancel">Отмена</button><button class="btn primary" id="ok">Сохранить</button></div>`,true);
   const pw=()=>{ const w=$('.gpw',box), k=$('.gk',box); if(w&&k) w.style.display=EP_PCTABLE.has(k.value)?'':'none'; }; const gk=$('.gk',box); if(gk) gk.onchange=pw; pw();
-  const subs=$('.gsubs',box); const drawSubs=()=>{ subs.innerHTML=''; g.subs.forEach((s,i)=>{ const r=el(`<div class="row" style="gap:6px;align-items:center;margin-bottom:4px">${epSel(allK,s.k,'sk')}<input class="sv" type="number" step="any" value="${+s.v||0}" style="width:80px"><label class="row sp" style="gap:4px;${EP_PCTABLE.has(s.k)?'':'display:none'}"><input type="checkbox" class="spc" ${s.pct?'checked':''}> %</label><button class="x-btn">×</button></div>`);
-      $('.sk',r).onchange=e=>{ s.k=e.target.value; $('.sp',r).style.display=EP_PCTABLE.has(s.k)?'':'none'; }; $('.sv',r).oninput=e=>{ s.v=+e.target.value||0; }; $('.spc',r).onchange=e=>{ s.pct=e.target.checked?1:0; }; $('.x-btn',r).onclick=()=>{ g.subs.splice(i,1); drawSubs(); }; subs.append(r); });
-    const a=el('<button class="btn sm">+ характеристика</button>'); a.onclick=()=>{ g.subs.push({k:'atk',v:0}); drawSubs(); }; subs.append(a); }; drawSubs();
   $('#cancel',box).onclick=closeModal;
   const del=$('#gdel',box); if(del) del.onclick=()=>{ delete ch.epic.gear[sl]; touch(ch); closeModal(); render(); };
   $('#ok',box).onclick=()=>{ g.name=$('#gn',box).value.trim(); if(SL[3]){ g.k=$('.gk',box).value; g.v=+$('#gv',box).value||0; if($('#gp',box).checked&&EP_PCTABLE.has(g.k)) g.pct=1; else delete g.pct; } else { delete g.k; delete g.v; delete g.pct; }
-    const st=$('.gset',box); if(st&&st.value) g.set=st.value; else delete g.set; g.desc=$('#gd',box).value.trim(); if(!g.desc) delete g.desc; g.subs=g.subs.filter(s=>s.k&&+s.v); if(!g.subs.length) delete g.subs;
+    const st=$('.gset',box); if(st&&st.value) g.set=st.value; else delete g.set; g.desc=$('#gd',box).value.trim(); if(!g.desc) delete g.desc; delete g.subs;
     ch.epic??={}; ch.epic.gear??={}; ch.epic.gear[sl]=g; touch(ch); closeModal(); render(); }; }
 
 /* ---------- скилл: раздел «✦ Эпик» в редакторе способности ---------- */
@@ -8121,6 +8143,274 @@ function epSettingsBind(page,s){ const on=$('#epOn',page); if(!on) return; const
       sl.append(row); }); };
   drawSets(); $('#epSetAdd',page).onclick=()=>{ sets().push({id:uid(),name:'Новый сет',n:2,bon:[]}); touch(s); drawSets(); };
   $('#epSetReset',page).onclick=async()=>{ if(!await confirmDlg('Вернуть сеты как в таблице? Свои сеты пропадут.','Вернуть')) return; delete E().sets; touch(s); drawSets(); }; }
+
+/* ---------- БОЙ: документ battles/<id> ----------
+   {name, bg, ph:'setup'|'fight'|'end', round, queue:[id], cur, extra:[id], souls, supCd:{a,e}, win, units:[u], prev (снимок для ↶), fl/flt (всплывающие числа)}
+   юнит u = {id, ref, side:'a'|'e', pos:'van'|'left'|'right'|'rear', снимок листа: nm,img,col,el,cls,s(статы),sk(скиллы),pas(пассивки),ssp(особые свойства сетов),rs(полоски);
+             в бою: hp, bar, sp, cd:{abId}, fx:[{i,id,k,dur,src,sa,n,nd,mods}], dead, ex, init, once, rit, sbFree, cut, lastNext}
+   Всё, что нужно для расчёта, лежит в документе боя — игроки считают удары по скрытым от них врагам, а ресурсы боя не трогают листы */
+const EP_POS=[['van','Авангард'],['left','Левый фланг'],['right','Правый фланг'],['rear','Арьергард']];
+const EP_POSXY={a:{rear:[9,52],left:[23,24],right:[23,80],van:[37,52]},e:{van:[63,52],left:[77,24],right:[77,80],rear:[91,52]}};
+const EP_POSTXT={van:'С наибольшим шансом атаки врагов летят сюда',left:'Положительные эффекты, наложенные на союзников, длятся на 1 ход дольше',right:'Бонус скорости +1',rear:'Уклонение +30'};
+/* способности позиций: тратят ход, КД нет (кроме «Огня на подавление» — 6 фаз, общий на сторону) */
+const EP_POSK={
+  van:[{id:'p_def',name:'Глухая оборона',ep:{type:'sup',tgt:'s',fx:[{id:'defUp',dur:2,on:'self'},{id:'immunity',dur:2,on:'self'}]}},{id:'p_agr',name:'Агрессивное наступление',ep:{type:'sup',tgt:'s',fx:[{id:'riposte',dur:2,on:'self'},{id:'vigor',dur:2,on:'self'}]}}],
+  left:[{id:'p_help',name:'Помощь',d:'КД скиллов союзника −1 и −1 ход его дебаффам',ep:{type:'sup',tgt:'a1',sp:'help'}},{id:'p_cover',name:'Прикрытие',d:'скилл нулифаер на союзника',ep:{type:'sup',tgt:'a1',fx:[{id:'nullify',dur:99,on:'tgt'}]}}],
+  right:[{id:'p_prep',name:'Подготовка к атаке',d:'БОЛЬШОЕ повышение атаки, крит шанса и крит урона на 2 хода, НО уклонение 0, пробитие защиты и метка на себя (не очищаются) и ходит последним в следующей фазе',ep:{type:'sup',tgt:'s',sp:'prep',fx:[{id:'atkUp2',dur:2,on:'self'},{id:'ccUp',dur:2,on:'self'},{id:'cdUp',dur:2,on:'self'},{id:'noEva',dur:2,on:'self',nd:1},{id:'defDown',dur:2,on:'self',nd:1},{id:'mark',dur:2,on:'self',nd:1}]}},{id:'p_rit',name:'Ритуал',d:'следующий соул бёрн без душ (1 раз за бой)',ep:{type:'sup',tgt:'s',sp:'ritual'}}],
+  rear:[{id:'p_rest',name:'Отдых',d:'регенерация на 2 хода и снять 1 дебафф',ep:{type:'sup',tgt:'s',fx:[{id:'regen',dur:2,on:'self'},{id:'cleanse',n:1,on:'self'}]}},{id:'p_sup',name:'Огонь на подавление',d:'60%: понижение атаки, слепота и замедление всем врагам на 2 хода; КД 6 фаз, общий для стороны',ep:{type:'sup',tgt:'eA',sp:'supp',fx:[{id:'atkDown',ch:60,dur:2,on:'tgt'},{id:'blind',ch:60,dur:2,on:'tgt'},{id:'slow',ch:60,dur:2,on:'tgt'}]}}]};
+const EP_FX_INT=[{id:'noEva',k:'debuff',icon:'🎯',name:'Без уклонения',d:'уклонение 0, нельзя повысить'}];
+const EP_FXSTAT={atkUp:[['atk',50,1]],atkUp2:[['atk',75,1]],defUp:[['def',50,1]],resUp:[['res',60]],accUp:[['acc',50]],evaUp:[['eva',50]],ccUp:[['cc',50]],cdUp:[['cd',0.7]],effUp:[['eff',50]],riposte:[['ctr',30]],haste:[['spd',2]],barricade:[['def',30,1],['res',30]],rage:[['atk',20,1],['spd',1]],focus:[['cc',15],['cd',0.15]],vigor:[['atk',30,1],['def',30,1]],atkDown:[['atk',-50,1]],defDown:[['def',-75,1]],slow:[['spd',-2]],blind:[['acc',-50]]};
+const EP_DOT=new Set(['poison','toxin','bleed','burn','bomb']); // складываются: каждое наложение — отдельный экземпляр
+const epFxAny=id=>epFx(id)||EP_FX_INT.find(f=>f.id===id)||null;
+const epD100=()=>1+Math.floor(Math.random()*100);
+const epU=(B,id)=>(B.units||[]).find(u=>u.id===id)||null;
+const epLive=(B,side)=>(B.units||[]).filter(u=>u.side===side&&!u.dead);
+const epFoeSide=u=>u.side==='a'?'e':'a';
+const epHas=(u,id)=>(u.fx||[]).some(e=>e.id===id);
+const epGet=(u,id)=>(u.fx||[]).find(e=>e.id===id)||null;
+function epTake(u,id){ const e=epGet(u,id); if(e) u.fx=u.fx.filter(x=>x!==e); return e; }
+function epSsp(u,sp){ let v=0; for(const x of (u.ssp||[])) if(x.sp===sp) v+=(+x.v||0)*(+x.t||1); return v; }
+/* статы юнита в бою: снимок листа + позиция + эффекты (атака/защита в процентах, остальное в единицах) + особые свойства сетов */
+function epUS(u){ const s={...(u.s||{})}; const pct={atk:0,def:0}; const add=(k,v,p)=>{ if(p&&k in pct) pct[k]+=v; else s[k]=(+s[k]||0)+v; };
+  if(u.pos==='right') add('spd',1); if(u.pos==='rear') add('eva',30);
+  for(const e of (u.fx||[])){ for(const [k,v,p] of (EP_FXSTAT[e.id]||[])) add(k,v,p); for(const m of (e.mods||[])){ const k=String(m.t||'').slice(3), v=+m.v||0; if(!(k in s)) continue; if(m.op==='*') s[k]*=v; else if(m.op==='=') s[k]=v; else add(k,m.op==='-'?-v:v,false); } }
+  for(const k in pct) if(pct[k]) s[k]=Math.max(0,s[k]*(1+pct[k]/100));
+  let mh=+s.hp||1; const tr=(u.fx||[]).filter(e=>e.id==='trauma').reduce((a,e)=>a+(+e.n||0),0); mh*=Math.max(.1,1-tr/100)*Math.max(.1,1-(+u.cut||0)/100); s.mhp=Math.max(1,Math.round(mh));
+  if(epHas(u,'noEva')) s.eva=0; s.dmg=epSsp(u,'dmg'); return s; }
+/* снимок персонажа для боя */
+function epSnap(ch){ const S=epStats(ch); const s={}; for(const k in S) s[k]=S[k].v; const E=ch.epic||{}; const cp=x=>JSON.parse(JSON.stringify(x));
+  const sk=(ch.abilities||[]).filter(a=>a.ep&&a.ep.slot&&(a.ep.type||'atk')!=='pas').map(a=>({id:a.id,name:a.name||'скилл',ep:cp(a.ep)})).sort((x,y)=>x.ep.slot-y.ep.slot);
+  const pas=(ch.abilities||[]).filter(a=>a.ep&&a.ep.type==='pas'&&(a.ep.trig||'always')!=='always').map(a=>({id:a.id,name:a.name||'пассивка',ep:cp(a.ep)}));
+  const rs={}; for(const b of (ch.bars||[])) if(b.name) rs[b.name]=+b.max||0;
+  return {nm:ch.name||'без имени',nm0:ch.name||'без имени',img:ch.mainImage||null,col:ch.color||null,el:E.el||null,cls:E.cls||null,st:+E.stars||0,s,sk,pas,ssp:epSetsOn(ch).filter(x=>x.sp).map(x=>({sp:x.sp,v:+x.spv||0,t:x.times})),rs,rs0:cp(rs)}; }
+/* одинаковые бойцы на одной стороне: «Гоблин #1», «Гоблин #2» */
+function epNames(B){ const g={}; for(const u of B.units){ u.nm0??=u.nm; (g[u.ref+':'+u.side]??=[]).push(u); } for(const L of Object.values(g)) L.forEach((u,i)=>{ u.nm=L.length>1?u.nm0+' #'+(i+1):u.nm0; }); }
+function epFl(B,u,v,c){ (B.fl??=[]).push({u:u.id,v:String(v),c}); }
+function epHeal(B,u,n,log){ if(u.dead||n<=0) return 0; if(epHas(u,'noheal')){ log.push(`💔 ${u.nm}: лечение запрещено`); return 0; } const m=epUS(u).mhp; const was=u.hp; u.hp=Math.min(m,u.hp+Math.round(n)); const d=u.hp-was; if(d){ epFl(B,u,'+'+d,'heal'); } return d; }
+/* урон по юниту: неуязвимость, дмг лимит, барьер, бессмертие, летальный урон, смерть; сон и стелс спадают от урона */
+function epHurt(B,t,dmg,log,o={}){ if(t.dead) return {dealt:0}; dmg=Math.max(0,Math.round(dmg));
+  if(epHas(t,'invinc')){ log.push(`💠 ${t.nm}: неуязвимость — урона нет`); epFl(B,t,'0','miss'); return {dealt:0}; }
+  const cap=epGet(t,'dmgcap'); if(cap) dmg=Math.min(dmg,Math.round(epUS(t).mhp*(+cap.n||30)/100));
+  let left=dmg; if(t.bar>0){ const a=Math.min(t.bar,left); t.bar-=a; left-=a; if(!t.bar) t.fx=(t.fx||[]).filter(e=>e.id!=='barrier'); }
+  t.hp-=left; epFl(B,t,'−'+dmg,o.crit?'crit':'dmg');
+  if(epHas(t,'sleep')){ epTake(t,'sleep'); log.push(`😴 ${t.nm} просыпается`); } if(epHas(t,'stealth')) epTake(t,'stealth');
+  if(t.hp<=0){ if(!epHas(t,'immortal')) epTrig(B,t,'lethal',log,{other:o.src}); if(epHas(t,'immortal')){ t.hp=1; log.push(`♾️ ${t.nm}: бессмертие — остаётся с 1 ХП`); } else epDie(B,t,log,o.src); }
+  else if(dmg>0) epTrig(B,t,'hurt',log,{other:o.src});
+  return {dealt:dmg}; }
+function epDie(B,t,log,src){ t.hp=0; t.dead=1; t.bar=0; if(epHas(t,'execute')) t.ex=1; t.fx=[]; B.queue=(B.queue||[]).filter(x=>x!==t.id); B.extra=(B.extra||[]).filter(x=>x!==t.id); log.push(`☠ ${t.nm} выбывает${t.ex?' (казнь — воскресить нельзя)':''}`);
+  if(src&&!src.dead) epTrig(B,src,'kill',log,{other:t}); for(const a of epLive(B,t.side)) epTrig(B,a,'allyDead',log,{other:t}); }
+/* наложить эффект/действие: шанс дебаффа = шанс + эффективность − резист цели против d100; иммунитет, запрет бафов, стаки ДоТов */
+function epApply(B,A,t,r,log){ const f=epFxAny(r.id); if(!f||!t) return; if(t.dead&&r.id!=='revive') return;
+  const foe=A.side!==t.side; const kind=f.k==='lib'?(foe?'debuff':'buff'):f.k==='sp'?(r.id==='execute'?'debuff':'buff'):f.k; const n=r.n??f.n;
+  if(kind==='debuff'&&foe){ if(epHas(t,'immunity')){ log.push(`✨ ${t.nm}: иммунитет — ${f.name} не наложен`); return; } const c=(r.ch??100)+(+epUS(A).eff||0)-(+epUS(t).res||0), roll=epD100(); if(roll>c){ log.push(`🛡 ${t.nm} сопротивляется: ${f.name} (d100 ${roll} > ${Math.round(c)})`); return; } }
+  else if((r.ch??100)<100){ const roll=epD100(); if(roll>(r.ch??100)){ log.push(`· ${f.name} не сработал (d100 ${roll})`); return; } }
+  if(kind==='buff'&&epHas(t,'nobuff')){ log.push(`⛔ ${t.nm}: баффы запрещены — ${f.name} не наложен`); return; }
+  if(f.inst){ switch(r.id){
+    case 'extra': (B.extra??=[]).unshift(t.id); log.push(`⏩ ${t.nm} получает экстра ход`); break;
+    case 'advance': if(epHas(t,'restrict')) log.push(`⛓️ ${t.nm}: рестрикт — продвинуть нельзя`); else { t.init=(+t.init||0)+(+n||0); epResort(B); log.push(`⏫ ${t.nm}: инициатива +${n}`); } break;
+    case 'push': t.init=(+t.init||0)-(+n||0); epResort(B); log.push(`⏬ ${t.nm}: инициатива −${n}`); break;
+    case 'cleanse': { const L=(t.fx||[]).filter(e=>e.k==='debuff'&&!e.nd).slice(-(+n||1)); t.fx=t.fx.filter(e=>!L.includes(e)); log.push(`🧼 ${t.nm}: снято дебаффов — ${L.length}`); break; }
+    case 'strip': { const L=(t.fx||[]).filter(e=>e.k==='buff'&&!e.nd).slice(-(+n||1)); t.fx=t.fx.filter(e=>!L.includes(e)); if(L.some(e=>e.id==='barrier')&&!epHas(t,'barrier')) t.bar=0; log.push(`🧹 ${t.nm}: снято баффов — ${L.length}`); break; }
+    case 'cdreset': t.cd={}; log.push(`🔄 ${t.nm}: КД скиллов сброшены`); break;
+    case 'cdUpD': for(const s of (t.sk||[])) if(+s.ep.cd) t.cd[s.id]=(+t.cd[s.id]||0)+(+n||1); log.push(`⏳ ${t.nm}: КД скиллов +${n}`); break;
+    case 'revive': if(!t.dead) break; if(t.ex){ log.push(`🪦 ${t.nm}: казнён — воскресить нельзя`); break; } t.dead=0; t.fx=[]; t.hp=Math.max(1,Math.round(epUS(t).mhp*(+n||30)/100)); log.push(`🕊️ ${t.nm} воскресает с ${t.hp} ХП`); epFl(B,t,'+'+t.hp,'heal'); break;
+    case 'detonate': epDetonate(B,t,log); break;
+    case 'spirit': t.sp=(+t.sp||0)+(+n||1); log.push(`🔥 ${t.nm}: боевой дух +${n}`); break; }
+    return; }
+  let dur=Math.max(1,r.dur??2); if(A.pos==='left'&&kind==='buff'&&!foe&&t!==A) dur++;
+  const e={i:uid(),id:r.id,k:kind,dur,src:A.id,sa:Math.round(+epUS(A).atk||0)}; if(n!=null) e.n=n; if(r.nd) e.nd=1;
+  if(f.k==='lib'){ const d=effLib().find(x=>x.id===r.id.slice(4)); const mods=(d&&d.mods||[]).filter(m=>String(m.t||'').startsWith('ep:')).map(m=>({t:m.t,op:m.op,v:typeof m.v==='number'?m.v:fxNumber(m.v,null)})); if(mods.length) e.mods=mods; }
+  t.fx??=[]; if(!EP_DOT.has(r.id)){ const old=t.fx.findIndex(x=>x.id===r.id); if(old>=0) t.fx.splice(old,1); }
+  t.fx.push(e); if(r.id==='barrier'){ t.bar=(+t.bar||0)+(+n||0); }
+  log.push(`${f.icon} ${t.nm}: ${f.name}${n!=null&&!['barrier'].includes(r.id)?' ('+n+')':''}${r.id==='barrier'?' +'+n:''} на ${dur} х.`); }
+function epDetonate(B,t,log){ const L=(t.fx||[]).filter(e=>EP_DOT.has(e.id)); if(!L.length){ log.push(`🧨 ${t.nm}: детонировать нечего`); return; } log.push(`🧨 Детонация на ${t.nm}`); for(const e of L){ epDotTick(B,t,e,log,true); if(t.dead) break; } t.fx=(t.fx||[]).filter(e=>e.id!=='bomb'); }
+/* тик ДоТа (в конце хода носителя) или взрыв бомбы */
+function epDotTick(B,t,e,log,boom){ const m=epUS(t).mhp; let d=0;
+  if(e.id==='poison') d=m*.05; else if(e.id==='toxin') d=m*.1; else if(e.id==='bleed') d=(+e.sa||0)*.3; else if(e.id==='burn') d=(+e.sa||0)*.5; else if(e.id==='bomb'){ if(!boom) return; d=+e.sa||0; }
+  const f=epFxAny(e.id); log.push(`${f.icon} ${f.name}: ${t.nm} −${Math.round(d)}`); const src=epU(B,e.src); epHurt(B,t,d,log,{src});
+  if(e.id==='bomb'&&!t.dead&&epD100()<=40){ t.fx.push({i:uid(),id:'stun',k:'debuff',dur:1,src:e.src}); log.push(`💫 ${t.nm} оглушён взрывом`); } }
+/* строки эффектов скилла: на кого */
+function epApplyRows(B,A,rows,T,log,hits){ for(const r of rows){ if(!r.id) continue; const f=epFxAny(r.id); if(!f) continue; const on=r.on||'tgt'; let L;
+    if(on==='self') L=[A]; else if(on==='aA') L=epLive(B,A.side); else if(on==='eA') L=epLive(B,epFoeSide(A)); else if(on==='a1') L=T.filter(t=>t.side===A.side).slice(0,1); else L=T;
+    for(const t of L){ const h=hits&&hits.get(t.id); if(h&&h.nul) continue; if(h&&h.miss&&t.side!==A.side&&f.k!=='buff') continue; /* промах — без отрицательных эффектов */ epApply(B,A,t,r,log); } } }
+/* одиночный удар по цели: попадание (d100 > уклонение − попадание), крит, урон × K/(K+защита), промах = половина урона */
+function epStrike(B,A,t,P,o,log){ const sa=epUS(A), st=epUS(t); const adv=epElAdv(A.el,t.el); const K=+EPS().defK||100;
+  const mk=epHas(t,'mark2')?2:epHas(t,'mark')?1:0; const asleep=epHas(t,'sleep');
+  const eva=(+st.eva||0)+(adv<0?50:0), acc=(+sa.acc||0)+(adv>0?15:0)+(mk===2?50:mk?30:0); let miss=false, roll=null;
+  if(epHas(A,'miss')) miss=true; else if(!asleep){ roll=epD100(); miss=!(roll>eva-acc); }
+  let crit=false; if(!miss){ if(asleep||epTake(A,'guarCrit')) crit=true; else crit=epD100()<=(+sa.cc||0)-(epHas(t,'critprot')?50:0); }
+  let base=0; for(const s of (P.scale&&P.scale.length?P.scale:[{k:'atk',m:1}])) base+=(s.k==='hp'?sa.mhp:(+sa[s.k]||0))*(+s.m||0); if(o.sbM) base+=(+sa.atk||0)*o.sbM;
+  const mult=1+(adv>0?.1:0)+(mk===2?.2:mk?.1:0)+(+sa.dmg||0);
+  let dmg=base*mult*(crit?1+(+sa.cd||0):1)*K/(K+Math.max(0,+st.def||0)); if(miss) dmg*=.5; const cas=epTake(A,'cascade'); if(cas&&!miss) dmg+=+cas.n||0;
+  log.push(`→ ${t.nm}: ${miss?'промах'+(roll!=null?` (d100 ${roll} ≤ ${Math.round(eva-acc)})`:'')+' — половина урона':crit?'КРИТ!':'попадание'}${adv>0?' · элемент сильнее':adv<0?' · элемент слабее':''}`);
+  const li=log.length; const r=epHurt(B,t,dmg,log,{src:A,crit}); if(r.dealt) log.splice(li,0,`   ${t.nm}: −${r.dealt} ХП${t.dead?'':` (${t.hp}/${epUS(t).mhp}${t.bar?', барьер '+t.bar:''})`}`);
+  const ls=epSsp(A,'lifesteal'); if(ls&&r.dealt){ const h=epHeal(B,A,r.dealt*ls/100,log); if(h) log.push(`🩸 ${A.nm}: вампиризм +${h}`); }
+  const inj=epSsp(A,'injury'); if(inj&&r.dealt&&!t.dead){ t.cut=Math.min(90,(+t.cut||0)+inj); if(t.hp>epUS(t).mhp) t.hp=epUS(t).mhp; log.push(`🩼 ${t.nm}: макс. ХП −${inj}% (травма)`); }
+  if(o.st&&r.dealt) for(const c of epLive(B,t.side)) if(c!==t&&epHas(c,'curse')){ log.push(`🕯️ Проклятие: ${c.nm} получает половину`); epHurt(B,c,r.dealt/2,log,{src:A}); }
+  if(!t.dead&&!epHas(t,'nocounter')&&(o.depth||0)<3){ if(r.dealt>0&&+st.ctr>0&&epD100()<=+st.ctr) o.ctrQ.push(t); else if(miss&&epSsp(t,'riposte')&&epD100()<=epSsp(t,'riposte')) o.ctrQ.push(t); }
+  return {miss,crit,dealt:r.dealt}; }
+/* цели по коду, когда выбирать не нужно */
+function epAutoT(B,A,code,picked){ if(code==='s') return [A]; if(code==='eA') return epLive(B,epFoeSide(A)); if(code==='aA') return epLive(B,A.side); return picked||[]; }
+/* использовать скилл: стоимость, стелс, эффекты до удара, удары, эффекты после, души и дух, дуо, контратаки */
+async function epUse(B,A,sk,T,o={}){ const P=sk.ep||{}; const log=o.log; const tp=P.type||'atk'; const sbOn=!!(o.sb&&P.sb&&P.sb.on);
+  if(!o.free){ if(+P.cd) (A.cd??={})[sk.id]=+P.cd; if(P.needSpend&&+P.need) A.sp=Math.max(0,(+A.sp||0)-(+P.need)); if(P.cost&&P.cost.bar) (A.rs??={})[P.cost.bar]=(+A.rs[P.cost.bar]||0)-(+P.cost.n||0);
+    if(sbOn){ if(A.sbFree){ A.sbFree=0; log.push('📿 Ритуал: соул бёрн без душ'); } else B.souls=Math.max(0,(+B.souls||0)-(+P.sb.cost||0)); } }
+  if(epHas(A,'stealth')) epTake(A,'stealth'); if(tp==='atk'&&epHas(A,'stealth2')) epTake(A,'stealth2');
+  if(sbOn&&P.sb.tgt) T=epAutoT(B,A,P.sb.tgt,T.length?T:epLive(B,P.sb.tgt[0]==='e'?epFoeSide(A):A.side).slice(0,P.sb.tgt==='e2'?2:P.sb.tgt==='e3'?3:1));
+  T=T.filter(t=>t&&(!t.dead||P.sp==='revive'||(P.fx||[]).some(r=>r.id==='revive')));
+  log.push(`${o.duo?'🤝 Дуо атака: ':o.counter?'↩️ Контратака: ':''}${A.nm} — «${sk.name}»${sbOn?' 🔥 соул бёрн':''}${T.length&&!(T.length===1&&T[0]===A)?' → '+T.map(t=>t.nm).join(', '):''}`);
+  if(P.sp) epPosSp(B,A,P.sp,T,log);
+  const rows=[...(P.fx||[]),...(sbOn?(P.sb.fx||[]):[])]; const hits=new Map(); const ctrQ=[];
+  /* нулифаер на цели съедает скилл врага целиком */ for(const t of T) if(t.side!==A.side&&epHas(t,'nullify')){ epTake(t,'nullify'); hits.set(t.id,{nul:1}); log.push(`🚫 ${t.nm}: скилл нулифаер — скилл не подействовал`); }
+  epApplyRows(B,A,rows.filter(r=>r.when==='pre'),T,log,hits);
+  if(tp==='atk') for(const t of T){ if(t.dead||hits.has(t.id)) continue; const h=epStrike(B,A,t,P,{sbM:sbOn?+P.sb.m||0:0,st:(P.tgt||'e1')==='e1',depth:o.depth||0,ctrQ},log); hits.set(t.id,h); if(h.dealt>0&&!A.dead) epTrig(B,A,'hit',log,{other:t}); }
+  epApplyRows(B,A,rows.filter(r=>r.when!=='pre'),T,log,hits);
+  if(A.side==='a'&&+P.souls){ B.souls=(+B.souls||0)+(+P.souls); log.push(`👻 Души команды +${P.souls} (${B.souls})`); }
+  if(+P.spirit){ A.sp=(+A.sp||0)+(+P.spirit); log.push(`🔥 ${A.nm}: боевой дух +${P.spirit} (${A.sp})`); }
+  /* дуо: только с 1-го скилла и не из дуо; союзник бьёт своим 1-м скиллом */
+  if(tp==='atk'&&+P.slot===1&&!o.duo&&!A.dead&&(o.depth||0)<3){ const c=+epUS(A).duo||0; if(c>0&&epD100()<=c){ const al=epLive(B,A.side).filter(x=>x!==A&&epSlot1(x)); if(al.length){ const ally=await epPickAlly(al,A); if(ally){ const s1=epSlot1(ally); const t2=epTargetsFor(B,ally,s1,T.filter(t=>!t.dead)); if(t2.length) await epUse(B,ally,s1,t2,{log,free:1,duo:1,depth:(o.depth||0)+1}); } } } }
+  /* контратаки: 1-й скилл в того, кто ударил (по всем, если 1-й скилл бьёт всех) */
+  for(const c of ctrQ){ if(c.dead||A.dead) continue; const s1=epSlot1(c); if(!s1||(s1.ep.type||'atk')!=='atk') continue; const t2=epTargetsFor(B,c,s1,[A]); if(t2.length) await epUse(B,c,s1,t2,{log,free:1,counter:1,depth:(o.depth||0)+1}); } }
+const epSlot1=u=>(u.sk||[]).find(s=>+s.ep.slot===1)||null;
+function epTargetsFor(B,u,s,pref){ const code=s.ep.tgt||'e1'; if(code==='eA'||code==='aA'||code==='s') return epAutoT(B,u,code); const n=code==='e2'?2:code==='e3'?3:1; const foes=epLive(B,epFoeSide(u)); const L=pref.filter(t=>foes.includes(t)); for(const f of foes){ if(L.length>=n) break; if(!L.includes(f)) L.push(f); } return L.slice(0,n); }
+function epPickAlly(al,A){ if(al.length===1) return Promise.resolve(al[0]); return new Promise(res=>{ const b=openModal(`<h2>🤝 Дуо атака!</h2><div class="faint" style="margin-bottom:10px">${esc(A.nm)}: какой союзник ударит своим 1-м скиллом?</div><div class="eppick">${al.map(u=>`<button class="btn" data-u="${u.id}">${esc(u.nm)}</button>`).join('')}</div>`,false); $$('.eppick .btn',b).forEach(x=>x.onclick=()=>{ closeModal(); res(al.find(u=>u.id===x.dataset.u)); }); }); }
+/* особые действия способностей позиций */
+function epPosSp(B,A,sp,T,log){ if(sp==='help'){ const t=T[0]; if(!t) return; for(const k of Object.keys(t.cd||{})) t.cd[k]=Math.max(0,t.cd[k]-1); for(const e of (t.fx||[])) if(e.k==='debuff'&&!e.nd) e.dur--; t.fx=(t.fx||[]).filter(e=>e.dur>0); log.push(`🤲 ${t.nm}: КД −1, дебаффы −1 ход`); }
+  else if(sp==='prep'){ A.lastNext=1; log.push(`⏬ ${A.nm} ходит последним в следующей фазе`); }
+  else if(sp==='ritual'){ A.rit=1; A.sbFree=1; log.push(`📿 ${A.nm}: следующий соул бёрн без душ`); }
+  else if(sp==='supp'){ (B.supCd??={})[A.side]=6; } }
+/* пассивки по событию (печать отключает) */
+function epTrig(B,u,trig,log,ctx={}){ if((u.dead&&trig!=='lethal')||epHas(u,'seal')||(ctx.d||0)>2) return; for(const p of (u.pas||[])){ const P=p.ep||{}; if((P.trig||'always')!==trig) continue; u.once??={}; if(P.once&&u.once[p.id]) continue; if(P.once) u.once[p.id]=1;
+    log.push(`✦ ${u.nm}: «${p.name}»`); epApplyRows(B,u,P.fx||[],ctx.other?[ctx.other]:[],log,null); if(+P.spirit){ u.sp=(+u.sp||0)+(+P.spirit); log.push(`🔥 ${u.nm}: боевой дух +${P.spirit}`); } } }
+/* ---------- ход и фазы ---------- */
+function epSortIds(B,ids){ return ids.map(id=>epU(B,id)).filter(u=>u&&!u.dead).sort((x,y)=>(+y.init||0)-(+x.init||0)||(x.side===y.side?0:x.side==='e'?-1:1)).map(u=>u.id); }
+function epResort(B){ B.queue=epSortIds(B,B.queue||[]); }
+function epStart(B,log){ for(const u of B.units){ u.rs0??=JSON.parse(JSON.stringify(u.rs||{})); Object.assign(u,{bar:0,sp:0,cd:{},fx:[],dead:0,ex:0,once:{},rit:0,sbFree:0,cut:0,lastNext:0,init:0}); u.rs=JSON.parse(JSON.stringify(u.rs0||u.rs||{})); u.hp=epUS(u).mhp; }
+  Object.assign(B,{ph:'fight',round:0,souls:0,supCd:{a:0,e:0},extra:[],queue:[],cur:null,win:null}); log.push(`⚔ Бой начался: ${epLive(B,'a').map(u=>u.nm).join(', ')} против ${epLive(B,'e').map(u=>u.nm).join(', ')}`);
+  for(const u of B.units){ const v=epSsp(u,'barrier'); if(v) for(const a of epLive(B,u.side)){ const n=Math.round(epUS(a).mhp*v/100); a.bar=(+a.bar||0)+n; } if(v) log.push(`🫧 ${u.nm} (Потенкция): барьер союзникам ${v}% ХП`); }
+  for(const u of B.units) epTrig(B,u,'start',log); epPhase(B,log); }
+function epPhase(B,log){ B.round=(+B.round||0)+1; for(const k of ['a','e']) if(B.supCd&&B.supCd[k]>0) B.supCd[k]--;
+  const L=B.units.filter(u=>!u.dead); for(const u of L){ const r=1+Math.floor(Math.random()*4); u.init=r+Math.round(+epUS(u).spd||0); u.ir=r; }
+  let q=epSortIds(B,L.map(u=>u.id)); const last=q.filter(id=>epU(B,id).lastNext); q=q.filter(id=>!last.includes(id)).concat(last); for(const id of last) epU(B,id).lastNext=0;
+  B.queue=q; B.cur=null; log.push(`— Фаза ${B.round}: ${q.map(id=>{ const u=epU(B,id); return `${u.nm} ${u.init} (1d4=${u.ir})`; }).join(' · ')}`); epNext(B,log); }
+const epOver=B=>{ const a=epLive(B,'a').length, e=epLive(B,'e').length; return !a?'e':!e?'a':null; };
+function epNext(B,log,g=0){ if(g>60) return; const w=epOver(B); if(w){ B.win=w; B.cur=null; B.queue=[]; log.push(w==='a'?'🏆 Победа!':'💀 Поражение'); return; }
+  let id=null; while((B.extra||[]).length&&!id){ const x=B.extra.shift(); if(epU(B,x)&&!epU(B,x).dead) id=x; } let ex=!!id;
+  while(!id&&(B.queue||[]).length){ const x=B.queue.shift(); if(epU(B,x)&&!epU(B,x).dead) id=x; }
+  if(!id){ epPhase(B,log); return; }
+  const u=epU(B,id); B.cur=id; for(const k of Object.keys(u.cd||{})) if(u.cd[k]>0) u.cd[k]--;
+  if(epHas(u,'fear')&&epD100()<=40){ epTake(u,'fear'); log.push(`😱 ${u.nm}: страх спал сам`); }
+  const skip=['stun','sleep','fear'].find(x=>epHas(u,x)); if(skip){ log.push(`${epFxAny(skip).icon} ${u.nm} пропускает ход (${epFxAny(skip).name})`); epEnd(B,u,log); epNext(B,log,g+1); return; }
+  if(ex) log.push(`⏩ ${u.nm}: экстра ход`); epTrig(B,u,'turn',log); if(u.dead) epNext(B,log,g+1); }
+/* конец хода юнита: ДоТы и регенерация, затем −1 ход всем его эффектам (бомба взрывается в конце срока) */
+function epEnd(B,u,log){ if(u.dead) return; for(const e of (u.fx||[]).slice()){ if(u.dead) break; if(EP_DOT.has(e.id)&&e.id!=='bomb') epDotTick(B,u,e,log); }
+  if(!u.dead&&epHas(u,'regen')){ const h=epHeal(B,u,epUS(u).mhp*.15,log); if(h) log.push(`💚 ${u.nm}: регенерация +${h}`); }
+  if(u.dead) return; for(const e of (u.fx||[])) if(e.dur<99) e.dur--; for(const e of (u.fx||[]).filter(e=>e.dur<=0)){ u.fx=u.fx.filter(x=>x!==e); if(e.id==='bomb') epDotTick(B,u,e,log,true); if(u.dead) return; }
+  if(u.bar&&!epHas(u,'barrier')&&!epSsp(u,'barrier')&&!(B.units||[]).some(a=>a.side===u.side&&epSsp(a,'barrier'))) u.bar=0;
+  epTrig(B,u,'tend',log); }
+
+/* ---------- экран боя «строй на строй» (раздел «Бой») ---------- */
+const EPT={}; let EPBUSY=0; const EP_SEEN={}; let EP_LOADED=false; // EPT — выбор целей: {bid, uid, sk, sb, code, need, picks}
+function epSubscribe(){ if(EPSUB||!me) return; EPSUB=DB.subscribe('battles',null,docs=>{ EP_LOADED=true; applyDocs('battles','battles',docs); }); }
+/* кто ведёт юнита: мастер — всех, игрок — своих персонажей на стороне союзников */
+const epCtl=u=>{ if(!u||viewAs) return false; if(isDM()) return true; if(u.side!=='a') return false; const ch=byId(world.characters,u.ref); return !!(ch&&(ch.players||[]).includes(me.uid)); };
+function epCardHTML(m){ return `<div class="epcard"><div class="eph">${esc(m.ti||'')}</div>${(m.ls||[]).map(l=>`<div class="epl ${/^—|^⚔|^🏆|^💀/.test(l)?'ph':/^→/.test(l)?'hit':/^ {3}/.test(l)?'dmg':''}">${esc(l.trim())}</div>`).join('')}</div>`; }
+function epPost(B,ti,ls){ if(!ls.length) return; const m={i:uid(),t:Date.now(),u:me.uid,n:me.name,k:'ep',ti:(B.name?B.name+' · ':'')+ti,ls:ls.slice(0,80).map(x=>String(x).slice(0,240))}; chatPut('chat',m).catch(()=>toast('Лог боя не отправился в чат',true)); }
+function epSavePrev(B){ B.prev=JSON.stringify({units:B.units,queue:B.queue||[],cur:B.cur||null,extra:B.extra||[],souls:+B.souls||0,round:+B.round||0,supCd:B.supCd||{},win:B.win||null,ph:B.ph}); }
+const epClear=()=>{ for(const k of Object.keys(EPT)) delete EPT[k]; };
+/* почему скилл сейчас нельзя: '' — можно */
+function epWhyNot(B,u,s){ const P=s.ep||{}; if(B.ph!=='fight'||B.cur!==u.id) return 'не его ход'; if((P.type||'atk')==='pas') return 'пассивка';
+  if(s.id==='p_sup'&&(B.supCd||{})[u.side]>0) return 'КД '+B.supCd[u.side]+' (общий)'; if(s.id==='p_rit'&&u.rit) return 'уже был в этом бою';
+  if((u.cd||{})[s.id]>0) return 'КД '+u.cd[s.id]; const s1=+P.slot===1; if(!s1&&epHas(u,'silence')) return 'немота: только 1-й скилл'; if(!s1&&epHas(u,'taunt')) return 'провокация: только 1-й скилл';
+  if(+P.need&&(+u.sp||0)<+P.need) return `нужно боевого духа ${P.need} (есть ${+u.sp||0})`; if(P.cost&&P.cost.bar&&(+(u.rs||{})[P.cost.bar]||0)<+P.cost.n) return 'не хватает: '+P.cost.bar; return ''; }
+function epPickable(B,A,s,code,t){ if(code==='a1'){ if(t.side!==A.side) return false; return (s.ep.fx||[]).some(r=>r.id==='revive')?!!t.dead:!t.dead; }
+  if(t.side===A.side||t.dead) return false; const tau=epGet(A,'taunt'); if(tau){ const src=epU(B,tau.src); if(src&&!src.dead&&src.side!==A.side) return t===src; }
+  const hid=x=>(epHas(x,'stealth')||epHas(x,'stealth2'))&&!epHas(x,'mark2'); if(hid(t)&&epLive(B,t.side).some(f=>!hid(f))) return false; return true; }
+function epChoose(B,A,s,sb){ const why=epWhyNot(B,A,s); if(why){ toast(why,true); return; } if(sb&&!A.sbFree&&(+B.souls||0)<(+s.ep.sb.cost||0)){ toast('Не хватает душ',true); return; }
+  const code=(sb&&s.ep.sb&&s.ep.sb.tgt)||s.ep.tgt||((s.ep.type||'atk')==='atk'?'e1':'s');
+  if(['s','eA','aA'].includes(code)){ epDo(B,A,s,epAutoT(B,A,code),sb); return; }
+  const n=code==='e2'?2:code==='e3'?3:1; const avail=B.units.filter(t=>epPickable(B,A,s,code,t)).length; if(!avail){ toast('Нет подходящих целей',true); return; }
+  epClear(); Object.assign(EPT,{bid:B.id,uid:A.id,sk:s,sb:!!sb,code,need:Math.min(n,avail),picks:[]}); render(); }
+async function epDo(B,A,s,T,sb){ if(EPBUSY) return; EPBUSY=1; const log=[]; try{ epSavePrev(B); B.fl=[]; B.flt=Date.now(); await epUse(B,A,s,T,{sb,log}); epEnd(B,A,log); epNext(B,log); epPost(B,`${A.nm}: ${s.name}`,log); }catch(e){ console.error(e); toast('Ошибка боя: '+e.message,true); } finally{ EPBUSY=0; } epClear(); touch(B); render(); }
+function epSkip(B){ const u=epU(B,B.cur); if(!u) return; epSavePrev(B); B.fl=[]; B.flt=Date.now(); const log=[`⏭ ${u.nm} пропускает ход`]; epEnd(B,u,log); epNext(B,log); epPost(B,'пропуск хода',log); epClear(); touch(B); render(); }
+/* ---------- карточка юнита на сцене ---------- */
+function epUnitHTML(B,u,fl){ const s=epUS(u); const mh=s.mhp, hp=Math.max(0,u.hp??mh); const [x,y]=EP_POSXY[u.side][u.pos]; const el_=EP_EL.find(e=>e[0]===u.el); const cl=EP_CLS.find(e=>e[0]===u.cls);
+  const A=EPT.bid===B.id?epU(B,EPT.uid):null; const pk=A?epPickable(B,A,EPT.sk,EPT.code,u):false; const pick=(EPT.picks||[]).includes(u.id); const set=B.ph==='setup';
+  return `<div class="epu s-${u.side} ${B.cur===u.id?'cur':''} ${u.dead?'dead':''} ${pk?'pk':''} ${pick?'picked':''}" data-u="${u.id}" style="left:${x}%;top:${y}%;--c:${esc(u.col||(u.side==='a'?'#4fb3ff':'#ff6b5e'))}">
+    <div class="pw"><div class="por">${u.img?`<img data-img="${esc(u.img)}" data-thumb="1" style="display:none">`:`<span>${esc(initials(u.nm))}</span>`}</div>${el_?`<i class="el" title="${el_[1]}">${el_[2]}</i>`:''}${u.st?`<i class="stars" title="уровень">${'★'.repeat(u.st)}</i>`:''}</div>
+    <div class="nm" title="${esc(u.nm+(cl?' · '+cl[1]:''))}">${cl?cl[2]+' ':''}${esc(u.nm)}</div>
+    ${set?`<div class="ppos">${EP_POS.find(p=>p[0]===u.pos)[1]}</div>`:`<div class="hpb"><i style="width:${Math.round(100*hp/mh)}%"></i>${u.bar?`<b style="width:${Math.min(100,Math.round(100*u.bar/mh))}%"></b>`:''}<span>${hp} / ${mh}${u.bar?' · 🫧'+u.bar:''}</span></div>`}
+    <div class="fxs">${(u.fx||[]).map(e=>{ const f=epFxAny(e.id); return f?`<span class="${e.k}" title="${esc(f.name+' — '+f.d+(e.n!=null?' (N='+e.n+')':'')+(e.dur<99?' · ходов: '+e.dur:'')+(e.nd?' · не очищается':''))}">${f.icon}${e.dur<99?`<sub>${e.dur}</sub>`:''}</span>`:''; }).join('')}</div>
+    ${set?'':`<div class="meta">${+u.sp?`<span title="боевой дух">🔥 ${u.sp}</span>`:''}${B.ph==='fight'&&!u.dead?`<span title="инициатива этой фазы (1d4 = ${u.ir||'?'} + скорость)">⚡ ${u.init||0}</span>`:''}${Object.entries(u.rs||{}).filter(([k])=>(u.sk||[]).some(s=>s.ep.cost&&s.ep.cost.bar===k)).map(([k,v])=>`<span title="${esc(k)}">${esc(k.slice(0,3))} ${v}</span>`).join('')}</div>`}
+    ${(fl||[]).map((f,i)=>`<div class="epfl ${f.c}" style="animation-delay:${i*.22}s">${esc(f.v)}</div>`).join('')}</div>`; }
+function epSkillBtn(B,A,s,pos){ const why=epWhyNot(B,A,s); const P=s.ep||{}; const sbOk=P.sb&&P.sb.on&&!why&&(A.sbFree||(+B.souls||0)>=(+P.sb.cost||0));
+  const tip=pos?(s.d||epSkillSummary(s)):epSkillSummary(s); const cd=(A.cd||{})[s.id]>0?A.cd[s.id]:(s.id==='p_sup'&&(B.supCd||{})[A.side]>0?B.supCd[A.side]:0);
+  return `<button class="epsk ${pos?'pos':''} ${why?'dis':''}" data-s="${s.id}" title="${esc(tip.replace(/<[^>]+>/g,'')+(why?'\n\n✗ '+why:''))}"><b>${pos?'◇':P.slot}</b>${esc(s.name)}${cd?`<span class="cd">КД ${cd}</span>`:''}</button>${P.sb&&P.sb.on?`<button class="epsk sb ${sbOk?'':'dis'}" data-s="${s.id}" data-sb="1" title="${esc('Соул бёрн: '+(A.sbFree?'бесплатно (Ритуал)':(P.sb.cost||0)+' душ')+(P.sb.desc?' — '+P.sb.desc:''))}">🔥${A.sbFree?'0':P.sb.cost||0}</button>`:''}`; }
+/* ---------- страница ---------- */
+function renderBattle(m){ epSubscribe(); const dm=isDM()&&!viewAs; const B=state.id?byId(world.battles,state.id):null;
+  if(!B){ const L=(world.battles||[]).filter(b=>dm||b.ph!=='end').sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)); const PH={setup:'подготовка',fight:'идёт бой',end:'завершён'};
+    const page=el(`<div class="page"><div class="head"><h1>Бой</h1><span class="grow"></span>${dm?'<button class="btn primary" id="epNew">+ Новый бой</button>':''}</div><div class="faint" style="font-size:13px;margin-bottom:12px">Пошаговый бой «строй на строй». ${dm?'Создай бой, расставь союзников и врагов по позициям и начни — игроки увидят его здесь.':'Здесь появляются бои, которые завёл мастер.'}</div><div class="eplist">${!EP_LOADED?'<div class="faint">загрузка…</div>':L.length?L.map(b=>`<div class="eprow" data-b="${b.id}"><b>${esc(b.name||'Бой')}</b><span class="faint">${PH[b.ph]||''}${b.ph==='fight'?' · фаза '+(b.round||1):''} · ${(b.units||[]).filter(u=>u.side==='a').length} на ${(b.units||[]).filter(u=>u.side==='e').length}</span><span class="grow"></span>${dm?'<button class="x-btn del" title="удалить бой">×</button>':''}</div>`).join(''):'<div class="faint">Боёв пока нет.</div>'}</div></div>`);
+    $$('.eprow',page).forEach(r=>{ r.onclick=e=>{ if(e.target.closest('.del')) return; go('battle',r.dataset.b); }; const d=$('.del',r); if(d) d.onclick=async()=>{ const b=byId(world.battles,r.dataset.b); if(!b||!await confirmDlg(`Удалить бой «${b.name||'Бой'}»?`)) return; await removeDoc('battles',b); render(); }; });
+    const nb=$('#epNew',page); if(nb) nb.onclick=async()=>{ const b={id:uid(),name:'Бой '+((world.battles||[]).length+1),ph:'setup',units:[],createdAt:Date.now()}; try{ await createDoc('battles',b); }catch(e){ return; } go('battle',b.id); };
+    m.append(page); return; }
+  if(EPT.bid&&(EPT.bid!==B.id||B.cur!==EPT.uid)) epClear();
+  const fl=B.flt&&EP_SEEN[B.id]!==B.flt&&Date.now()-B.flt<6000; if(B.flt) EP_SEEN[B.id]=B.flt; const flOf=u=>fl?(B.fl||[]).filter(f=>f.u===u.id):[];
+  const set=B.ph==='setup', fight=B.ph==='fight'; const cur=epU(B,B.cur);
+  const slots=set&&dm?['a','e'].flatMap(side=>EP_POS.filter(([p])=>!B.units.some(u=>u.side===side&&u.pos===p)).map(([p,pn])=>{ const [x,y]=EP_POSXY[side][p]; return `<div class="epu empty s-${side}" data-add="${side}:${p}" style="left:${x}%;top:${y}%" title="${esc(EP_POSTXT[p])}"><div class="plus">＋</div><div class="ppos">${pn}</div><div class="faint" style="font-size:10.5px">${side==='a'?'союзник':'враг'}</div></div>`; })):[];
+  const ord=fight?[B.cur,...(B.extra||[]),...(B.queue||[])].filter(Boolean).map(id=>epU(B,id)).filter(Boolean):[];
+  const ordH=ord.map((u,i)=>{ const nx=ord[i+1]; const sw=i>0&&nx&&u.side==='a'&&nx.side==='a'&&(+u.init||0)===(+nx.init||0)&&(B.queue||[]).includes(u.id)&&(B.queue||[]).includes(nx.id)&&(dm||epCtl(u)||epCtl(nx)); return `<span class="oc ${u.side} ${i===0?'cur':''}" title="инициатива ${u.init||0}">${esc(u.nm)}</span>${sw?`<button class="x-btn epsw" data-a="${u.id}" data-b="${nx.id}" title="Равная инициатива — игроки решают, кто первый: поменять местами">⇄</button>`:''}`; }).join('<span class="faint">›</span>');
+  const page=el(`<div class="page epbpage"><div class="head"><button class="btn sm" id="epBack" title="Все бои">←</button>${dm?`<input id="epName" value="${esc(B.name||'')}" class="epname">`:`<h1>${esc(B.name||'Бой')}</h1>`}<span class="grow"></span>
+      ${dm?`${set?`<button class="btn sm" id="epBg" title="Картинка заднего плана">🖼 Фон</button>${B.bg?'<button class="btn sm" id="epBgX" title="Убрать фон">✕ фон</button>':''}<button class="btn sm" id="epResnap" title="Взять статы, скиллы и снаряжение из листов персонажей заново">⟳ Из листов</button><button class="btn sm primary" id="epStart">▶ Начать бой</button>`:''}${fight?`${B.prev?'<button class="btn sm" id="epUndo" title="Отменить последнее действие">↶ Отменить</button>':''}${cur?'<button class="btn sm" id="epSkip" title="Текущий боец пропускает ход">⏭ Пропустить ход</button>':''}<button class="btn sm" id="epStop">■ Завершить бой</button>`:''}${B.ph==='end'?'<button class="btn sm" id="epAgain" title="Вернуть бой в подготовку: те же бойцы, всё обнулится">↺ В подготовку</button>':''}`:''}</div>
+    <div class="epstage ${EPT.bid===B.id?'picking':''}">${B.bg?`<img class="epbg" data-img="${esc(B.bg)}" style="display:none">`:''}<div class="epmid"></div>
+      <div class="eptop">${fight?`<span class="epround">Фаза ${B.round||1}</span><div class="epord">${ordH}</div>`:set?`<span class="epround">Подготовка</span>`:`<span class="epround">Бой завершён</span>`}${fight||B.ph==='end'?`<span class="epsouls" title="Души команды игроков — на соул бёрн">👻 ${+B.souls||0}</span>`:''}</div>
+      ${B.units.map(u=>epUnitHTML(B,u,flOf(u))).join('')}${slots.join('')}
+      ${B.win&&fight?`<div class="epwin ${B.win}">${B.win==='a'?'🏆 Победа':'💀 Поражение'}</div>`:''}</div>
+    <div class="epact"></div></div>`);
+  /* панель действий */
+  const act=$('.epact',page);
+  if(set) act.innerHTML=dm?`<span class="faint">Расставь бойцов: ＋ на свободной позиции (одна позиция — один боец). Клик по бойцу — убрать или поменять. Когда все на местах — «▶ Начать бой». ХП в начале боя всегда полное, все ресурсы боя обнуляются.</span>`:'<span class="faint">Мастер готовит бой…</span>';
+  else if(B.ph==='end') act.innerHTML='<span class="faint">Бой завершён. Лог — в чате.</span>';
+  else if(B.win) act.innerHTML=`<span>${B.win==='a'?'🏆 Все враги повержены.':'💀 Все союзники выбыли.'}</span>${dm?'<span class="faint"> — «■ Завершить бой», когда будете готовы.</span>':''}`;
+  else if(cur&&EPT.bid===B.id) act.innerHTML=`<span class="eppk">🎯 «${esc(EPT.sk.name)}»${EPT.sb?' 🔥':''}: выбери ${EPT.code==='a1'?'союзника':'цель'}${EPT.need>1?` (${EPT.picks.length}/${EPT.need})`:''} — подсвечены</span><button class="btn sm" id="epCancel">Отмена</button>`;
+  else if(cur&&epCtl(cur)){ const posk=EP_POSK[cur.pos]||[];
+    act.innerHTML=`<span class="epwho">Ход: <b>${esc(cur.nm)}</b></span>${(cur.sk||[]).map(s=>epSkillBtn(B,cur,s)).join('')||'<span class="faint">нет скиллов со слотом — задай их в способностях (вкладка ✦ Эпик)</span>'}<span class="epsep" title="${esc(EP_POSTXT[cur.pos])}">${EP_POS.find(p=>p[0]===cur.pos)[1]}:</span>${posk.map(s=>epSkillBtn(B,cur,s,true)).join('')}`;
+    $$('.epsk',act).forEach(b=>b.onclick=()=>{ if(b.classList.contains('dis')){ toast(b.title.split('✗ ')[1]||'Нельзя',true); return; } const s=(cur.sk||[]).find(x=>x.id===b.dataset.s)||posk.find(x=>x.id===b.dataset.s); if(s) epChoose(B,cur,s,!!b.dataset.sb); }); }
+  else if(cur) act.innerHTML=`<span class="epwho">Ходит <b>${esc(cur.nm)}</b>${cur.side==='e'?' <span class="faint">— ведёт мастер</span>':''}</span>`;
+  /* клики по сцене */
+  $$('.epu[data-u]',page).forEach(c=>c.onclick=()=>{ const u=epU(B,c.dataset.u); if(!u) return;
+    if(EPT.bid===B.id){ const A=epU(B,EPT.uid); if(!A||!epPickable(B,A,EPT.sk,EPT.code,u)) return; if(EPT.picks.includes(u.id)) EPT.picks=EPT.picks.filter(x=>x!==u.id); else EPT.picks.push(u.id); if(EPT.picks.length>=EPT.need) epDo(B,A,EPT.sk,EPT.picks.map(id=>epU(B,id)),EPT.sb); else render(); return; }
+    if(dm) epUnitDlg(B,u); });
+  $$('.epu[data-add]',page).forEach(c=>c.onclick=()=>{ const [side,pos]=c.dataset.add.split(':'); epAddDlg(B,side,pos); });
+  $$('.epsw',page).forEach(b=>b.onclick=()=>{ const q=B.queue, i=q.indexOf(b.dataset.a), j=q.indexOf(b.dataset.b); if(i<0||j<0) return; [q[i],q[j]]=[q[j],q[i]]; touch(B); render(); });
+  const on=(id,f)=>{ const x=$(id,page); if(x) x.onclick=f; };
+  on('#epBack',()=>go('battle')); on('#epCancel',()=>{ epClear(); render(); });
+  { const n=$('#epName',page); if(n) n.onchange=()=>{ B.name=n.value.trim()||'Бой'; touch(B); }; }
+  on('#epBg',()=>pickFiles(async files=>{ const ids=await uploadImages(files,B.id); if(ids[0]){ B.bg=ids[0]; touch(B); render(); } })); on('#epBgX',()=>{ delete B.bg; touch(B); render(); });
+  on('#epResnap',()=>{ let n=0; for(const u of B.units){ const ch=byId(world.characters,u.ref); if(ch){ Object.assign(u,epSnap(ch)); n++; } } epNames(B); touch(B); render(); toast('Обновлено из листов: '+n); });
+  on('#epStart',()=>{ if(!B.units.some(u=>u.side==='a')||!B.units.some(u=>u.side==='e')){ toast('Нужен хотя бы один союзник и один враг',true); return; } const log=[]; delete B.prev; B.fl=[]; epStart(B,log); epPost(B,'начало боя',log); touch(B); render(); });
+  on('#epSkip',()=>epSkip(B));
+  on('#epUndo',()=>{ if(!B.prev) return; Object.assign(B,JSON.parse(B.prev)); delete B.prev; B.fl=[]; epClear(); epPost(B,'отмена',['↶ Мастер отменил последнее действие']); touch(B); render(); });
+  on('#epStop',async()=>{ if(!await confirmDlg('Завершить бой? Ресурсы боя обнулятся, листы персонажей не меняются.','Завершить')) return; B.ph='end'; B.cur=null; B.queue=[]; delete B.prev; epPost(B,'конец боя',['■ Бой завершён'+(B.win?(B.win==='a'?' победой':' поражением'):'')]); touch(B); render(); });
+  on('#epAgain',()=>{ Object.assign(B,{ph:'setup',cur:null,queue:[],extra:[],round:0,souls:0,win:null}); for(const u of B.units){ u.fx=[]; u.dead=0; delete u.hp; } delete B.prev; touch(B); render(); });
+  m.append(page); }
+/* мастер: поставить персонажа на позицию */
+function epAddDlg(B,side,pos){ const L=world.characters.filter(c=>!isClone(c)).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  const b=openModal(`<h2>${side==='a'?'Союзник':'Враг'}: ${EP_POS.find(p=>p[0]===pos)[1]}</h2><div class="faint" style="font-size:12.5px;margin-bottom:8px">${esc(EP_POSTXT[pos])}. Статы, скиллы и снаряжение берутся из листа (вкладки «Характеристики», «Снаряжение», способности со слотом).</div><input id="q" placeholder="поиск…" style="width:100%;margin-bottom:8px"><div class="tgl"></div><div class="modal-actions"><button class="btn" id="cancel">Отмена</button></div>`,true);
+  const box=$('.tgl',b); const draw=q=>{ box.innerHTML=''; for(const c of L){ if(q&&!(c.name||'').toLowerCase().includes(q)) continue; const sk=(c.abilities||[]).filter(a=>a.ep&&a.ep.slot).length; const row=el(`<div class="tgrow"><div class="av">${c.thumb?`<img src="${esc(c.thumb)}">`:esc(entAbbr(c))}</div><div class="grow"><b>${esc(c.name||'без имени')}</b><div class="faint" style="font-size:11.5px">${c.epic&&c.epic.cls?esc((EP_CLS.find(x=>x[0]===c.epic.cls)||[])[1]||'')+' · ':''}скиллов со слотом: ${sk}</div></div></div>`); row.onclick=()=>{ closeModal(); B.units.push({id:uid(),ref:c.id,side,pos,...epSnap(c)}); epNames(B); touch(B); render(); }; box.append(row); } if(!box.children.length) box.innerHTML='<div class="faint">Никого не найдено.</div>'; };
+  draw(''); $('#q',b).oninput=e=>draw(e.target.value.trim().toLowerCase()); $('#cancel',b).onclick=closeModal; }
+/* мастер: правка бойца — ХП, дух, эффекты, позиция, убрать */
+function epUnitDlg(B,u){ const set=B.ph==='setup'; const s=epUS(u);
+  const b=openModal(`<h2>${esc(u.nm)} <span class="faint" style="font-size:13px">${u.side==='a'?'союзник':'враг'} · ${EP_POS.find(p=>p[0]===u.pos)[1]}</span></h2>
+    ${set?`<div class="field"><label>Позиция</label>${epSel(EP_POS.map(([p,n])=>[p,n+(B.units.some(x=>x!==u&&x.side===u.side&&x.pos===p)?' (занята — поменяются)':'')]),u.pos,'pos')}</div>`:`<div class="row" style="gap:10px;flex-wrap:wrap"><div class="field" style="width:130px"><label>ХП (макс. ${s.mhp})</label><input id="uhp" type="number" value="${u.hp??s.mhp}"></div><div class="field" style="width:110px"><label>Барьер</label><input id="ubar" type="number" value="${+u.bar||0}"></div><div class="field" style="width:120px"><label>Боевой дух</label><input id="usp" type="number" value="${+u.sp||0}"></div></div>
+    <div class="field"><label>Эффекты</label><div class="epufx">${(u.fx||[]).map(e=>{ const f=epFxAny(e.id); return `<span class="epchip" data-i="${e.i}">${f?f.icon+' '+esc(f.name):e.id}${e.dur<99?' · '+e.dur:''} <button class="x-btn">×</button></span>`; }).join('')||'<span class="faint">нет</span>'}</div></div>`}
+    <div class="faint" style="font-size:12px;line-height:1.5">${EP_STATS.map(([k,n])=>`${n} ${epFmt(k,k==='hp'?s.mhp:s[k])}`).join(' · ')}</div>
+    <div class="modal-actions">${set?'<button class="btn danger" id="urm" style="margin-right:auto">Убрать из боя</button>':`<button class="btn" id="ukill" style="margin-right:auto">${u.dead?'🕊 Вернуть в бой':'☠ Вывести из боя'}</button>`}<button class="btn" id="cancel">Отмена</button><button class="btn primary" id="ok">Готово</button></div>`,true);
+  $$('.epufx .x-btn',b).forEach(x=>x.onclick=()=>{ const i=x.parentNode.dataset.i; u.fx=(u.fx||[]).filter(e=>e.i!==i); x.parentNode.remove(); });
+  $('#cancel',b).onclick=closeModal;
+  const rm=$('#urm',b); if(rm) rm.onclick=()=>{ B.units=B.units.filter(x=>x!==u); epNames(B); closeModal(); touch(B); render(); };
+  const kl=$('#ukill',b); if(kl) kl.onclick=()=>{ epSavePrev(B); const log=[]; if(u.dead){ u.dead=0; u.hp=Math.max(1,u.hp||Math.round(s.mhp*.3)); log.push(`🕊 Мастер вернул ${u.nm} в бой`); } else { epDie(B,u,log,null); if(B.cur===u.id){ epNext(B,log); } } const w=epOver(B); if(w) B.win=w; else B.win=null; epPost(B,'мастер',log); closeModal(); touch(B); render(); };
+  $('#ok',b).onclick=()=>{ if(set){ const p=$('.pos',b).value; const o=B.units.find(x=>x!==u&&x.side===u.side&&x.pos===p); if(o) o.pos=u.pos; u.pos=p; } else { epSavePrev(B); const n=v=>Math.max(0,Math.round(+v||0)); u.hp=Math.min(s.mhp,n($('#uhp',b).value)); u.bar=n($('#ubar',b).value); u.sp=n($('#usp',b).value); if(u.hp<=0&&!u.dead){ const log=[]; epDie(B,u,log,null); if(B.cur===u.id) epNext(B,log); epPost(B,'мастер',log); } }
+    closeModal(); touch(B); render(); }; }
 
 /* ============================================================
    КАРТОЧКИ — библиотека карт для Tabletop Simulator: сеты, конструктор с живым превью, рендер на canvas

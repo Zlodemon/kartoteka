@@ -110,6 +110,8 @@ service cloud.firestore {
       match /cards/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow write: if isDM(); }
       match /cardsets/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow write: if isDM(); }
       // картинки карт для TTS: рисует браузер мастера, забирает программа 4_KARTY_V_TTS
+      // ===== «Эпик-бой»: документ боя. Ходы пишет тот, кто действует (мастер или игрок), создаёт и удаляет мастер
+      match /battles/{id} { allow read: if signedIn(); allow create, delete: if isDM(); allow update: if isDM() || isPlayer(); }
       match /cardfaces/{id} { allow read, write: if isDM(); }
 
       // ===== картинки
