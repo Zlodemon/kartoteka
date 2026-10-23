@@ -2287,6 +2287,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-24',t:'Эпик-бой: кровь у режущих ударов',items:['Удары мечом, секирой, кинжалом, когтями и копьём оставляют порез, брызги крови по ходу удара, кровавую дымку и пятна на земле.','Обезглавливание, Казнь и Мгновенный разрез — фонтан крови толчками и багровая вспышка по краям экрана.','Кровь можно выключить: Настройки → ✦ Эпик-бой → «🩸 Кровь в анимациях».']},
   {d:'2026-10-24',t:'Эпик-бой: удары, молот, трещины и цвет анимаций',items:['Удары руками и ногами без картинок кулаков: герой подскакивает к цели и бьёт сериями, каждый удар — вспышка-звезда, ударная волна и воздушный хлопок, последний — тяжёлый.','Новые: вихрь пинков, удар ладонью.','Молот и сокрушение — тяжёлый удар в землю: вспышка, волна по земле, стена пыли, летящие камни, сильная тряска.','Трещины по земле переделаны: воронка в перспективе, широкие разломы с раскалённым ядром.','У любой анимации можно выбрать цвет стихии: во вкладке «✦ Эпик» → «Анимация» — 🎨 в окне выбора (огонь, лёд, молния, свет, тьма, кровь и т.д.).']},
   {d:'2026-10-24',t:'Эпик-бой: копья, движения героя, новые удары и баффы',items:['Герой двигается: прыжок с броском, отскок назад, прыжок к цели с ударом сверху, рывок насквозь, исчезновение в тени.','Копья: бросок, бросок с прыжка, пронзающий бросок, град копий, удар с разбега, вихрь копья, шквал уколов, прыжок с копьём; ульты — падение гигантского копья, драконий прыжок, небесный град копий.','Новые удары: удар с прыжка, рассекающий рывок, мгновенный разрез, двойной, звёздный, обезглавливание, сокрушающий, контрудар, крестовый рывок, клинок ветра, тысяча кулаков; шквал и серия ударов переделаны.','Новые баффы: уход в тень, перезарядка, концентрация, накопление силы, щит маны, шипастая и ледяная броня, огненное оружие, второе дыхание, боевая стойка, невидимость, кровавый ритуал, попутный ветер, сплочение, волна исцеления.','АОЕ-баффы: кастер играет свою часть один раз, к каждому союзнику летит сгусток силы и раскрывается аурой.','Драконы смотрят мордой вперёд; кровавые пики — два веера огромных шипов; дождь клинков — мечи падают из порталов и вонзаются.']},
   {d:'2026-10-24',t:'Эпик-бой: переделаны слабые анимации',items:['Мили-удары: широкий светящийся взмах с острым концом, удар отбрасывает цель и она вспыхивает белым.','Вихрь клинков, Круговой удар, Жатва — вихрь вокруг цели с оружием на конце, ветром и пылью.','Тысяча клинков: порталы над целями, мечи падают, вонзаются в землю и выбивают искры.','Цунами — настоящая стена воды с пеной и брызгами через всё поле.','Кровавые пики — веер огромных шипов из-под цели с брызгами крови.','Драконы — тело-лента с гребнем и чешуёй, крупная голова, дыхание идёт из пасти.','Выстрелы: вспышка у стрелка и светящийся след снаряда.']},
@@ -8173,6 +8174,7 @@ function epSettingsPanel(s){ const E=s.epic||{}; return `<div class="settings ep
     <div class="faint" style="font-size:12.5px;line-height:1.6">Пошаговый бой «строй на строй» в духе Epic Seven. У персонажа появляются элемент, класс, звёзды, характеристики и снаряжение (вкладки «Характеристики» и «Снаряжение»), у способностей — раздел «✦ Эпик» (слот 1–10, КД, цели, урон, эффекты, души, соул бёрн).</div>
     <ul class="faint eprules"><li><b>Инициатива:</b> в начале фазы каждый бросает 1d4 + бонус скорости; при равенстве первым ходит враг, игроки между собой решают сами.</li><li><b>Попадание:</b> атака попадает, если d100 > уклонение цели − попадание. Промах — половина урона, без крита и без эффектов.</li><li><b>Урон:</b> (стат × множитель скилла) × множитель элемента × крит (1 + крит урон) × K / (K + защита цели).</li><li><b>Дебаффы:</b> накладываются, если шанс скилла + эффективность − эффект резист цели ≥ d100. Баффы — просто накладываются.</li><li><b>Элементы:</b> Вода > Огонь > Земля > Вода, Свет ⇄ Тьма. Преимущество: множитель +0.1 и попадание +15; помеха: уклонение цели +50.</li></ul>
     <label class="row" style="gap:8px;cursor:pointer;margin-top:10px;align-items:flex-start"><input type="checkbox" id="epMusOn" ${E.music!==false?'checked':''} style="margin-top:3px"> <span><b>🎵 Музыка в бою</b> <span class="faint" style="font-size:12.5px">— мастер включает трек или плейлист YouTube кнопкой «♫ Музыка» на экране боя, слышат все. Сними галку — музыки в бою не будет совсем.</span></span></label>
+    <label class="row" style="gap:8px;cursor:pointer;margin-top:8px;align-items:flex-start"><input type="checkbox" id="epGore" ${E.gore!==false?'checked':''} style="margin-top:3px"> <span><b>🩸 Кровь в анимациях</b> <span class="faint" style="font-size:12.5px">— брызги, порезы и пятна у ударов мечом, секирой, когтями; у обезглавливания и казни — фонтан. Сними галку, если игрокам это не нравится.</span></span></label>
     <div class="row" style="gap:8px;align-items:center;margin-top:8px"><span>Константа брони K</span><input id="epK" type="number" min="1" max="10000" value="${+E.defK||100}" style="width:90px"><span class="faint" style="font-size:12px">— при защите = K урон режется вдвое</span></div></div>
   <div class="panel epclsp" style="--sc:#ff8a3d"><h3>Классы <button class="btn sm" id="epClsReset" title="Вернуть бонусы из таблицы">↺ как в таблице</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Прибавки к базе персонажа. Уникальные механики класса описываются в его скиллах.</div><div class="list"></div></div>
   <div class="panel epposp" style="--sc:#7ae0ff"><h3>Позиции</h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Бонус бойцу на позиции и две способности позиции (тратят ход). Числа, эффекты и названия правятся здесь; ↺ — вернуть как в таблице. Игроки видят это на экране боя кнопкой «ℹ Позиции».</div><div class="list"></div></div>
@@ -8180,7 +8182,7 @@ function epSettingsPanel(s){ const E=s.epic||{}; return `<div class="settings ep
   <div class="panel epsetp" style="--sc:#c04be0"><h3>Сеты снаряжения <button class="btn sm" id="epSetAdd">+ Сет</button><button class="btn sm" id="epSetReset" title="Вернуть сеты из таблицы">↺ как в таблице</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Сет собирается из одинаковых вещей в 6 слотах (артефакт не считается). Сет на 2 слота может сработать до трёх раз. Бонус ХП/атаки/защиты — в процентах, если стоит «%».</div><div class="list"></div></div></div>`; }
 function epSettingsBind(page,s){ const on=$('#epOn',page); if(!on) return; const E=()=>(s.epic??={});
   on.onchange=e=>{ E().on=e.target.checked; if(E().on&&s.ruina&&s.ruina.on){ s.ruina.on=false; toast('Руина выключена — вместе с Эпик-боем она не работает'); } touch(s); applyNav(); render(); };
-  { const g=$('.epanp .epangal',page); if(g) epAnGallery(g,{}); } { const m=$('#epMusOn',page); if(m) m.onchange=e=>{ E().music=e.target.checked; touch(s); musSync(); }; }
+  { const g=$('.epanp .epangal',page); if(g) epAnGallery(g,{}); } { const m=$('#epMusOn',page); if(m) m.onchange=e=>{ E().music=e.target.checked; touch(s); musSync(); }; } { const g=$('#epGore',page); if(g) g.onchange=e=>{ E().gore=e.target.checked; touch(s); }; }
   $('#epK',page).oninput=e=>{ const v=+e.target.value; if(v>0){ E().defK=v; touch(s); } };
   const cl=$('.epclsp .list',page); const drawCls=()=>{ cl.innerHTML=''; for(const [id,n,ic,role] of EP_CLS){ const B=epClsBonus(id);
       const row=el(`<div class="epclsrow" style="--cc:${EP_CLSC[id]}"><div class="h"><span class="ic">${ic}</span><b>${esc(n)}</b></div><div class="role">${esc(role)}</div><div class="bons"></div><button class="btn sm add">+ бонус</button></div>`); const bx=$('.bons',row);
@@ -8529,7 +8531,7 @@ const EP_AN=(()=>{ const L=[]; const A=(g,id,n,c,c2,st,o={})=>L.push({id,g,n,c,c
   S('st_holysw','Святой меч','#ffe27a','#ffffff',[['slash',{p:'down',w:10}],['pillar',{w:26,dl:.05}]]);
   S('st_bloodsw','Кровавый разрез','#ff3b4f','#ffb0b8',[['slash',{p:'x',w:7}],['sparks',{n:12}]]);
   S('st_dagger','Удар кинжалом','#e8fff0','#8fd16a',[['slash',{p:'x',w:3}]],{lunge:2});
-  S('st_backstab','Удар в спину','#ffffff','#ff6b5e',[['slash',{p:'thrust',w:4}],['glyph',{ch:'💢',m:'pop',sz:34}]],{lunge:2});
+  S('st_backstab','Удар в спину','#ffffff','#ff6b5e',[['slash',{p:'thrust',w:4}],['impact',{k:1}]],{lunge:2});
   S('st_dance','Танец клинков','#e8fff0','#8fd16a',[['slash',{p:'multi',w:3}],['slash',{p:'x',w:3,dl:.3}]],{lunge:2});
   S('st_poisdag','Отравленный кинжал','#8fe35a','#e3ff9a',[['slash',{p:'x',w:3}],['cloud',{n:4,dl:.1}]],{lunge:2});
   S('st_shield','Удар щитом','#4fb3ff','#cfe9ff',[['glyph',{ch:'🛡️',m:'pop',sz:48,dl:-.08}],['ring',{r:58}],['ring',{r:40,c:'#cfe9ff',dl:.1}]]);
@@ -8969,6 +8971,7 @@ function epGLStep(S,k,s,at,p,q,t,c,c2,sg,P){ const K=S.K, E=o=>epGLEmit(S,o), d0
   case 'orbit': epGLOrbit(S,at,t,s,c,c2); break;
   case 'impact': epGLImpact(S,at.x,at.y,sg,t,c,s.k||1); if(S.tEl) epGLRecoil(S,S.tEl,p,q,t,1.2); epGLPunch(S,t,1.03); break;
   case 'slam': epGLSlam(S,p,q,at,t,s,c,c2); break;
+  case 'blood': if(EPS().gore!==false) epGLBlood(S,at,t,sg,s.k||1,s.heavy); break;
   case 'flash': epGLFull(S,t,t+.32,s.c||c,.5,'flash'); break;
   case 'shake': epGLShake(S,t,s.k||1); break;
   /* ---- кинематика ультимейтов ---- */
@@ -9266,6 +9269,30 @@ function epAnRecolor(P,el){ const E=EP_ANEL[el]; if(!P||!E) return P; const k=P.
   A('strike','st_smash','Сокрушение','#c08a4a','#f0d29a',[['slam',{k:1.15}]],{lunge:1,el:'earth'});
   A('strike','st_quake','Сокрушающий удар','#c08a4a','#f0d29a',[mv('leap',{h:200,dur:1}),['slam',{k:1.4}]],{cast:.4,el:'earth'});
   A('ult','ul_hammer','Молот небес','#7ae0ff','#ffffff',[['dim',{fld:1,a:.6,dur:1.8}],mv('leap',{h:260,dur:1.1}),['rain',{sh:'zap',n:1,sp:0}],['slam',{k:1.7}],['rain',{sh:'zap',n:2,sp:60,dl:.15}]],{el:'storm',cast:.5});
+})();
+/* ---------- кровь у режущих ударов: порез, брызги по ходу удара, дымка, пятна на земле; heavy — фонтан толчками (обезглавливание, казнь).
+   Выключается в настройках Эпик-боя («Кровь в анимациях»), цвет не перекрашивается вместе с анимацией ---------- */
+const EP_BLOOD=['#b3001b','#8a0012','#d4142a','#6a000c'];
+function epGLBlood(S,at,t,dir,k=1,heavy){ const E=o=>epGLEmit(S,o), gy=at.y+46, up=dir>0?[-60,10]:[170,240];
+  /* порез: тонкая алая полоса поперёк цели */
+  const ca=(dir>0?-.6:.6)+(epRnd((at.x|0)%97)-.5)*.4; epGLOne(S,'beam','#d4142a',t,t+.5,f=>({x:at.x,y:at.y,w:150*k*Math.min(1,f*6),h:7*k,r:ca,a:.95*epEnv(f,.02,.5)}),'n'); epGLOne(S,'beam','#ff6a7a',t,t+.25,f=>({x:at.x,y:at.y,w:140*k*Math.min(1,f*6),h:2.5*k,r:ca,a:epEnv(f,.02,.4)}));
+  /* брызги по ходу удара и вверх, капли падают */
+  E({x:at.x,y:at.y,t,n:Math.round(36*k),tx:'drop',c:EP_BLOOD,bl:'n',sz:[5*k,13*k],sp:[260,680],ang:up,ay:1250,life:[.55,1],align:1,fo:.75,g1:.9,sx:.7});
+  E({x:at.x,y:at.y,t,n:Math.round(30*k),tx:'dot',c:EP_BLOOD,bl:'n',sz:[2.5,6],sp:[200,760],ang:up,ay:1250,life:[.5,.9],fo:.8});
+  E({x:at.x,y:at.y,t:t+.02,n:Math.round(5*k),tx:['smoke_03','smoke_05'],c:'#6a000c',bl:'n',sz:[50*k,90*k],sp:[40,120],ang:up,dr:2,life:[.6,1],g0:.5,g1:1.6,al:[.35,.55],rot:true,vr:1,fo:.4});
+  /* пятна на земле, куда упали капли */
+  for(let i=0;i<Math.round(4*k);i++){ const x=at.x+dir*(20+epRnd(i+(at.y|0)%53)*140*k)+(epRnd(i+7)-.5)*40, tl=t+.35+epRnd(i+3)*.25; epGLOne(S,['scorch_03','dirt_02','circle_05'][i%3],'#4a0008',tl,tl+1.6,f=>({x,y:gy+(epRnd(i+11)-.5)*10,sx:(.25+epRnd(i+5)*.25)*k*Math.min(1,f*8),sy:(.09+epRnd(i+5)*.08)*k*Math.min(1,f*8),a:.85*epEnv(f,.03,.7)}),'n'); }
+  if(!heavy) return;
+  /* фонтан: три толчка вверх, капли разлетаются и падают; багровая вспышка по краям */
+  for(let j=0;j<3;j++){ const tj=t+.08+j*.17; E({x:at.x,y:at.y-28,t:tj,n:Math.round(30*k),tx:'drop',c:EP_BLOOD,bl:'n',sz:[5*k,12*k],sp:[300,720],ang:[-128,-52],ay:1300,life:[.7,1.1],align:1,fo:.8,dt:[0,.1],sx:.7}); E({x:at.x,y:at.y-28,t:tj,n:Math.round(26*k),tx:'dot',c:EP_BLOOD,bl:'n',sz:[2.5,6],sp:[250,760],ang:[-135,-45],ay:1300,life:[.6,1],dt:[0,.1]}); }
+  E({x:at.x,y:at.y-20,t:t+.05,n:4,tx:['smoke_03','smoke_05'],c:'#5a0008',bl:'n',sz:[90*k,140*k],sp:[20,60],ang:[-120,-60],life:[1,1.4],g1:1.6,al:[.4,.55],rot:true,fo:.5});
+  epGLFull(S,t,t+.45,'#b3001b',.55,'vign'); epGLShake(S,t,1.4); }
+/* кровь у режущих ударов: k — сила, heavy — фонтан; dl — задержка (удары с рывком) */
+(()=>{ const add=(id,o)=>{ const P=EP_ANM[id]; if(P) P.st.push(['blood',o]); };
+  for(const [id,o] of [['st_behead',{k:1.9,heavy:1}],['ul_execute',{k:2,heavy:1}],['st_iai',{k:1.5,heavy:1,dl:.28}],['ul_reaper',{k:1.4}],['ul_dash',{k:1.4,dl:.3}],
+    ['st_axe',{k:1.3}],['st_cleave',{k:1.2}],['st_bloodsw',{k:1.4}],['st_sword',{k:.75}],['st_cross',{k:.9}],['st_triple',{k:.9}],['st_double',{k:.8,dl:.14}],['st_upper',{k:.8}],['st_z',{k:.8}],
+    ['st_claw',{k:1}],['st_bite',{k:1}],['st_backstab',{k:1.1}],['st_dagger',{k:.6}],['st_poisdag',{k:.5}],['st_reap',{k:1}],['st_whirl',{k:1}],['st_spin',{k:.8}],['st_flurry',{k:.8,dl:.4}],['st_dance',{k:.8,dl:.45}],
+    ['st_star',{k:1,dl:.36}],['st_dashcut',{k:1,dl:.25}],['st_cross2',{k:1.1,dl:.2}],['st_leap',{k:.9}],['st_counter',{k:.8}],['sp_thrust',{k:.9}],['sp_pierce',{k:.9}],['st_spear',{k:.8}],['st_pierce',{k:1}],['ul_worldslash',{k:1.2}],['ul_bloodspikes',{k:1.2}],['ul_spearstorm',{k:.8,dl:.5}]]) add(id,o);
 })();
 /* проиграть пресет: p — кто применяет, q — цель, d — секунда действия; o.aEl — элемент бойца для подскока */
 function epAnDraw(X,P,p,q,d,o={}){ const cast=P.cast||0, hit=epAnHitP(P), sg=q.x<p.x?-1:1; X.K=epKitOf(P); X.m=o.m||1; X.sd=(Math.floor(d*1000)*31+Math.floor(p.x)*7+Math.floor(q.y)*13)%2147483646+1;
