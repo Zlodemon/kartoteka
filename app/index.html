@@ -609,7 +609,7 @@ body.fight #fightBtn{background:rgba(255,209,102,.2);border-color:rgba(255,209,1
 .epstage>canvas.epgl,.epanst>canvas.epgl{position:absolute;left:0;top:0;z-index:4;pointer-events:none}.epghost{pointer-events:none!important}.epanst .d{z-index:1}
 .epglyph{position:absolute;transform:translate(-50%,-50%);line-height:1;pointer-events:none;white-space:nowrap;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}.epflash{position:absolute;inset:0;pointer-events:none}
 .epanbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.epanbar .q{width:240px}.epanbar .chips{display:flex;gap:5px;flex-wrap:wrap}.epanbar .btn.on,.epanspec .btn.on{border-color:var(--gc,var(--gold));color:var(--gc,var(--gold));background:rgba(255,255,255,.06)}
-.epanspec{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.epanspec{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.epancl{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;color:var(--muted);margin-left:auto}
 .settings.epwrap{grid-template-columns:minmax(0,1fr)!important}.epwrap .rusecs,.epwrap details.rusec,.epanp,.epangal{min-width:0}
 .epangrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}.epanh{grid-column:1/-1;margin:8px 0 0;font-size:12.5px;font-weight:700;color:var(--gc);letter-spacing:.5px;border-bottom:1px solid color-mix(in srgb,var(--gc) 35%,transparent);padding-bottom:3px}
 .epanc{border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:#0f1422;cursor:pointer;box-shadow:inset 0 2px 0 var(--ac);transition:border-color .15s}.epanc:hover{border-color:var(--ac)}.epanc.cur{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
@@ -2287,6 +2287,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-24',t:'Эпик-бой: удары, молот, трещины и цвет анимаций',items:['Удары руками и ногами без картинок кулаков: герой подскакивает к цели и бьёт сериями, каждый удар — вспышка-звезда, ударная волна и воздушный хлопок, последний — тяжёлый.','Новые: вихрь пинков, удар ладонью.','Молот и сокрушение — тяжёлый удар в землю: вспышка, волна по земле, стена пыли, летящие камни, сильная тряска.','Трещины по земле переделаны: воронка в перспективе, широкие разломы с раскалённым ядром.','У любой анимации можно выбрать цвет стихии: во вкладке «✦ Эпик» → «Анимация» — 🎨 в окне выбора (огонь, лёд, молния, свет, тьма, кровь и т.д.).']},
   {d:'2026-10-24',t:'Эпик-бой: копья, движения героя, новые удары и баффы',items:['Герой двигается: прыжок с броском, отскок назад, прыжок к цели с ударом сверху, рывок насквозь, исчезновение в тени.','Копья: бросок, бросок с прыжка, пронзающий бросок, град копий, удар с разбега, вихрь копья, шквал уколов, прыжок с копьём; ульты — падение гигантского копья, драконий прыжок, небесный град копий.','Новые удары: удар с прыжка, рассекающий рывок, мгновенный разрез, двойной, звёздный, обезглавливание, сокрушающий, контрудар, крестовый рывок, клинок ветра, тысяча кулаков; шквал и серия ударов переделаны.','Новые баффы: уход в тень, перезарядка, концентрация, накопление силы, щит маны, шипастая и ледяная броня, огненное оружие, второе дыхание, боевая стойка, невидимость, кровавый ритуал, попутный ветер, сплочение, волна исцеления.','АОЕ-баффы: кастер играет свою часть один раз, к каждому союзнику летит сгусток силы и раскрывается аурой.','Драконы смотрят мордой вперёд; кровавые пики — два веера огромных шипов; дождь клинков — мечи падают из порталов и вонзаются.']},
   {d:'2026-10-24',t:'Эпик-бой: переделаны слабые анимации',items:['Мили-удары: широкий светящийся взмах с острым концом, удар отбрасывает цель и она вспыхивает белым.','Вихрь клинков, Круговой удар, Жатва — вихрь вокруг цели с оружием на конце, ветром и пылью.','Тысяча клинков: порталы над целями, мечи падают, вонзаются в землю и выбивают искры.','Цунами — настоящая стена воды с пеной и брызгами через всё поле.','Кровавые пики — веер огромных шипов из-под цели с брызгами крови.','Драконы — тело-лента с гребнем и чешуёй, крупная голова, дыхание идёт из пасти.','Выстрелы: вспышка у стрелка и светящийся след снаряда.']},
   {d:'2026-10-23',t:'Эпик-бой: эффекты нового уровня и 30 ультимейтов',items:['Эффекты рисуются видеокартой: настоящее свечение, тысячи частиц, тряска и рывки камеры.','Мили-удары переделаны: замах, рывок с остаточными изображениями, замирание в момент удара, светящиеся разрезы.','Стихии теперь разные: земля поднимает пыль и камни с трещинами, лёд разлетается осколками, вода брызгами, тьма закручивается воронкой.','Вместо эмодзи — силуэты: драконы, крылья, черепа, щиты, молоты.','Новая группа «★ Ультимейты» — 30 кинематик: драконы, кровавые пики, разрез мира, чёрная дыра, казнь, феникс, воскрешение, благословение и другие.']},
@@ -8134,7 +8135,7 @@ function epSkillEditor(box,a,ch,onChange){ const draw=()=>{ const P=a.ep||{}; co
     const fld=(lbl,html,w)=>`<div class="field" style="margin:0${w?';width:'+w+'px':''}"><label>${lbl}</label>${html}</div>`;
     box.innerHTML=`<div class="epske">
       <div class="epskhd" style="--tc:${tc}"><div class="slot" title="слот скилла">${P.slot||'—'}</div><div class="t"><input class="epnmi" value="${esc(a.name||'')}" placeholder="Название скилла — оно на кнопке в бою"><div class="epsum"></div></div><span class="tp">${(EP_TYPE.find(x=>x[0]===type)||[])[1]}</span></div>
-      ${epSec('epc-main','#ffd166','⚙','Основное','',`<div class="eprow2">${fld('Слот',`<div class="epdots epslotseg">${Array.from({length:10},(_,i)=>i+1).map(i=>`<span data-v="${i}" class="${+P.slot===i?'on':''}">${i}</span>`).join('')}<span data-v="" class="${P.slot?'':'on'}" title="не участвует в бою">—</span></div>`)}${fld('Тип',`<div class="eptype">${EP_TYPE.map(([k,n])=>`<span data-v="${k}" class="${type===k?'on':''}" style="--c:${EP_TYPEC[k]}">${n}</span>`).join('')}</div>`)}${pas?'':fld('КД, ходов',`<input class="epcd" type="number" min="0" max="99" value="${+P.cd||0}">`,96)}${pas?'':fld('Цели',epSel(EP_TGT,P.tgt||(type==='atk'?'e1':'s'),'eptg'))}${pas?'':fld('Анимация',`<button class="btn sm epanb" title="Выбрать из библиотеки анимаций (наведи на карточку — проиграется)">🎬 ${esc(epAnName(P))}</button>`)}${pas?'':`<label class="row epultl" style="gap:6px;margin-bottom:6px;cursor:pointer" title="Перед скиллом — врезка на весь экран боя: портрет героя, название скилла, скоростные линии; эффекты скилла ярче"><input type="checkbox" class="epult" ${P.ult?'checked':''}> ⭐ Ультимейт</label>`}</div>`)}
+      ${epSec('epc-main','#ffd166','⚙','Основное','',`<div class="eprow2">${fld('Слот',`<div class="epdots epslotseg">${Array.from({length:10},(_,i)=>i+1).map(i=>`<span data-v="${i}" class="${+P.slot===i?'on':''}">${i}</span>`).join('')}<span data-v="" class="${P.slot?'':'on'}" title="не участвует в бою">—</span></div>`)}${fld('Тип',`<div class="eptype">${EP_TYPE.map(([k,n])=>`<span data-v="${k}" class="${type===k?'on':''}" style="--c:${EP_TYPEC[k]}">${n}</span>`).join('')}</div>`)}${pas?'':fld('КД, ходов',`<input class="epcd" type="number" min="0" max="99" value="${+P.cd||0}">`,96)}${pas?'':fld('Цели',epSel(EP_TGT,P.tgt||(type==='atk'?'e1':'s'),'eptg'))}${pas?'':fld('Анимация',`<button class="btn sm epanb" title="Выбрать из библиотеки анимаций (наведи на карточку — проиграется)">🎬 ${esc(epAnName(P))}${P.animEl&&EP_ANEL[P.animEl]?' · '+esc(EP_ANEL[P.animEl][0]):''}</button>`)}${pas?'':`<label class="row epultl" style="gap:6px;margin-bottom:6px;cursor:pointer" title="Перед скиллом — врезка на весь экран боя: портрет героя, название скилла, скоростные линии; эффекты скилла ярче"><input type="checkbox" class="epult" ${P.ult?'checked':''}> ⭐ Ультимейт</label>`}</div>`)}
       ${type==='atk'?epSec('epc-dmg','#ff6b5e','⚔','Урон','стат × множитель; несколько — складываются','<div class="epscale"></div>'):''}
       ${pas?epSec('epc-trig','#c04be0','✦','Срабатывание','',`<div class="eprow2">${fld('Когда срабатывает',epSel(EP_TRIG,P.trig||'always','eptr'))}<label class="row" style="gap:6px;margin-bottom:6px"><input type="checkbox" class="eponce" ${P.once?'checked':''}> 1 раз за бой</label></div><div class="faint" style="font-size:11.5px;margin-top:6px">«Всегда» — постоянные прибавки: вкладка «🎲 Бросок и модификаторы» → ƒ модификаторы → «Эпик: …».</div>`):''}
       ${epSec('epc-fx','#4fb3ff','✨','Эффекты','<span style="color:#4fb3ff">■</span> бафф · <span style="color:#ff6b5e">■</span> дебафф · <span style="color:#ffd166">■</span> особый','<div class="epfx"></div>')}
@@ -8144,7 +8145,7 @@ function epSkillEditor(box,a,ch,onChange){ const draw=()=>{ const P=a.ep||{}; co
     { const ni=$('.epnmi',box); const M=$('#modalBox'); const mi=M&&$('.abt[data-t="main"] input.nm',M); if(ni) ni.oninput=()=>{ a.name=ni.value; const h=M&&$('h2',M); if(h) h.textContent=a.name||'Способность'; if(mi) mi.value=a.name; ch_(); }; if(mi&&!mi._epSync){ mi._epSync=1; mi.addEventListener('input',()=>{ const x=$('.epnmi',box); if(x) x.value=mi.value; }); } }
     $$('.epslotseg span',box).forEach(s=>s.onclick=()=>{ const v=s.dataset.v; if(v) E().slot=+v; else delete E().slot; ch_(); draw(); });
     $$('.eptype span',box).forEach(s=>s.onclick=()=>{ E().type=s.dataset.v; ch_(); draw(); });
-    { const ab=$('.epanb',box); if(ab) ab.onclick=()=>epAnPicker(E().anim||'',type==='atk',id=>{ if(id) E().anim=id; else delete E().anim; ch_(); draw(); }); }
+    { const ab=$('.epanb',box); if(ab) ab.onclick=()=>epAnPicker(E().anim||'',type==='atk',(id,el)=>{ if(id) E().anim=id; else delete E().anim; if(el) E().animEl=el; else delete E().animEl; ch_(); draw(); },E().animEl||''); }
     const bind=(sel,f)=>{ const x=$(sel,box); if(x) x.oninput=x.onchange=()=>{ f(x); ch_(); }; };
     bind('.epult',x=>{ if(x.checked) E().ult=1; else delete E().ult; });
     bind('.epcd',x=>E().cd=Math.max(0,Math.round(+x.value||0))); bind('.eptg',x=>E().tgt=x.value); bind('.eptr',x=>E().trig=x.value); bind('.eponce',x=>{ if(x.checked) E().once=1; else delete E().once; });
@@ -8365,7 +8366,7 @@ function epStrike(B,A,t,P,o,log){ const sa=epUS(A), st=epUS(t); const adv=epElAd
   const mult=1+(adv>0?.1:0)+(mk===2?+epP('mark2','v'):mk?+epP('mark','v'):0)+(+sa.dmg||0);
   let dmg=base*mult*(crit?1+(+sa.cd||0):1)*K/(K+Math.max(0,+st.def||0)); if(miss) dmg*=.5; const cas=epTake(A,'cascade'); if(cas&&!miss) dmg+=+cas.n||0;
   log.push(`→ ${t.nm}: ${miss?'промах'+(roll!=null?` (d100 ${roll} ≤ ${Math.round(eva-acc)})`:'')+' — половина урона':crit?'КРИТ!':'попадание'}${adv>0?' · элемент сильнее':adv<0?' · элемент слабее':''}`);
-  { const an=epAnId(A,P,t); if(an){ epAn(B,{k:'atk',a:A.id,t:t.id,c:A.cls||'',an,...(P.ult?{ult:1}:{}),...(EPI?{sub:1}:{})}); EPTL+=epAnHit(an); } }
+  { const an=epAnId(A,P,t); if(an){ epAn(B,{k:'atk',a:A.id,t:t.id,c:A.cls||'',an,...(P.ult?{ult:1}:{}),...(EPI?{sub:1}:{}),...(P.animEl?{ae:P.animEl}:{})}); EPTL+=epAnHit(an); } }
   const li=log.length; const r=epHurt(B,t,dmg,log,{src:A,crit}); if(r.dealt) log.splice(li,0,`   ${t.nm}: −${r.dealt} ХП${t.dead?'':` (${t.hp}/${epUS(t).mhp}${t.bar?', барьер '+t.bar:''})`}`);
   const ls=epSsp(A,'lifesteal')+(A.fx||[]).filter(e=>e.id==='vamp').reduce((v,e)=>v+(+e.n||0),0); if(ls&&r.dealt){ const h=epHeal(B,A,r.dealt*ls/100,log); if(h) log.push(`🧛 ${A.nm}: вампиризм +${h}`); }
   const inj=epSsp(A,'injury'); if(inj&&r.dealt&&!t.dead){ t.cut=Math.min(90,(+t.cut||0)+inj); if(t.hp>epUS(t).mhp) t.hp=epUS(t).mhp; log.push(`🦴 ${t.nm}: макс. ХП −${inj}% (травма)`); }
@@ -8389,7 +8390,7 @@ async function epUse(B,A,sk,T,o={}){ const P=sk.ep||{}; const log=o.log; const t
   const rows=[...(P.fx||[]),...(sbOn?(P.sb.fx||[]):[])]; const hits=new Map(); const ctrQ=[];
   /* нулифаер на цели съедает скилл врага целиком */ for(const t of T) if(t.side!==A.side&&epHas(t,'nullify')){ epTake(t,'nullify'); hits.set(t.id,{nul:1}); log.push(`🚫 ${t.nm}: скилл нулифаер — скилл не подействовал`); }
   /* поддержка: анимация на каждой цели (бафф союзнику, дебафф врагу) */
-  if(tp!=='atk'&&T.length){ const t0=EPTL; let tE=t0; T.forEach((t,i)=>{ const an=epAnId(A,P,t); if(!an) return; EPTL=t0+i*.08; epAn(B,{k:'atk',a:A.id,t:t.id,an,...(P.ult?{ult:1}:{}),...(i?{sub:1}:{})}); tE=Math.max(tE,EPTL+epAnHit(an)); }); EPTL=tE; }
+  if(tp!=='atk'&&T.length){ const t0=EPTL; let tE=t0; T.forEach((t,i)=>{ const an=epAnId(A,P,t); if(!an) return; EPTL=t0+i*.08; epAn(B,{k:'atk',a:A.id,t:t.id,an,...(P.ult?{ult:1}:{}),...(i?{sub:1}:{}),...(P.animEl?{ae:P.animEl}:{})}); tE=Math.max(tE,EPTL+epAnHit(an)); }); EPTL=tE; }
   epApplyRows(B,A,rows.filter(r=>r.when==='pre'),T,log,hits);
   if(tp==='atk'){ const t0=EPTL; let tE=t0, i=0; /* по нескольким целям удары почти одновременно */
     for(const t of T){ if(t.dead||hits.has(t.id)) continue; EPI=i; EPTL=t0+(i++)*.12; const h=epStrike(B,A,t,P,{sbM:sbOn?+P.sb.m||0:0,st:(P.tgt||'e1')==='e1',depth:o.depth||0,ctrQ},log); hits.set(t.id,h); if(h.dealt>0&&!A.dead) epTrig(B,A,'hit',log,{other:t}); tE=Math.max(tE,EPTL); } EPTL=tE; EPI=0; }
@@ -8891,9 +8892,6 @@ function epGLBoom(S,x,y,r,t,K,c){ const E=o=>epGLEmit(S,o), st=K.st||'steel', kc
   else { E({x,y,t,n:8,tx:['star_06','flare_01','scorch_01'],c:kc,sz:[r*.8,r*1.5],sp:[40,160],dr:3,life:[.35,.6],g0:.5,g1:1.5,rot:true}); }
   if(st!=='storm'&&st!=='earth') sparks(10); }
 /* трещины по земле из точки */
-function epGLCrack(S,x,y,R,t,c,c2){ const g=new PIXI.Graphics(); let sd=((x*7+y*13)|0)+5; const Rn=()=>{ sd=(sd*16807)%2147483647; return (sd-1)/2147483646; }; const br=[];
-  for(let i=0;i<7;i++){ const a=Math.PI+i/6*Math.PI+(Rn()-.5)*.3; const pts=[[0,0]]; let px=0,py=0; for(let j=0;j<6;j++){ px+=Math.cos(a+(Rn()-.5)*.8)*R/6; py+=Math.sin(a+(Rn()-.5)*.8)*R/6*.45; pts.push([px,py]); } br.push(pts); }
-  S.ob(t,t+1.3,g,f=>{ g.clear(); const n=Math.min(1,f*5); for(const [w,cc,al] of [[5,c,.9],[1.6,c2,.8*(1-f)]]){ g.lineStyle(w,epHx(cc),al*(f>.7?(1-f)/.3:1)); for(const pts of br){ const m=Math.max(1,Math.round(pts.length*n)); g.moveTo(x,y); for(let j=1;j<m;j++) g.lineTo(x+pts[j][0],y+pts[j][1]); } } }); }
 /* тряска и «рывок камеры» — двигается сама сцена боя (DOM), как раньше */
 function epGLShake(S,t,k=1){ const st=S.stage; if(!st) return; const m=6*k*S.sc; try{ st.animate([{transform:'translate(0,0)'},{transform:`translate(${m}px,${-m/2}px)`},{transform:`translate(${-m}px,${m/2}px)`},{transform:`translate(${m/2}px,${m/2}px)`},{transform:`translate(${-m/2}px,${-m/2}px)`},{transform:'translate(0,0)'}],{duration:340,delay:(t-S.ago)*1000,fill:'none'}); }catch{} }
 function epGLPunch(S,t,k=1.03){ const st=S.stage; if(!st) return; try{ st.animate([{transform:'scale(1)'},{transform:`scale(${k})`,offset:.25},{transform:'scale(1)'}],{duration:260,delay:(t-S.ago)*1000,fill:'none',easing:'ease-out'}); }catch{} }
@@ -8969,6 +8967,8 @@ function epGLStep(S,k,s,at,p,q,t,c,c2,sg,P){ const K=S.K, E=o=>epGLEmit(S,o), d0
   case 'flurry': epGLFlurry(S,p,q,at,t,s,c,c2); break;
   case 'punches': epGLPunches(S,p,q,at,t,s,c,c2); break;
   case 'orbit': epGLOrbit(S,at,t,s,c,c2); break;
+  case 'impact': epGLImpact(S,at.x,at.y,sg,t,c,s.k||1); if(S.tEl) epGLRecoil(S,S.tEl,p,q,t,1.2); epGLPunch(S,t,1.03); break;
+  case 'slam': epGLSlam(S,p,q,at,t,s,c,c2); break;
   case 'flash': epGLFull(S,t,t+.32,s.c||c,.5,'flash'); break;
   case 'shake': epGLShake(S,t,s.k||1); break;
   /* ---- кинематика ультимейтов ---- */
@@ -9127,14 +9127,6 @@ function epGLFlurry(S,p,q,at,t,s,c,c2){ const n=s.n||8, st=s.st||.065, sg=q.x<p.
     epGLEmit(S,{x:at.x,y:at.y,t:tt+.05,n:4,tx:'trace_01',c:[c,'#ffffff'],sz:[30,55],sp:[220,420],dr:3,life:[.15,.3],align:1,sx:.3}); if(S.tEl) epGLRecoil(S,S.tEl,p,q,tt+.05,.45); }
   const te=t+n*st; epGLEmit(S,{x:at.x,y:at.y,t:te,n:1,tx:'ring',c,sz:30,g1:6,life:.4,sp:0,fo:.2}); epGLEmit(S,{x:at.x,y:at.y,t:te,n:1,tx:'flare_01',c:'#ffffff',sz:240,g0:.4,g1:1.2,life:.22,sp:0}); epGLPunch(S,te,1.03); }
 /* серия ударов кулаком: кулаки «влетают» в цель на разной высоте, последний — большой */
-function epGLPunches(S,p,q,at,t,s,c,c2){ const n=s.n||7, st=s.st||.07, dir=Math.sign(q.x-p.x)||1, ic=s.ic||'fist';
-  for(let i=0;i<n;i++){ const tt=t+i*st, last=i===n-1, y=at.y+(last?0:(epRnd(i+3)-.5)*70), x0=at.x-dir*(last?170:120), x1=at.x-dir*22, sz=last?.85:.46;
-    epGLOne(S,'beam',c,tt,tt+.16,f=>({x:(x0+x1)/2,y,w:Math.abs(x1-x0)*Math.min(1,f*3),h:last?30:16,r:0,a:.7*epEnv(f,.05,.5)}));
-    epGLOne(S,'ic:'+ic,'#9a7a52',tt,tt+.22,f=>({x:x0+(x1-x0)*Math.min(1,f*3),y,s:sz*(f<.33?1:1-(f-.33)*.4),r:dir*Math.PI/2,a:epEnv(f,.05,.6)}),'n');
-    epGLOne(S,'ic:'+ic,c,tt,tt+.22,f=>({x:x0+(x1-x0)*Math.min(1,f*3),y,s:sz*1.08,r:dir*Math.PI/2,a:.4*epEnv(f,.05,.6)}));
-    const th=tt+.07; epGLEmit(S,{x:x1+dir*10,y,t:th,n:1,tx:'ring',c,sz:last?40:18,g1:last?7:4,life:.3,sp:0,fo:.2}); epGLEmit(S,{x:x1+dir*10,y,t:th,n:1,tx:'star_08',c:'#ffffff',sz:last?260:110,g0:.3,g1:1,life:.14,sp:0,rot:true});
-    epGLEmit(S,{x:x1,y,t:th,n:last?14:5,tx:'trace_01',c:[c,'#ffffff'],sz:[30,60],sp:[220,460],ang:dir>0?[-40,40]:[140,220],dr:3,life:[.15,.32],align:1,sx:.3}); if(S.tEl) epGLRecoil(S,S.tEl,p,q,th,last?1.6:.5);
-    if(last){ epGLShake(S,th,1.6); epGLPunch(S,th,1.04); if(S.K) epGLBoom(S,at.x,at.y,40,th,S.K,c); } } }
 /* орбита: предметы кружат вокруг и сходятся в центр (перезарядка, руны, осколки брони) */
 function epGLOrbit(S,at,t,s,c,c2){ const n=s.n||6, dur=s.dur||.8, R=s.r||85, tx=s.tx||'star_04', sc=tx.startsWith('ic:')?.17:tx==='bullet'?.55:tx==='shard'?.6:.4;
   for(let i=0;i<n;i++){ const a0=i/n*6.283; epGLOne(S,tx,i%2?c:c2,t,t+dur,f=>{ const a=a0+f*7, r=R*(1-Math.pow(f,1.6)); return {x:at.x+Math.cos(a)*r,y:at.y+Math.sin(a)*r*.55,s:sc,r:a+Math.PI/2,a:epEnv(f,.1,.92)}; }); }
@@ -9213,13 +9205,75 @@ function epGLImpale(S,at,t,n,H,c,c2){ const by=at.y+48;
   /* дракон бездны — та же голова, что у остальных драконов (силуэт виверны был анфас) */
   const dd=EP_ANM.ul_dragon_dark; if(dd) dd.st=dd.st.map(([k,s])=>k==='dragon'?[k,{...s,ic:'dragon2'}]:[k,s]);
 })();
+/* ---------- земля: воронка и разломы в перспективе (сужающиеся трещины с тёмным телом и светящейся сердцевиной) ---------- */
+function epGLTaper(g,pts,w0,pr,col,al){ const n=pts.length-1, m=n*pr, k=Math.floor(m), fr=m-k; if(m<=0) return; const P=pts.slice(0,k+1); if(k<n) P.push([pts[k][0]+(pts[k+1][0]-pts[k][0])*fr,pts[k][1]+(pts[k+1][1]-pts[k][1])*fr]);
+  const L=[],Rr=[]; for(let i=0;i<P.length;i++){ const a=P[Math.max(0,i-1)], b=P[Math.min(P.length-1,i+1)], dx=b[0]-a[0], dy=b[1]-a[1], l=Math.hypot(dx,dy)||1, w=w0*Math.pow(Math.max(0,1-i/n),1.15)+.4; L.push([P[i][0]-dy/l*w,P[i][1]+dx/l*w]); Rr.push([P[i][0]+dy/l*w,P[i][1]-dx/l*w]); }
+  g.beginFill(epHx(col),al); g.moveTo(L[0][0],L[0][1]); for(const v of L) g.lineTo(v[0],v[1]); for(let i=Rr.length-1;i>=0;i--) g.lineTo(Rr[i][0],Rr[i][1]); g.closePath(); g.endFill(); }
+function epGLCrack(S,x,y,R,t,c,c2){ const cont=new PIXI.Container(); cont.position.set(x,y); cont.scale.set(1,.36); S.ob(t,t+1.7,cont,()=>{});
+  let sd=((x*7+y*13)|0)%99991+5; const Rn=()=>{ sd=(sd*16807)%2147483647; return (sd-1)/2147483646; };
+  const cr=S.spr('glow','#000000','n'); S.ob(t,t+1.7,cr,f=>{ cr.scale.set(R*1.25/128*Math.min(1,.4+f*8)); cr.alpha=.85*epEnv(f,.02,.7); },cont);
+  const rim=S.spr('ring',epDark(c2,.6),'n'); S.ob(t,t+1.5,rim,f=>{ rim.scale.set(R*.55/128*Math.min(1,.3+f*10)); rim.alpha=.6*epEnv(f,.02,.6); },cont);
+  const cracks=[]; const m=7+((Rn()*3)|0); for(let i=0;i<m;i++){ const a0=i/m*6.283+(Rn()-.5)*.45, len=R*(.6+Rn()*.8), w0=16+Rn()*12; const pts=[[0,0]]; let a=a0, px=0, py=0; for(let j=1;j<=7;j++){ a+=(Rn()-.5)*.55; px+=Math.cos(a)*len/7; py+=Math.sin(a)*len/7; pts.push([px,py]); } cracks.push([pts,w0]);
+    if(Rn()<.7){ const bi=2+((Rn()*3)|0), b0=pts[bi]; let ba=a0+(Rn()<.5?-1:1)*(.5+Rn()*.6), bx=b0[0], by=b0[1]; const bp=[[bx,by]]; for(let j=1;j<=4;j++){ ba+=(Rn()-.5)*.5; bx+=Math.cos(ba)*len*.11; by+=Math.sin(ba)*len*.11; bp.push([bx,by]); } cracks.push([bp,w0*.5]); } }
+  const gd=new PIXI.Graphics(), gl=new PIXI.Graphics(); gl.blendMode=EP_ADD();
+  S.ob(t,t+1.7,gd,f=>{ gd.clear(); const pr=Math.min(1,f*1.7/.16), al=f>.7?(1-f)/.3:1; for(const [pts,w] of cracks){ epGLTaper(gd,pts,w*1.5,pr,'#050302',.95*al); epGLTaper(gd,pts,w*.9,pr,epDark(c2,.35),.9*al); } },cont);
+  S.ob(t,t+1.3,gl,f=>{ gl.clear(); const pr=Math.min(1,f*1.3/.16), al=Math.max(0,1-f*1.0); for(const [pts,w] of cracks){ epGLTaper(gl,pts,w*1.6,pr,c2,.22*al); epGLTaper(gl,pts,w*.55,pr,c2,al); epGLTaper(gl,pts,w*.2,pr,'#ffffff',al); } },cont);
+  /* обломки и пыль — в обычных координатах (летят вверх) */
+  epGLEmit(S,{x,y,t,n:12,tx:'rock',c:['#6a5a4a','#4a3e32','#8a7a68'],bl:'n',w:R*.6,h:10,sz:[10,24],sp:[180,440],ang:[215,325],ay:1300,life:[.5,.9],rot:true,vr:12,fo:.8,g1:1});
+  epGLEmit(S,{x,y,t:t+.02,n:10,tx:['smoke_04','smoke_05','smoke_03'],c:'#4a4038',bl:'n',w:R*.8,h:8,sz:[R*.5,R*.9],sp:[40,140],ang:[170,190],dr:2,life:[.7,1.2],g1:1.8,al:[.45,.7],sx:1.7,fo:.4});
+  epGLEmit(S,{x,y,t:t+.02,n:10,tx:['smoke_04','smoke_05','smoke_03'],c:'#4a4038',bl:'n',w:R*.8,h:8,sz:[R*.5,R*.9],sp:[40,140],ang:[-10,10],dr:2,life:[.7,1.2],g1:1.8,al:[.45,.7],sx:1.7,fo:.4}); }
+/* удар «как в аниме»: зубчатая звезда-вспышка, ударная волна поперёк удара, воздушный хлопок за целью, штрихи, пыль */
+function epGLImpact(S,x,y,dir,t,c,k=1){ const g=new PIXI.Graphics(); g.blendMode=EP_ADD(); const rot=epRnd((x*3+y)|0)*6.28; const pts=[]; for(let i=0;i<16;i++){ const a=i/16*6.283, r=i%2?.42:(.8+epRnd(i+((x|0)%97))*.45); pts.push([Math.cos(a)*r,Math.sin(a)*r]); }
+  S.ob(t,t+.2,g,f=>{ g.clear(); g.position.set(x,y); g.rotation=rot; const s=70*k*(f<.25?f/.25*1.15:1.15-(f-.25)*.3), al=f<.35?1:Math.max(0,1-(f-.35)/.65); g.beginFill(0xffffff,al); g.lineStyle(5*k,epHx(c),al); g.moveTo(pts[0][0]*s,pts[0][1]*s); for(const p of pts) g.lineTo(p[0]*s,p[1]*s); g.closePath(); g.endFill(); });
+  epGLOne(S,'ring',c,t,t+.38,f=>({x:x+dir*f*40*k,y,sx:(.15+f*.45)*k,sy:(.4+f*1.3)*k,a:epEnv(f,.05,.3)})); epGLOne(S,'ring','#ffffff',t+.04,t+.34,f=>({x:x+dir*f*60*k,y,sx:(.1+f*.3)*k,sy:(.3+f*.9)*k,a:.8*epEnv(f,.05,.3)}));
+  epGLOne(S,'beam',c,t,t+.22,f=>({x:x+dir*(40+f*120)*k,y,w:200*k*(.4+f),h:70*k*(1-f*.6),r:0,a:.55*epEnv(f,.05,.3)}));
+  epGLEmit(S,{x,y,t,n:Math.round(14*k),tx:'trace_01',c:[c,'#ffffff'],sz:[40*k,80*k],sp:[300,650],ang:dir>0?[-55,55]:[125,235],dr:3,life:[.16,.32],align:1,sx:.28});
+  epGLEmit(S,{x,y,t,n:1,tx:'glow',c,sz:220*k,g0:.3,g1:1,life:.2,sp:0,al:.8}); epGLEmit(S,{x,y:y+40,t,n:4,tx:['smoke_04','smoke_05'],c:'#5a5f70',bl:'n',sz:[40,70],sp:[40,120],ang:dir>0?[-30,20]:[160,210],life:[.4,.7],al:.4,g1:1.6}); }
+/* серия ударов: герой подскакивает к цели и бьёт сериями (джебы), каждый удар — вспышка-звезда; последний — тяжёлый с волной */
+function epGLPunches(S,p,q,at,t,s,c,c2){ const n=s.n||7, st=s.st||.08, dir=Math.sign(q.x-p.x)||1, el=S.aEl, kick=!!s.kick;
+  if(el){ const dx=q.x-p.x, dy=q.y-p.y, L=Math.hypot(dx,dy)||1, stop=Math.min(85,L*.4), ex=dx*(L-stop)/L*S.sc, ey=dy*(L-stop)/L*S.sc, k=S.sc, app=.2, back=.3, D=app+n*st+back; const T=(x,y,r=0)=>`translate(calc(-50% + ${x}px),calc(-50% + ${y}px)) rotate(${r}deg)`;
+    const kf=[{transform:T(0,0),offset:0},{transform:T(ex,ey),offset:app/D}]; for(let i=0;i<n;i++){ const o1=(app+i*st)/D, o2=(app+i*st+st*.45)/D; kf.push({transform:T(ex+dir*(i===n-1?34:20)*k,ey+(kick?-6*k:0),kick?dir*-18:0),offset:Math.min(.99,o1+.01)}); kf.push({transform:T(ex-dir*6*k,ey),offset:Math.min(.995,o2)}); }
+    kf.push({transform:T(ex,ey),offset:(app+n*st)/D}); kf.push({transform:T(0,0),offset:1}); const kz=kf.map(x=>({...x,zIndex:6})); try{ el.animate(kz,{duration:D*1000,delay:(t-app-S.ago)*1000,fill:'none',easing:'linear'}); }catch{} }
+  for(let i=0;i<n;i++){ const tt=t+i*st, last=i===n-1, y=at.y+(last?0:(epRnd(i+3)-.5)*56)+(kick?18:0), x=at.x-dir*12+(epRnd(i+8)-.5)*16;
+    if(kick) epGLSmear(S,at.x-dir*40,y-30,90,dir>0?2.6:.55,dir>0?-1.9:1.9,tt-.05,.24,c,{th:.3,swing:.4});
+    epGLImpact(S,x,y,dir,tt,i%2&&!last?c2:c,last?1.7:.75); if(S.tEl) epGLRecoil(S,S.tEl,p,q,tt,last?1.8:.5);
+    if(last){ epGLShake(S,tt,1.8); epGLPunch(S,tt,1.045); epGLFull(S,tt,tt+.12,'#ffffff',.25,'flash'); for(let j=0;j<3;j++) epGLOne(S,'ring',j?'#ffffff':c,tt+j*.06,tt+.5+j*.06,f=>({x:at.x+dir*f*80,y,sx:.3+f*.8,sy:.8+f*2.4,a:.8*epEnv(f,.05,.3)})); } } }
+/* сокрушение: тяжёлый удар сверху в землю — взмах, вспышка, воронка, волна по земле, стена пыли, камни, тряска */
+function epGLSlam(S,p,q,at,t,s,c,c2){ const k=s.k||1, dir=Math.sign(q.x-p.x)||1, gy=at.y+46;
+  epGLSlash(S,{p:'down',w:16,sz:1.5*k},at,t-.07,c,c2,dir);
+  epGLEmit(S,{x:at.x,y:gy,t,n:1,tx:'glow','c':'#ffffff',sz:260*k,sx:1.8,g0:.3,g1:1.1,life:.18,sp:0}); epGLOne(S,'beam',c,t,t+.3,f=>({x:at.x,y:gy-120*k,w:260*k,h:90*k*(1-f),r:Math.PI/2,a:.8*epEnv(f,.03,.3)}));
+  epGLCrack(S,at.x,gy,170*k,t,'#050302',c);
+  for(let j=0;j<3;j++) epGLOne(S,'ring',j===1?'#ffffff':c,t+j*.07,t+.65+j*.07,f=>({x:at.x,y:gy,sx:(.3+f*2.4)*k,sy:(.3+f*2.4)*k*.3,a:.85*epEnv(f,.04,.3)}));
+  epGLEmit(S,{x:at.x,y:gy,t,n:18,tx:['smoke_04','smoke_05','smoke_07'],c:['#5a4a3a','#3a3028'],bl:'n',w:60,h:6,sz:[70*k,120*k],sp:[160,380],ang:[175,185],dr:2.2,life:[.7,1.2],g1:1.6,al:[.55,.8],vy:-30,fo:.4});
+  epGLEmit(S,{x:at.x,y:gy,t,n:18,tx:['smoke_04','smoke_05','smoke_07'],c:['#5a4a3a','#3a3028'],bl:'n',w:60,h:6,sz:[70*k,120*k],sp:[160,380],ang:[-5,5],dr:2.2,life:[.7,1.2],g1:1.6,al:[.55,.8],vy:-30,fo:.4});
+  epGLEmit(S,{x:at.x,y:gy,t,n:20,tx:'rock',c:['#8a7a68','#5a4a3a','#a08a70'],bl:'n',w:80,sz:[14,34],sp:[260,620],ang:[220,320],ay:1500,life:[.6,1.1],rot:true,vr:14,fo:.85,g1:1});
+  if(S.K&&S.K.st!=='steel') epGLBoom(S,at.x,at.y,50*k,t,S.K,c); epGLShake(S,t,2.8*k); epGLPunch(S,t,1.06); epGLFull(S,t,t+.14,'#ffffff',.3,'flash'); if(S.tEl) epGLRecoil(S,S.tEl,p,q,t,1.8); }
+/* цвет анимации у скилла: пресет в палитре выбранной стихии (явные цвета шагов, кроме затемнения, тоже берут палитру) */
+const EP_RECOL={};
+function epAnRecolor(P,el){ const E=EP_ANEL[el]; if(!P||!E) return P; const k=P.id+'@'+el; if(EP_RECOL[k]) return EP_RECOL[k];
+  return EP_RECOL[k]={...P,id:k,c:E[1],c2:E[2],el,_h:undefined,_kit:undefined,st:P.st.map(([kk,s])=>{ if(kk==='dim') return [kk,s]; const o={...s}; if(kk==='vign'&&o.c) o.c=E[1]; else { delete o.c; delete o.c2; } return [kk,o]; })}; }
+/* ---------- удары руками/ногами без картинок кулаков, молот и сокрушение как тяжёлый удар в землю ---------- */
+(()=>{ const A=(g,id,n,c,c2,st,o={})=>{ const P={id,g,n,c,c2,st,...o}; const i=EP_AN.findIndex(x=>x.id===id); if(i>=0) EP_AN[i]=P; else EP_AN.push(P); EP_ANM[id]=P; };
+  const mv=(m,o={})=>['move',{m,ph:'cast',fld:1,...o}];
+  A('strike','st_punch','Удар кулаком','#ffd166','#ffffff',[['punches',{n:1}]],{cast:.25});
+  A('strike','st_combo','Серия ударов','#ffd166','#ff7a3d',[['punches',{n:6,st:.09}]],{cast:.25});
+  A('strike','st_thousand','Тысяча кулаков','#ff7a3d','#ffd166',[['punches',{n:14,st:.05}]],{cast:.25});
+  A('strike','st_kick','Удар ногой','#ffd166','#ffffff',[['punches',{n:1,kick:1}]],{cast:.25});
+  A('strike','st_kickcombo','Вихрь пинков','#7ae0ff','#ffffff',[['punches',{n:4,st:.11,kick:1}]],{cast:.25});
+  A('strike','st_palm','Удар ладонью','#8ef7c1','#ffffff',[['punches',{n:1}],['nova',{r:120,dl:.02}]],{cast:.25,el:'wind'});
+  A('strike','st_shield','Удар щитом','#4fb3ff','#cfe9ff',[['impact',{k:1.4}],['icon',{ic:'shield',sz:110,dur:.35,a:.3}],['shake',{k:1.2}]],{lunge:1});
+  A('strike','st_hammer','Удар молотом','#ffd166','#ffffff',[mv('leap',{h:150,dur:.95}),['slam',{}]],{cast:.4});
+  A('strike','st_smash','Сокрушение','#c08a4a','#f0d29a',[['slam',{k:1.15}]],{lunge:1,el:'earth'});
+  A('strike','st_quake','Сокрушающий удар','#c08a4a','#f0d29a',[mv('leap',{h:200,dur:1}),['slam',{k:1.4}]],{cast:.4,el:'earth'});
+  A('ult','ul_hammer','Молот небес','#7ae0ff','#ffffff',[['dim',{fld:1,a:.6,dur:1.8}],mv('leap',{h:260,dur:1.1}),['rain',{sh:'zap',n:1,sp:0}],['slam',{k:1.7}],['rain',{sh:'zap',n:2,sp:60,dl:.15}]],{el:'storm',cast:.5});
+})();
 /* проиграть пресет: p — кто применяет, q — цель, d — секунда действия; o.aEl — элемент бойца для подскока */
 function epAnDraw(X,P,p,q,d,o={}){ const cast=P.cast||0, hit=epAnHitP(P), sg=q.x<p.x?-1:1; X.K=epKitOf(P); X.m=o.m||1; X.sd=(Math.floor(d*1000)*31+Math.floor(p.x)*7+Math.floor(q.y)*13)%2147483646+1;
   if(P.lunge) epLunge(X,o.aEl,p,q,d+cast,P.lunge===2?.42:.62,hit-cast);
   for(const [k,s] of P.st){ const ph=s.ph||EP_ANPH[k]||'hit'; const t=d+(ph==='cast'?0:ph==='go'?cast:hit)+(s.dl||0); const at=s.on==='p'?p:s.on==='q'?q:ph==='cast'?p:q;
     try{ epAnStep(X,k,s,at,p,q,t,s.c||P.c,s.c2||P.c2||'#ffffff',sg); epPxStep(X,k,s,at,p,q,t,s.c||P.c,s.c2||P.c2||'#ffffff'); }catch(e){ console.warn('anim',P.id,k,e); } } }
 /* ---------- библиотека анимаций: сетка карточек с мини-сценой (наведи — проиграется) ---------- */
-function epAnPlayCard(card){ const P=EP_ANM[card.dataset.id]; const st=$('.epanst',card); if(!P||!st) return; epTxLoad();
+function epAnPlayCard(card,el){ const P=epAnRecolor(EP_ANM[card.dataset.id],el); const st=$('.epanst',card); if(!P||!st) return; epTxLoad();
   if(EPG.st===1){ $$('.epfxl',st).forEach(x=>x.remove()); const R=st.getBoundingClientRect(); if(!R.width) return; const sc=.5, W=R.width/sc, H=R.height/sc;
     const lay=document.createElement('div'); lay.className='epfxl'; lay.style.cssText=`inset:auto;left:0;top:0;width:${W}px;height:${H}px;transform:scale(${sc});transform-origin:0 0`; st.append(lay);
     const S=epGLScene(st,R.width,R.height,0,sc); S.stage=st; S.lay=lay; const cen=e=>{ const r=e.getBoundingClientRect(); return {x:(r.left+r.width/2-R.left)/sc,y:(r.top+r.height/2-R.top)/sc,top:(r.top-R.top)/sc}; };
@@ -9230,24 +9284,24 @@ function epAnPlayCard(card){ const P=EP_ANM[card.dataset.id]; const st=$('.epans
   const a=$('.d.a',st), b=$('.d.b',st); epAnDraw(X,P,cen(a),cen(b),.05,{aEl:a}); }
 function epAnCard(P,cur){ const g=EP_ANG.find(x=>x[0]===P.g)||EP_ANG[0]; const E=P.el?EP_ANEL[P.el]:null;
   return `<div class="epanc ${P.g==='buff'?'ally':''} ${cur===P.id?'cur':''}" data-id="${P.id}" style="--ac:${P.c}" title="${esc(P.n)}"><div class="epanst"><i class="d a"></i><i class="d b"></i></div><div class="nm">${esc(P.n)}</div><div class="tg">${g[1]} ${esc(E?E[0]:g[2])}</div></div>`; }
-function epAnGallery(box,o={}){ epGLLoad(); let grp='', q=''; try{ grp=localStorage.getItem('epAnG')||''; }catch{} if(grp&&!EP_ANG.some(g=>g[0]===grp)) grp='';
-  box.innerHTML=`<div class="epanbar"><input class="q" placeholder="🔍 поиск: огонь, стрела, лечение…"><span class="chips"></span></div>${o.pick?`<div class="epanspec"><button class="btn sm ${!o.cur?'on':''}" data-v="">${o.isAtk?'⚔ По классу бойца':'✨ По умолчанию (сияние / сглаз)'}</button><button class="btn sm ${o.cur==='none'?'on':''}" data-v="none">∅ Без анимации</button></div>`:''}<div class="epangrid"></div>`;
+function epAnGallery(box,o={}){ epGLLoad(); let grp='', q='', el=o.el||''; try{ grp=localStorage.getItem('epAnG')||''; }catch{} if(grp&&!EP_ANG.some(g=>g[0]===grp)) grp='';
+  box.innerHTML=`<div class="epanbar"><input class="q" placeholder="🔍 поиск: огонь, стрела, лечение…"><span class="chips"></span><label class="epancl" title="Перекрасить анимацию в цвета стихии">🎨 ${epSel([['','цвет как в анимации'],...Object.entries(EP_ANEL).map(([k,v])=>[k,v[0]])],el,'epancol')}</label></div>${o.pick?`<div class="epanspec"><button class="btn sm ${!o.cur?'on':''}" data-v="">${o.isAtk?'⚔ По классу бойца':'✨ По умолчанию (сияние / сглаз)'}</button><button class="btn sm ${o.cur==='none'?'on':''}" data-v="none">∅ Без анимации</button></div>`:''}<div class="epangrid"></div>`;
   const chips=$('.chips',box), grid=$('.epangrid',box);
   const drawChips=()=>{ chips.innerHTML=[['','Все',EP_AN.length,'#ffd166'],...EP_ANG.map(g=>[g[0],g[1]+' '+g[2],EP_AN.filter(P=>P.g===g[0]).length,g[3]])].map(([k,n,c,col])=>`<button class="btn sm ${grp===k?'on':''}" data-g="${k}" style="--gc:${col}">${esc(n)} <span class="faint">${c}</span></button>`).join('');
     $$('button',chips).forEach(b=>b.onclick=()=>{ grp=b.dataset.g; try{ localStorage.setItem('epAnG',grp); }catch{} drawChips(); drawGrid(); }); };
   const drawGrid=()=>{ const ql=q.toLowerCase(); const L=EP_AN.filter(P=>(!grp||P.g===grp)&&(!ql||(P.n+' '+(P.el?EP_ANEL[P.el][0]:'')+' '+(EP_ANG.find(g=>g[0]===P.g)||[])[2]).toLowerCase().includes(ql)));
     let h='', last=''; for(const P of L){ const sec=P.g==='magic'?'magic:'+P.el:P.g; if(sec!==last&&(grp||!ql)){ const g=EP_ANG.find(x=>x[0]===P.g); h+=`<div class="epanh" style="--gc:${P.g==='magic'?EP_ANEL[P.el][1]:g[3]}">${P.g==='magic'?'🔮 Магия · '+esc(EP_ANEL[P.el][0]):g[1]+' '+esc(g[2])}</div>`; last=sec; } h+=epAnCard(P,o.cur); }
     grid.innerHTML=h||'<div class="faint">Ничего не нашлось.</div>';
-    $$('.epanc',grid).forEach(c=>{ let tm=0; c.onmouseenter=()=>{ epAnPlayCard(c); clearInterval(tm); tm=setInterval(()=>{ if(!c.isConnected) return clearInterval(tm); epAnPlayCard(c); },1900); }; c.onmouseleave=()=>clearInterval(tm);
-      c.onclick=()=>{ if(o.pick&&o.onPick) o.onPick(c.dataset.id); else epAnPlayCard(c); }; }); };
+    $$('.epanc',grid).forEach(c=>{ let tm=0; c.onmouseenter=()=>{ epAnPlayCard(c,el); clearInterval(tm); tm=setInterval(()=>{ if(!c.isConnected) return clearInterval(tm); epAnPlayCard(c,el); },1900); }; c.onmouseleave=()=>clearInterval(tm);
+      c.onclick=()=>{ if(o.pick&&o.onPick) o.onPick(c.dataset.id,el); else epAnPlayCard(c,el); }; }); };
   $('.q',box).oninput=e=>{ q=e.target.value.trim(); drawGrid(); };
-  $$('.epanspec button',box).forEach(b=>b.onclick=()=>o.onPick&&o.onPick(b.dataset.v));
+  $$('.epanspec button',box).forEach(b=>b.onclick=()=>o.onPick&&o.onPick(b.dataset.v,el)); { const cs=$('.epancol',box); if(cs) cs.onchange=()=>{ el=cs.value; }; }
   drawChips(); drawGrid(); }
 /* выбор анимации скилла — поверх окна способности */
-function epAnPicker(cur,isAtk,onPick){ const ov=el(`<div class="epanov"><div class="epanpn"><div class="hd"><b>🎬 Анимация скилла</b><span class="faint" style="font-size:12.5px">наведи — проиграется, клик — выбрать</span><span class="grow"></span><button class="btn sm icon x" title="Закрыть">✕</button></div><div class="gal"></div></div></div>`);
+function epAnPicker(cur,isAtk,onPick,el){ const ov=el(`<div class="epanov"><div class="epanpn"><div class="hd"><b>🎬 Анимация скилла</b><span class="faint" style="font-size:12.5px">наведи — проиграется, клик — выбрать</span><span class="grow"></span><button class="btn sm icon x" title="Закрыть">✕</button></div><div class="gal"></div></div></div>`);
   const close=()=>{ ov.remove(); document.removeEventListener('keydown',ek,true); }; const ek=e=>{ if(e.key==='Escape'){ e.stopPropagation(); e.preventDefault(); close(); } };
   document.addEventListener('keydown',ek,true); ov.onclick=e=>{ if(e.target===ov) close(); }; $('.x',ov).onclick=close; document.body.append(ov);
-  epAnGallery($('.gal',ov),{pick:1,cur,isAtk,onPick:id=>{ close(); onPick(id); }}); const c=cur&&$(`.epanc[data-id="${cur}"]`,ov); if(c) c.scrollIntoView({block:'center'}); }
+  epAnGallery($('.gal',ov),{pick:1,cur,isAtk,el,onPick:(id,e)=>{ close(); onPick(id,e); }}); const c=cur&&$(`.epanc[data-id="${cur}"]`,ov); if(c) c.scrollIntoView({block:'center'}); }
 /* анимации действия поверх сцены: удары и заклинания (пресеты EP_AN), COUNTER/DUO, переход на другую позицию.
    Время считается от момента, когда этот зритель увидел действие, — перерисовка страницы продолжает анимацию с того же места */
 function epPlay(page,B){ const sn=EP_SEEN[B.id]; const ago=sn&&sn.at?(Date.now()-sn.at)/1000:1e9; const st=$('.epstage',page); const L=(B.an||[]).filter(a=>a.d+3.5>ago); if(!st||!L.length) return; const R=st.getBoundingClientRect(); if(!R.width) return;
@@ -9261,7 +9315,7 @@ function epPlay(page,B){ const sn=EP_SEEN[B.id]; const ago=sn&&sn.at?(Date.now()
       X.run(n,[{transform:T((f[0]-t[0])*R.width/100,(f[1]-t[1])*R.height/100),zIndex:6},{transform:T(0,0),zIndex:6}],.6,d,{keep:1,fill:'backwards',e:'ease-in-out'}); continue; }
     if(a.k==='ult'){ epUlt(X,U(a.u),epU(B,a.u),a,d); continue; }
     if(a.k!=='atk') continue; const p=C(a.a), q=C(a.t); if(!p||!q) continue;
-    const P=EP_ANM[a.an]||EP_ANM[EP_CLSAN[a.c]]||EP_ANM.st_basic; if(S){ const ua=epU(B,a.a), ut=epU(B,a.t); epGLDraw(S,P,p,q,d,{aEl:U(a.a),tEl:ua&&ut&&ua.side!==ut.side?U(a.t):null,m:a.ult?1.8:1,sub:a.sub}); } else epAnDraw(X,P,p,q,d,{aEl:U(a.a),m:a.ult?1.8:1}); } }
+    const P=epAnRecolor(EP_ANM[a.an]||EP_ANM[EP_CLSAN[a.c]]||EP_ANM.st_basic,a.ae); if(S){ const ua=epU(B,a.a), ut=epU(B,a.t); epGLDraw(S,P,p,q,d,{aEl:U(a.a),tEl:ua&&ut&&ua.side!==ut.side?U(a.t):null,m:a.ult?1.8:1,sub:a.sub}); } else epAnDraw(X,P,p,q,d,{aEl:U(a.a),m:a.ult?1.8:1}); } }
 /* ---------- карточка юнита на сцене ---------- */
 function epUnitHTML(B,u,fl,ago=0){ const s=epUS(u); const mh=s.mhp, hp=Math.max(0,u.hp??mh); const [x,y]=EP_POSXY[u.side][u.pos]; const el_=EP_EL.find(e=>e[0]===u.el); const cl=EP_CLS.find(e=>e[0]===u.cls);
   const A=EPT.bid===B.id?epU(B,EPT.uid):null; const pk=A?epPickable(B,A,EPT.sk,EPT.code,u):false; const pick=(EPT.picks||[]).includes(u.id); const set=B.ph==='setup';
