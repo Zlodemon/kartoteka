@@ -588,6 +588,16 @@ body.fight #fightBtn{background:rgba(255,209,102,.2);border-color:rgba(255,209,1
 .eppick{display:flex;gap:8px;flex-wrap:wrap}.epufx{display:flex;flex-wrap:wrap;gap:4px}.epposrow{padding:8px 0;border-bottom:1px solid var(--line)}.eppsks{display:flex;flex-direction:column;gap:6px;margin:6px 0 0 18px}.eppsk{border:1px dashed var(--line2);border-radius:10px;padding:6px 8px}.eppsk .fxbox{margin-top:6px}
 .epposi{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}.epposc{border:1px solid var(--line2);border-radius:12px;padding:10px 12px}.epposc .h{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}.epposc .h .faint{font-size:12px;color:var(--gold)}.epposc .sk{margin-top:6px;font-size:12.5px}.epposc .sk .faint{font-size:12px;line-height:1.45}
 .epu .pbon{font-size:10.5px;color:var(--muted);line-height:1.3;margin-top:2px}.epu .meta .mpos{color:#7ae0ff;cursor:help}
+.epfxl{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden}.epfxl svg{position:absolute;left:0;top:0;overflow:visible}
+.eptag{position:absolute;font-weight:900;font-style:italic;font-size:29px;letter-spacing:2px;white-space:nowrap;-webkit-text-stroke:1px #1a0000;text-shadow:0 0 12px rgba(255,40,40,.75),0 2px 3px #000}.eptag.ctr{color:#ff3434}.eptag.duo{color:#7ae0ff;-webkit-text-stroke:1px #001a22;text-shadow:0 0 12px rgba(122,224,255,.75),0 2px 3px #000}
+.epshield{position:absolute;font-size:48px;filter:drop-shadow(0 0 12px #4fb3ff)}
+.eptop .epround.pend{border-color:#ff9a7a;color:#ff9a7a}.epordb{font-size:14px;padding:0 6px;flex:none}
+.epord .oc[draggable]{cursor:grab}.epord .oc.drg{opacity:.4}.epord .oc.dov{box-shadow:0 0 0 2px var(--gold)}
+.epordl{display:flex;flex-direction:column;gap:4px}.eporow{display:flex;gap:8px;align-items:center;padding:6px 10px;border:1px solid var(--line2);border-radius:10px;background:rgba(255,255,255,.03);cursor:grab}.eporow.s-a{border-left:3px solid #4fb3ff}.eporow.s-e{border-left:3px solid #ff6b5e}.eporow .n{width:18px;color:var(--faint);font-size:12px}
+.epsk.mv{border-color:rgba(122,224,255,.35);margin-left:10px}.epsk.mv:hover{border-color:#7ae0ff}
+.epufx .epchip.buff{box-shadow:inset 3px 0 0 #4fb3ff}.epufx .epchip.debuff{box-shadow:inset 3px 0 0 #ff5c6c}.epufx .epchip.new{background:rgba(142,247,193,.12);color:#8ef7c1}
+.epfxadd{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;padding:8px;border:1px dashed var(--line2);border-radius:10px}.epfxadd .fid{flex:1;min-width:190px}.epfxadd input{width:60px}.epfxadd .fsrc{max-width:160px}
+.field .epfxadd label{display:inline-flex;gap:5px;align-items:center;margin:0;letter-spacing:0;text-transform:none;font-weight:400;color:var(--muted)}
 .epfxn{width:52px;padding:1px 4px;margin:0 2px;font-size:12.5px;text-align:center;border-radius:6px}.epfxn.ov{border-color:var(--gold);color:var(--gold)}.epfxc .epchip .epfxn{width:44px}.epfxc.buff{border-left:3px solid #4fb3ff}.epfxc.debuff{border-left:3px solid #ff5c6c}.epfxc.sp{border-left:3px solid var(--gold)}
 #ruhandside .dhint{padding:7px 10px 0;font-size:10.5px;color:#98a0b8;line-height:1.5}
 #ruhandside .dhint b{color:#c9cee0}
@@ -2259,6 +2269,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-23',t:'Эпик-бой: позиции, анимации, фазы',items:['Вместо скилла можно «⇄ Сменить позицию» — на свободное место или местами с союзником, без его согласия.','У скиллов 10 слотов вместо 4.','Новый бафф «🧛 Вампиризм»: атака лечит на N% от нанесённого урона.','Клик по бойцу в бою — наложить или снять эффект вручную (мастер — любому, игрок — своему).','Анимации ударов по классу: меч, стрела, луч, щит, кинжал, молния; COUNTER красным над контратакующим.','Фаза меняется только по кнопке мастера «⏭ Закончить фазу»; мастер меняет порядок ходов перетаскиванием или кнопкой ⇅.']},
   {d:'2026-10-23',t:'Эпик-бой: экран боя',items:['Раздел «Бой»: строй на строй как в Epic Seven — 4 позиции у союзников и врагов, свой фон, порядок ходов сверху, кнопки скиллов внизу.','Приложение само кидает попадание, крит, урон и эффекты, лог каждого действия — в чат. Дуо и контратаки, ДоТы, сон, стелс, провокация, бессмертие, барьер, соул бёрн, способности позиций.','Игрок ходит своими персонажами, мастер — врагами; у мастера ⏭ пропуск, ↶ отмена и правка бойца. ХП в начале боя полное, ресурсы боя обнуляются.']},
   {d:'2026-10-23',t:'Эпик-бой: персонаж и скиллы',items:['Новый доп. режим «Эпик-бой» — пошаговый бой в духе Epic Seven (Настройки → ✦ Эпик-бой; вместе с Руиной не включается).','На листе персонажа: элемент, класс, звёзды и характеристики с итогом, вкладка «Снаряжение» — 7 слотов и сеты.','У способностей вкладка «✦ Эпик»: слот 1–4, КД, цели, урон, эффекты из таблицы, души, боевой дух, соул бёрн. Сам экран боя — следующим обновлением.']},
   {d:'2026-10-23',t:'Быстрее отклик, шаблоны и отмена',items:['Шаблоны на карте больше не прыгают назад у других, когда отпускаешь ручку, и не мигают при создании.','Ctrl+Z на карте отменяет только твоё действие: чужие шаблоны, рисунки и токены, которые двигали другие, больше не откатываются.','Клики, выбор в списках и Enter сохраняются почти сразу (около 0,1 с вместо 0,7 с) — другие игроки видят изменение быстрее.','Набор текста по-прежнему сохраняется через 0,7 с после последней буквы, чтобы не тратить лимит базы на каждую букву.','После своего клика чужие правки на странице персонажа больше не ждут лишние 2 секунды.']},
@@ -7972,6 +7983,7 @@ const EP_FX=[
   {id:'haste',k:'buff',icon:'🐎',name:'Ускорение',d:'бонус скорости +{v}'},
   {id:'cascade',k:'buff',icon:'🌊',name:'Каскад',d:'следующая атака наносит ещё N фиксированного урона',n:20,nl:'фикс. урон'},
   {id:'regen',k:'buff',icon:'💚',name:'Регенерация',d:'в конце хода восстанавливает {v}% макс. ХП'},
+  {id:'vamp',k:'buff',icon:'🧛',name:'Вампиризм',d:'нанёс урон атакой — восстанавливает себе N% от него',n:30,nl:'% от урона'},
   {id:'critprot',k:'buff',icon:'⛑️',name:'Защита от критов',d:'при атаке по цели вычитается {v} из крит шанса'},
   {id:'barricade',k:'buff',icon:'🏰',name:'Баррикада',d:'защита +{v}%, эффект резист +{w}'},
   {id:'rage',k:'buff',icon:'😡',name:'Ярость',d:'атака +{v}%, бонус скорости +{w}'},
@@ -8099,7 +8111,7 @@ function epSkillEditor(box,a,ch,onChange){ const draw=()=>{ const P=a.ep||{}; co
     const fld=(lbl,html,w)=>`<div class="field" style="margin:0${w?';width:'+w+'px':''}"><label>${lbl}</label>${html}</div>`;
     box.innerHTML=`<div class="epske">
       <div class="epskhd" style="--tc:${tc}"><div class="slot" title="слот скилла">${P.slot||'—'}</div><div class="t"><input class="epnmi" value="${esc(a.name||'')}" placeholder="Название скилла — оно на кнопке в бою"><div class="epsum"></div></div><span class="tp">${(EP_TYPE.find(x=>x[0]===type)||[])[1]}</span></div>
-      ${epSec('epc-main','#ffd166','⚙','Основное','',`<div class="eprow2">${fld('Слот',`<div class="epdots epslotseg">${[1,2,3,4].map(i=>`<span data-v="${i}" class="${+P.slot===i?'on':''}">${i}</span>`).join('')}<span data-v="" class="${P.slot?'':'on'}" title="не участвует в бою">—</span></div>`)}${fld('Тип',`<div class="eptype">${EP_TYPE.map(([k,n])=>`<span data-v="${k}" class="${type===k?'on':''}" style="--c:${EP_TYPEC[k]}">${n}</span>`).join('')}</div>`)}${pas?'':fld('КД, ходов',`<input class="epcd" type="number" min="0" max="99" value="${+P.cd||0}">`,96)}${pas?'':fld('Цели',epSel(EP_TGT,P.tgt||(type==='atk'?'e1':'s'),'eptg'))}</div>`)}
+      ${epSec('epc-main','#ffd166','⚙','Основное','',`<div class="eprow2">${fld('Слот',`<div class="epdots epslotseg">${Array.from({length:10},(_,i)=>i+1).map(i=>`<span data-v="${i}" class="${+P.slot===i?'on':''}">${i}</span>`).join('')}<span data-v="" class="${P.slot?'':'on'}" title="не участвует в бою">—</span></div>`)}${fld('Тип',`<div class="eptype">${EP_TYPE.map(([k,n])=>`<span data-v="${k}" class="${type===k?'on':''}" style="--c:${EP_TYPEC[k]}">${n}</span>`).join('')}</div>`)}${pas?'':fld('КД, ходов',`<input class="epcd" type="number" min="0" max="99" value="${+P.cd||0}">`,96)}${pas?'':fld('Цели',epSel(EP_TGT,P.tgt||(type==='atk'?'e1':'s'),'eptg'))}</div>`)}
       ${type==='atk'?epSec('epc-dmg','#ff6b5e','⚔','Урон','стат × множитель; несколько — складываются','<div class="epscale"></div>'):''}
       ${pas?epSec('epc-trig','#c04be0','✦','Срабатывание','',`<div class="eprow2">${fld('Когда срабатывает',epSel(EP_TRIG,P.trig||'always','eptr'))}<label class="row" style="gap:6px;margin-bottom:6px"><input type="checkbox" class="eponce" ${P.once?'checked':''}> 1 раз за бой</label></div><div class="faint" style="font-size:11.5px;margin-top:6px">«Всегда» — постоянные прибавки: вкладка «🎲 Бросок и модификаторы» → ƒ модификаторы → «Эпик: …».</div>`):''}
       ${epSec('epc-fx','#4fb3ff','✨','Эффекты','<span style="color:#4fb3ff">■</span> бафф · <span style="color:#ff6b5e">■</span> дебафф · <span style="color:#ffd166">■</span> особый','<div class="epfx"></div>')}
@@ -8127,12 +8139,12 @@ function epSkillSummary(a){ const P=a&&a.ep; if(!P) return ''; const L=[]; const
   for(const r of (P.fx||[])){ const f=epFx(r.id); if(f) L.push(`${f.icon} ${esc(f.name)}${f.inst?'':(r.dur??2)>=99?' до срабатывания':' '+(r.dur??2)+' х.'}${(r.ch??100)<100?' '+r.ch+'%':''}`); }
   if(+P.souls) L.push('души +'+P.souls); if(+P.spirit) L.push('дух +'+P.spirit); if(+P.need) L.push('нужно духа '+P.need); if(P.sb&&P.sb.on) L.push('соул бёрн '+(+P.sb.cost||0));
   return L.join(' · '); }
-function epTileTags(a){ const P=a.ep; if(!P) return ''; return `<div class="abc-tags">${P.slot?`<span class="rudie mass" title="слот скилла">${'①②③④'[P.slot-1]||P.slot}</span>`:''}<span class="rudie" style="white-space:normal">${epSkillSummary(a)}</span></div>`; }
+function epTileTags(a){ const P=a.ep; if(!P) return ''; return `<div class="abc-tags">${P.slot?`<span class="rudie mass" title="слот скилла">${'①②③④⑤⑥⑦⑧⑨⑩'[P.slot-1]||P.slot}</span>`:''}<span class="rudie" style="white-space:normal">${epSkillSummary(a)}</span></div>`; }
 
 /* ---------- настройки: вкл, классы, сеты ---------- */
 function epSettingsPanel(s){ const E=s.epic||{}; return `<div class="settings epwrap" data-tab="epic" style="grid-template-columns:1fr;display:none">
   <div class="panel epset" style="--sc:#ffd166"><h3>Эпик-бой <span class="faint" style="font-size:11px;letter-spacing:0;text-transform:none">доп. режим</span></h3><label class="row" style="gap:8px;cursor:pointer;margin-bottom:8px"><input type="checkbox" id="epOn" ${E.on?'checked':''}> <b>Включить</b> <span class="faint">— Руина при этом выключится</span></label>
-    <div class="faint" style="font-size:12.5px;line-height:1.6">Пошаговый бой «строй на строй» в духе Epic Seven. У персонажа появляются элемент, класс, звёзды, характеристики и снаряжение (вкладки «Характеристики» и «Снаряжение»), у способностей — раздел «✦ Эпик» (слот 1–4, КД, цели, урон, эффекты, души, соул бёрн).</div>
+    <div class="faint" style="font-size:12.5px;line-height:1.6">Пошаговый бой «строй на строй» в духе Epic Seven. У персонажа появляются элемент, класс, звёзды, характеристики и снаряжение (вкладки «Характеристики» и «Снаряжение»), у способностей — раздел «✦ Эпик» (слот 1–10, КД, цели, урон, эффекты, души, соул бёрн).</div>
     <ul class="faint eprules"><li><b>Инициатива:</b> в начале фазы каждый бросает 1d4 + бонус скорости; при равенстве первым ходит враг, игроки между собой решают сами.</li><li><b>Попадание:</b> атака попадает, если d100 > уклонение цели − попадание. Промах — половина урона, без крита и без эффектов.</li><li><b>Урон:</b> (стат × множитель скилла) × множитель элемента × крит (1 + крит урон) × K / (K + защита цели).</li><li><b>Дебаффы:</b> накладываются, если шанс скилла + эффективность − эффект резист цели ≥ d100. Баффы — просто накладываются.</li><li><b>Элементы:</b> Вода > Огонь > Земля > Вода, Свет ⇄ Тьма. Преимущество: множитель +0.1 и попадание +15; помеха: уклонение цели +50.</li></ul>
     <div class="row" style="gap:8px;align-items:center;margin-top:8px"><span>Константа брони K</span><input id="epK" type="number" min="1" max="10000" value="${+E.defK||100}" style="width:90px"><span class="faint" style="font-size:12px">— при защите = K урон режется вдвое</span></div></div>
   <div class="panel epclsp" style="--sc:#ff8a3d"><h3>Классы <button class="btn sm" id="epClsReset" title="Вернуть бонусы из таблицы">↺ как в таблице</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Прибавки к базе персонажа. Уникальные механики класса описываются в его скиллах.</div><div class="list"></div></div>
@@ -8262,7 +8274,12 @@ const epFxEdited=id=>!!(EPS().fx&&EPS().fx[id]&&Object.keys(EPS().fx[id]).length
 const epNum=(id,k)=>{ const ov=EPS().fx&&EPS().fx[id]&&EPS().fx[id][k]!=null; return `<input class="epfxn ${ov?'ov':''}" data-id="${id}" data-k="${k}" value="${epP(id,k)}" title="${ov?'изменено мастером':'как в таблице'}">`; };
 /* одинаковые бойцы на одной стороне: «Гоблин #1», «Гоблин #2» */
 function epNames(B){ const g={}; for(const u of B.units){ u.nm0??=u.nm; (g[u.ref+':'+u.side]??=[]).push(u); } for(const L of Object.values(g)) L.forEach((u,i)=>{ u.nm=L.length>1?u.nm0+' #'+(i+1):u.nm0; }); }
-function epFl(B,u,v,c){ (B.fl??=[]).push({u:u.id,v:String(v),c}); }
+/* анимации действия: EPTL — таймлайн текущего действия (сек); B.an — удары и надписи, B.fl — всплывающие числа; d — когда показать */
+let EPTL=0; const EP_IMP={ranger:.42,mage:.24,healer:.16,warrior:.3,knight:.3,thief:.18}; // через сколько удар класса «доходит» до цели
+const epT=()=>Math.round(EPTL*100)/100;
+function epFl(B,u,v,c){ (B.fl??=[]).push({u:u.id,v:String(v),c,d:epT()}); }
+function epAn(B,o){ (B.an??=[]).push({...o,d:epT()}); }
+function epAct(B){ epSavePrev(B); B.fl=[]; B.an=[]; B.flt=Date.now(); EPTL=0; }
 function epHeal(B,u,n,log){ if(u.dead||n<=0) return 0; if(epHas(u,'noheal')){ log.push(`💔 ${u.nm}: лечение запрещено`); return 0; } const m=epUS(u).mhp; const was=u.hp; u.hp=Math.min(m,u.hp+Math.round(n)); const d=u.hp-was; if(d){ epFl(B,u,'+'+d,'heal'); } return d; }
 /* урон по юниту: неуязвимость, дмг лимит, барьер, бессмертие, летальный урон, смерть; сон и стелс спадают от урона */
 function epHurt(B,t,dmg,log,o={}){ if(t.dead) return {dealt:0}; dmg=Math.max(0,Math.round(dmg));
@@ -8279,9 +8296,9 @@ function epDie(B,t,log,src){ t.hp=0; t.dead=1; t.bar=0; if(epHas(t,'execute')) t
 /* наложить эффект/действие: шанс дебаффа = шанс + эффективность − резист цели против d100; иммунитет, запрет бафов, стаки ДоТов */
 function epApply(B,A,t,r,log){ const f=epFxAny(r.id); if(!f||!t) return; if(t.dead&&r.id!=='revive') return;
   const foe=A.side!==t.side; const kind=f.k==='lib'?(foe?'debuff':'buff'):f.k==='sp'?(r.id==='execute'?'debuff':'buff'):f.k; const n=r.n??(f.n!=null?epP(f.id,'n'):undefined);
-  if(kind==='debuff'&&foe){ if(epHas(t,'immunity')){ log.push(`✨ ${t.nm}: иммунитет — ${f.name} не наложен`); return; } const c=(r.ch??100)+(+epUS(A).eff||0)-(+epUS(t).res||0), roll=epD100(); if(roll>c){ log.push(`🛡 ${t.nm} сопротивляется: ${f.name} (d100 ${roll} > ${Math.round(c)})`); return; } }
+  if(r.force){ /* вручную из окна бойца — без бросков и иммунитетов */ } else if(kind==='debuff'&&foe){ if(epHas(t,'immunity')){ log.push(`✨ ${t.nm}: иммунитет — ${f.name} не наложен`); return; } const c=(r.ch??100)+(+epUS(A).eff||0)-(+epUS(t).res||0), roll=epD100(); if(roll>c){ log.push(`🛡 ${t.nm} сопротивляется: ${f.name} (d100 ${roll} > ${Math.round(c)})`); return; } }
   else if((r.ch??100)<100){ const roll=epD100(); if(roll>(r.ch??100)){ log.push(`· ${f.name} не сработал (d100 ${roll})`); return; } }
-  if(kind==='buff'&&epHas(t,'nobuff')){ log.push(`⛔ ${t.nm}: баффы запрещены — ${f.name} не наложен`); return; }
+  if(!r.force&&kind==='buff'&&epHas(t,'nobuff')){ log.push(`⛔ ${t.nm}: баффы запрещены — ${f.name} не наложен`); return; }
   if(f.inst){ switch(r.id){
     case 'extra': (B.extra??=[]).unshift(t.id); log.push(`⏩ ${t.nm} получает экстра ход`); break;
     case 'advance': if(epHas(t,'restrict')) log.push(`⛓️ ${t.nm}: рестрикт — продвинуть нельзя`); else { t.init=(+t.init||0)+(+n||0); epResort(B); log.push(`⏫ ${t.nm}: инициатива +${n}`); } break;
@@ -8294,7 +8311,7 @@ function epApply(B,A,t,r,log){ const f=epFxAny(r.id); if(!f||!t) return; if(t.de
     case 'detonate': epDetonate(B,t,log); break;
     case 'spirit': t.sp=(+t.sp||0)+(+n||1); log.push(`🔥 ${t.nm}: боевой дух +${n}`); break; }
     return; }
-  let dur=Math.max(1,r.dur??2); { const bd=epPosCfg(A.pos).bd; if(bd&&kind==='buff'&&!foe&&t!==A) dur+=bd; }
+  let dur=Math.max(1,r.dur??2); { const bd=epPosCfg(A.pos).bd; if(bd&&!r.force&&kind==='buff'&&!foe&&t!==A) dur+=bd; }
   const e={i:uid(),id:r.id,k:kind,dur,src:A.id,sa:Math.round(+epUS(A).atk||0)}; if(n!=null) e.n=n; if(r.nd) e.nd=1;
   if(f.k==='lib'){ const d=effLib().find(x=>x.id===r.id.slice(4)); const mods=(d&&d.mods||[]).filter(m=>String(m.t||'').startsWith('ep:')).map(m=>({t:m.t,op:m.op,v:typeof m.v==='number'?m.v:fxNumber(m.v,null)})); if(mods.length) e.mods=mods; }
   t.fx??=[]; if(!EP_DOT.has(r.id)){ const old=t.fx.findIndex(x=>x.id===r.id); if(old>=0) t.fx.splice(old,1); }
@@ -8320,10 +8337,12 @@ function epStrike(B,A,t,P,o,log){ const sa=epUS(A), st=epUS(t); const adv=epElAd
   const mult=1+(adv>0?.1:0)+(mk===2?+epP('mark2','v'):mk?+epP('mark','v'):0)+(+sa.dmg||0);
   let dmg=base*mult*(crit?1+(+sa.cd||0):1)*K/(K+Math.max(0,+st.def||0)); if(miss) dmg*=.5; const cas=epTake(A,'cascade'); if(cas&&!miss) dmg+=+cas.n||0;
   log.push(`→ ${t.nm}: ${miss?'промах'+(roll!=null?` (d100 ${roll} ≤ ${Math.round(eva-acc)})`:'')+' — половина урона':crit?'КРИТ!':'попадание'}${adv>0?' · элемент сильнее':adv<0?' · элемент слабее':''}`);
+  epAn(B,{k:'atk',a:A.id,t:t.id,c:A.cls||''}); EPTL+=EP_IMP[A.cls]||.25;
   const li=log.length; const r=epHurt(B,t,dmg,log,{src:A,crit}); if(r.dealt) log.splice(li,0,`   ${t.nm}: −${r.dealt} ХП${t.dead?'':` (${t.hp}/${epUS(t).mhp}${t.bar?', барьер '+t.bar:''})`}`);
-  const ls=epSsp(A,'lifesteal'); if(ls&&r.dealt){ const h=epHeal(B,A,r.dealt*ls/100,log); if(h) log.push(`🩸 ${A.nm}: вампиризм +${h}`); }
+  const ls=epSsp(A,'lifesteal')+(A.fx||[]).filter(e=>e.id==='vamp').reduce((v,e)=>v+(+e.n||0),0); if(ls&&r.dealt){ const h=epHeal(B,A,r.dealt*ls/100,log); if(h) log.push(`🧛 ${A.nm}: вампиризм +${h}`); }
   const inj=epSsp(A,'injury'); if(inj&&r.dealt&&!t.dead){ t.cut=Math.min(90,(+t.cut||0)+inj); if(t.hp>epUS(t).mhp) t.hp=epUS(t).mhp; log.push(`🦴 ${t.nm}: макс. ХП −${inj}% (травма)`); }
   if(o.st&&r.dealt) for(const c of epLive(B,t.side)) if(c!==t&&epHas(c,'curse')){ log.push(`🕯️ Проклятие: ${c.nm} получает половину`); epHurt(B,c,r.dealt/2,log,{src:A}); }
+  EPTL+=.3;
   if(!t.dead&&!epHas(t,'nocounter')&&(o.depth||0)<3){ if(r.dealt>0&&+st.ctr>0&&epD100()<=+st.ctr) o.ctrQ.push(t); else if(miss&&epSsp(t,'riposte')&&epD100()<=epSsp(t,'riposte')) o.ctrQ.push(t); }
   return {miss,crit,dealt:r.dealt}; }
 /* цели по коду, когда выбирать не нужно */
@@ -8335,12 +8354,14 @@ async function epUse(B,A,sk,T,o={}){ const P=sk.ep||{}; const log=o.log; const t
   if(epHas(A,'stealth')) epTake(A,'stealth'); if(tp==='atk'&&epHas(A,'stealth2')) epTake(A,'stealth2');
   if(sbOn&&P.sb.tgt) T=epAutoT(B,A,P.sb.tgt,T.length?T:epLive(B,P.sb.tgt[0]==='e'?epFoeSide(A):A.side).slice(0,P.sb.tgt==='e2'?2:P.sb.tgt==='e3'?3:1));
   T=T.filter(t=>t&&(!t.dead||P.sp==='revive'||(P.fx||[]).some(r=>r.id==='revive')));
+  if(o.counter||o.duo){ epAn(B,{k:'tag',u:A.id,txt:o.counter?'COUNTER':'DUO',c:o.counter?'ctr':'duo'}); EPTL+=.45; }
   log.push(`${o.duo?'🤝 Дуо атака: ':o.counter?'↩️ Контратака: ':''}${A.nm} — «${sk.name}»${sbOn?' 🔥 соул бёрн':''}${T.length&&!(T.length===1&&T[0]===A)?' → '+T.map(t=>t.nm).join(', '):''}`);
   if(P.sp) epPosSp(B,A,P.sp,T,log,P.prm||{});
   const rows=[...(P.fx||[]),...(sbOn?(P.sb.fx||[]):[])]; const hits=new Map(); const ctrQ=[];
   /* нулифаер на цели съедает скилл врага целиком */ for(const t of T) if(t.side!==A.side&&epHas(t,'nullify')){ epTake(t,'nullify'); hits.set(t.id,{nul:1}); log.push(`🚫 ${t.nm}: скилл нулифаер — скилл не подействовал`); }
   epApplyRows(B,A,rows.filter(r=>r.when==='pre'),T,log,hits);
-  if(tp==='atk') for(const t of T){ if(t.dead||hits.has(t.id)) continue; const h=epStrike(B,A,t,P,{sbM:sbOn?+P.sb.m||0:0,st:(P.tgt||'e1')==='e1',depth:o.depth||0,ctrQ},log); hits.set(t.id,h); if(h.dealt>0&&!A.dead) epTrig(B,A,'hit',log,{other:t}); }
+  if(tp==='atk'){ const t0=EPTL; let tE=t0, i=0; /* по нескольким целям удары почти одновременно */
+    for(const t of T){ if(t.dead||hits.has(t.id)) continue; EPTL=t0+(i++)*.12; const h=epStrike(B,A,t,P,{sbM:sbOn?+P.sb.m||0:0,st:(P.tgt||'e1')==='e1',depth:o.depth||0,ctrQ},log); hits.set(t.id,h); if(h.dealt>0&&!A.dead) epTrig(B,A,'hit',log,{other:t}); tE=Math.max(tE,EPTL); } EPTL=tE; }
   epApplyRows(B,A,rows.filter(r=>r.when!=='pre'),T,log,hits);
   if(A.side==='a'&&+P.souls){ B.souls=(+B.souls||0)+(+P.souls); log.push(`👻 Души команды +${P.souls} (${B.souls})`); }
   if(+P.spirit){ A.sp=(+A.sp||0)+(+P.spirit); log.push(`🔥 ${A.nm}: боевой дух +${P.spirit} (${A.sp})`); }
@@ -8366,7 +8387,7 @@ function epStart(B,log){ for(const u of B.units){ u.rs0??=JSON.parse(JSON.string
   Object.assign(B,{ph:'fight',round:0,souls:0,supCd:{a:0,e:0},extra:[],queue:[],cur:null,win:null}); log.push(`⚔ Бой начался: ${epLive(B,'a').map(u=>u.nm).join(', ')} против ${epLive(B,'e').map(u=>u.nm).join(', ')}`);
   for(const u of B.units){ const v=epSsp(u,'barrier'); if(v) for(const a of epLive(B,u.side)){ const n=Math.round(epUS(a).mhp*v/100); a.bar=(+a.bar||0)+n; } if(v) log.push(`🔵 ${u.nm} (Потенкция): барьер союзникам ${v}% ХП`); }
   for(const u of B.units) epTrig(B,u,'start',log); epPhase(B,log); }
-function epPhase(B,log){ B.round=(+B.round||0)+1; for(const k of ['a','e']) if(B.supCd&&B.supCd[k]>0) B.supCd[k]--;
+function epPhase(B,log){ B.pend=0; B.round=(+B.round||0)+1; for(const k of ['a','e']) if(B.supCd&&B.supCd[k]>0) B.supCd[k]--;
   const L=B.units.filter(u=>!u.dead); for(const u of L){ const r=1+Math.floor(Math.random()*4); u.init=r+Math.round(+epUS(u).spd||0); u.ir=r; }
   let q=epSortIds(B,L.map(u=>u.id)); const last=q.filter(id=>epU(B,id).lastNext); q=q.filter(id=>!last.includes(id)).concat(last); for(const id of last) epU(B,id).lastNext=0;
   B.queue=q; B.cur=null; log.push(`— Фаза ${B.round}: ${q.map(id=>{ const u=epU(B,id); return `${u.nm} ${u.init} (1d4=${u.ir})`; }).join(' · ')}`); epNext(B,log); }
@@ -8374,7 +8395,7 @@ const epOver=B=>{ const a=epLive(B,'a').length, e=epLive(B,'e').length; return !
 function epNext(B,log,g=0){ if(g>60) return; const w=epOver(B); if(w){ B.win=w; B.cur=null; B.queue=[]; log.push(w==='a'?'🏆 Победа!':'💀 Поражение'); return; }
   let id=null; while((B.extra||[]).length&&!id){ const x=B.extra.shift(); if(epU(B,x)&&!epU(B,x).dead) id=x; } let ex=!!id;
   while(!id&&(B.queue||[]).length){ const x=B.queue.shift(); if(epU(B,x)&&!epU(B,x).dead) id=x; }
-  if(!id){ epPhase(B,log); return; }
+  if(!id){ B.cur=null; B.pend=1; log.push(`— Фаза ${B.round||1} окончена: все сходили, следующую начинает мастер`); return; }
   const u=epU(B,id); B.cur=id; for(const k of Object.keys(u.cd||{})) if(u.cd[k]>0) u.cd[k]--;
   if(epHas(u,'fear')&&epD100()<=(+epP('fear','v')||0)){ epTake(u,'fear'); log.push(`😱 ${u.nm}: страх спал сам`); }
   const skip=['stun','sleep','fear'].find(x=>epHas(u,x)); if(skip){ log.push(`${epFxAny(skip).icon} ${u.nm} пропускает ход (${epFxAny(skip).name})`); epEnd(B,u,log); epNext(B,log,g+1); return; }
@@ -8393,14 +8414,14 @@ function epSubscribe(){ if(EPSUB||!me) return; EPSUB=DB.subscribe('battles',null
 const epCtl=u=>{ if(!u||viewAs) return false; if(isDM()) return true; if(u.side!=='a') return false; const ch=byId(world.characters,u.ref); return !!(ch&&(ch.players||[]).includes(me.uid)); };
 function epCardHTML(m){ return `<div class="epcard"><div class="eph">${esc(m.ti||'')}</div>${(m.ls||[]).map(l=>`<div class="epl ${/^—|^⚔|^🏆|^💀/.test(l)?'ph':/^→/.test(l)?'hit':/^ {3}/.test(l)?'dmg':''}">${esc(l.trim())}</div>`).join('')}</div>`; }
 function epPost(B,ti,ls){ if(!ls.length) return; const m={i:uid(),t:Date.now(),u:me.uid,n:me.name,k:'ep',ti:(B.name?B.name+' · ':'')+ti,ls:ls.slice(0,80).map(x=>String(x).slice(0,240))}; chatPut('chat',m).catch(()=>toast('Лог боя не отправился в чат',true)); }
-function epSavePrev(B){ B.prev=JSON.stringify({units:B.units,queue:B.queue||[],cur:B.cur||null,extra:B.extra||[],souls:+B.souls||0,round:+B.round||0,supCd:B.supCd||{},win:B.win||null,ph:B.ph}); }
+function epSavePrev(B){ B.prev=JSON.stringify({units:B.units,queue:B.queue||[],cur:B.cur||null,extra:B.extra||[],souls:+B.souls||0,round:+B.round||0,supCd:B.supCd||{},win:B.win||null,ph:B.ph,pend:B.pend||0}); }
 const epClear=()=>{ for(const k of Object.keys(EPT)) delete EPT[k]; };
 /* почему скилл сейчас нельзя: '' — можно */
 function epWhyNot(B,u,s){ const P=s.ep||{}; if(B.ph!=='fight'||B.cur!==u.id) return 'не его ход'; if((P.type||'atk')==='pas') return 'пассивка';
   if(s.id==='p_sup'&&(B.supCd||{})[u.side]>0) return 'КД '+B.supCd[u.side]+' (общий)'; if(s.id==='p_rit'&&u.rit) return 'уже был в этом бою';
   if((u.cd||{})[s.id]>0) return 'КД '+u.cd[s.id]; const s1=+P.slot===1; if(!s1&&epHas(u,'silence')) return 'немота: только 1-й скилл'; if(!s1&&epHas(u,'taunt')) return 'провокация: только 1-й скилл';
   if(+P.need&&(+u.sp||0)<+P.need) return `нужно боевого духа ${P.need} (есть ${+u.sp||0})`; if(P.cost&&P.cost.bar&&(+(u.rs||{})[P.cost.bar]||0)<+P.cost.n) return 'не хватает: '+P.cost.bar; return ''; }
-function epPickable(B,A,s,code,t){ if(code==='a1'){ if(t.side!==A.side) return false; return (s.ep.fx||[]).some(r=>r.id==='revive')?!!t.dead:!t.dead; }
+function epPickable(B,A,s,code,t){ if(code==='mv') return t.side===A.side&&t!==A; if(code==='a1'){ if(t.side!==A.side) return false; return (s.ep.fx||[]).some(r=>r.id==='revive')?!!t.dead:!t.dead; }
   if(t.side===A.side||t.dead) return false; const tau=epGet(A,'taunt'); if(tau){ const src=epU(B,tau.src); if(src&&!src.dead&&src.side!==A.side) return t===src; }
   const hid=x=>(epHas(x,'stealth')||epHas(x,'stealth2'))&&!epHas(x,'mark2'); if(hid(t)&&epLive(B,t.side).some(f=>!hid(f))) return false; return true; }
 function epChoose(B,A,s,sb){ const why=epWhyNot(B,A,s); if(why){ toast(why,true); return; } if(sb&&!A.sbFree&&(+B.souls||0)<(+s.ep.sb.cost||0)){ toast('Не хватает душ',true); return; }
@@ -8408,10 +8429,60 @@ function epChoose(B,A,s,sb){ const why=epWhyNot(B,A,s); if(why){ toast(why,true)
   if(['s','eA','aA'].includes(code)){ epDo(B,A,s,epAutoT(B,A,code),sb); return; }
   const n=code==='e2'?2:code==='e3'?3:1; const avail=B.units.filter(t=>epPickable(B,A,s,code,t)).length; if(!avail){ toast('Нет подходящих целей',true); return; }
   epClear(); Object.assign(EPT,{bid:B.id,uid:A.id,sk:s,sb:!!sb,code,need:Math.min(n,avail),picks:[]}); render(); }
-async function epDo(B,A,s,T,sb){ if(EPBUSY) return; EPBUSY=1; const log=[]; try{ epSavePrev(B); B.fl=[]; B.flt=Date.now(); await epUse(B,A,s,T,{sb,log}); epEnd(B,A,log); epNext(B,log); epPost(B,`${A.nm}: ${s.name}`,log); }catch(e){ console.error(e); toast('Ошибка боя: '+e.message,true); } finally{ EPBUSY=0; } epClear(); touch(B); render(); }
-function epSkip(B){ const u=epU(B,B.cur); if(!u) return; epSavePrev(B); B.fl=[]; B.flt=Date.now(); const log=[`⏭ ${u.nm} пропускает ход`]; epEnd(B,u,log); epNext(B,log); epPost(B,'пропуск хода',log); epClear(); touch(B); render(); }
+async function epDo(B,A,s,T,sb){ if(EPBUSY) return; EPBUSY=1; const log=[]; try{ epAct(B); await epUse(B,A,s,T,{sb,log}); epEnd(B,A,log); epNext(B,log); epPost(B,`${A.nm}: ${s.name}`,log); }catch(e){ console.error(e); toast('Ошибка боя: '+e.message,true); } finally{ EPBUSY=0; } epClear(); touch(B); render(); }
+function epSkip(B){ const u=epU(B,B.cur); if(!u) return; epAct(B); const log=[`↷ ${u.nm} пропускает ход`]; epEnd(B,u,log); epNext(B,log); epPost(B,'пропуск хода',log); epClear(); touch(B); render(); }
+/* смена позиции вместо способности: на свободное место или местами с союзником (его согласие не нужно); тратит ход */
+function epMove(B,A,pos){ if(EPBUSY||!A||A.pos===pos) return; epAct(B); const pn=p=>EP_POS.find(x=>x[0]===p)[1]; const o=B.units.find(x=>x!==A&&x.side===A.side&&x.pos===pos); const log=[];
+  epAn(B,{k:'mv',u:A.id,from:A.pos}); if(o){ epAn(B,{k:'mv',u:o.id,from:pos}); o.pos=A.pos; log.push(`⇄ ${A.nm} и ${o.nm} меняются местами: ${A.nm} → ${pn(pos)}, ${o.nm} → ${pn(o.pos)}`); } else log.push(`⇄ ${A.nm}: ${pn(A.pos)} → ${pn(pos)}`);
+  A.pos=pos; EPTL=.6; epEnd(B,A,log); epNext(B,log); epPost(B,`${A.nm}: смена позиции`,log); epClear(); touch(B); render(); }
+/* мастер: закончить фазу — кто не сходил, тот не ходит; новый бросок инициативы */
+async function epPhaseEnd(B){ if(EPBUSY||B.ph!=='fight'||B.win) return; const left=[B.cur,...(B.extra||[]),...(B.queue||[])].filter(Boolean).map(id=>epU(B,id)).filter(u=>u&&!u.dead);
+  if(left.length&&!await confirmDlg(`Ещё не сходили: ${left.map(u=>u.nm).join(', ')}. Закончить фазу ${B.round||1}?`,'Закончить')) return;
+  epAct(B); const log=[`⏭ Мастер закончил фазу ${B.round||1}${left.length?' (не сходили: '+left.map(u=>u.nm).join(', ')+')':''}`]; B.extra=[]; B.queue=[]; B.cur=null; epPhase(B,log); epPost(B,'новая фаза',log); epClear(); touch(B); render(); }
+/* мастер: порядок ходов — список тех, кто ещё не ходил в этой фазе (экстра ходы — туда же) */
+function epSetOrder(B,L){ const was=[...(B.extra||[]),...(B.queue||[])]; if(L.join()===was.join()) return; epSavePrev(B); B.extra=[]; B.queue=L.slice();
+  epPost(B,'порядок ходов',['⇅ Мастер изменил порядок ходов: '+[B.cur,...L].filter(Boolean).map(id=>(epU(B,id)||{}).nm||'?').join(' › ')]); touch(B); render(); }
+function epOrderDlg(B){ const L=[...(B.extra||[]),...(B.queue||[])].filter(id=>epU(B,id)); if(!L.length){ toast('В этой фазе больше никто не ходит',true); return; }
+  const b=openModal(`<h2>⇅ Порядок ходов</h2><div class="faint" style="font-size:12.5px;margin-bottom:8px">Фаза ${B.round||1}.${B.cur?` Сейчас ходит <b>${esc(epU(B,B.cur).nm)}</b>, дальше — по списку.`:''} Перетащи строку или жми ↑ ↓. Имена сверху сцены тоже можно перетаскивать.</div><div class="epordl"></div><div class="modal-actions"><button class="btn" id="cancel">Отмена</button><button class="btn primary" id="ok">Готово</button></div>`,true);
+  const box=$('.epordl',b); let drag=null;
+  const draw=()=>{ box.innerHTML=''; L.forEach((id,i)=>{ const u=epU(B,id); const r=el(`<div class="eporow s-${u.side}" draggable="true"><span class="n">${i+1}</span><b class="grow">${esc(u.nm)}</b><span class="faint" title="инициатива">⚡ ${u.init||0}</span><button class="x-btn up" ${i?'':'disabled'}>↑</button><button class="x-btn dn" ${i<L.length-1?'':'disabled'}>↓</button></div>`);
+    const mv=j=>{ L.splice(i,1); L.splice(j,0,id); draw(); }; $('.up',r).onclick=()=>mv(i-1); $('.dn',r).onclick=()=>mv(i+1);
+    r.ondragstart=()=>{ drag=i; }; r.ondragover=e=>e.preventDefault(); r.ondrop=e=>{ e.preventDefault(); if(drag!=null&&drag!==i){ const [x]=L.splice(drag,1); L.splice(i,0,x); } drag=null; draw(); }; box.append(r); }); };
+  draw(); $('#cancel',b).onclick=closeModal; $('#ok',b).onclick=()=>{ closeModal(); epSetOrder(B,L); }; }
+/* анимации действия поверх сцены (Web Animations): удар по классу атакующего, COUNTER/DUO, переход на другую позицию.
+   Время считается от момента, когда этот зритель увидел действие, — перерисовка страницы продолжает анимацию с того же места */
+function epPlay(page,B){ const sn=EP_SEEN[B.id]; const ago=sn&&sn.at?(Date.now()-sn.at)/1000:1e9; const st=$('.epstage',page); const L=(B.an||[]).filter(a=>a.d+1.7>ago); if(!st||!L.length) return; const R=st.getBoundingClientRect(); if(!R.width) return;
+  const lay=document.createElement('div'); lay.className='epfxl'; st.append(lay); const NS='http://www.w3.org/2000/svg'; const svg=document.createElementNS(NS,'svg'); svg.setAttribute('width',R.width); svg.setAttribute('height',R.height); lay.append(svg);
+  const U=id=>$(`.epu[data-u="${id}"]`,st); const C=id=>{ const u=U(id); if(!u) return null; const r=($('.por',u)||u).getBoundingClientRect(); return {x:r.left+r.width/2-R.left,y:r.top+r.height/2-R.top,top:u.getBoundingClientRect().top-R.top}; };
+  const sv=(tag,at,par=svg)=>{ const e=document.createElementNS(NS,tag); for(const k in at) e.setAttribute(k,at[k]); e.style.opacity=0; par.append(e); return e; };
+  const dv=(cls,txt,x,y)=>{ const n=document.createElement('div'); n.className=cls; n.textContent=txt; n.style.left=x+'px'; n.style.top=y+'px'; n.style.opacity=0; lay.append(n); return n; };
+  const run=(n,kf,dur,d,o={})=>{ const a=n.animate(kf,{duration:dur*1000,delay:(d-ago)*1000,fill:o.fill||'forwards',easing:o.e||'linear'}); if(!o.keep) a.onfinish=()=>n.remove(); return a; };
+  const ring=(q,d,col,r1=34)=>run(sv('circle',{cx:0,cy:0,r:10,fill:'none',stroke:col,'stroke-width':3,'vector-effect':'non-scaling-stroke'}),[{transform:`translate(${q.x}px,${q.y}px) scale(.4)`,opacity:1},{transform:`translate(${q.x}px,${q.y}px) scale(${r1/10})`,opacity:0}],.42,d,{e:'ease-out'});
+  const slash=(q,x1,y1,cx,cy,x2,y2,w,col,d)=>run(sv('path',{d:`M${q.x+x1},${q.y+y1} Q${q.x+cx},${q.y+cy} ${q.x+x2},${q.y+y2}`,fill:'none',stroke:col,'stroke-width':w,'stroke-linecap':'round',pathLength:100,'stroke-dasharray':100,style:`filter:drop-shadow(0 0 5px ${col})`}),[{strokeDashoffset:'100px',opacity:1},{strokeDashoffset:'0px',opacity:1,offset:.45},{strokeDashoffset:'0px',opacity:0}],.36,d,{e:'ease-out'});
+  const T=(x,y)=>`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;
+  const lunge=(id,p,q,d,dur,hit)=>{ const n=U(id); if(!n) return; const dx=q.x-p.x, dy=q.y-p.y, len=Math.hypot(dx,dy); if(len<130) return; const k=(len-110)/len;
+    run(n,[{transform:T(0,0),zIndex:6},{transform:T(dx*k,dy*k),zIndex:6,offset:hit/dur},{transform:T(dx*k*.93,dy*k*.93),zIndex:6,offset:Math.min(.9,hit/dur+.2)},{transform:T(0,0),zIndex:6}],dur,d,{keep:1,fill:'none',e:'ease-in-out'}); };
+  for(const a of L){ const d=a.d;
+    if(a.k==='tag'){ const p=C(a.u); if(!p) continue; run(dv('eptag '+(a.c||''),a.txt,p.x,p.top-6),[{opacity:0,transform:'translate(-50%,-50%) scale(.3)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.3)',offset:.12},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.25},{opacity:1,transform:'translate(-50%,-85%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-130%) scale(1)'}],1.6,d,{e:'ease-out'}); continue; }
+    if(a.k==='mv'){ const n=U(a.u), u=epU(B,a.u); const f=u&&EP_POSXY[u.side][a.from], t=u&&EP_POSXY[u.side][u.pos]; if(!n||!f||!t) continue;
+      run(n,[{transform:T((f[0]-t[0])*R.width/100,(f[1]-t[1])*R.height/100),zIndex:6},{transform:T(0,0),zIndex:6}],.6,d,{keep:1,fill:'backwards',e:'ease-in-out'}); continue; }
+    if(a.k!=='atk') continue; const p=C(a.a), q=C(a.t); if(!p||!q) continue; const c=a.c, hit=EP_IMP[c]||.25, sg=q.x<p.x?-1:1; const ang=Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI;
+    if(c==='ranger'){ /* стрела летит в цель */ const g=sv('g',{}); for(const [tg,at] of [['line',{x1:-26,y1:0,x2:8,y2:0,stroke:'#f3e3b5','stroke-width':3,'stroke-linecap':'round'}],['path',{d:'M6,-7 L23,0 L6,7 Z',fill:'#ffd166'}],['path',{d:'M-24,0 L-33,-7 M-24,0 L-33,7 M-18,0 L-27,-7 M-18,0 L-27,7',stroke:'#ff8a6a','stroke-width':2}]]) sv(tg,at,g).style.opacity=1;
+      const tr=(f)=>`translate(${p.x+(q.x-p.x)*f}px,${p.y+(q.y-p.y)*f}px) rotate(${ang}deg) scale(1.45)`; run(g,[{transform:tr(0),opacity:0},{transform:tr(.08),opacity:1,offset:.08},{transform:tr(.94),opacity:1,offset:.96},{transform:tr(1),opacity:0}],hit,d,{e:'ease-in'}); ring(q,d+hit,'#ffd166'); }
+    else if(c==='mage'){ /* луч: растёт от мага к цели, вспыхивает и гаснет */ const at={x1:p.x,y1:p.y,x2:q.x,y2:q.y,'stroke-linecap':'round',pathLength:100,'stroke-dasharray':100};
+      run(sv('line',{...at,stroke:'#b48cff',style:'filter:drop-shadow(0 0 8px #b48cff)'}),[{strokeWidth:'6px',strokeDashoffset:'100px',opacity:1},{strokeWidth:'18px',strokeDashoffset:'0px',opacity:1,offset:.35},{strokeWidth:'12px',strokeDashoffset:'0px',opacity:.9,offset:.7},{strokeWidth:'0px',strokeDashoffset:'0px',opacity:0}],.7,d,{e:'ease-out'});
+      run(sv('line',{...at,stroke:'#fff'}),[{strokeWidth:'2px',strokeDashoffset:'100px',opacity:1},{strokeWidth:'5px',strokeDashoffset:'0px',opacity:1,offset:.35},{strokeWidth:'3px',strokeDashoffset:'0px',opacity:.9,offset:.7},{strokeWidth:'0px',strokeDashoffset:'0px',opacity:0}],.7,d,{e:'ease-out'});
+      run(sv('circle',{cx:0,cy:0,r:12,fill:'#e2c8ff',style:'filter:drop-shadow(0 0 10px #b48cff)'}),[{transform:`translate(${p.x}px,${p.y}px) scale(0)`,opacity:1},{transform:`translate(${p.x}px,${p.y}px) scale(1.5)`,opacity:.9,offset:.3},{transform:`translate(${p.x}px,${p.y}px) scale(0)`,opacity:0}],.6,d-.05,{e:'ease-out'}); ring(q,d+hit,'#e2c8ff',46); }
+    else if(c==='healer'){ /* молния: ломаная, мерцает */ const zig=()=>{ const n=Math.max(4,Math.round(Math.hypot(q.x-p.x,q.y-p.y)/30)), nx=-(q.y-p.y), ny=q.x-p.x, l=Math.hypot(nx,ny)||1; let s=''; for(let i=0;i<=n;i++){ const f=i/n, j=(i&&i<n)?(Math.random()-.5)*30:0; s+=`${(p.x+(q.x-p.x)*f+nx/l*j).toFixed(1)},${(p.y+(q.y-p.y)*f+ny/l*j).toFixed(1)} `; } return s; };
+      for(const [w,col,dl] of [[6,'#7ae0ff',0],[2.5,'#ffffff',0],[4,'#ffe27a',.13]]) run(sv('polyline',{points:zig(),fill:'none',stroke:col,'stroke-width':w,'stroke-linejoin':'round',style:'filter:drop-shadow(0 0 6px #7ae0ff)'}),[{opacity:0},{opacity:1,offset:.1},{opacity:.2,offset:.3},{opacity:1,offset:.45},{opacity:.4,offset:.7},{opacity:0}],.5,d+dl);
+      ring(q,d+hit,'#ffe27a',42); }
+    else if(c==='warrior'||c==='knight'||c==='thief'){ lunge(a.a,p,q,d,c==='thief'?.42:.62,hit);
+      if(c==='knight'){ /* удар щитом: щит врезается, ударная волна */ run(dv('epshield','🛡️',q.x,q.y),[{opacity:0,transform:'translate(-50%,-50%) scale(.4)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.5)',offset:.3},{opacity:0,transform:'translate(-50%,-50%) scale(1.9)'}],.5,d+hit-.08,{e:'ease-out'}); ring(q,d+hit,'#4fb3ff',58); ring(q,d+hit+.1,'#cfe9ff',40); }
+      else if(c==='warrior'){ /* мечом: широкий взмах */ slash(q,-48*sg,-42,32*sg,-36,42*sg,46,8,'#ffffff',d+hit-.06); slash(q,-42*sg,-32,28*sg,-28,36*sg,42,3,'#ff6b5e',d+hit-.03); }
+      else { /* кинжалом: два быстрых крест-накрест */ slash(q,-34,-30,0,-6,32,30,3,'#e8fff0',d+hit-.05); slash(q,34,-30,0,-6,-32,30,3,'#8fd16a',d+hit+.08); } }
+    else { slash(q,-36*sg,-30,20*sg,-24,30*sg,34,5,'#ffffff',d+hit-.05); ring(q,d+hit,'#ffffff',30); } } }
 /* ---------- карточка юнита на сцене ---------- */
-function epUnitHTML(B,u,fl){ const s=epUS(u); const mh=s.mhp, hp=Math.max(0,u.hp??mh); const [x,y]=EP_POSXY[u.side][u.pos]; const el_=EP_EL.find(e=>e[0]===u.el); const cl=EP_CLS.find(e=>e[0]===u.cls);
+function epUnitHTML(B,u,fl,ago=0){ const s=epUS(u); const mh=s.mhp, hp=Math.max(0,u.hp??mh); const [x,y]=EP_POSXY[u.side][u.pos]; const el_=EP_EL.find(e=>e[0]===u.el); const cl=EP_CLS.find(e=>e[0]===u.cls);
   const A=EPT.bid===B.id?epU(B,EPT.uid):null; const pk=A?epPickable(B,A,EPT.sk,EPT.code,u):false; const pick=(EPT.picks||[]).includes(u.id); const set=B.ph==='setup';
   return `<div class="epu s-${u.side} ${B.cur===u.id?'cur':''} ${u.dead?'dead':''} ${pk?'pk':''} ${pick?'picked':''}" data-u="${u.id}" style="left:${x}%;top:${y}%;--c:${esc(u.col||(u.side==='a'?'#4fb3ff':'#ff6b5e'))}">
     <div class="pw"><div class="por">${u.img?`<img data-img="${esc(u.img)}" data-thumb="1" style="display:none">`:`<span>${esc(initials(u.nm))}</span>`}</div>${el_?`<i class="el" title="${el_[1]}">${el_[2]}</i>`:''}${u.st?`<i class="stars" title="уровень">${'★'.repeat(u.st)}</i>`:''}</div>
@@ -8419,7 +8490,7 @@ function epUnitHTML(B,u,fl){ const s=epUS(u); const mh=s.mhp, hp=Math.max(0,u.hp
     ${set?`<div class="ppos" title="${esc(epPosTxt(u.pos))}">${EP_POS.find(p=>p[0]===u.pos)[1]}</div><div class="pbon">${esc(epPosTxt(u.pos))}</div>`:`<div class="hpb"><i style="width:${Math.round(100*hp/mh)}%"></i>${u.bar?`<b style="width:${Math.min(100,Math.round(100*u.bar/mh))}%"></b>`:''}<span>${hp} / ${mh}${u.bar?' · 🔵'+u.bar:''}</span></div>`}
     <div class="fxs">${(u.fx||[]).map(e=>{ const f=epFxAny(e.id); return f?`<span class="${e.k}" title="${esc(f.name+' — '+epFxD(f)+(e.n!=null?' (N='+e.n+')':'')+(e.dur<99?' · ходов: '+e.dur:'')+(e.nd?' · не очищается':''))}">${f.icon}${e.dur<99?`<sub>${e.dur}</sub>`:''}</span>`:''; }).join('')}</div>
     ${set?'':`<div class="meta"><span class="mpos" title="${esc(EP_POS.find(p=>p[0]===u.pos)[1]+': '+epPosTxt(u.pos))}">◇ ${EP_POS.find(p=>p[0]===u.pos)[1]}</span>${+u.sp?`<span title="боевой дух">🔥 ${u.sp}</span>`:''}${B.ph==='fight'&&!u.dead?`<span title="инициатива этой фазы (1d4 = ${u.ir||'?'} + скорость)">⚡ ${u.init||0}</span>`:''}${Object.entries(u.rs||{}).filter(([k])=>(u.sk||[]).some(s=>s.ep.cost&&s.ep.cost.bar===k)).map(([k,v])=>`<span title="${esc(k)}">${esc(k.slice(0,3))} ${v}</span>`).join('')}</div>`}
-    ${(fl||[]).map((f,i)=>`<div class="epfl ${f.c}" style="animation-delay:${i*.22}s">${esc(f.v)}</div>`).join('')}</div>`; }
+    ${(fl||[]).map((f,i)=>`<div class="epfl ${f.c}" style="animation-delay:${((f.d??i*.22)-ago).toFixed(2)}s">${esc(f.v)}</div>`).join('')}</div>`; }
 function epSkillBtn(B,A,s,pos){ const why=epWhyNot(B,A,s); const P=s.ep||{}; const L=pos?null:epLiveAb(A,s); const nm=(L&&L.name)||s.name; const img=L?(L.images||[])[0]:s.img; const sbOk=P.sb&&P.sb.on&&!why&&(A.sbFree||(+B.souls||0)>=(+P.sb.cost||0));
   const tip=pos?epPosSkTxt(s):epSkillSummary(s); const cd=(A.cd||{})[s.id]>0?A.cd[s.id]:(s.id==='p_sup'&&(B.supCd||{})[A.side]>0?B.supCd[A.side]:0);
   return `<button class="epsk ${pos?'pos':''} ${why?'dis':''}" data-s="${s.id}" title="${esc(tip.replace(/<[^>]+>/g,'')+(why?'\n\n✗ '+why:''))}"><b>${pos?'◇':P.slot}</b>${img?`<img class="ski" data-img="${esc(img)}" data-thumb="1" style="display:none">`:''}${esc(nm)}${cd?`<span class="cd">КД ${cd}</span>`:''}</button>${P.sb&&P.sb.on?`<button class="epsk sb ${sbOk?'':'dis'}" data-s="${s.id}" data-sb="1" title="${esc('Соул бёрн: '+(A.sbFree?'бесплатно (Ритуал)':(P.sb.cost||0)+' душ')+(P.sb.desc?' — '+P.sb.desc:''))}">🔥${A.sbFree?'0':P.sb.cost||0}</button>`:''}`; }
@@ -8431,16 +8502,20 @@ function renderBattle(m){ epSubscribe(); const dm=isDM()&&!viewAs; const B=state
     const nb=$('#epNew',page); if(nb) nb.onclick=async()=>{ const b={id:uid(),name:'Бой '+((world.battles||[]).length+1),ph:'setup',units:[],createdAt:Date.now()}; try{ await createDoc('battles',b); }catch(e){ return; } go('battle',b.id); };
     m.append(page); return; }
   if(EPT.bid&&(EPT.bid!==B.id||B.cur!==EPT.uid)) epClear();
-  const fl=B.flt&&EP_SEEN[B.id]!==B.flt&&Date.now()-B.flt<6000; if(B.flt) EP_SEEN[B.id]=B.flt; const flOf=u=>fl?(B.fl||[]).filter(f=>f.u===u.id):[];
+  /* анимации и числа: новое действие играет у каждого зрителя с момента, когда он его увидел; при первом открытии — только свежее */
+  let sn=EP_SEEN[B.id]; if(!sn||sn.flt!==(B.flt||0)) sn=EP_SEEN[B.id]={flt:B.flt||0,at:B.flt&&(sn||Date.now()-B.flt<8000)?Date.now():0};
+  const ago=sn.at?(Date.now()-sn.at)/1000:1e9; const flOf=u=>(B.fl||[]).filter(f=>f.u===u.id&&(f.d||0)+1.8>ago);
   const set=B.ph==='setup', fight=B.ph==='fight'; const cur=epU(B,B.cur);
   const slots=set&&dm?['a','e'].flatMap(side=>EP_POS.filter(([p])=>!B.units.some(u=>u.side===side&&u.pos===p)).map(([p,pn])=>{ const [x,y]=EP_POSXY[side][p]; return `<div class="epu empty s-${side}" data-add="${side}:${p}" style="left:${x}%;top:${y}%" title="${esc(epPosTxt(p))}"><div class="plus">＋</div><div class="ppos">${pn}</div><div class="faint" style="font-size:10.5px">${side==='a'?'союзник':'враг'}</div></div>`; })):[];
+  const mvA=EPT.bid===B.id&&EPT.code==='mv'?epU(B,EPT.uid):null; /* смена позиции: свободные места своей стороны */
+  if(mvA) for(const [p,pn] of EP_POS){ if(B.units.some(u=>u.side===mvA.side&&u.pos===p)) continue; const [x,y]=EP_POSXY[mvA.side][p]; slots.push(`<div class="epu empty pk s-${mvA.side}" data-mv="${p}" style="left:${x}%;top:${y}%" title="${esc(epPosTxt(p))}"><div class="plus">⇄</div><div class="ppos">${pn}</div><div class="faint" style="font-size:10.5px">свободно</div></div>`); }
   const ord=fight?[B.cur,...(B.extra||[]),...(B.queue||[])].filter(Boolean).map(id=>epU(B,id)).filter(Boolean):[];
-  const ordH=ord.map((u,i)=>{ const nx=ord[i+1]; const sw=i>0&&nx&&u.side==='a'&&nx.side==='a'&&(+u.init||0)===(+nx.init||0)&&(B.queue||[]).includes(u.id)&&(B.queue||[]).includes(nx.id)&&(dm||epCtl(u)||epCtl(nx)); return `<span class="oc ${u.side} ${i===0?'cur':''}" title="инициатива ${u.init||0}">${esc(u.nm)}</span>${sw?`<button class="x-btn epsw" data-a="${u.id}" data-b="${nx.id}" title="Равная инициатива — игроки решают, кто первый: поменять местами">⇄</button>`:''}`; }).join('<span class="faint">›</span>');
+  const ordH=ord.map((u,i)=>{ const nx=ord[i+1]; const sw=i>0&&nx&&u.side==='a'&&nx.side==='a'&&(+u.init||0)===(+nx.init||0)&&(B.queue||[]).includes(u.id)&&(B.queue||[]).includes(nx.id)&&(dm||epCtl(u)||epCtl(nx)); const isCur=i===0&&!!B.cur, drg=dm&&!isCur; return `<span class="oc ${u.side} ${isCur?'cur':''}" ${drg?`draggable="true" data-id="${u.id}"`:''} title="инициатива ${u.init||0}${drg?' · перетащи, чтобы поменять порядок':''}">${esc(u.nm)}</span>${sw?`<button class="x-btn epsw" data-a="${u.id}" data-b="${nx.id}" title="Равная инициатива — игроки решают, кто первый: поменять местами">⇄</button>`:''}`; }).join('<span class="faint">›</span>');
   const page=el(`<div class="page epbpage"><div class="head"><button class="btn sm" id="epBack" title="Все бои">←</button>${dm?`<input id="epName" value="${esc(B.name||'')}" class="epname">`:`<h1>${esc(B.name||'Бой')}</h1>`}<span class="grow"></span><button class="btn sm" id="epPosI" title="Что дают позиции и их способности">ℹ Позиции</button>
-      ${dm?`${set?`<button class="btn sm" id="epBg" title="Картинка заднего плана">🖼 Фон</button>${B.bg?'<button class="btn sm" id="epBgX" title="Убрать фон">✕ фон</button>':''}<button class="btn sm" id="epResnap" title="Взять статы, скиллы и снаряжение из листов персонажей заново">⟳ Из листов</button><button class="btn sm primary" id="epStart">▶ Начать бой</button>`:''}${fight?`${B.prev?'<button class="btn sm" id="epUndo" title="Отменить последнее действие">↶ Отменить</button>':''}${cur?'<button class="btn sm" id="epSkip" title="Текущий боец пропускает ход">⏭ Пропустить ход</button>':''}<button class="btn sm" id="epStop">■ Завершить бой</button>`:''}${B.ph==='end'?'<button class="btn sm" id="epAgain" title="Вернуть бой в подготовку: те же бойцы, всё обнулится">↺ В подготовку</button>':''}`:''}</div>
+      ${dm?`${set?`<button class="btn sm" id="epBg" title="Картинка заднего плана">🖼 Фон</button>${B.bg?'<button class="btn sm" id="epBgX" title="Убрать фон">✕ фон</button>':''}<button class="btn sm" id="epResnap" title="Взять статы, скиллы и снаряжение из листов персонажей заново">⟳ Из листов</button><button class="btn sm primary" id="epStart">▶ Начать бой</button>`:''}${fight?`${B.prev?'<button class="btn sm" id="epUndo" title="Отменить последнее действие">↶ Отменить</button>':''}${cur?'<button class="btn sm" id="epSkip" title="Текущий боец пропускает ход">↷ Пропустить ход</button>':''}${B.win?'':`<button class="btn sm ${B.pend?'primary':''}" id="epPhase" title="Закончить фазу: кто не сходил — не ходит; новый бросок инициативы">⏭ Закончить фазу</button>`}<button class="btn sm" id="epStop">■ Завершить бой</button>`:''}${B.ph==='end'?'<button class="btn sm" id="epAgain" title="Вернуть бой в подготовку: те же бойцы, всё обнулится">↺ В подготовку</button>':''}`:''}</div>
     <div class="epstage ${EPT.bid===B.id?'picking':''}">${B.bg?`<img class="epbg" data-img="${esc(B.bg)}" style="display:none">`:''}<div class="epmid"></div>
-      <div class="eptop">${fight?`<span class="epround">Фаза ${B.round||1}</span><div class="epord">${ordH}</div>`:set?`<span class="epround">Подготовка</span>`:`<span class="epround">Бой завершён</span>`}${fight||B.ph==='end'?`<span class="epsoulb" title="Души команды игроков — на соул бёрн">👻 ${+B.souls||0}</span>`:''}</div>
-      ${B.units.map(u=>epUnitHTML(B,u,flOf(u))).join('')}${slots.join('')}
+      <div class="eptop">${fight?`<span class="epround">Фаза ${B.round||1}</span>${B.pend?'<span class="epround pend">окончена</span>':''}<div class="epord">${ordH}</div>${dm&&!B.win&&ord.length>1?'<button class="x-btn epordb" id="epOrd" title="Порядок ходов">⇅</button>':''}`:set?`<span class="epround">Подготовка</span>`:`<span class="epround">Бой завершён</span>`}${fight||B.ph==='end'?`<span class="epsoulb" title="Души команды игроков — на соул бёрн">👻 ${+B.souls||0}</span>`:''}</div>
+      ${B.units.map(u=>epUnitHTML(B,u,flOf(u),ago)).join('')}${slots.join('')}
       ${B.win&&fight?`<div class="epwin ${B.win}">${B.win==='a'?'🏆 Победа':'💀 Поражение'}</div>`:''}</div>
     <div class="epact"></div></div>`);
   /* панель действий */
@@ -8448,15 +8523,22 @@ function renderBattle(m){ epSubscribe(); const dm=isDM()&&!viewAs; const B=state
   if(set) act.innerHTML=dm?`<span class="faint">Расставь бойцов: ＋ на свободной позиции (одна позиция — один боец). Клик по бойцу — убрать или поменять. Когда все на местах — «▶ Начать бой». ХП в начале боя всегда полное, все ресурсы боя обнуляются.</span>`:'<span class="faint">Мастер готовит бой…</span>';
   else if(B.ph==='end') act.innerHTML='<span class="faint">Бой завершён. Лог — в чате.</span>';
   else if(B.win) act.innerHTML=`<span>${B.win==='a'?'🏆 Все враги повержены.':'💀 Все союзники выбыли.'}</span>${dm?'<span class="faint"> — «■ Завершить бой», когда будете готовы.</span>':''}`;
-  else if(cur&&EPT.bid===B.id) act.innerHTML=`<span class="eppk">🎯 «${esc(EPT.sk.name)}»${EPT.sb?' 🔥':''}: выбери ${EPT.code==='a1'?'союзника':'цель'}${EPT.need>1?` (${EPT.picks.length}/${EPT.need})`:''} — подсвечены</span><button class="btn sm" id="epCancel">Отмена</button>`;
+  else if(B.pend) act.innerHTML=`<span>Все сходили — фаза ${B.round||1} окончена.</span>${dm?'<button class="btn sm primary" id="epPhase2">⏭ Следующая фаза</button>':'<span class="faint">Ждём мастера.</span>'}`;
+  else if(cur&&EPT.bid===B.id) act.innerHTML=`<span class="eppk">${EPT.code==='mv'?'⇄ Смена позиции: выбери свободное место или союзника — поменяетесь местами':`🎯 «${esc(EPT.sk.name)}»${EPT.sb?' 🔥':''}: выбери ${EPT.code==='a1'?'союзника':'цель'}${EPT.need>1?` (${EPT.picks.length}/${EPT.need})`:''} — подсвечены`}</span><button class="btn sm" id="epCancel">Отмена</button>`;
   else if(cur&&epCtl(cur)){ const posk=epPosK(cur.pos);
-    act.innerHTML=`<span class="epwho">Ход: <b>${esc(cur.nm)}</b></span>${(cur.sk||[]).map(s=>epSkillBtn(B,cur,s)).join('')||'<span class="faint">нет скиллов со слотом — задай их в способностях (вкладка ✦ Эпик)</span>'}<span class="epsep" title="${esc(epPosTxt(cur.pos))}">${EP_POS.find(p=>p[0]===cur.pos)[1]}:</span>${posk.map(s=>epSkillBtn(B,cur,s,true)).join('')}`;
-    $$('.epsk',act).forEach(b=>b.onclick=()=>{ if(b.classList.contains('dis')){ toast(b.title.split('✗ ')[1]||'Нельзя',true); return; } const s=(cur.sk||[]).find(x=>x.id===b.dataset.s)||posk.find(x=>x.id===b.dataset.s); if(s) epChoose(B,cur,s,!!b.dataset.sb); }); }
+    act.innerHTML=`<span class="epwho">Ход: <b>${esc(cur.nm)}</b></span>${(cur.sk||[]).map(s=>epSkillBtn(B,cur,s)).join('')||'<span class="faint">нет скиллов со слотом — задай их в способностях (вкладка ✦ Эпик)</span>'}<span class="epsep" title="${esc(epPosTxt(cur.pos))}">${EP_POS.find(p=>p[0]===cur.pos)[1]}:</span>${posk.map(s=>epSkillBtn(B,cur,s,true)).join('')}<button class="epsk mv" id="epMv" title="Вместо способности: перейти на свободную позицию или поменяться местами с союзником (его согласие не нужно). Тратит ход.">⇄ Сменить позицию</button>`;
+    $('#epMv',act).onclick=()=>{ epClear(); Object.assign(EPT,{bid:B.id,uid:cur.id,sk:{id:'_mv',name:'Смена позиции',ep:{}},code:'mv',need:1,picks:[]}); render(); };
+    $$('.epsk[data-s]',act).forEach(b=>b.onclick=()=>{ if(b.classList.contains('dis')){ toast(b.title.split('✗ ')[1]||'Нельзя',true); return; } const s=(cur.sk||[]).find(x=>x.id===b.dataset.s)||posk.find(x=>x.id===b.dataset.s); if(s) epChoose(B,cur,s,!!b.dataset.sb); }); }
   else if(cur) act.innerHTML=`<span class="epwho">Ходит <b>${esc(cur.nm)}</b>${cur.side==='e'?' <span class="faint">— ведёт мастер</span>':''}</span>`;
   /* клики по сцене */
   $$('.epu[data-u]',page).forEach(c=>c.onclick=()=>{ const u=epU(B,c.dataset.u); if(!u) return;
-    if(EPT.bid===B.id){ const A=epU(B,EPT.uid); if(!A||!epPickable(B,A,EPT.sk,EPT.code,u)) return; if(EPT.picks.includes(u.id)) EPT.picks=EPT.picks.filter(x=>x!==u.id); else EPT.picks.push(u.id); if(EPT.picks.length>=EPT.need) epDo(B,A,EPT.sk,EPT.picks.map(id=>epU(B,id)),EPT.sb); else render(); return; }
-    if(dm) epUnitDlg(B,u); });
+    if(EPT.bid===B.id){ const A=epU(B,EPT.uid); if(!A||!epPickable(B,A,EPT.sk,EPT.code,u)) return; if(EPT.code==='mv'){ epMove(B,A,u.pos); return; } if(EPT.picks.includes(u.id)) EPT.picks=EPT.picks.filter(x=>x!==u.id); else EPT.picks.push(u.id); if(EPT.picks.length>=EPT.need) epDo(B,A,EPT.sk,EPT.picks.map(id=>epU(B,id)),EPT.sb); else render(); return; }
+    if(dm||(fight&&epCtl(u))) epUnitDlg(B,u); });
+  $$('.epu[data-mv]',page).forEach(c=>c.onclick=()=>{ const A=epU(B,EPT.uid); if(A) epMove(B,A,c.dataset.mv); });
+  if(dm&&fight){ let drag=null; /* мастер перетаскивает имена в строке порядка */
+    $$('.epord .oc[draggable]',page).forEach(c=>{ c.ondragstart=e=>{ drag=c.dataset.id; try{ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',drag); }catch{} c.classList.add('drg'); }; c.ondragend=()=>{ drag=null; c.classList.remove('drg'); };
+      c.ondragover=e=>{ if(drag&&drag!==c.dataset.id){ e.preventDefault(); c.classList.add('dov'); } }; c.ondragleave=()=>c.classList.remove('dov');
+      c.ondrop=e=>{ e.preventDefault(); c.classList.remove('dov'); if(!drag||drag===c.dataset.id) return; const L=[...(B.extra||[]),...(B.queue||[])]; const i=L.indexOf(drag), j=L.indexOf(c.dataset.id); if(i<0||j<0) return; L.splice(i,1); L.splice(j,0,drag); epSetOrder(B,L); }; }); }
   $$('.epu[data-add]',page).forEach(c=>c.onclick=()=>{ const [side,pos]=c.dataset.add.split(':'); epAddDlg(B,side,pos); });
   $$('.epsw',page).forEach(b=>b.onclick=()=>{ const q=B.queue, i=q.indexOf(b.dataset.a), j=q.indexOf(b.dataset.b); if(i<0||j<0) return; [q[i],q[j]]=[q[j],q[i]]; touch(B); render(); });
   const on=(id,f)=>{ const x=$(id,page); if(x) x.onclick=f; };
@@ -8464,29 +8546,48 @@ function renderBattle(m){ epSubscribe(); const dm=isDM()&&!viewAs; const B=state
   { const n=$('#epName',page); if(n) n.onchange=()=>{ B.name=n.value.trim()||'Бой'; touch(B); }; }
   on('#epBg',()=>pickFiles(async files=>{ const ids=await uploadImages(files,B.id); if(ids[0]){ B.bg=ids[0]; touch(B); render(); } })); on('#epBgX',()=>{ delete B.bg; touch(B); render(); });
   on('#epResnap',()=>{ let n=0; for(const u of B.units){ const ch=byId(world.characters,u.ref); if(ch){ Object.assign(u,epSnap(ch)); n++; } } epNames(B); touch(B); render(); toast('Обновлено из листов: '+n); });
-  on('#epStart',()=>{ if(!B.units.some(u=>u.side==='a')||!B.units.some(u=>u.side==='e')){ toast('Нужен хотя бы один союзник и один враг',true); return; } for(const u of B.units){ const c=byId(world.characters,u.ref); if(c) Object.assign(u,epSnap(c)); } epNames(B); const log=[]; delete B.prev; B.fl=[]; epStart(B,log); epPost(B,'начало боя',log); touch(B); render(); });
-  on('#epSkip',()=>epSkip(B));
-  on('#epUndo',()=>{ if(!B.prev) return; Object.assign(B,JSON.parse(B.prev)); delete B.prev; B.fl=[]; epClear(); epPost(B,'отмена',['↶ Мастер отменил последнее действие']); touch(B); render(); });
+  on('#epStart',()=>{ if(!B.units.some(u=>u.side==='a')||!B.units.some(u=>u.side==='e')){ toast('Нужен хотя бы один союзник и один враг',true); return; } for(const u of B.units){ const c=byId(world.characters,u.ref); if(c) Object.assign(u,epSnap(c)); } epNames(B); const log=[]; delete B.prev; B.fl=[]; B.an=[]; epStart(B,log); epPost(B,'начало боя',log); touch(B); render(); });
+  on('#epSkip',()=>epSkip(B)); on('#epPhase',()=>epPhaseEnd(B)); on('#epPhase2',()=>epPhaseEnd(B)); on('#epOrd',()=>epOrderDlg(B));
+  on('#epUndo',()=>{ if(!B.prev) return; Object.assign(B,JSON.parse(B.prev)); delete B.prev; B.fl=[]; B.an=[]; epClear(); epPost(B,'отмена',['↶ Мастер отменил последнее действие']); touch(B); render(); });
   on('#epStop',async()=>{ if(!await confirmDlg('Завершить бой? Ресурсы боя обнулятся, листы персонажей не меняются.','Завершить')) return; B.ph='end'; B.cur=null; B.queue=[]; delete B.prev; epPost(B,'конец боя',['■ Бой завершён'+(B.win?(B.win==='a'?' победой':' поражением'):'')]); touch(B); render(); });
   on('#epAgain',()=>{ Object.assign(B,{ph:'setup',cur:null,queue:[],extra:[],round:0,souls:0,win:null}); for(const u of B.units){ u.fx=[]; u.dead=0; delete u.hp; } delete B.prev; touch(B); render(); });
-  m.append(page); }
+  m.append(page); if(ago<8) setTimeout(()=>epPlay(page,B),0); }
 /* мастер: поставить персонажа на позицию */
 function epAddDlg(B,side,pos){ const L=world.characters.filter(c=>!isClone(c)).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
   const b=openModal(`<h2>${side==='a'?'Союзник':'Враг'}: ${EP_POS.find(p=>p[0]===pos)[1]}</h2><div class="faint" style="font-size:12.5px;margin-bottom:8px">${esc(epPosTxt(pos))}. Статы, скиллы и снаряжение берутся из листа (вкладки «Характеристики», «Снаряжение», способности со слотом).</div><input id="q" placeholder="поиск…" style="width:100%;margin-bottom:8px"><div class="tgl"></div><div class="modal-actions"><button class="btn" id="cancel">Отмена</button></div>`,true);
   const box=$('.tgl',b); const draw=q=>{ box.innerHTML=''; for(const c of L){ if(q&&!(c.name||'').toLowerCase().includes(q)) continue; const sk=(c.abilities||[]).filter(a=>a.ep&&a.ep.slot).length; const row=el(`<div class="tgrow"><div class="av">${c.thumb?`<img src="${esc(c.thumb)}">`:esc(entAbbr(c))}</div><div class="grow"><b>${esc(c.name||'без имени')}</b><div class="faint" style="font-size:11.5px">${c.epic&&c.epic.cls?esc((EP_CLS.find(x=>x[0]===c.epic.cls)||[])[1]||'')+' · ':''}скиллов со слотом: ${sk}</div></div></div>`); row.onclick=()=>{ closeModal(); B.units.push({id:uid(),ref:c.id,side,pos,...epSnap(c)}); epNames(B); touch(B); render(); }; box.append(row); } if(!box.children.length) box.innerHTML='<div class="faint">Никого не найдено.</div>'; };
   draw(''); $('#q',b).oninput=e=>draw(e.target.value.trim().toLowerCase()); $('#cancel',b).onclick=closeModal; }
-/* мастер: правка бойца — ХП, дух, эффекты, позиция, убрать */
-function epUnitDlg(B,u){ const set=B.ph==='setup'; const s=epUS(u);
+/* окно бойца. Мастер: ХП, барьер, дух, эффекты, позиция, убрать/вывести. Игрок (свой боец в бою): только эффекты.
+   Эффекты: × снять, «＋ Наложить» — вручную, без бросков на резист и без иммунитетов; применяются по «Готово» */
+function epUnitDlg(B,u){ const set=B.ph==='setup'; const s=epUS(u); const dm=isDM()&&!viewAs; const rm=new Set(), adds=[]; const live=B.units.filter(x=>!x.dead);
+  const nmOf=id=>{ const f=epFxAny(id); return f?f.icon+' '+f.name:id; };
   const b=openModal(`<h2>${esc(u.nm)} <span class="faint" style="font-size:13px">${u.side==='a'?'союзник':'враг'} · ${EP_POS.find(p=>p[0]===u.pos)[1]}</span></h2>
-    ${set?`<div class="field"><label>Позиция</label>${epSel(EP_POS.map(([p,n])=>[p,n+(B.units.some(x=>x!==u&&x.side===u.side&&x.pos===p)?' (занята — поменяются)':'')]),u.pos,'pos')}</div>`:`<div class="row" style="gap:10px;flex-wrap:wrap"><div class="field" style="width:130px"><label>ХП (макс. ${s.mhp})</label><input id="uhp" type="number" value="${u.hp??s.mhp}"></div><div class="field" style="width:110px"><label>Барьер</label><input id="ubar" type="number" value="${+u.bar||0}"></div><div class="field" style="width:120px"><label>Боевой дух</label><input id="usp" type="number" value="${+u.sp||0}"></div></div>
-    <div class="field"><label>Эффекты</label><div class="epufx">${(u.fx||[]).map(e=>{ const f=epFxAny(e.id); return `<span class="epchip" data-i="${e.i}">${f?f.icon+' '+esc(f.name):e.id}${e.dur<99?' · '+e.dur:''} <button class="x-btn">×</button></span>`; }).join('')||'<span class="faint">нет</span>'}</div></div>`}
+    ${set?`<div class="field"><label>Позиция</label>${epSel(EP_POS.map(([p,n])=>[p,n+(B.units.some(x=>x!==u&&x.side===u.side&&x.pos===p)?' (занята — поменяются)':'')]),u.pos,'pos')}</div>`:`${dm?`<div class="row" style="gap:10px;flex-wrap:wrap"><div class="field" style="width:130px"><label>ХП (макс. ${s.mhp})</label><input id="uhp" type="number" value="${u.hp??s.mhp}"></div><div class="field" style="width:110px"><label>Барьер</label><input id="ubar" type="number" value="${+u.bar||0}"></div><div class="field" style="width:120px"><label>Боевой дух</label><input id="usp" type="number" value="${+u.sp||0}"></div></div>`:''}
+    <div class="field"><label>Эффекты</label><div class="epufx"></div>
+      <div class="epfxadd"><select class="fid">${epFxOptions('')}</select><label title="сколько ходов держится (99 — пока не снимут)">ходов <input class="fdur" type="number" min="1" max="99" value="2"></label><label title="число N эффекта: барьер, дмг лимит, вампиризм, продвижение…">N <input class="fn" type="number" step="any"></label><label title="кто наложил: в него бьют при провокации, от его атаки считаются Кровотечение, Горение и Бомба">от <select class="fsrc">${live.map(x=>`<option value="${x.id}" ${x===u?'selected':''}>${esc(x.nm)}</option>`).join('')}</select></label><button class="btn sm" id="fadd">＋ Наложить</button></div>
+      <div class="faint" style="font-size:11.5px;margin-top:4px">Вручную — без бросков на резист и мимо иммунитета. Всё применится по «Готово» и уйдёт в чат.</div></div>`}
     <div class="faint" style="font-size:12px;line-height:1.5">${EP_STATS.map(([k,n])=>`${n} ${epFmt(k,k==='hp'?s.mhp:s[k])}`).join(' · ')}</div>
-    <div class="modal-actions">${set?'<button class="btn danger" id="urm" style="margin-right:auto">Убрать из боя</button>':`<button class="btn" id="ukill" style="margin-right:auto">${u.dead?'🕊 Вернуть в бой':'☠ Вывести из боя'}</button>`}<button class="btn" id="cancel">Отмена</button><button class="btn primary" id="ok">Готово</button></div>`,true);
-  $$('.epufx .x-btn',b).forEach(x=>x.onclick=()=>{ const i=x.parentNode.dataset.i; u.fx=(u.fx||[]).filter(e=>e.i!==i); x.parentNode.remove(); });
+    <div class="modal-actions">${set?'<button class="btn danger" id="urm" style="margin-right:auto">Убрать из боя</button>':dm?`<button class="btn" id="ukill" style="margin-right:auto">${u.dead?'🕊 Вернуть в бой':'☠ Вывести из боя'}</button>`:''}<button class="btn" id="cancel">Отмена</button><button class="btn primary" id="ok">Готово</button></div>`,true);
+  const box=$('.epufx',b);
+  const drawFx=()=>{ if(!box) return; const cur=(u.fx||[]).filter(e=>!rm.has(e.i));
+    box.innerHTML=cur.map(e=>`<span class="epchip ${e.k||''}" data-i="${e.i}">${esc(nmOf(e.id))}${e.n!=null?' ('+e.n+')':''}${e.dur<99?' · '+e.dur+' х.':''} <button class="x-btn" title="снять">×</button></span>`).join('')
+      +adds.map((a,i)=>`<span class="epchip new" data-a="${i}">＋ ${esc(nmOf(a.id))}${a.n!=null?' ('+a.n+')':''}${(epFxAny(a.id)||{}).inst?'':' · '+a.dur+' х.'} <button class="x-btn" title="не накладывать">×</button></span>`).join('')||'<span class="faint">нет</span>';
+    $$('.epchip .x-btn',box).forEach(x=>x.onclick=()=>{ const c=x.parentNode; if(c.dataset.i) rm.add(c.dataset.i); else adds.splice(+c.dataset.a,1); drawFx(); }); };
+  drawFx();
+  const fid=$('.fid',b); if(fid){ const fn=$('.fn',b), fd=$('.fdur',b), fs=$('.fsrc',b);
+    fid.onchange=()=>{ const f=epFxAny(fid.value); const hasN=!!(f&&f.n!=null); fn.value=hasN?epP(f.id,'n')??'':''; fn.disabled=!hasN; fd.disabled=!!(f&&f.inst); if(fid.value==='taunt'){ const e=live.find(x=>x.side!==u.side); if(e) fs.value=e.id; } };
+    fid.onchange();
+    $('#fadd',b).onclick=()=>{ const f=epFxAny(fid.value); if(!f){ toast('Выбери эффект',true); return; } adds.push({id:f.id,dur:Math.max(1,Math.min(99,Math.round(+fd.value||2))),n:f.n!=null&&fn.value!==''?+fn.value:undefined,src:fs.value}); fid.value=''; fid.onchange(); drawFx(); }; }
   $('#cancel',b).onclick=closeModal;
-  const rm=$('#urm',b); if(rm) rm.onclick=()=>{ B.units=B.units.filter(x=>x!==u); epNames(B); closeModal(); touch(B); render(); };
+  const rmb=$('#urm',b); if(rmb) rmb.onclick=()=>{ B.units=B.units.filter(x=>x!==u); epNames(B); closeModal(); touch(B); render(); };
   const kl=$('#ukill',b); if(kl) kl.onclick=()=>{ epSavePrev(B); const log=[]; if(u.dead){ u.dead=0; u.hp=Math.max(1,u.hp||Math.round(s.mhp*.3)); log.push(`🕊 Мастер вернул ${u.nm} в бой`); } else { epDie(B,u,log,null); if(B.cur===u.id){ epNext(B,log); } } const w=epOver(B); if(w) B.win=w; else B.win=null; epPost(B,'мастер',log); closeModal(); touch(B); render(); };
-  $('#ok',b).onclick=()=>{ if(set){ const p=$('.pos',b).value; const o=B.units.find(x=>x!==u&&x.side===u.side&&x.pos===p); if(o) o.pos=u.pos; u.pos=p; } else { epSavePrev(B); const n=v=>Math.max(0,Math.round(+v||0)); u.hp=Math.min(s.mhp,n($('#uhp',b).value)); u.bar=n($('#ubar',b).value); u.sp=n($('#usp',b).value); if(u.hp<=0&&!u.dead){ const log=[]; epDie(B,u,log,null); if(B.cur===u.id) epNext(B,log); epPost(B,'мастер',log); } }
+  $('#ok',b).onclick=()=>{ if(set){ const p=$('.pos',b).value; const o=B.units.find(x=>x!==u&&x.side===u.side&&x.pos===p); if(o) o.pos=u.pos; u.pos=p; }
+    else { epSavePrev(B); const log=[]; const who=dm?'Мастер':(me.name||'Игрок');
+      if(dm){ const n=v=>Math.max(0,Math.round(+v||0)); u.hp=Math.min(s.mhp,n($('#uhp',b).value)); u.bar=n($('#ubar',b).value); u.sp=n($('#usp',b).value); }
+      if(rm.size){ const L=(u.fx||[]).filter(e=>rm.has(e.i)); u.fx=(u.fx||[]).filter(e=>!rm.has(e.i)); if(L.some(e=>e.id==='barrier')&&!epHas(u,'barrier')) u.bar=0; log.push(`✋ ${who} снимает с ${u.nm}: ${L.map(e=>nmOf(e.id)).join(', ')}`); }
+      if(adds.length){ log.push(`✋ ${who} накладывает на ${u.nm}:`); for(const a of adds) epApply(B,epU(B,a.src)||u,u,{id:a.id,dur:a.dur,n:a.n,force:1},log); }
+      if(dm&&u.hp<=0&&!u.dead){ epDie(B,u,log,null); if(B.cur===u.id) epNext(B,log); }
+      if(log.length) epPost(B,rm.size||adds.length?'эффекты':'мастер',log); }
     closeModal(); touch(B); render(); }; }
 
 /* ============================================================
