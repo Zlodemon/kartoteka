@@ -51,6 +51,7 @@ function Build-Site($cfg) {
   $html = $html.Replace('{"__FIREBASE__":1}', $fbJson).Replace('["__DM_EMAILS__"]', '[' + $jsEmails + ']')
   [IO.File]::WriteAllText((Join-Path $SiteDir 'public\index.html'), $html, $utf8)
   Copy-Item (Join-Path $AppDir 'techniques-base.js') (Join-Path $SiteDir 'public\techniques-base.js') -Force
+  $fx = Join-Path $AppDir 'fx'; if (Test-Path $fx) { New-Item -ItemType Directory -Force -Path (Join-Path $SiteDir 'public\fx') | Out-Null; Copy-Item (Join-Path $fx '*') (Join-Path $SiteDir 'public\fx') -Recurse -Force }   # картинки эффектов боя
   $rules = [IO.File]::ReadAllText((Join-Path $AppDir 'firestore.rules'), $utf8).Replace("['__DM_EMAILS__']", '[' + $rulesEmails + ']')
   [IO.File]::WriteAllText((Join-Path $SiteDir 'firestore.rules'), $rules, $utf8)
   foreach ($f in 'database.rules.json','firestore.indexes.json','firebase.json') { Copy-Item (Join-Path $AppDir $f) (Join-Path $SiteDir $f) -Force }

@@ -598,6 +598,14 @@ body.fight #fightBtn{background:rgba(255,209,102,.2);border-color:rgba(255,209,1
 .epufx .epchip.buff{box-shadow:inset 3px 0 0 #4fb3ff}.epufx .epchip.debuff{box-shadow:inset 3px 0 0 #ff5c6c}.epufx .epchip.new{background:rgba(142,247,193,.12);color:#8ef7c1}
 .epfxadd{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;padding:8px;border:1px dashed var(--line2);border-radius:10px}.epfxadd .fid{flex:1;min-width:190px}.epfxadd input{width:60px}.epfxadd .fsrc{max-width:160px}
 .field .epfxadd label{display:inline-flex;gap:5px;align-items:center;margin:0;letter-spacing:0;text-transform:none;font-weight:400;color:var(--muted)}
+.epult.dim{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.5),rgba(0,0,0,.88));pointer-events:none}
+.epult.band{position:absolute;left:-4%;right:-4%;top:27%;height:46%;overflow:hidden;pointer-events:none;background:linear-gradient(90deg,#05070d 0%,color-mix(in srgb,var(--uc) 50%,#05070d) 50%,color-mix(in srgb,var(--uc) 80%,#ffffff) 100%);box-shadow:0 0 0 3px var(--uc),0 0 50px var(--uc);border-top:2px solid #fff;border-bottom:2px solid #fff}
+.epult.band .lines{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 60px,rgba(255,255,255,.1) 60px 62px,transparent 62px 140px,rgba(255,255,255,.16) 140px 141px,transparent 141px 230px);mix-blend-mode:screen}
+.epult.band img,.epult.band .ini{position:absolute;right:7%;bottom:-25%;height:155%;aspect-ratio:1;object-fit:cover;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 82%,transparent);mask-image:linear-gradient(90deg,transparent,#000 22%,#000 82%,transparent)}
+.epult.band .ini{display:flex;align-items:center;justify-content:center;font-size:130px;font-weight:900;color:#fff;opacity:.85}
+.epult.band .txt{position:absolute;left:7%;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center}.epult .who{font-size:15px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:#fff;opacity:.85;text-shadow:0 2px 6px #000}
+.epult .sk{font-size:46px;font-weight:900;font-style:italic;line-height:1.05;color:#fff;-webkit-text-stroke:1.5px var(--uc);text-shadow:0 0 18px var(--uc),0 4px 10px #000;white-space:nowrap}
+.epsk .ultm{font-size:12px;margin-left:-2px}
 .epglyph{position:absolute;transform:translate(-50%,-50%);line-height:1;pointer-events:none;white-space:nowrap;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}.epflash{position:absolute;inset:0;pointer-events:none}
 .epanbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.epanbar .q{width:240px}.epanbar .chips{display:flex;gap:5px;flex-wrap:wrap}.epanbar .btn.on,.epanspec .btn.on{border-color:var(--gc,var(--gold));color:var(--gc,var(--gold));background:rgba(255,255,255,.06)}
 .epanspec{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
@@ -2278,6 +2286,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-23',t:'Эпик-бой: частицы и ультимейты',items:['Все анимации скиллов получили частицы: огонь, дым, искры, молнии, звёзды — у каждой стихии свои.','Галка «⭐ Ультимейт» у скилла: перед ним врезка на весь экран с портретом героя и названием скилла, эффекты вдвое ярче.','Текстуры — бесплатный пак Kenney (CC0), грузятся с самого сайта один раз и не нагружают базу.']},
   {d:'2026-10-23',t:'Эпик-бой: 198 анимаций и музыка',items:['Библиотека из 198 анимаций скиллов: удары, выстрелы, магия 12 стихий, баффы, лечение и дебаффы.','Скиллу анимация выбирается во вкладке «✦ Эпик» → «🎬 Анимация»: галерея, наведи — проиграется, клик — выбрать.','Не атакующие скиллы тоже анимируются: лечение, щиты, проклятия — на каждой цели.','Посмотреть все анимации: Настройки → ✦ Эпик-бой → «🎬 Анимации».','На экране боя у мастера «♫ Музыка»: трек или плейлист YouTube играет у всех; выключается настройкой «🎵 Музыка в бою».']},
   {d:'2026-10-23',t:'Эпик-бой: позиции, анимации, фазы',items:['Вместо скилла можно «⇄ Сменить позицию» — на свободное место или местами с союзником, без его согласия.','У скиллов 10 слотов вместо 4.','Новый бафф «🧛 Вампиризм»: атака лечит на N% от нанесённого урона.','Клик по бойцу в бою — наложить или снять эффект вручную (мастер — любому, игрок — своему).','Анимации ударов по классу: меч, стрела, луч, щит, кинжал, молния; COUNTER красным над контратакующим.','Фаза меняется только по кнопке мастера «⏭ Закончить фазу»; мастер меняет порядок ходов перетаскиванием или кнопкой ⇅.']},
   {d:'2026-10-23',t:'Эпик-бой: экран боя',items:['Раздел «Бой»: строй на строй как в Epic Seven — 4 позиции у союзников и врагов, свой фон, порядок ходов сверху, кнопки скиллов внизу.','Приложение само кидает попадание, крит, урон и эффекты, лог каждого действия — в чат. Дуо и контратаки, ДоТы, сон, стелс, провокация, бессмертие, барьер, соул бёрн, способности позиций.','Игрок ходит своими персонажами, мастер — врагами; у мастера ⏭ пропуск, ↶ отмена и правка бойца. ХП в начале боя полное, ресурсы боя обнуляются.']},
@@ -8121,7 +8130,7 @@ function epSkillEditor(box,a,ch,onChange){ const draw=()=>{ const P=a.ep||{}; co
     const fld=(lbl,html,w)=>`<div class="field" style="margin:0${w?';width:'+w+'px':''}"><label>${lbl}</label>${html}</div>`;
     box.innerHTML=`<div class="epske">
       <div class="epskhd" style="--tc:${tc}"><div class="slot" title="слот скилла">${P.slot||'—'}</div><div class="t"><input class="epnmi" value="${esc(a.name||'')}" placeholder="Название скилла — оно на кнопке в бою"><div class="epsum"></div></div><span class="tp">${(EP_TYPE.find(x=>x[0]===type)||[])[1]}</span></div>
-      ${epSec('epc-main','#ffd166','⚙','Основное','',`<div class="eprow2">${fld('Слот',`<div class="epdots epslotseg">${Array.from({length:10},(_,i)=>i+1).map(i=>`<span data-v="${i}" class="${+P.slot===i?'on':''}">${i}</span>`).join('')}<span data-v="" class="${P.slot?'':'on'}" title="не участвует в бою">—</span></div>`)}${fld('Тип',`<div class="eptype">${EP_TYPE.map(([k,n])=>`<span data-v="${k}" class="${type===k?'on':''}" style="--c:${EP_TYPEC[k]}">${n}</span>`).join('')}</div>`)}${pas?'':fld('КД, ходов',`<input class="epcd" type="number" min="0" max="99" value="${+P.cd||0}">`,96)}${pas?'':fld('Цели',epSel(EP_TGT,P.tgt||(type==='atk'?'e1':'s'),'eptg'))}${pas?'':fld('Анимация',`<button class="btn sm epanb" title="Выбрать из библиотеки анимаций (наведи на карточку — проиграется)">🎬 ${esc(epAnName(P))}</button>`)}</div>`)}
+      ${epSec('epc-main','#ffd166','⚙','Основное','',`<div class="eprow2">${fld('Слот',`<div class="epdots epslotseg">${Array.from({length:10},(_,i)=>i+1).map(i=>`<span data-v="${i}" class="${+P.slot===i?'on':''}">${i}</span>`).join('')}<span data-v="" class="${P.slot?'':'on'}" title="не участвует в бою">—</span></div>`)}${fld('Тип',`<div class="eptype">${EP_TYPE.map(([k,n])=>`<span data-v="${k}" class="${type===k?'on':''}" style="--c:${EP_TYPEC[k]}">${n}</span>`).join('')}</div>`)}${pas?'':fld('КД, ходов',`<input class="epcd" type="number" min="0" max="99" value="${+P.cd||0}">`,96)}${pas?'':fld('Цели',epSel(EP_TGT,P.tgt||(type==='atk'?'e1':'s'),'eptg'))}${pas?'':fld('Анимация',`<button class="btn sm epanb" title="Выбрать из библиотеки анимаций (наведи на карточку — проиграется)">🎬 ${esc(epAnName(P))}</button>`)}${pas?'':`<label class="row epultl" style="gap:6px;margin-bottom:6px;cursor:pointer" title="Перед скиллом — врезка на весь экран боя: портрет героя, название скилла, скоростные линии; эффекты скилла ярче"><input type="checkbox" class="epult" ${P.ult?'checked':''}> ⭐ Ультимейт</label>`}</div>`)}
       ${type==='atk'?epSec('epc-dmg','#ff6b5e','⚔','Урон','стат × множитель; несколько — складываются','<div class="epscale"></div>'):''}
       ${pas?epSec('epc-trig','#c04be0','✦','Срабатывание','',`<div class="eprow2">${fld('Когда срабатывает',epSel(EP_TRIG,P.trig||'always','eptr'))}<label class="row" style="gap:6px;margin-bottom:6px"><input type="checkbox" class="eponce" ${P.once?'checked':''}> 1 раз за бой</label></div><div class="faint" style="font-size:11.5px;margin-top:6px">«Всегда» — постоянные прибавки: вкладка «🎲 Бросок и модификаторы» → ƒ модификаторы → «Эпик: …».</div>`):''}
       ${epSec('epc-fx','#4fb3ff','✨','Эффекты','<span style="color:#4fb3ff">■</span> бафф · <span style="color:#ff6b5e">■</span> дебафф · <span style="color:#ffd166">■</span> особый','<div class="epfx"></div>')}
@@ -8133,6 +8142,7 @@ function epSkillEditor(box,a,ch,onChange){ const draw=()=>{ const P=a.ep||{}; co
     $$('.eptype span',box).forEach(s=>s.onclick=()=>{ E().type=s.dataset.v; ch_(); draw(); });
     { const ab=$('.epanb',box); if(ab) ab.onclick=()=>epAnPicker(E().anim||'',type==='atk',id=>{ if(id) E().anim=id; else delete E().anim; ch_(); draw(); }); }
     const bind=(sel,f)=>{ const x=$(sel,box); if(x) x.oninput=x.onchange=()=>{ f(x); ch_(); }; };
+    bind('.epult',x=>{ if(x.checked) E().ult=1; else delete E().ult; });
     bind('.epcd',x=>E().cd=Math.max(0,Math.round(+x.value||0))); bind('.eptg',x=>E().tgt=x.value); bind('.eptr',x=>E().trig=x.value); bind('.eponce',x=>{ if(x.checked) E().once=1; else delete E().once; });
     bind('.epsouls',x=>E().souls=Math.max(0,+x.value||0)); bind('.epsp',x=>E().spirit=Math.max(0,+x.value||0)); bind('.epneed',x=>E().need=Math.max(0,+x.value||0)); bind('.epns',x=>{ if(x.checked) E().needSpend=1; else delete E().needSpend; });
     bind('.epcb',x=>{ if(x.value){ E().cost??={n:1}; E().cost.bar=x.value; } else delete E().cost; }); bind('.epcn',x=>{ if(E().cost) E().cost.n=Math.max(0,+x.value||0); });
@@ -8351,7 +8361,7 @@ function epStrike(B,A,t,P,o,log){ const sa=epUS(A), st=epUS(t); const adv=epElAd
   const mult=1+(adv>0?.1:0)+(mk===2?+epP('mark2','v'):mk?+epP('mark','v'):0)+(+sa.dmg||0);
   let dmg=base*mult*(crit?1+(+sa.cd||0):1)*K/(K+Math.max(0,+st.def||0)); if(miss) dmg*=.5; const cas=epTake(A,'cascade'); if(cas&&!miss) dmg+=+cas.n||0;
   log.push(`→ ${t.nm}: ${miss?'промах'+(roll!=null?` (d100 ${roll} ≤ ${Math.round(eva-acc)})`:'')+' — половина урона':crit?'КРИТ!':'попадание'}${adv>0?' · элемент сильнее':adv<0?' · элемент слабее':''}`);
-  { const an=epAnId(A,P,t); if(an){ epAn(B,{k:'atk',a:A.id,t:t.id,c:A.cls||'',an}); EPTL+=epAnHit(an); } }
+  { const an=epAnId(A,P,t); if(an){ epAn(B,{k:'atk',a:A.id,t:t.id,c:A.cls||'',an,...(P.ult?{ult:1}:{})}); EPTL+=epAnHit(an); } }
   const li=log.length; const r=epHurt(B,t,dmg,log,{src:A,crit}); if(r.dealt) log.splice(li,0,`   ${t.nm}: −${r.dealt} ХП${t.dead?'':` (${t.hp}/${epUS(t).mhp}${t.bar?', барьер '+t.bar:''})`}`);
   const ls=epSsp(A,'lifesteal')+(A.fx||[]).filter(e=>e.id==='vamp').reduce((v,e)=>v+(+e.n||0),0); if(ls&&r.dealt){ const h=epHeal(B,A,r.dealt*ls/100,log); if(h) log.push(`🧛 ${A.nm}: вампиризм +${h}`); }
   const inj=epSsp(A,'injury'); if(inj&&r.dealt&&!t.dead){ t.cut=Math.min(90,(+t.cut||0)+inj); if(t.hp>epUS(t).mhp) t.hp=epUS(t).mhp; log.push(`🦴 ${t.nm}: макс. ХП −${inj}% (травма)`); }
@@ -8369,12 +8379,13 @@ async function epUse(B,A,sk,T,o={}){ const P=sk.ep||{}; const log=o.log; const t
   if(sbOn&&P.sb.tgt) T=epAutoT(B,A,P.sb.tgt,T.length?T:epLive(B,P.sb.tgt[0]==='e'?epFoeSide(A):A.side).slice(0,P.sb.tgt==='e2'?2:P.sb.tgt==='e3'?3:1));
   T=T.filter(t=>t&&(!t.dead||P.sp==='revive'||(P.fx||[]).some(r=>r.id==='revive')));
   if(o.counter||o.duo){ epAn(B,{k:'tag',u:A.id,txt:o.counter?'COUNTER':'DUO',c:o.counter?'ctr':'duo'}); EPTL+=.45; }
+  else if(P.ult&&!o.free){ epAn(B,{k:'ult',u:A.id,txt:(epLiveAb(A,sk)||{}).name||sk.name}); EPTL+=1.55; } /* ультимейт: врезка с портретом */
   log.push(`${o.duo?'🤝 Дуо атака: ':o.counter?'↩️ Контратака: ':''}${A.nm} — «${sk.name}»${sbOn?' 🔥 соул бёрн':''}${T.length&&!(T.length===1&&T[0]===A)?' → '+T.map(t=>t.nm).join(', '):''}`);
   if(P.sp) epPosSp(B,A,P.sp,T,log,P.prm||{});
   const rows=[...(P.fx||[]),...(sbOn?(P.sb.fx||[]):[])]; const hits=new Map(); const ctrQ=[];
   /* нулифаер на цели съедает скилл врага целиком */ for(const t of T) if(t.side!==A.side&&epHas(t,'nullify')){ epTake(t,'nullify'); hits.set(t.id,{nul:1}); log.push(`🚫 ${t.nm}: скилл нулифаер — скилл не подействовал`); }
   /* поддержка: анимация на каждой цели (бафф союзнику, дебафф врагу) */
-  if(tp!=='atk'&&T.length){ const t0=EPTL; let tE=t0; T.forEach((t,i)=>{ const an=epAnId(A,P,t); if(!an) return; EPTL=t0+i*.08; epAn(B,{k:'atk',a:A.id,t:t.id,an}); tE=Math.max(tE,EPTL+epAnHit(an)); }); EPTL=tE; }
+  if(tp!=='atk'&&T.length){ const t0=EPTL; let tE=t0; T.forEach((t,i)=>{ const an=epAnId(A,P,t); if(!an) return; EPTL=t0+i*.08; epAn(B,{k:'atk',a:A.id,t:t.id,an,...(P.ult?{ult:1}:{})}); tE=Math.max(tE,EPTL+epAnHit(an)); }); EPTL=tE; }
   epApplyRows(B,A,rows.filter(r=>r.when==='pre'),T,log,hits);
   if(tp==='atk'){ const t0=EPTL; let tE=t0, i=0; /* по нескольким целям удары почти одновременно */
     for(const t of T){ if(t.dead||hits.has(t.id)) continue; EPTL=t0+(i++)*.12; const h=epStrike(B,A,t,P,{sbM:sbOn?+P.sb.m||0:0,st:(P.tgt||'e1')==='e1',depth:o.depth||0,ctrQ},log); hits.set(t.id,h); if(h.dealt>0&&!A.dead) epTrig(B,A,'hit',log,{other:t}); tE=Math.max(tE,EPTL); } EPTL=tE; }
@@ -8638,10 +8649,10 @@ function epShape(X,g,sh,c,c2){ const s=(t,a)=>X.sv(t,a,g,1); const glow=`filter:
 /* летящий снаряд по дуге (h — высота дуги вверх), n штук веером, tr — шлейф из копий */
 function epProj(X,s,p,q,d,c,c2){ const dx=q.x-p.x, dy=q.y-p.y, L=Math.hypot(dx,dy); if(L<20) return; let ux=-dy/L, uy=dx/L; if(uy>0){ ux=-ux; uy=-uy; } const n=s.n||1, dur=s.dur||.4, k=(s.sz||10)/10;
   for(let i=0;i<n;i++){ const off=n>1?(i-(n-1)/2)*(s.sp??16):0; const h=(s.h||0)+off; const dd=d+i*(s.st??0); const qe={x:q.x+ux*off*.25,y:q.y+uy*off*.25}; const mx=(p.x+qe.x)/2+ux*h*2, my=(p.y+qe.y)/2+uy*h*2;
-    for(let gh=0; gh<=(s.tr||0); gh++){ const g=X.sv('g',{}); epShape(X,g,s.sh||'orb',c,c2); const kf=[];
+    for(let gh=0; gh<=(s.tr||0); gh++){ const g=X.sv('g',{}); epShape(X,g,s.sh||'orb',c,c2); const kf=[], pts=[];
       for(let j=0;j<=10;j++){ const t=j/10, u=1-t; const x=u*u*p.x+2*u*t*mx+t*t*qe.x, y=u*u*p.y+2*u*t*my+t*t*qe.y; const tx=2*u*(mx-p.x)+2*t*(qe.x-mx), ty=2*u*(my-p.y)+2*t*(qe.y-my);
-        const a=s.spin?t*900:Math.atan2(ty,tx)*180/Math.PI; kf.push({transform:`translate(${x}px,${y}px) rotate(${a}deg) scale(${k*(1-.16*gh)})`,opacity:(j===0||j===10?0:1)*(gh?.5/gh:1)}); }
-      X.run(g,kf,dur,dd+gh*.035,{e:s.e||'linear'}); } } }
+        const a=s.spin?t*900:Math.atan2(ty,tx)*180/Math.PI; kf.push({transform:`translate(${x}px,${y}px) rotate(${a}deg) scale(${k*(1-.16*gh)})`,opacity:(j===0||j===10?0:1)*(gh?.5/gh:1)}); if(!gh) pts.push({x,y}); }
+      X.run(g,kf,dur,dd+gh*.035,{e:s.e||'linear'}); if(!gh&&(s.e||'linear')==='linear') epPxTrail(X,pts,dd,dur,k); } } }
 function epRing(X,q,d,col,r1=34,dur=.42){ X.run(X.sv('circle',{cx:0,cy:0,r:10,fill:'none',stroke:col,'stroke-width':3,'vector-effect':'non-scaling-stroke'}),[{transform:`translate(${q.x}px,${q.y}px) scale(.4)`,opacity:1},{transform:`translate(${q.x}px,${q.y}px) scale(${r1/10})`,opacity:0}],dur,d,{e:'ease-out'}); }
 const epRnd=i=>{ const x=Math.sin(i*127.1+311.7)*43758.5453; return x-Math.floor(x); }; // повторяемое «случайное» число
 const EP_SLASH={'1':[[-48,-42,32,-36,42,46]],x:[[-34,-30,0,-6,32,30],[34,-30,0,-6,-32,30]],'3':[[-50,-30,10,-30,30,40],[-40,-40,20,-40,40,30],[-30,-50,30,-50,50,20]],claw:[[-30,-36,-10,0,10,38],[-16,-40,4,-2,24,36],[-2,-42,18,-4,38,32]],cross:[[-44,0,0,4,44,0],[0,-44,-4,0,0,44]],thrust:[[-62,0,0,0,40,0]],v:[[-30,-34,-12,0,0,30],[30,-34,12,0,0,30]],up:[[-30,40,-36,-10,30,-46]],down:[[-10,-58,8,0,-4,52]],z:[[-34,-30,0,-30,34,-30],[34,-30,0,0,-34,30],[-34,30,0,30,34,30]]};
@@ -8697,15 +8708,103 @@ function epAnStep(X,k,s,at,p,q,t,c,c2,sg){ const tr=(x,y,extra='')=>`translate($
       X.run(g,[{transform:`translate(${sx}px,${sy}px) rotate(${a}deg) scale(${k2})`,opacity:1},{transform:`translate(${x}px,${y}px) rotate(${a}deg) scale(${k2})`,opacity:1,offset:.95},{transform:`translate(${x}px,${y}px) rotate(${a}deg) scale(${k2})`,opacity:0}],dur,t0,{e:'ease-in'}); epRing(X,{x,y},t0+dur,c,22,.3); } break; }
   case 'flash': X.run(X.dv('epflash','',0,0,`background:${s.c||c}`),[{opacity:0},{opacity:.42,offset:.25},{opacity:0}],.3,t); break;
   case 'shake': { const st=X.st; if(!st) break; const m=6*(s.k||1); X.run(st,[{transform:'translate(0,0)'},{transform:`translate(${m}px,${-m/2}px)`},{transform:`translate(${-m}px,${m/2}px)`},{transform:`translate(${m/2}px,${m/2}px)`},{transform:`translate(${-m/2}px,${-m/2}px)`},{transform:'translate(0,0)'}],.32,t,{keep:1,fill:'none'}); break; } } }
+/* ---------- частицы на canvas поверх анимаций: текстуры Kenney (CC0) из fx/kenney.webp (хостинг сайта, база не участвует) + своё свечение.
+   Частица считается формулой от возраста (без пошаговой симуляции) и со своим зерном случайности — перерисовка и опоздавший зритель видят то же самое ---------- */
+const EP_TX='circle_02 circle_03 circle_05 dirt_01 dirt_02 fire_01 fire_02 flame_01 flame_02 flame_03 flame_04 flame_05 flame_06 flare_01 light_01 light_03 magic_01 magic_02 magic_03 magic_04 magic_05 muzzle_01 muzzle_02 muzzle_04 scorch_01 scorch_02 scorch_03 scratch_01 slash_01 slash_02 slash_03 slash_04 smoke_01 smoke_02 smoke_03 smoke_04 smoke_05 smoke_07 smoke_09 smoke_10 spark_01 spark_02 spark_05 spark_06 spark_07 star_01 star_02 star_04 star_06 star_08 star_09 symbol_01 trace_01 trace_04 twirl_01 twirl_02 twirl_03'.split(' ');
+const EPX={img:null,ok:false,busy:false,tint:new Map()};
+function epTxLoad(){ if(EPX.busy) return; EPX.busy=true; const im=new Image(); im.onload=()=>{ EPX.img=im; EPX.ok=true; EPX.tint.clear(); }; im.onerror=()=>{ EPX.busy=false; }; im.src='fx/kenney.webp?v=1'; }
+/* текстура, перекрашенная в цвет (кэш); пока атлас не загрузился — мягкое свечение */
+function epTex(name,col){ const real=EPX.ok&&name!=='glow'&&EP_TX.includes(name); const k=(real?name:'glow')+'|'+col; let c=EPX.tint.get(k); if(c) return c;
+  c=document.createElement('canvas'); c.width=c.height=128; const g=c.getContext('2d');
+  if(real){ const i=EP_TX.indexOf(name); g.drawImage(EPX.img,(i%8)*128,(i>>3)*128,128,128,0,0,128,128); g.globalCompositeOperation='source-in'; g.fillStyle=col; g.fillRect(0,0,128,128); }
+  else { const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.22,col); r.addColorStop(.55,col+'55'); r.addColorStop(1,col+'00'); g.fillStyle=r; g.fillRect(0,0,128,128); }
+  EPX.tint.set(k,c); return c; }
+const epR=X=>{ X.sd=(X.sd*16807)%2147483647; return (X.sd-1)/2147483646; };
+/* холст частиц слоя анимаций (под svg); кадр рисуется, пока есть живые частицы */
+function epPx(X){ if(X.px) return X.px; const dpr=Math.min(2,window.devicePixelRatio||1); const cv=document.createElement('canvas'); cv.width=Math.round(X.W*dpr); cv.height=Math.round(X.H*dpr); cv.className='eppx'; cv.style.cssText=`position:absolute;left:0;top:0;width:${X.W}px;height:${X.H}px;pointer-events:none`; X.lay.prepend(cv);
+  const L=[], t0=performance.now(), g=cv.getContext('2d'); let run=false;
+  const draw=t=>{ g.setTransform(dpr,0,0,dpr,0,0); g.globalCompositeOperation='source-over'; g.globalAlpha=1; g.clearRect(0,0,X.W,X.H); let alive=0;
+    for(const p of L){ const a=t-p.t; if(a>p.life) continue; alive++; if(a<0) continue; const f=a/p.life, e=p.dr?(1-Math.exp(-p.dr*a))/p.dr:a;
+      const x=p.x+p.vx*e+.5*p.ax*a*a, y=p.y+p.vy*e+.5*p.ay*a*a, s=p.s0+(p.s1-p.s0)*f; const al=p.al*(f<p.fi?f/p.fi:1)*(f>p.fo?Math.max(0,1-(f-p.fo)/(1-p.fo)):1); if(al<.01||s<1) continue;
+      g.globalCompositeOperation=p.bl; g.globalAlpha=Math.min(1,al); const im=epTex(p.tx,p.c); const r=p.r+p.vr*a;
+      if(r||p.sx!==1){ g.save(); g.translate(x,y); if(r) g.rotate(r); if(p.sx!==1) g.scale(p.sx,1); g.drawImage(im,-s/2,-s/2,s,s); g.restore(); } else g.drawImage(im,x-s/2,y-s/2,s,s); }
+    return alive; };
+  const frame=()=>{ if(!cv.isConnected){ run=false; return; } if(draw(X.ago+(performance.now()-t0)/1000)) requestAnimationFrame(frame); else run=false; };
+  X.px={add(p){ L.push(p); if(!run){ run=true; requestAnimationFrame(frame); } },draw}; return X.px; } // draw(t) — кадр на момент t (для проверки)
+/* выпустить n частиц: значения-диапазоны [a,b], tx/c — строка или список (берётся случайный) */
+function epEmit(X,o){ const P=epPx(X); const n=Math.round((o.n||1)*(X.m||1)*(X.pq||1)); const R=()=>epR(X); const pk=v=>Array.isArray(v)?v[(R()*v.length)|0]:v; const rg=(v,d)=>{ const x=v??d; return Array.isArray(x)?x[0]+(x[1]-x[0])*R():x; };
+  for(let i=0;i<n;i++){ const a=rg(o.ang,[0,360])*Math.PI/180, sp=rg(o.sp,60), sz=rg(o.sz,30);
+    P.add({t:o.t+rg(o.dt,0),life:rg(o.life,.6),x:o.x+(R()-.5)*(o.w||0),y:o.y+(R()-.5)*(o.h||0),vx:Math.cos(a)*sp+(o.vx||0),vy:Math.sin(a)*sp+(o.vy||0),ax:o.ax||0,ay:o.ay||0,dr:o.dr||0,
+      s0:sz*(o.g0??1),s1:sz*(o.g1??1.5),al:rg(o.al,1),fi:o.fi??.12,fo:o.fo??.45,tx:pk(o.tx||'glow'),c:pk(o.c||'#ffffff'),bl:o.bl||'lighter',r:o.rot!=null?(o.rot===true?R()*6.28:o.rot):0,vr:o.vr?(R()-.5)*o.vr:0,sx:o.sx||1}); } }
+/* наборы текстур по стихии: burst — взрыв, trail — шлейф, spark — искры, smoke — дым (sc — цвет, sb — смешивание) */
+const EP_KIT={
+  fire:{c:['#ff7a3d','#ffb347','#ffd166','#ff4b2b'],burst:['fire_01','fire_02','scorch_01','scorch_02','flame_01','flame_03'],trail:['flame_05','flame_06','fire_01'],spark:['star_04','flare_01'],smoke:['smoke_03','smoke_05','smoke_07'],sc:'#2a2320',sb:'source-over',up:1},
+  ice:{c:['#8fe3ff','#ffffff','#5ec8ff'],burst:['star_06','star_08','magic_05','light_03'],trail:['star_04','circle_05'],spark:['star_01','star_04'],smoke:['smoke_09'],sc:'#9fdcff',sb:'lighter'},
+  water:{c:['#3fa9ff','#bfe8ff','#7ad7ff'],burst:['circle_02','circle_03','smoke_10','light_01'],trail:['circle_05'],spark:['circle_05'],smoke:['smoke_09'],sc:'#7ad7ff',sb:'lighter'},
+  earth:{c:['#c08a4a','#8a6a3a','#f0d29a'],burst:['dirt_01','dirt_02','smoke_04'],trail:['dirt_02','smoke_03'],spark:['dirt_01'],smoke:['smoke_04','smoke_05'],sc:'#5a4630',sb:'source-over',grav:1},
+  wind:{c:['#9ff5d0','#ffffff','#c8fff0'],burst:['twirl_01','twirl_02','twirl_03','trace_04'],trail:['twirl_02','trace_01'],spark:['trace_01'],smoke:['smoke_09'],sc:'#dffcef',sb:'lighter',spin:1},
+  light:{c:['#ffe27a','#ffffff','#fff3b0'],burst:['star_09','light_03','flare_01','star_06'],trail:['star_04','flare_01'],spark:['star_01','star_08'],smoke:[],up:1},
+  dark:{c:['#a06bff','#ff5cf0','#6b3bd6'],burst:['twirl_01','smoke_07','scorch_03','magic_04'],trail:['circle_05','smoke_01'],spark:['star_04'],smoke:['smoke_07','smoke_09'],sc:'#160a24',sb:'source-over',spin:1},
+  storm:{c:['#7ae0ff','#ffffff','#b8f0ff'],burst:['spark_01','spark_02','spark_05','flare_01'],trail:['spark_07','trace_04'],spark:['spark_01','spark_02'],smoke:[]},
+  poison:{c:['#8fe35a','#c7ff7a','#5aa83a'],burst:['smoke_02','smoke_04','circle_05'],trail:['circle_05'],spark:['circle_02'],smoke:['smoke_04','smoke_05'],sc:'#2f5a1a',sb:'source-over',up:1},
+  arcane:{c:['#c78bff','#ffffff','#8f7bff'],burst:['magic_01','magic_02','magic_03','star_09'],trail:['star_04','magic_05'],spark:['star_01','magic_05'],smoke:[],spin:1},
+  blood:{c:['#ff3b4f','#b3001b','#ffb0b8'],burst:['scorch_03','circle_05','dirt_02'],trail:['circle_05'],spark:['circle_05'],smoke:['smoke_03'],sc:'#2a0508',sb:'source-over',grav:1},
+  void:{c:['#5d6bff','#ff9cf5','#2a2f7a'],burst:['twirl_03','smoke_10','light_01'],trail:['circle_05'],spark:['star_04'],smoke:['smoke_07'],sc:'#05060c',sb:'source-over',spin:1}};
+/* набор для пресета: стихия пресета, или стихия по цвету, или «сталь» в цвет анимации */
+function epKitOf(P){ if(P.el&&EP_KIT[P.el]) return EP_KIT[P.el]; for(const [el,v] of Object.entries(EP_ANEL)) if(v[1]===P.c&&EP_KIT[el]) return EP_KIT[el];
+  return P._kit??={c:[P.c,P.c2||'#ffffff','#ffffff'],burst:['star_06','flare_01','scorch_01','light_03'],trail:['trace_01','star_04'],spark:['star_04','flare_01'],smoke:P.g==='debuff'?['smoke_03','smoke_05']:[],sc:P.g==='debuff'?'#1d1a26':'#3a3a46',sb:'source-over'}; }
+/* шлейф снаряда по точкам пути */
+function epPxTrail(X,pts,d,dur,k){ const K=X.K; if(!K) return; for(let j=1;j<pts.length;j++){ const p0=pts[j-1], p1=pts[j], p={x:(p0.x+p1.x)/2,y:(p0.y+p1.y)/2}, seg=Math.hypot(p1.x-p0.x,p1.y-p0.y); epEmit(X,{x:p.x,y:p.y,w:seg,h:seg*.5,t:d+dur*(j-.5)/(pts.length-1),dt:[0,dur/(pts.length-1)],n:5,tx:K.trail,c:K.c,sz:[34*k,60*k],sp:[5,45],life:[.3,.65],g1:.3,fo:.2,rot:true,vr:3,ay:K.up?-80:0}); epEmit(X,{x:p.x,y:p.y,t:d+dur*j/(pts.length-1),n:1,tx:'glow',c:K.c[0],sz:54*k,g1:.4,sp:0,life:.35,al:.8}); } }
+/* частицы к шагу анимации */
+function epPxStep(X,k,s,at,p,q,t,c,c2){ const K=X.K; if(!K) return; const E=o=>epEmit(X,o);
+  const boom=(x,y,r,tt)=>{ E({x,y,t:tt,n:1,tx:'glow',c:'#ffffff',sz:r*4.2,g0:.3,g1:1.2,life:.32,sp:0,fi:.05,fo:.2}); E({x,y,t:tt,n:1,tx:'glow',c:K.c[0],sz:r*5,g0:.4,g1:1.4,life:.55,sp:0,fi:.08,fo:.3,al:.8});
+    E({x,y,t:tt,n:12+r/4,tx:K.burst,c:K.c,sz:[r*1.2,r*2.3],sp:[40,200],dr:3,life:[.5,1],g0:.4,g1:1.8,rot:true,vr:K.spin?6:2,ay:K.up?-90:K.grav?90:0});
+    E({x,y,t:tt,n:5,tx:K.burst,c:'#ffffff',sz:[r*.8,r*1.3],sp:[20,70],dr:3,life:[.25,.4],g0:.5,g1:1.3,rot:true,al:.75});
+    E({x,y,t:tt,n:14,tx:K.spark,c:K.c,sz:[18,34],sp:[220,460],dr:3.5,life:[.35,.7],g1:.4,ay:K.grav?300:0,rot:true});
+    if(K.smoke.length) E({x,y,t:tt+.08,n:6,tx:K.smoke,c:K.sc,bl:K.sb,sz:[r*1.5,r*2.3],sp:[15,55],dr:1.5,life:[1,1.6],g1:2,al:[.35,.55],ay:-25,rot:true,vr:1,fo:.3}); };
+  switch(k){
+  case 'beam': { const L=Math.hypot(q.x-p.x,q.y-p.y); if(L<20) break; for(let i=0;i<24;i++){ const f=epR(X); E({x:p.x+(q.x-p.x)*f,y:p.y+(q.y-p.y)*f,t:t+.08+f*.12,n:1,tx:K.spark,c:K.c,sz:[10,20],sp:[10,50],life:[.3,.5],g1:.3,rot:true}); } boom(q.x,q.y,26,t+.22); break; }
+  case 'chain': E({x:q.x,y:q.y,t:t+.1,n:4,tx:['spark_01','spark_02'],c:K.c,sz:[50,80],sp:[0,20],life:[.2,.35],rot:true,fo:.3}); boom(q.x,q.y,22,t+.15); break;
+  case 'boom': boom(at.x,at.y,s.r||40,t); break;
+  case 'ring': E({x:at.x,y:at.y,t,n:1,tx:'circle_02',c:c,sz:(s.r||34)*.5,g1:5,life:s.dur||.42,sp:0,fo:.2,al:.8}); break;
+  case 'sparks': E({x:at.x,y:at.y,t,n:(s.n||8)*1.2,tx:K.spark,c:K.c,sz:[10,20],sp:[140,280],dr:3,life:[.3,.6],g1:.4,rot:true}); break;
+  case 'slash': E({x:at.x,y:at.y,t:t+.06,n:1,tx:['slash_01','slash_02','slash_03','slash_04'],c:c,sz:160*(s.sz||1),g0:.8,g1:1.15,life:.3,sp:0,rot:(epR(X)*1.2-.6)+(s.p==='down'?1.57:0),fo:.3});
+    E({x:at.x,y:at.y,t:t+.1,n:8,tx:['star_04','flare_01'],c:['#ffffff',c],sz:[16,30],sp:[160,320],dr:4,life:[.25,.45],g1:.3}); E({x:at.x,y:at.y,t:t+.08,n:1,tx:'glow',c:c,sz:120,g0:.3,g1:1,sp:0,life:.25,al:.7}); break;
+  case 'pillar': { const w=s.w||40; E({x:at.x,y:at.y+30,t,n:26,tx:K.trail.concat(K.spark),c:K.c,w,sz:[14,28],sp:0,vy:-300,ay:-200,life:[.45,.8],dt:[0,.4],g1:.4,rot:true}); boom(at.x,at.y+30,w*.8,t); break; }
+  case 'sigil': for(let i=0;i<14;i++){ const a=i/14*6.283, R=s.r||40; E({x:at.x+Math.cos(a)*R,y:(s.flat?at.y+30+Math.sin(a)*R*.42:at.y+Math.sin(a)*R),t:t+.15+i*.02,n:1,tx:'star_04',c:c,sz:[10,16],sp:[0,10],vy:-40,life:[.5,.8],g1:.4}); } break;
+  case 'glyph': E({x:at.x,y:at.y,t,n:6,tx:'star_04',c:c,sz:[10,18],sp:[60,140],dr:3,life:[.3,.5],g1:.3}); break;
+  case 'aura': E({x:at.x,y:at.y+30,t,n:18,tx:K.trail.concat(['star_04']),c:K.c,w:70,h:10,sz:[10,20],sp:[0,15],vy:-90,life:[.6,1],dt:[0,.4],g1:.3}); E({x:at.x,y:at.y,t,n:1,tx:'light_01',c:c,sz:110,g0:.6,g1:1.1,sp:0,life:.9,al:.5,fi:.3,fo:.5}); break;
+  case 'rise': E({x:at.x,y:at.y,t,n:8,tx:'glow',c:c,w:70,h:30,sz:[8,14],sp:0,vy:-70,life:[.6,1],dt:[0,.5]}); break;
+  case 'swirl': E({x:at.x,y:at.y,t:t+.6,n:1,tx:'twirl_02',c:c,sz:110,g0:1.4,g1:.4,sp:0,life:.5,vr:0,rot:0,al:.8}); boom(at.x,at.y,26,t+.65); break;
+  case 'spikes': E({x:at.x,y:at.y+40,t,n:8,tx:K.burst,c:K.c,w:84,sz:[18,30],sp:[20,60],ang:[200,340],life:[.4,.7],g1:1.4,rot:true,ay:K.grav?200:0}); break;
+  case 'nova': E({x:at.x,y:at.y,t,n:1,tx:'circle_03',c:c,sz:30,g1:(s.r||90)/8,life:.55,sp:0,fo:.2}); E({x:at.x,y:at.y,t,n:14,tx:'star_04',c:c,sz:[10,18],sp:[160,260],dr:2,life:[.35,.55],g1:.3}); break;
+  case 'charge': for(let i=0;i<16;i++){ const a=epR(X)*6.283, R=70+epR(X)*40, l=.35+epR(X)*.15; E({x:at.x+Math.cos(a)*R,y:at.y+Math.sin(a)*R,t:t+epR(X)*.12,n:1,tx:'star_04',c:K.c,sz:[10,18],sp:0,vx:-Math.cos(a)*R/l,vy:-Math.sin(a)*R/l,life:l,g1:.5,fo:.8}); } E({x:at.x,y:at.y,t:t+.15,n:1,tx:'glow',c:c,sz:40,g1:2.2,life:.4,sp:0}); break;
+  case 'bubble': E({x:at.x,y:at.y,t,n:1,tx:'light_01',c:c,sz:(s.r||46)*2.3,g0:.4,g1:1.05,sp:0,life:s.dur||.95,al:.6,fi:.25,fo:.6}); break;
+  case 'cloud': E({x:at.x,y:at.y,t,n:8,tx:['smoke_03','smoke_04','smoke_05','smoke_09'],c:s.c||c,w:60,h:30,sz:[40,70],sp:[5,25],life:[.9,1.4],g0:.5,g1:1.6,al:[.35,.6],rot:true,vr:1,bl:'lighter',dt:[0,.2]}); break;
+  case 'drain': E({x:p.x,y:p.y,t:t+.55,n:1,tx:'glow',c:c,sz:50,g1:2,life:.4,sp:0}); break;
+  case 'rain': { const n=s.n||8, st=s.st??.045, sp=s.sp??50; for(let i=0;i<n;i++){ const x=at.x+(n>1?(epRnd(i+1)*2-1)*sp:0), y=at.y+(epRnd(i+4)-.5)*20, tl=t-.32+i*st-(n-1)*st/2+.32;
+      if(s.sh==='zap'){ E({x,y:y/2-10,t:tl-.04,n:1,tx:['spark_05','spark_06'],c:K.c,sz:y+60,g0:1,g1:1,sp:0,life:.35,fo:.3,fi:.05}); boom(x,y,30,tl); }
+      else E({x,y,t:tl,n:5,tx:K.burst,c:K.c,sz:[16,30],sp:[30,110],dr:3,life:[.3,.6],g1:1.3,rot:true,ay:K.grav?160:0}); } break; } } }
+/* ульта: врезка с портретом героя (картинка уже загружена для бойца на сцене — база не читается) */
+function epUlt(X,el_,u,a,d){ const col=(EP_EL.find(e=>e[0]===(u&&u.el))||[])[3]||'#ffd166'; const img=el_&&$('.por img',el_); const src=img&&img.src&&img.style.display!=='none'?img.src:''; const D=1.55;
+  const dim=X.dv('epult dim','',0,0); X.run(dim,[{opacity:0},{opacity:1,offset:.1},{opacity:1,offset:.85},{opacity:0}],D,d);
+  const band=document.createElement('div'); band.className='epult band'; band.style.cssText=`--uc:${col};opacity:0`; band.innerHTML=`<div class="lines"></div>${src?`<img src="${esc(src)}" alt="">`:`<div class="ini">${esc(initials(u?u.nm:'?'))}</div>`}<div class="txt"><div class="who">${esc(u?u.nm:'')}</div><div class="sk">${esc(a.txt||'')}</div></div>`; X.lay.append(band);
+  X.run(band,[{opacity:1,transform:'translateX(-105%) skewY(-7deg)'},{opacity:1,transform:'translateX(0) skewY(-7deg)',offset:.14},{opacity:1,transform:'translateX(1.5%) skewY(-7deg)',offset:.82},{opacity:1,transform:'translateX(105%) skewY(-7deg)'}],D,d,{e:'ease-in-out'});
+  const pi=$('img,.ini',band); X.run(pi,[{transform:'translateX(80px) scale(1.15)'},{transform:'translateX(0) scale(1.05)',offset:.2},{transform:'translateX(-30px) scale(1)'}],D,d,{keep:1,fill:'both'});
+  X.run($('.txt',band),[{opacity:0,transform:'translateX(120px)'},{opacity:0,transform:'translateX(120px)',offset:.1},{opacity:1,transform:'translateX(0)',offset:.25},{opacity:1,transform:'translateX(-20px)'}],D,d,{keep:1,fill:'both'});
+  X.run($('.lines',band),[{backgroundPosition:'0 0'},{backgroundPosition:'-1200px 0'}],D,d,{keep:1,fill:'both'});
+  const cy=X.H/2; epEmit(X,{x:X.W/2,y:cy,t:d+.1,n:46,tx:['trace_01','trace_04'],c:['#ffffff',col],w:X.W,h:X.H*.5,sz:[60,120],sp:0,vx:-1400,life:[.25,.45],dt:[0,1.1],rot:Math.PI/2,sx:.35,al:[.4,.9]});
+  epEmit(X,{x:X.W*.62,y:cy,t:d+.2,n:24,tx:['star_04','flare_01','star_06'],c:[col,'#ffffff'],w:X.W*.6,h:X.H*.4,sz:[14,30],sp:[10,40],life:[.4,.8],dt:[0,1]});
+  X.run(X.dv('epflash','',0,0,'background:#ffffff'),[{opacity:0},{opacity:.55,offset:.3},{opacity:0}],.3,d+D-.12); }
 /* проиграть пресет: p — кто применяет, q — цель, d — секунда действия; o.aEl — элемент бойца для подскока */
-function epAnDraw(X,P,p,q,d,o={}){ const cast=P.cast||0, hit=epAnHitP(P), sg=q.x<p.x?-1:1;
+function epAnDraw(X,P,p,q,d,o={}){ const cast=P.cast||0, hit=epAnHitP(P), sg=q.x<p.x?-1:1; X.K=epKitOf(P); X.m=o.m||1; X.sd=(Math.floor(d*1000)*31+Math.floor(p.x)*7+Math.floor(q.y)*13)%2147483646+1;
   if(P.lunge) epLunge(X,o.aEl,p,q,d+cast,P.lunge===2?.42:.62,hit-cast);
   for(const [k,s] of P.st){ const ph=s.ph||EP_ANPH[k]||'hit'; const t=d+(ph==='cast'?0:ph==='go'?cast:hit)+(s.dl||0); const at=s.on==='p'?p:s.on==='q'?q:ph==='cast'?p:q;
-    try{ epAnStep(X,k,s,at,p,q,t,s.c||P.c,s.c2||P.c2||'#ffffff',sg); }catch(e){ console.warn('anim',P.id,k,e); } } }
+    try{ epAnStep(X,k,s,at,p,q,t,s.c||P.c,s.c2||P.c2||'#ffffff',sg); epPxStep(X,k,s,at,p,q,t,s.c||P.c,s.c2||P.c2||'#ffffff'); }catch(e){ console.warn('anim',P.id,k,e); } } }
 /* ---------- библиотека анимаций: сетка карточек с мини-сценой (наведи — проиграется) ---------- */
-function epAnPlayCard(card){ const P=EP_ANM[card.dataset.id]; const st=$('.epanst',card); if(!P||!st) return; $$('.epfxl',st).forEach(x=>x.remove()); const R=st.getBoundingClientRect(); if(!R.width) return; const sc=.5, W=R.width/sc, H=R.height/sc;
+function epAnPlayCard(card){ const P=EP_ANM[card.dataset.id]; const st=$('.epanst',card); if(!P||!st) return; epTxLoad(); $$('.epfxl',st).forEach(x=>x.remove()); const R=st.getBoundingClientRect(); if(!R.width) return; const sc=.5, W=R.width/sc, H=R.height/sc;
   const lay=document.createElement('div'); lay.className='epfxl'; lay.style.cssText=`inset:auto;left:0;top:0;width:${W}px;height:${H}px;transform:scale(${sc});transform-origin:0 0`; st.append(lay);
-  const X=epFxCtx(lay,0,W,H); X.st=st; X.k=sc; const cen=e=>{ const r=e.getBoundingClientRect(); return {x:(r.left+r.width/2-R.left)/sc,y:(r.top+r.height/2-R.top)/sc,top:(r.top-R.top)/sc}; };
+  const X=epFxCtx(lay,0,W,H); X.st=st; X.k=sc; X.pq=.6; const cen=e=>{ const r=e.getBoundingClientRect(); return {x:(r.left+r.width/2-R.left)/sc,y:(r.top+r.height/2-R.top)/sc,top:(r.top-R.top)/sc}; };
   const a=$('.d.a',st), b=$('.d.b',st); epAnDraw(X,P,cen(a),cen(b),.05,{aEl:a}); }
 function epAnCard(P,cur){ const g=EP_ANG.find(x=>x[0]===P.g)||EP_ANG[0]; const E=P.el?EP_ANEL[P.el]:null;
   return `<div class="epanc ${P.g==='buff'?'ally':''} ${cur===P.id?'cur':''}" data-id="${P.id}" style="--ac:${P.c}" title="${esc(P.n)}"><div class="epanst"><i class="d a"></i><i class="d b"></i></div><div class="nm">${esc(P.n)}</div><div class="tg">${g[1]} ${esc(E?E[0]:g[2])}</div></div>`; }
@@ -8730,15 +8829,16 @@ function epAnPicker(cur,isAtk,onPick){ const ov=el(`<div class="epanov"><div cla
 /* анимации действия поверх сцены: удары и заклинания (пресеты EP_AN), COUNTER/DUO, переход на другую позицию.
    Время считается от момента, когда этот зритель увидел действие, — перерисовка страницы продолжает анимацию с того же места */
 function epPlay(page,B){ const sn=EP_SEEN[B.id]; const ago=sn&&sn.at?(Date.now()-sn.at)/1000:1e9; const st=$('.epstage',page); const L=(B.an||[]).filter(a=>a.d+2.2>ago); if(!st||!L.length) return; const R=st.getBoundingClientRect(); if(!R.width) return;
-  const lay=document.createElement('div'); lay.className='epfxl'; st.append(lay); const X=epFxCtx(lay,ago,R.width,R.height); X.st=st;
+  epTxLoad(); const lay=document.createElement('div'); lay.className='epfxl'; st.append(lay); const X=epFxCtx(lay,ago,R.width,R.height); X.st=st;
   const U=id=>$(`.epu[data-u="${id}"]`,st); const C=id=>{ const u=U(id); if(!u) return null; const r=($('.por',u)||u).getBoundingClientRect(); return {x:r.left+r.width/2-R.left,y:r.top+r.height/2-R.top,top:u.getBoundingClientRect().top-R.top}; };
   const T=(x,y)=>`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;
   for(const a of L){ const d=a.d;
     if(a.k==='tag'){ const p=C(a.u); if(!p) continue; X.run(X.dv('eptag '+(a.c||''),a.txt,p.x,p.top-6),[{opacity:0,transform:'translate(-50%,-50%) scale(.3)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.3)',offset:.12},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.25},{opacity:1,transform:'translate(-50%,-85%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-130%) scale(1)'}],1.6,d,{e:'ease-out'}); continue; }
     if(a.k==='mv'){ const n=U(a.u), u=epU(B,a.u); const f=u&&EP_POSXY[u.side][a.from], t=u&&EP_POSXY[u.side][u.pos]; if(!n||!f||!t) continue;
       X.run(n,[{transform:T((f[0]-t[0])*R.width/100,(f[1]-t[1])*R.height/100),zIndex:6},{transform:T(0,0),zIndex:6}],.6,d,{keep:1,fill:'backwards',e:'ease-in-out'}); continue; }
+    if(a.k==='ult'){ epUlt(X,U(a.u),epU(B,a.u),a,d); continue; }
     if(a.k!=='atk') continue; const p=C(a.a), q=C(a.t); if(!p||!q) continue;
-    const P=EP_ANM[a.an]||EP_ANM[EP_CLSAN[a.c]]||EP_ANM.st_basic; epAnDraw(X,P,p,q,d,{aEl:U(a.a)}); } }
+    const P=EP_ANM[a.an]||EP_ANM[EP_CLSAN[a.c]]||EP_ANM.st_basic; epAnDraw(X,P,p,q,d,{aEl:U(a.a),m:a.ult?1.8:1}); } }
 /* ---------- карточка юнита на сцене ---------- */
 function epUnitHTML(B,u,fl,ago=0){ const s=epUS(u); const mh=s.mhp, hp=Math.max(0,u.hp??mh); const [x,y]=EP_POSXY[u.side][u.pos]; const el_=EP_EL.find(e=>e[0]===u.el); const cl=EP_CLS.find(e=>e[0]===u.cls);
   const A=EPT.bid===B.id?epU(B,EPT.uid):null; const pk=A?epPickable(B,A,EPT.sk,EPT.code,u):false; const pick=(EPT.picks||[]).includes(u.id); const set=B.ph==='setup';
@@ -8751,7 +8851,7 @@ function epUnitHTML(B,u,fl,ago=0){ const s=epUS(u); const mh=s.mhp, hp=Math.max(
     ${(fl||[]).map((f,i)=>`<div class="epfl ${f.c}" style="animation-delay:${((f.d??i*.22)-ago).toFixed(2)}s">${esc(f.v)}</div>`).join('')}</div>`; }
 function epSkillBtn(B,A,s,pos){ const why=epWhyNot(B,A,s); const P=s.ep||{}; const L=pos?null:epLiveAb(A,s); const nm=(L&&L.name)||s.name; const img=L?(L.images||[])[0]:s.img; const sbOk=P.sb&&P.sb.on&&!why&&(A.sbFree||(+B.souls||0)>=(+P.sb.cost||0));
   const tip=pos?epPosSkTxt(s):epSkillSummary(s); const cd=(A.cd||{})[s.id]>0?A.cd[s.id]:(s.id==='p_sup'&&(B.supCd||{})[A.side]>0?B.supCd[A.side]:0);
-  return `<button class="epsk ${pos?'pos':''} ${why?'dis':''}" data-s="${s.id}" title="${esc(tip.replace(/<[^>]+>/g,'')+(why?'\n\n✗ '+why:''))}"><b>${pos?'◇':P.slot}</b>${img?`<img class="ski" data-img="${esc(img)}" data-thumb="1" style="display:none">`:''}${esc(nm)}${cd?`<span class="cd">КД ${cd}</span>`:''}</button>${P.sb&&P.sb.on?`<button class="epsk sb ${sbOk?'':'dis'}" data-s="${s.id}" data-sb="1" title="${esc('Соул бёрн: '+(A.sbFree?'бесплатно (Ритуал)':(P.sb.cost||0)+' душ')+(P.sb.desc?' — '+P.sb.desc:''))}">🔥${A.sbFree?'0':P.sb.cost||0}</button>`:''}`; }
+  return `<button class="epsk ${pos?'pos':''} ${why?'dis':''}" data-s="${s.id}" title="${esc(tip.replace(/<[^>]+>/g,'')+(why?'\n\n✗ '+why:''))}"><b>${pos?'◇':P.slot}</b>${P.ult?'<span class="ultm" title="ультимейт">⭐</span>':''}${img?`<img class="ski" data-img="${esc(img)}" data-thumb="1" style="display:none">`:''}${esc(nm)}${cd?`<span class="cd">КД ${cd}</span>`:''}</button>${P.sb&&P.sb.on?`<button class="epsk sb ${sbOk?'':'dis'}" data-s="${s.id}" data-sb="1" title="${esc('Соул бёрн: '+(A.sbFree?'бесплатно (Ритуал)':(P.sb.cost||0)+' душ')+(P.sb.desc?' — '+P.sb.desc:''))}">🔥${A.sbFree?'0':P.sb.cost||0}</button>`:''}`; }
 /* ---------- страница ---------- */
 function renderBattle(m){ epSubscribe(); const dm=isDM()&&!viewAs; const B=state.id?byId(world.battles,state.id):null;
   if(!B){ const L=(world.battles||[]).filter(b=>dm||b.ph!=='end').sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)); const PH={setup:'подготовка',fight:'идёт бой',end:'завершён'};
@@ -9939,7 +10039,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{wmTmplGeo,wmTmplHandles,fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{EPX,epTex,epEmit,epPx,epFxCtx,epAnDraw,epUlt,EP_ANM,wmTmplGeo,wmTmplHandles,fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
