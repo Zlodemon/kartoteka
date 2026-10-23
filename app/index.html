@@ -598,6 +598,15 @@ body.fight #fightBtn{background:rgba(255,209,102,.2);border-color:rgba(255,209,1
 .epufx .epchip.buff{box-shadow:inset 3px 0 0 #4fb3ff}.epufx .epchip.debuff{box-shadow:inset 3px 0 0 #ff5c6c}.epufx .epchip.new{background:rgba(142,247,193,.12);color:#8ef7c1}
 .epfxadd{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;padding:8px;border:1px dashed var(--line2);border-radius:10px}.epfxadd .fid{flex:1;min-width:190px}.epfxadd input{width:60px}.epfxadd .fsrc{max-width:160px}
 .field .epfxadd label{display:inline-flex;gap:5px;align-items:center;margin:0;letter-spacing:0;text-transform:none;font-weight:400;color:var(--muted)}
+.epglyph{position:absolute;transform:translate(-50%,-50%);line-height:1;pointer-events:none;white-space:nowrap;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}.epflash{position:absolute;inset:0;pointer-events:none}
+.epanbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.epanbar .q{width:240px}.epanbar .chips{display:flex;gap:5px;flex-wrap:wrap}.epanbar .btn.on,.epanspec .btn.on{border-color:var(--gc,var(--gold));color:var(--gc,var(--gold));background:rgba(255,255,255,.06)}
+.epanspec{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.settings.epwrap{grid-template-columns:minmax(0,1fr)!important}.epwrap .rusecs,.epwrap details.rusec,.epanp,.epangal{min-width:0}
+.epangrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}.epanh{grid-column:1/-1;margin:8px 0 0;font-size:12.5px;font-weight:700;color:var(--gc);letter-spacing:.5px;border-bottom:1px solid color-mix(in srgb,var(--gc) 35%,transparent);padding-bottom:3px}
+.epanc{border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:#0f1422;cursor:pointer;box-shadow:inset 0 2px 0 var(--ac);transition:border-color .15s}.epanc:hover{border-color:var(--ac)}.epanc.cur{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.epanst{position:relative;height:88px;overflow:hidden;background:radial-gradient(ellipse at 50% 70%,#252b45,#0b0f1a 75%)}.epanst .d{position:absolute;top:58%;width:26px;height:26px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid #4fb3ff;background:#1a1f30;z-index:1}.epanst .d.a{left:20%}.epanst .d.b{left:80%;border-color:#ff6b5e}.epanc.ally .epanst .d.b{border-color:#8ef7c1}
+.epanc .nm{padding:5px 8px 0;font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.epanc .tg{padding:0 8px 6px;font-size:11px;color:var(--muted)}
+.epanov{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:16px}.epanpn{width:min(1000px,100%);max-height:88vh;overflow:auto;background:#121726;border:1px solid var(--line2);border-radius:14px;padding:14px 16px;box-shadow:0 20px 60px rgba(0,0,0,.6)}.epanpn .hd{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:15px}
 .epfxn{width:52px;padding:1px 4px;margin:0 2px;font-size:12.5px;text-align:center;border-radius:6px}.epfxn.ov{border-color:var(--gold);color:var(--gold)}.epfxc .epchip .epfxn{width:44px}.epfxc.buff{border-left:3px solid #4fb3ff}.epfxc.debuff{border-left:3px solid #ff5c6c}.epfxc.sp{border-left:3px solid var(--gold)}
 #ruhandside .dhint{padding:7px 10px 0;font-size:10.5px;color:#98a0b8;line-height:1.5}
 #ruhandside .dhint b{color:#c9cee0}
@@ -2269,6 +2278,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-23',t:'Эпик-бой: 198 анимаций и музыка',items:['Библиотека из 198 анимаций скиллов: удары, выстрелы, магия 12 стихий, баффы, лечение и дебаффы.','Скиллу анимация выбирается во вкладке «✦ Эпик» → «🎬 Анимация»: галерея, наведи — проиграется, клик — выбрать.','Не атакующие скиллы тоже анимируются: лечение, щиты, проклятия — на каждой цели.','Посмотреть все анимации: Настройки → ✦ Эпик-бой → «🎬 Анимации».','На экране боя у мастера «♫ Музыка»: трек или плейлист YouTube играет у всех; выключается настройкой «🎵 Музыка в бою».']},
   {d:'2026-10-23',t:'Эпик-бой: позиции, анимации, фазы',items:['Вместо скилла можно «⇄ Сменить позицию» — на свободное место или местами с союзником, без его согласия.','У скиллов 10 слотов вместо 4.','Новый бафф «🧛 Вампиризм»: атака лечит на N% от нанесённого урона.','Клик по бойцу в бою — наложить или снять эффект вручную (мастер — любому, игрок — своему).','Анимации ударов по классу: меч, стрела, луч, щит, кинжал, молния; COUNTER красным над контратакующим.','Фаза меняется только по кнопке мастера «⏭ Закончить фазу»; мастер меняет порядок ходов перетаскиванием или кнопкой ⇅.']},
   {d:'2026-10-23',t:'Эпик-бой: экран боя',items:['Раздел «Бой»: строй на строй как в Epic Seven — 4 позиции у союзников и врагов, свой фон, порядок ходов сверху, кнопки скиллов внизу.','Приложение само кидает попадание, крит, урон и эффекты, лог каждого действия — в чат. Дуо и контратаки, ДоТы, сон, стелс, провокация, бессмертие, барьер, соул бёрн, способности позиций.','Игрок ходит своими персонажами, мастер — врагами; у мастера ⏭ пропуск, ↶ отмена и правка бойца. ХП в начале боя полное, ресурсы боя обнуляются.']},
   {d:'2026-10-23',t:'Эпик-бой: персонаж и скиллы',items:['Новый доп. режим «Эпик-бой» — пошаговый бой в духе Epic Seven (Настройки → ✦ Эпик-бой; вместе с Руиной не включается).','На листе персонажа: элемент, класс, звёзды и характеристики с итогом, вкладка «Снаряжение» — 7 слотов и сеты.','У способностей вкладка «✦ Эпик»: слот 1–4, КД, цели, урон, эффекты из таблицы, души, боевой дух, соул бёрн. Сам экран боя — следующим обновлением.']},
@@ -7508,8 +7518,8 @@ setTimeout(appVerCheck,3000); setInterval(appVerCheck,3*60e3); document.addEvent
    Мастер ставит трек (♫ на карте) — запись live/music {on,url,title,loop,t}; у всех, кто в картотеке, играет маленький плеер,
    громкость, «без звука» и «не слушать» — у каждого свои (в этом браузере). Опоздавшие подключаются с того же места. ===== */
 const MUS={key:'',cur:null,el:null,muted:false,paused:false,blocked:false,skip:''};
-function musOn(){ return !!(world.settings&&world.settings.sceneMusic); }
-function musParse(url){ url=String(url||'').trim(); let m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})/); if(m) return {k:'yt',id:m[1]}; if(/soundcloud\.com\//.test(url)) return {k:'sc',url}; if(/^https?:\/\//.test(url)) return {k:'au',url}; return null; }
+function musOn(){ const s=world.settings; return !!(s&&(s.sceneMusic||(s.epic&&s.epic.on&&s.epic.music!==false))); } // общая музыка сцены или «Музыка в бою» Эпик-боя
+function musParse(url){ url=String(url||'').trim(); let m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})/); const li=(url.match(/[?&]list=([\w-]+)/)||[])[1]; if(m||(li&&/youtu/.test(url))) return {k:'yt',id:m?m[1]:'',list:li||''}; if(/soundcloud\.com\//.test(url)) return {k:'sc',url}; if(/^https?:\/\//.test(url)) return {k:'au',url}; return null; }
 function musLive(){ return (world._live||[]).find(d=>d.id==='music')||null; }
 function musVol(){ let v=.6; try{ const s=localStorage.getItem('music.vol'); if(s!=null&&s!=='') v=+s; }catch{} return Math.max(0,Math.min(1,isNaN(v)?.6:v)); }
 function musVolApply(){ const v=MUS.muted?0:musVol(), n=MUS.el; if(!n) return; if(n.tagName==='AUDIO'){ n.volume=v*v; return; }
@@ -7519,7 +7529,7 @@ function musSync(){ const d=musLive(); const want=musOn()&&me&&d&&d.on&&musParse
   document.body.classList.toggle('musOn',!!want&&MUS.skip!==key); if(key===MUS.key){ musBar(); return; } MUS.key=key; musStop(); if(want&&MUS.skip!==key) musStart(want); musBar(); }
 function musStop(){ if(MUS.el){ try{ if(MUS.el.tagName==='AUDIO') MUS.el.pause(); }catch{} MUS.el.remove(); } MUS.el=null; MUS.cur=null; MUS.paused=false; MUS.blocked=false; }
 function musStart(d){ const p=musParse(d.url); const off=Math.max(0,Math.floor((Date.now()-(+d.t||Date.now()))/1000)); MUS.cur={...d,p}; let node;
-  if(p.k==='yt'){ node=el(`<iframe class="musfr yt" src="https://www.youtube-nocookie.com/embed/${p.id}?autoplay=1&start=${off<6*3600?off:0}&enablejsapi=1&controls=0&disablekb=1&modestbranding=1&rel=0&playsinline=1${d.loop!==false?'&loop=1&playlist='+p.id:''}" allow="autoplay; encrypted-media" title="музыка сцены"></iframe>`); node.addEventListener('load',()=>setTimeout(musVolApply,400)); }
+  if(p.k==='yt'){ node=el(`<iframe class="musfr yt" src="https://www.youtube-nocookie.com/embed/${p.id||'videoseries'}?${p.list?'list='+p.list+'&':''}autoplay=1&start=${!p.list&&off<6*3600?off:0}&enablejsapi=1&controls=0&disablekb=1&modestbranding=1&rel=0&playsinline=1${d.loop!==false?(p.list?'&loop=1':'&loop=1&playlist='+p.id):''}" allow="autoplay; encrypted-media" title="музыка сцены"></iframe>`); node.addEventListener('load',()=>setTimeout(musVolApply,400)); }
   else if(p.k==='sc') node=el(`<iframe class="musfr sc" src="https://w.soundcloud.com/player/?url=${encodeURIComponent(p.url)}&auto_play=true&show_comments=false&visual=false&buying=false&sharing=false&show_user=false" allow="autoplay" title="музыка сцены"></iframe>`);
   else { node=document.createElement('audio'); node.className='musau'; node.preload='auto'; node.loop=d.loop!==false; node.src=p.url; node.volume=MUS.muted?0:musVol()**2;
     node.addEventListener('loadedmetadata',()=>{ try{ if(node.duration&&isFinite(node.duration)) node.currentTime=node.loop?off%node.duration:Math.min(off,node.duration); }catch{} },{once:true});
@@ -7551,10 +7561,10 @@ function musBarUpd(){ const bar=$('#musBar'); if(!bar) return; const n=MUS.el, d
   $('.mtip',bar).textContent='Громкость '+shown+'%';
   const name=d?(d.title||(d.p.k==='yt'?'YouTube':d.p.k==='sc'?'SoundCloud':'музыка')):'';
   $('.mbtn',bar).title=blocked?'Браузер не дал включить звук сам — нажми, чтобы слушать':'♫ '+name+(sc?'':' · громкость '+shown+'%')+'\nКлик — плеер'+(sc?'':', колесо мыши — громкость'); }
-function musicDialog(){ if(!isDM()||viewAs) return; if(!musOn()){ toast('Сначала включи «Общая музыка сцены» в Настройках',true); return; } const cur=musLive(); const playing=cur&&cur.on; let hist=[]; try{ hist=JSON.parse(localStorage.getItem('music.hist')||'[]')||[]; }catch{}
+function musicDialog(){ if(!isDM()||viewAs) return; if(!musOn()){ toast('Сначала включи «Общая музыка сцены» в Настройках или «Музыка в бою» в настройках Эпик-боя',true); return; } const cur=musLive(); const playing=cur&&cur.on; let hist=[]; try{ hist=JSON.parse(localStorage.getItem('music.hist')||'[]')||[]; }catch{}
   const sheets=[...world.characters,...world.orgs,...world.locations].filter(e=>e.music&&e.music.url&&!isClone(e)&&musParse(e.music.url)).map(e=>({url:e.music.url,title:e.music.title||e.name||''}));
   const sugg=[...hist,...sheets.filter(x=>!hist.some(h=>h.url===x.url))].slice(0,16);
-  const b=openModal(`<h2>♫ Музыка сцены</h2><div class="faint" style="margin:-8px 0 10px;line-height:1.5">Играет у всех, кто сейчас в картотеке, — маленький плеер внизу экрана; громкость и «без звука» у каждого свои. Подходит YouTube, SoundCloud или прямая ссылка на mp3/ogg.${playing?`<br>Сейчас: <b>${esc(cur.title||cur.url)}</b>`:''}</div>
+  const b=openModal(`<h2>♫ Музыка сцены</h2><div class="faint" style="margin:-8px 0 10px;line-height:1.5">Играет у всех, кто сейчас в картотеке, — маленький плеер внизу экрана; громкость и «без звука» у каждого свои. Подходит YouTube (видео или плейлист), SoundCloud или прямая ссылка на mp3/ogg.${playing?`<br>Сейчас: <b>${esc(cur.title||cur.url)}</b>`:''}</div>
     <input id="muU" placeholder="https://youtu.be/…  или  https://…/track.mp3" style="width:100%" value="${esc(playing?cur.url:'')}"><input id="muT" placeholder="Название (необязательно): таверна, бой, дождь…" style="width:100%;margin-top:6px" value="${esc(playing?cur.title||'':'')}">
     <label class="row" style="gap:6px;margin-top:8px;font-size:13px"><input type="checkbox" id="muL" ${!cur||cur.loop!==false?'checked':''}> по кругу</label>
     ${sugg.length?`<div class="tiny" style="margin:12px 0 4px">Недавние и из листов</div><div class="mulist">${sugg.map(x=>`<button class="btn sm" data-u="${esc(x.url)}" data-t="${esc(x.title||'')}" title="${esc(x.url)}">${esc(x.title||x.url.slice(0,40))}</button>`).join('')}</div>`:''}
@@ -8111,7 +8121,7 @@ function epSkillEditor(box,a,ch,onChange){ const draw=()=>{ const P=a.ep||{}; co
     const fld=(lbl,html,w)=>`<div class="field" style="margin:0${w?';width:'+w+'px':''}"><label>${lbl}</label>${html}</div>`;
     box.innerHTML=`<div class="epske">
       <div class="epskhd" style="--tc:${tc}"><div class="slot" title="слот скилла">${P.slot||'—'}</div><div class="t"><input class="epnmi" value="${esc(a.name||'')}" placeholder="Название скилла — оно на кнопке в бою"><div class="epsum"></div></div><span class="tp">${(EP_TYPE.find(x=>x[0]===type)||[])[1]}</span></div>
-      ${epSec('epc-main','#ffd166','⚙','Основное','',`<div class="eprow2">${fld('Слот',`<div class="epdots epslotseg">${Array.from({length:10},(_,i)=>i+1).map(i=>`<span data-v="${i}" class="${+P.slot===i?'on':''}">${i}</span>`).join('')}<span data-v="" class="${P.slot?'':'on'}" title="не участвует в бою">—</span></div>`)}${fld('Тип',`<div class="eptype">${EP_TYPE.map(([k,n])=>`<span data-v="${k}" class="${type===k?'on':''}" style="--c:${EP_TYPEC[k]}">${n}</span>`).join('')}</div>`)}${pas?'':fld('КД, ходов',`<input class="epcd" type="number" min="0" max="99" value="${+P.cd||0}">`,96)}${pas?'':fld('Цели',epSel(EP_TGT,P.tgt||(type==='atk'?'e1':'s'),'eptg'))}</div>`)}
+      ${epSec('epc-main','#ffd166','⚙','Основное','',`<div class="eprow2">${fld('Слот',`<div class="epdots epslotseg">${Array.from({length:10},(_,i)=>i+1).map(i=>`<span data-v="${i}" class="${+P.slot===i?'on':''}">${i}</span>`).join('')}<span data-v="" class="${P.slot?'':'on'}" title="не участвует в бою">—</span></div>`)}${fld('Тип',`<div class="eptype">${EP_TYPE.map(([k,n])=>`<span data-v="${k}" class="${type===k?'on':''}" style="--c:${EP_TYPEC[k]}">${n}</span>`).join('')}</div>`)}${pas?'':fld('КД, ходов',`<input class="epcd" type="number" min="0" max="99" value="${+P.cd||0}">`,96)}${pas?'':fld('Цели',epSel(EP_TGT,P.tgt||(type==='atk'?'e1':'s'),'eptg'))}${pas?'':fld('Анимация',`<button class="btn sm epanb" title="Выбрать из библиотеки анимаций (наведи на карточку — проиграется)">🎬 ${esc(epAnName(P))}</button>`)}</div>`)}
       ${type==='atk'?epSec('epc-dmg','#ff6b5e','⚔','Урон','стат × множитель; несколько — складываются','<div class="epscale"></div>'):''}
       ${pas?epSec('epc-trig','#c04be0','✦','Срабатывание','',`<div class="eprow2">${fld('Когда срабатывает',epSel(EP_TRIG,P.trig||'always','eptr'))}<label class="row" style="gap:6px;margin-bottom:6px"><input type="checkbox" class="eponce" ${P.once?'checked':''}> 1 раз за бой</label></div><div class="faint" style="font-size:11.5px;margin-top:6px">«Всегда» — постоянные прибавки: вкладка «🎲 Бросок и модификаторы» → ƒ модификаторы → «Эпик: …».</div>`):''}
       ${epSec('epc-fx','#4fb3ff','✨','Эффекты','<span style="color:#4fb3ff">■</span> бафф · <span style="color:#ff6b5e">■</span> дебафф · <span style="color:#ffd166">■</span> особый','<div class="epfx"></div>')}
@@ -8121,6 +8131,7 @@ function epSkillEditor(box,a,ch,onChange){ const draw=()=>{ const P=a.ep||{}; co
     { const ni=$('.epnmi',box); const M=$('#modalBox'); const mi=M&&$('.abt[data-t="main"] input.nm',M); if(ni) ni.oninput=()=>{ a.name=ni.value; const h=M&&$('h2',M); if(h) h.textContent=a.name||'Способность'; if(mi) mi.value=a.name; ch_(); }; if(mi&&!mi._epSync){ mi._epSync=1; mi.addEventListener('input',()=>{ const x=$('.epnmi',box); if(x) x.value=mi.value; }); } }
     $$('.epslotseg span',box).forEach(s=>s.onclick=()=>{ const v=s.dataset.v; if(v) E().slot=+v; else delete E().slot; ch_(); draw(); });
     $$('.eptype span',box).forEach(s=>s.onclick=()=>{ E().type=s.dataset.v; ch_(); draw(); });
+    { const ab=$('.epanb',box); if(ab) ab.onclick=()=>epAnPicker(E().anim||'',type==='atk',id=>{ if(id) E().anim=id; else delete E().anim; ch_(); draw(); }); }
     const bind=(sel,f)=>{ const x=$(sel,box); if(x) x.oninput=x.onchange=()=>{ f(x); ch_(); }; };
     bind('.epcd',x=>E().cd=Math.max(0,Math.round(+x.value||0))); bind('.eptg',x=>E().tgt=x.value); bind('.eptr',x=>E().trig=x.value); bind('.eponce',x=>{ if(x.checked) E().once=1; else delete E().once; });
     bind('.epsouls',x=>E().souls=Math.max(0,+x.value||0)); bind('.epsp',x=>E().spirit=Math.max(0,+x.value||0)); bind('.epneed',x=>E().need=Math.max(0,+x.value||0)); bind('.epns',x=>{ if(x.checked) E().needSpend=1; else delete E().needSpend; });
@@ -8146,12 +8157,15 @@ function epSettingsPanel(s){ const E=s.epic||{}; return `<div class="settings ep
   <div class="panel epset" style="--sc:#ffd166"><h3>Эпик-бой <span class="faint" style="font-size:11px;letter-spacing:0;text-transform:none">доп. режим</span></h3><label class="row" style="gap:8px;cursor:pointer;margin-bottom:8px"><input type="checkbox" id="epOn" ${E.on?'checked':''}> <b>Включить</b> <span class="faint">— Руина при этом выключится</span></label>
     <div class="faint" style="font-size:12.5px;line-height:1.6">Пошаговый бой «строй на строй» в духе Epic Seven. У персонажа появляются элемент, класс, звёзды, характеристики и снаряжение (вкладки «Характеристики» и «Снаряжение»), у способностей — раздел «✦ Эпик» (слот 1–10, КД, цели, урон, эффекты, души, соул бёрн).</div>
     <ul class="faint eprules"><li><b>Инициатива:</b> в начале фазы каждый бросает 1d4 + бонус скорости; при равенстве первым ходит враг, игроки между собой решают сами.</li><li><b>Попадание:</b> атака попадает, если d100 > уклонение цели − попадание. Промах — половина урона, без крита и без эффектов.</li><li><b>Урон:</b> (стат × множитель скилла) × множитель элемента × крит (1 + крит урон) × K / (K + защита цели).</li><li><b>Дебаффы:</b> накладываются, если шанс скилла + эффективность − эффект резист цели ≥ d100. Баффы — просто накладываются.</li><li><b>Элементы:</b> Вода > Огонь > Земля > Вода, Свет ⇄ Тьма. Преимущество: множитель +0.1 и попадание +15; помеха: уклонение цели +50.</li></ul>
+    <label class="row" style="gap:8px;cursor:pointer;margin-top:10px;align-items:flex-start"><input type="checkbox" id="epMusOn" ${E.music!==false?'checked':''} style="margin-top:3px"> <span><b>🎵 Музыка в бою</b> <span class="faint" style="font-size:12.5px">— мастер включает трек или плейлист YouTube кнопкой «♫ Музыка» на экране боя, слышат все. Сними галку — музыки в бою не будет совсем.</span></span></label>
     <div class="row" style="gap:8px;align-items:center;margin-top:8px"><span>Константа брони K</span><input id="epK" type="number" min="1" max="10000" value="${+E.defK||100}" style="width:90px"><span class="faint" style="font-size:12px">— при защите = K урон режется вдвое</span></div></div>
   <div class="panel epclsp" style="--sc:#ff8a3d"><h3>Классы <button class="btn sm" id="epClsReset" title="Вернуть бонусы из таблицы">↺ как в таблице</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Прибавки к базе персонажа. Уникальные механики класса описываются в его скиллах.</div><div class="list"></div></div>
   <div class="panel epposp" style="--sc:#7ae0ff"><h3>Позиции</h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Бонус бойцу на позиции и две способности позиции (тратят ход). Числа, эффекты и названия правятся здесь; ↺ — вернуть как в таблице. Игроки видят это на экране боя кнопкой «ℹ Позиции».</div><div class="list"></div></div>
+  <div class="panel epanp" style="--sc:#ff9cf5"><h3>Анимации скиллов</h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Библиотека: ${EP_AN.length} анимаций — наведи на карточку, чтобы посмотреть.</div><div class="faint" style="font-size:12.5px;margin-bottom:10px;line-height:1.5">Скиллу анимация выбирается во вкладке «✦ Эпик» → «Основное» → «Анимация». Не выбрана — атака играет анимацию класса (Воин — меч, Рейнджер — стрела, Маг — луч, Рыцарь — щит, Вор — кинжал, Лекарь — молния), поддержка — сияние на союзнике или сглаз на враге. У способностей позиций свои анимации.</div><div class="epangal"></div></div>
   <div class="panel epsetp" style="--sc:#c04be0"><h3>Сеты снаряжения <button class="btn sm" id="epSetAdd">+ Сет</button><button class="btn sm" id="epSetReset" title="Вернуть сеты из таблицы">↺ как в таблице</button></h3><div class="faint" style="font-size:12.5px;margin-bottom:8px">Сет собирается из одинаковых вещей в 6 слотах (артефакт не считается). Сет на 2 слота может сработать до трёх раз. Бонус ХП/атаки/защиты — в процентах, если стоит «%».</div><div class="list"></div></div></div>`; }
 function epSettingsBind(page,s){ const on=$('#epOn',page); if(!on) return; const E=()=>(s.epic??={});
   on.onchange=e=>{ E().on=e.target.checked; if(E().on&&s.ruina&&s.ruina.on){ s.ruina.on=false; toast('Руина выключена — вместе с Эпик-боем она не работает'); } touch(s); applyNav(); render(); };
+  { const g=$('.epanp .epangal',page); if(g) epAnGallery(g,{}); } { const m=$('#epMusOn',page); if(m) m.onchange=e=>{ E().music=e.target.checked; touch(s); musSync(); }; }
   $('#epK',page).oninput=e=>{ const v=+e.target.value; if(v>0){ E().defK=v; touch(s); } };
   const cl=$('.epclsp .list',page); const drawCls=()=>{ cl.innerHTML=''; for(const [id,n,ic,role] of EP_CLS){ const B=epClsBonus(id);
       const row=el(`<div class="epclsrow" style="--cc:${EP_CLSC[id]}"><div class="h"><span class="ic">${ic}</span><b>${esc(n)}</b></div><div class="role">${esc(role)}</div><div class="bons"></div><button class="btn sm add">+ бонус</button></div>`); const bx=$('.bons',row);
@@ -8182,10 +8196,10 @@ const EP_POS=[['van','Авангард'],['left','Левый фланг'],['righ
 const EP_POSXY={a:{rear:[9,52],left:[23,24],right:[23,80],van:[37,52]},e:{van:[63,52],left:[77,24],right:[77,80],rear:[91,52]}};
 /* способности позиций: тратят ход, КД нет (кроме «Огня на подавление» — 6 фаз, общий на сторону) */
 const EP_POSK={
-  van:[{id:'p_def',name:'Глухая оборона',ep:{type:'sup',tgt:'s',fx:[{id:'defUp',dur:2,on:'self'},{id:'immunity',dur:2,on:'self'}]}},{id:'p_agr',name:'Агрессивное наступление',ep:{type:'sup',tgt:'s',fx:[{id:'riposte',dur:2,on:'self'},{id:'vigor',dur:2,on:'self'}]}}],
-  left:[{id:'p_help',name:'Помощь',ep:{type:'sup',tgt:'a1',sp:'help',prm:{cd:1,dt:1}}},{id:'p_cover',name:'Прикрытие',ep:{type:'sup',tgt:'a1',fx:[{id:'nullify',dur:99,on:'tgt'}]}}],
-  right:[{id:'p_prep',name:'Подготовка к атаке',d:'уклонение 0 и пробитие защиты с меткой на себя не очищаются; ходит последним в следующей фазе',ep:{type:'sup',tgt:'s',sp:'prep',fx:[{id:'atkUp2',dur:2,on:'self'},{id:'ccUp',dur:2,on:'self'},{id:'cdUp',dur:2,on:'self'},{id:'noEva',dur:2,on:'self',nd:1},{id:'defDown',dur:2,on:'self',nd:1},{id:'mark',dur:2,on:'self',nd:1}]}},{id:'p_rit',name:'Ритуал',d:'следующий соул бёрн без душ (1 раз за бой)',ep:{type:'sup',tgt:'s',sp:'ritual'}}],
-  rear:[{id:'p_rest',name:'Отдых',ep:{type:'sup',tgt:'s',fx:[{id:'regen',dur:2,on:'self'},{id:'cleanse',n:1,on:'self'}]}},{id:'p_sup',name:'Огонь на подавление',d:'КД общий для всей стороны',ep:{type:'sup',tgt:'eA',sp:'supp',prm:{cd:6},fx:[{id:'atkDown',ch:60,dur:2,on:'tgt'},{id:'blind',ch:60,dur:2,on:'tgt'},{id:'slow',ch:60,dur:2,on:'tgt'}]}}]};
+  van:[{id:'p_def',name:'Глухая оборона',ep:{type:'sup',tgt:'s',anim:'bf_def',fx:[{id:'defUp',dur:2,on:'self'},{id:'immunity',dur:2,on:'self'}]}},{id:'p_agr',name:'Агрессивное наступление',ep:{type:'sup',tgt:'s',anim:'bf_rage',fx:[{id:'riposte',dur:2,on:'self'},{id:'vigor',dur:2,on:'self'}]}}],
+  left:[{id:'p_help',name:'Помощь',ep:{type:'sup',tgt:'a1',anim:'bf_heal',sp:'help',prm:{cd:1,dt:1}}},{id:'p_cover',name:'Прикрытие',ep:{type:'sup',tgt:'a1',anim:'bf_barrier',fx:[{id:'nullify',dur:99,on:'tgt'}]}}],
+  right:[{id:'p_prep',name:'Подготовка к атаке',d:'уклонение 0 и пробитие защиты с меткой на себя не очищаются; ходит последним в следующей фазе',ep:{type:'sup',tgt:'s',sp:'prep',anim:'bf_crit',fx:[{id:'atkUp2',dur:2,on:'self'},{id:'ccUp',dur:2,on:'self'},{id:'cdUp',dur:2,on:'self'},{id:'noEva',dur:2,on:'self',nd:1},{id:'defDown',dur:2,on:'self',nd:1},{id:'mark',dur:2,on:'self',nd:1}]}},{id:'p_rit',name:'Ритуал',d:'следующий соул бёрн без душ (1 раз за бой)',ep:{type:'sup',tgt:'s',sp:'ritual',anim:'bf_medit'}}],
+  rear:[{id:'p_rest',name:'Отдых',ep:{type:'sup',tgt:'s',anim:'bf_regen',fx:[{id:'regen',dur:2,on:'self'},{id:'cleanse',n:1,on:'self'}]}},{id:'p_sup',name:'Огонь на подавление',d:'КД общий для всей стороны',ep:{type:'sup',tgt:'eA',sp:'supp',anim:'sh_rain',prm:{cd:6},fx:[{id:'atkDown',ch:60,dur:2,on:'tgt'},{id:'blind',ch:60,dur:2,on:'tgt'},{id:'slow',ch:60,dur:2,on:'tgt'}]}}]};
 const EP_FX_INT=[{id:'noEva',k:'debuff',icon:'🎯',name:'Без уклонения',d:'уклонение 0, нельзя повысить'}];
 /* числа встроенных эффектов по умолчанию; мастер правит их в каталоге (settings.epic.fx[id][ключ]), «n» — N по умолчанию для скилла */
 const EP_FXP={atkUp:{v:50},atkUp2:{v:75},defUp:{v:50},resUp:{v:60},accUp:{v:50},evaUp:{v:50},ccUp:{v:50},cdUp:{v:0.7},effUp:{v:50},riposte:{v:30},haste:{v:2},barricade:{v:30,w:30},rage:{v:20,w:1},focus:{v:15,w:0.15},vigor:{v:30,w:30},atkDown:{v:50},defDown:{v:75},slow:{v:2},blind:{v:50},regen:{v:15},critprot:{v:50},poison:{v:5},toxin:{v:10},bleed:{v:0.3},burn:{v:0.5},bomb:{v:1,w:40},fear:{v:40},mark:{v:0.1,w:30},mark2:{v:0.2,w:50}};
@@ -8246,7 +8260,7 @@ function epPosSettings(page,s){ const box=$('.epposp .list',page); if(!box) retu
         { const rs=$('.rs',card); if(rs) rs.onclick=()=>{ delete E().posk[S.id]; touch(s); draw(); }; } sk.append(card); } box.append(sec); } };
   draw(); }
 /* настройки Эпик-боя: быстрая навигация и сворачиваемые секции (как в «Общих») */
-const EP_SETSEC={epset:['⚙','Режим и правила'],epclsp:['🎭','Классы'],epposp:['🧭','Позиции'],epsetp:['◆','Сеты снаряжения']};
+const EP_SETSEC={epset:['⚙','Режим и правила'],epclsp:['🎭','Классы'],epposp:['🧭','Позиции'],epanp:['🎬','Анимации'],epsetp:['◆','Сеты снаряжения']};
 function epSettingsBeautify(page){ const box=$('.settings[data-tab="epic"]',page); if(!box||box.dataset.sec) return; box.dataset.sec='1';
   const opened=(()=>{ try{ return JSON.parse(localStorage.getItem('epSetOpen')||'null'); }catch{ return null; } })();
   const wrap=el('<div class="rusecs"></div>'), nav=el('<div class="runav" style="margin:0"></div>');
@@ -8275,7 +8289,7 @@ const epNum=(id,k)=>{ const ov=EPS().fx&&EPS().fx[id]&&EPS().fx[id][k]!=null; re
 /* одинаковые бойцы на одной стороне: «Гоблин #1», «Гоблин #2» */
 function epNames(B){ const g={}; for(const u of B.units){ u.nm0??=u.nm; (g[u.ref+':'+u.side]??=[]).push(u); } for(const L of Object.values(g)) L.forEach((u,i)=>{ u.nm=L.length>1?u.nm0+' #'+(i+1):u.nm0; }); }
 /* анимации действия: EPTL — таймлайн текущего действия (сек); B.an — удары и надписи, B.fl — всплывающие числа; d — когда показать */
-let EPTL=0; const EP_IMP={ranger:.42,mage:.24,healer:.16,warrior:.3,knight:.3,thief:.18}; // через сколько удар класса «доходит» до цели
+let EPTL=0;
 const epT=()=>Math.round(EPTL*100)/100;
 function epFl(B,u,v,c){ (B.fl??=[]).push({u:u.id,v:String(v),c,d:epT()}); }
 function epAn(B,o){ (B.an??=[]).push({...o,d:epT()}); }
@@ -8337,7 +8351,7 @@ function epStrike(B,A,t,P,o,log){ const sa=epUS(A), st=epUS(t); const adv=epElAd
   const mult=1+(adv>0?.1:0)+(mk===2?+epP('mark2','v'):mk?+epP('mark','v'):0)+(+sa.dmg||0);
   let dmg=base*mult*(crit?1+(+sa.cd||0):1)*K/(K+Math.max(0,+st.def||0)); if(miss) dmg*=.5; const cas=epTake(A,'cascade'); if(cas&&!miss) dmg+=+cas.n||0;
   log.push(`→ ${t.nm}: ${miss?'промах'+(roll!=null?` (d100 ${roll} ≤ ${Math.round(eva-acc)})`:'')+' — половина урона':crit?'КРИТ!':'попадание'}${adv>0?' · элемент сильнее':adv<0?' · элемент слабее':''}`);
-  epAn(B,{k:'atk',a:A.id,t:t.id,c:A.cls||''}); EPTL+=EP_IMP[A.cls]||.25;
+  { const an=epAnId(A,P,t); if(an){ epAn(B,{k:'atk',a:A.id,t:t.id,c:A.cls||'',an}); EPTL+=epAnHit(an); } }
   const li=log.length; const r=epHurt(B,t,dmg,log,{src:A,crit}); if(r.dealt) log.splice(li,0,`   ${t.nm}: −${r.dealt} ХП${t.dead?'':` (${t.hp}/${epUS(t).mhp}${t.bar?', барьер '+t.bar:''})`}`);
   const ls=epSsp(A,'lifesteal')+(A.fx||[]).filter(e=>e.id==='vamp').reduce((v,e)=>v+(+e.n||0),0); if(ls&&r.dealt){ const h=epHeal(B,A,r.dealt*ls/100,log); if(h) log.push(`🧛 ${A.nm}: вампиризм +${h}`); }
   const inj=epSsp(A,'injury'); if(inj&&r.dealt&&!t.dead){ t.cut=Math.min(90,(+t.cut||0)+inj); if(t.hp>epUS(t).mhp) t.hp=epUS(t).mhp; log.push(`🦴 ${t.nm}: макс. ХП −${inj}% (травма)`); }
@@ -8359,6 +8373,8 @@ async function epUse(B,A,sk,T,o={}){ const P=sk.ep||{}; const log=o.log; const t
   if(P.sp) epPosSp(B,A,P.sp,T,log,P.prm||{});
   const rows=[...(P.fx||[]),...(sbOn?(P.sb.fx||[]):[])]; const hits=new Map(); const ctrQ=[];
   /* нулифаер на цели съедает скилл врага целиком */ for(const t of T) if(t.side!==A.side&&epHas(t,'nullify')){ epTake(t,'nullify'); hits.set(t.id,{nul:1}); log.push(`🚫 ${t.nm}: скилл нулифаер — скилл не подействовал`); }
+  /* поддержка: анимация на каждой цели (бафф союзнику, дебафф врагу) */
+  if(tp!=='atk'&&T.length){ const t0=EPTL; let tE=t0; T.forEach((t,i)=>{ const an=epAnId(A,P,t); if(!an) return; EPTL=t0+i*.08; epAn(B,{k:'atk',a:A.id,t:t.id,an}); tE=Math.max(tE,EPTL+epAnHit(an)); }); EPTL=tE; }
   epApplyRows(B,A,rows.filter(r=>r.when==='pre'),T,log,hits);
   if(tp==='atk'){ const t0=EPTL; let tE=t0, i=0; /* по нескольким целям удары почти одновременно */
     for(const t of T){ if(t.dead||hits.has(t.id)) continue; EPTL=t0+(i++)*.12; const h=epStrike(B,A,t,P,{sbM:sbOn?+P.sb.m||0:0,st:(P.tgt||'e1')==='e1',depth:o.depth||0,ctrQ},log); hits.set(t.id,h); if(h.dealt>0&&!A.dead) epTrig(B,A,'hit',log,{other:t}); tE=Math.max(tE,EPTL); } EPTL=tE; }
@@ -8449,38 +8465,280 @@ function epOrderDlg(B){ const L=[...(B.extra||[]),...(B.queue||[])].filter(id=>e
     const mv=j=>{ L.splice(i,1); L.splice(j,0,id); draw(); }; $('.up',r).onclick=()=>mv(i-1); $('.dn',r).onclick=()=>mv(i+1);
     r.ondragstart=()=>{ drag=i; }; r.ondragover=e=>e.preventDefault(); r.ondrop=e=>{ e.preventDefault(); if(drag!=null&&drag!==i){ const [x]=L.splice(drag,1); L.splice(i,0,x); } drag=null; draw(); }; box.append(r); }); };
   draw(); $('#cancel',b).onclick=closeModal; $('#ok',b).onclick=()=>{ closeModal(); epSetOrder(B,L); }; }
-/* анимации действия поверх сцены (Web Animations): удар по классу атакующего, COUNTER/DUO, переход на другую позицию.
+/* ========== АНИМАЦИИ СКИЛЛОВ: библиотека EP_AN и проигрыватель ==========
+   пресет {id, g:группа, n:название, el?:стихия, c, c2:цвета, cast?:сек подготовки, lunge?:1 подскок | 2 быстрый подскок, st:[[вид, {параметры}]]}
+   вид шага — примитив epAnStep; фаза шага: cast (с начала, у кастующего), go (полёт после подготовки), hit (в момент попадания, на цели).
+   у скилла ep.anim = id пресета; '' — по классу (атака) / по умолчанию (поддержка), 'none' — без анимации */
+const EP_ANG=[['strike','⚔','Удары','#ff6b5e'],['shot','🏹','Выстрелы','#ffd166'],['magic','🔮','Магия','#b48cff'],['buff','✨','Баффы и лечение','#8ef7c1'],['debuff','☠','Дебаффы','#ff5c6c']];
+const EP_ANEL={fire:['Огонь','#ff7a3d','#ffd166','orb','orb'],ice:['Лёд','#8fe3ff','#ffffff','shard','shard'],water:['Вода','#3fa9ff','#bfe8ff','orb','drop'],earth:['Земля','#c08a4a','#f0d29a','rock','rock'],wind:['Ветер','#9ff5d0','#ffffff','wave','wave'],light:['Свет','#ffe27a','#ffffff','star','spear'],dark:['Тьма','#a06bff','#ff5cf0','orb','orb'],storm:['Молния','#7ae0ff','#ffffff','bolt','zap'],poison:['Яд','#8fe35a','#e3ff9a','orb','drop'],arcane:['Тайная магия','#c78bff','#ffffff','star','star'],blood:['Кровь','#ff3b4f','#ffb0b8','orb','shard'],void:['Бездна','#5d6bff','#ff9cf5','orb','orb']};
+const EP_ANELN={fire:['Огненный шар','Луч пламени','Огненный взрыв','Метеоритный дождь','Столп огня','Огненный залп','Пожирающее пламя','Инферно'],
+  ice:['Ледяной осколок','Морозный луч','Ледяной взрыв','Град','Ледяной шпиль','Ледяной залп','Обморожение','Абсолютный ноль'],
+  water:['Водяной шар','Водяной поток','Всплеск','Ливень','Гейзер','Водяной залп','Водоворот','Цунами'],
+  earth:['Каменная глыба','Песчаный поток','Землетрясение','Камнепад','Каменные шипы','Град камней','Зыбучие пески','Гнев земли'],
+  wind:['Воздушный клинок','Поток ветра','Вихрь','Буря лезвий','Торнадо','Режущий ветер','Удушающий вихрь','Ураган'],
+  light:['Луч света','Священный луч','Сияние небес','Небесные копья','Столп света','Залп света','Очищающий свет','Суд небес'],
+  dark:['Тёмная сфера','Луч тьмы','Взрыв тьмы','Тёмный дождь','Столп тьмы','Теневой залп','Пожирание души','Затмение'],
+  storm:['Шаровая молния','Разряд','Грозовой взрыв','Гроза','Удар молнии','Цепная молния','Электрошок','Гнев громовержца'],
+  poison:['Ядовитый плевок','Струя кислоты','Ядовитый взрыв','Кислотный дождь','Ядовитый гейзер','Залп шипов','Миазмы','Чума'],
+  arcane:['Магическая стрела','Луч тайной силы','Арканный взрыв','Звездопад','Столп магии','Чародейский залп','Распад','Сверхновая'],
+  blood:['Кровавая сфера','Кровавый луч','Кровавый взрыв','Кровавый дождь','Кровавые шипы','Кровавые иглы','Высасывание крови','Кровавая луна'],
+  void:['Сфера бездны','Луч пустоты','Разлом','Падающие звёзды','Столп бездны','Залп пустоты','Чёрная дыра','Конец света']};
+const EP_AN=(()=>{ const L=[]; const A=(g,id,n,c,c2,st,o={})=>L.push({id,g,n,c,c2,st,...o});
+  /* магия: 8 заклинаний на каждую из 12 стихий */
+  for(const [el,[,c,c2,sh,rsh]] of Object.entries(EP_ANEL)){ const N=EP_ANELN[el]; const id=i=>'mg_'+el+'_'+i;
+    const spec={dark:[['drain',{n:12}],['swirl',{n:10}]],blood:[['drain',{n:14}],['sparks',{n:10}]],poison:[['cloud',{n:6}],['rise',{n:6}]],ice:[['spikes',{n:6}],['bubble',{r:40}]],earth:[['spikes',{n:7}],['cloud',{n:4,c:'#8a6a3a'}],['shake',{}]],storm:[['chain',{n:3,j:34}],['sparks',{n:12}]],fire:[['pillar',{w:40}],['rise',{n:7,ch:'🔥',sz:22}]],light:[['pillar',{w:24}],['rise',{n:8,ch:'✨',sz:20}]],void:[['swirl',{n:16,r:90}],['bubble',{r:34,c:'#05060c'}],['boom',{r:40,dl:.35}]]}[el]||[['swirl',{n:14}],['boom',{r:40,dl:.32}]];
+    A('magic',id(0),N[0],c,c2,[['proj',{sh,sz:12,tr:3,dur:.42,h:30}],['boom',{r:42}],['sparks',{n:8}]],{el});
+    A('magic',id(1),N[1],c,c2,el==='storm'?[['chain',{n:2}],['sparks',{n:8}],['ring',{r:36}]]:[['beam',{w:16,pulse:el==='wind'||el==='water'}],['ring',{r:44}],['sparks',{n:6}]],{el});
+    A('magic',id(2),N[2],c,c2,[['sigil',{r:40,flat:1,on:'q'}],['boom',{r:72}],['ring',{r:96}],['sparks',{n:12}],['shake',{}]],{el,cast:.35});
+    A('magic',id(3),N[3],c,c2,[['rain',{sh:rsh,n:el==='storm'?3:8,sp:52}],['boom',{r:46,dl:.05}],['shake',{}]],{el});
+    A('magic',id(4),N[4],c,c2,el==='storm'?[['rain',{sh:'zap',n:1,sp:0}],['flash',{}],['boom',{r:50}],['ring',{r:70}]]:[['sigil',{r:34,flat:1,on:'q'}],['pillar',{w:48}],['sparks',{n:10}]],{el,cast:el==='storm'?0:.2});
+    A('magic',id(5),N[5],c,c2,el==='storm'?[['chain',{n:4,j:40}],['ring',{r:40}],['sparks',{n:8}]]:[['proj',{sh,sz:7,n:3,sp:26,st:.07,dur:.36,h:40}],['sparks',{n:6}],['ring',{r:32}]],{el});
+    A('magic',id(6),N[6],c,c2,spec,{el});
+    A('magic',id(7),N[7],c,c2,[['charge',{n:14}],['sigil',{r:46,flat:1,on:'p'}],['proj',{sh,sz:22,tr:4,dur:.42,h:60}],['flash',{}],['boom',{r:96}],['ring',{r:126}],['sparks',{n:16}],['shake',{k:2}]],{el,cast:.45}); }
+  /* удары: подскок к цели */
+  const S=(id,n,c,c2,st,o={})=>A('strike',id,n,c,c2,st,{lunge:1,...o});
+  S('st_sword','Взмах меча','#ffffff','#ff6b5e',[['slash',{p:'1',w:8}],['slash',{p:'1',w:3,c:'#ff6b5e',dl:.03}]]);
+  S('st_cross','Крестовый удар','#ffffff','#ffd166',[['slash',{p:'x',w:6}],['ring',{r:34,c:'#ffd166',dl:.1}]]);
+  S('st_triple','Тройной разрез','#e8f1ff','#7ae0ff',[['slash',{p:'3',w:5}]]);
+  S('st_spin','Вихрь клинков','#dfe6f5','#7ae0ff',[['slash',{p:'spin',w:6}],['ring',{r:56}]]);
+  S('st_cleave','Рассекающий удар','#ffffff','#ff6b5e',[['slash',{p:'down',w:12}],['ring',{r:60,c:'#ff6b5e'}],['shake',{}]]);
+  S('st_upper','Восходящий разрез','#ffffff','#ffd166',[['slash',{p:'up',w:8}],['sparks',{n:6}]]);
+  S('st_thrust','Выпад','#ffffff','#7ae0ff',[['slash',{p:'thrust',w:6}],['ring',{r:26}]]);
+  S('st_flurry','Шквал ударов','#ffffff','#ffd166',[['slash',{p:'multi',w:4}]],{lunge:2});
+  S('st_z','Зигзаг клинка','#e8f1ff','#b48cff',[['slash',{p:'z',w:5}]]);
+  S('st_firesw','Пылающий клинок','#ff7a3d','#ffd166',[['slash',{p:'1',w:9}],['boom',{r:34}],['rise',{n:5,ch:'🔥',sz:20}]]);
+  S('st_icesw','Ледяной клинок','#8fe3ff','#ffffff',[['slash',{p:'x',w:6}],['spikes',{n:4}]]);
+  S('st_thundersw','Громовой клинок','#7ae0ff','#ffffff',[['slash',{p:'down',w:8}],['rain',{sh:'zap',n:1,sp:0}],['flash',{}]]);
+  S('st_shadowsw','Теневой разрез','#a06bff','#ff5cf0',[['slash',{p:'x',w:7}],['swirl',{n:8}]]);
+  S('st_holysw','Святой меч','#ffe27a','#ffffff',[['slash',{p:'down',w:10}],['pillar',{w:26,dl:.05}]]);
+  S('st_bloodsw','Кровавый разрез','#ff3b4f','#ffb0b8',[['slash',{p:'x',w:7}],['sparks',{n:12}]]);
+  S('st_dagger','Удар кинжалом','#e8fff0','#8fd16a',[['slash',{p:'x',w:3}]],{lunge:2});
+  S('st_backstab','Удар в спину','#ffffff','#ff6b5e',[['slash',{p:'thrust',w:4}],['glyph',{ch:'💢',m:'pop',sz:34}]],{lunge:2});
+  S('st_dance','Танец клинков','#e8fff0','#8fd16a',[['slash',{p:'multi',w:3}],['slash',{p:'x',w:3,dl:.3}]],{lunge:2});
+  S('st_poisdag','Отравленный кинжал','#8fe35a','#e3ff9a',[['slash',{p:'x',w:3}],['cloud',{n:4,dl:.1}]],{lunge:2});
+  S('st_shield','Удар щитом','#4fb3ff','#cfe9ff',[['glyph',{ch:'🛡️',m:'pop',sz:48,dl:-.08}],['ring',{r:58}],['ring',{r:40,c:'#cfe9ff',dl:.1}]]);
+  S('st_hammer','Удар молотом','#c08a4a','#f0d29a',[['glyph',{ch:'🔨',m:'drop',sz:44}],['ring',{r:70}],['spikes',{n:5,dl:.05}],['shake',{k:2}]]);
+  S('st_smash','Сокрушение','#c08a4a','#ffd166',[['boom',{r:70}],['ring',{r:96}],['sparks',{n:14}],['shake',{k:2}]]);
+  S('st_punch','Удар кулаком','#ffd166','#ffffff',[['glyph',{ch:'👊',m:'pop',sz:40}],['ring',{r:36}]],{lunge:2});
+  S('st_combo','Серия ударов','#ffd166','#ffffff',[['glyph',{ch:'👊',m:'multi',n:4,sz:32}],['ring',{r:30,dl:.3}]],{lunge:2});
+  S('st_kick','Удар ногой','#ffd166','#ffffff',[['glyph',{ch:'🦶',m:'pop',sz:40}],['ring',{r:40}],['sparks',{n:6}]]);
+  S('st_claw','Когти зверя','#ff6b5e','#ffb0b8',[['slash',{p:'claw',w:4}]],{lunge:2});
+  S('st_bite','Укус','#ffffff','#ff3b4f',[['slash',{p:'v',w:5}],['sparks',{n:8,c:'#ff3b4f'}]],{lunge:2});
+  S('st_spear','Удар копьём','#ffd166','#ffffff',[['slash',{p:'thrust',w:5,sz:1.5}],['ring',{r:28}]]);
+  S('st_pierce','Пронзание','#ffffff','#7ae0ff',[['slash',{p:'thrust',w:7,sz:1.6}],['sparks',{n:10}],['ring',{r:40}]]);
+  S('st_axe','Удар секирой','#ff6b5e','#ffffff',[['slash',{p:'down',w:13}],['sparks',{n:10}],['shake',{}]]);
+  S('st_whirl','Круговой удар','#ffd166','#ffffff',[['slash',{p:'spin',w:9,sz:1.3}],['ring',{r:70}]]);
+  S('st_reap','Жатва','#a06bff','#ff5cf0',[['slash',{p:'spin',w:7,sz:1.2}],['swirl',{n:10}]]);
+  S('st_whip','Хлыст','#c08a4a','#ffd166',[['slash',{p:'up',w:3,sz:1.4}],['sparks',{n:5}]],{lunge:2});
+  S('st_basic','Простой удар','#ffffff','#ffffff',[['slash',{p:'1',w:5}],['ring',{r:30}]],{lunge:0});
+  /* выстрелы */
+  const H=(id,n,c,c2,st,o={})=>A('shot',id,n,c,c2,st,o);
+  H('sh_arrow','Выстрел из лука','#ffd166','#ff8a6a',[['proj',{sh:'arrow',sz:14,dur:.42}],['ring',{r:34}]]);
+  H('sh_tri','Тройной выстрел','#ffd166','#ff8a6a',[['proj',{sh:'arrow',sz:13,n:3,sp:22,st:.06,dur:.4}],['sparks',{n:6}]]);
+  H('sh_pierce','Пронзающая стрела','#ffd166','#ffffff',[['proj',{sh:'arrow',sz:15,dur:.24,tr:4}],['beam',{w:4,dl:.0}],['sparks',{n:10}]]);
+  H('sh_fire','Огненная стрела','#ff7a3d','#ffd166',[['proj',{sh:'arrow',sz:14,dur:.4,tr:2}],['boom',{r:34}],['rise',{n:3,ch:'🔥',sz:18}]]);
+  H('sh_ice','Ледяная стрела','#8fe3ff','#ffffff',[['proj',{sh:'arrow',sz:14,dur:.4,tr:2}],['spikes',{n:3}]]);
+  H('sh_pois','Ядовитая стрела','#8fe35a','#e3ff9a',[['proj',{sh:'arrow',sz:14,dur:.4}],['cloud',{n:4}]]);
+  H('sh_storm','Громовая стрела','#7ae0ff','#ffffff',[['proj',{sh:'arrow',sz:14,dur:.36,tr:2}],['rain',{sh:'zap',n:1,sp:0}],['sparks',{n:8}]]);
+  H('sh_rain','Дождь стрел','#ffd166','#ff8a6a',[['rain',{sh:'arrow',n:12,sp:60}],['shake',{}]]);
+  H('sh_volley','Залп','#ffd166','#ff8a6a',[['proj',{sh:'arrow',sz:12,n:5,sp:30,st:.05,dur:.5,h:80}],['sparks',{n:8}]]);
+  H('sh_snipe','Снайперский выстрел','#ff3b4f','#ffffff',[['reticle',{ph:'cast',on:'q',dur:.5}],['proj',{sh:'bullet',sz:12,dur:.12}],['flash',{c:'#ffffff'}],['sparks',{n:12}]],{cast:.4});
+  H('sh_musket','Выстрел из мушкета','#ffd166','#ffffff',[['boom',{r:16,on:'p',ph:'go'}],['proj',{sh:'bullet',sz:10,dur:.15}],['sparks',{n:8}],['glyph',{ch:'💥',m:'pop',sz:30}]]);
+  H('sh_shotgun','Картечь','#ffd166','#ffffff',[['boom',{r:20,on:'p',ph:'go'}],['proj',{sh:'bullet',sz:7,n:6,sp:16,st:0,dur:.18}],['sparks',{n:10}]]);
+  H('sh_cannon','Пушечное ядро','#3a3f4f','#ffd166',[['boom',{r:22,on:'p',ph:'go',c:'#ffd166'}],['proj',{sh:'rock',sz:16,dur:.55,h:70,c:'#3a3f4f',c2:'#8a90a8'}],['boom',{r:72,c:'#ff7a3d'}],['ring',{r:96}],['shake',{k:2}]]);
+  H('sh_knives','Метательные ножи','#c9d3e6','#ff6b5e',[['proj',{sh:'knife',sz:13,n:3,sp:18,st:.05,dur:.3}],['sparks',{n:6}]]);
+  H('sh_shuriken','Сюрикены','#c9d3e6','#7ae0ff',[['proj',{sh:'star',sz:12,n:3,sp:22,st:.06,dur:.36,spin:1}],['sparks',{n:6}]]);
+  H('sh_javelin','Метательное копьё','#ffd166','#ffffff',[['proj',{sh:'arrow',sz:22,dur:.5,h:50}],['ring',{r:44}],['shake',{}]]);
+  H('sh_bomb','Брошенная бомба','#2a2d3a','#ff7a3d',[['proj',{sh:'orb',sz:11,dur:.6,h:120,c:'#2a2d3a',c2:'#ff7a3d',spin:1}],['boom',{r:66,c:'#ff7a3d',c2:'#ffd166'}],['sparks',{n:14,c:'#ffd166'}],['shake',{k:2}]]);
+  H('sh_sling','Камень из пращи','#c08a4a','#f0d29a',[['proj',{sh:'rock',sz:8,dur:.38,h:30,spin:1}],['ring',{r:28}]]);
+  H('sh_wave','Волна клинка','#ffffff','#7ae0ff',[['proj',{sh:'wave',sz:26,dur:.35,tr:2}],['slash',{p:'x',w:5}]]);
+  H('sh_energy','Энергетический выстрел','#7ae0ff','#ffffff',[['proj',{sh:'bolt',sz:13,dur:.3,tr:3}],['ring',{r:40}],['sparks',{n:8}]]);
+  H('sh_homing','Самонаводящиеся снаряды','#c78bff','#ffffff',[['proj',{sh:'orb',sz:7,n:4,sp:70,st:.08,dur:.55,tr:2}],['sparks',{n:10}],['ring',{r:36}]]);
+  /* баффы и лечение — на цели (союзник или сам) */
+  const F=(id,n,c,c2,st,o={})=>A('buff',id,n,c,c2,st,o);
+  F('bf_glow','Сияние','#ffd166','#ffffff',[['aura',{}],['sparks',{n:6}]]);
+  F('bf_atk','Усиление атаки','#ff6b5e','#ffd166',[['aura',{}],['glyph',{ch:'⚔️',m:'rise',sz:32}]]);
+  F('bf_def','Усиление защиты','#4fb3ff','#cfe9ff',[['bubble',{r:46}],['glyph',{ch:'🛡️',m:'rise',sz:32}]]);
+  F('bf_spd','Ускорение','#7ae0ff','#ffffff',[['aura',{}],['glyph',{ch:'💨',m:'rise',sz:32}],['ring',{r:50}]]);
+  F('bf_crit','Острый глаз','#ffd166','#ffffff',[['aura',{}],['glyph',{ch:'✴️',m:'spin',sz:32}],['sparks',{n:10}]]);
+  F('bf_heal','Лечение','#8ef7c1','#ffffff',[['aura',{}],['rise',{n:6,ch:'➕',sz:20}]]);
+  F('bf_bigheal','Большое лечение','#8ef7c1','#ffffff',[['pillar',{w:42}],['rise',{n:10,ch:'➕',sz:22}],['ring',{r:60}]]);
+  F('bf_regen','Регенерация','#8fe35a','#e3ff9a',[['aura',{}],['rise',{n:7,ch:'🍃',sz:20}]]);
+  F('bf_barrier','Барьер','#7ae0ff','#ffffff',[['bubble',{r:50}],['ring',{r:62}]]);
+  F('bf_immune','Иммунитет','#ffd166','#ffffff',[['sigil',{r:40,flat:1}],['bubble',{r:48}]]);
+  F('bf_bless','Благословение','#ffe27a','#ffffff',[['pillar',{w:36}],['rise',{n:8,ch:'✨',sz:20}]]);
+  F('bf_cry','Боевой клич','#ff6b5e','#ffd166',[['nova',{r:90}],['glyph',{ch:'📢',m:'pop',sz:34,on:'p',ph:'cast'}],['aura',{}]],{cast:.3});
+  F('bf_rage','Ярость','#ff3b4f','#ff7a3d',[['aura',{}],['rise',{n:6,ch:'🔥',sz:22}],['shake',{}]]);
+  F('bf_revive','Воскрешение','#ffffff','#ffe27a',[['pillar',{w:56}],['glyph',{ch:'🕊️',m:'rise',sz:40}],['flash',{c:'#fff7d6'}]]);
+  F('bf_cleanse','Очищение','#7ae0ff','#ffffff',[['rise',{n:9,sz:8}],['sparks',{n:10,c:'#ffffff'}]]);
+  F('bf_stealth','Уход в тень','#5a6178','#a06bff',[['cloud',{n:6}],['aura',{c:'#a06bff'}]]);
+  F('bf_reflect','Отражение','#c78bff','#ffffff',[['bubble',{r:48}],['glyph',{ch:'↩️',m:'pop',sz:32}]]);
+  F('bf_vamp','Жажда крови','#ff3b4f','#ffb0b8',[['aura',{}],['glyph',{ch:'🧛',m:'rise',sz:34}]]);
+  F('bf_song','Боевая песнь','#ff9cf5','#ffffff',[['aura',{}],['rise',{n:6,ch:'🎵',sz:22}]]);
+  F('bf_medit','Медитация','#4fb3ff','#ffffff',[['sigil',{r:44,flat:1,dur:1}],['aura',{}]]);
+  F('bf_stone','Каменная кожа','#c08a4a','#f0d29a',[['spikes',{n:5}],['bubble',{r:44}]]);
+  F('bf_ench','Зачарование оружия','#c78bff','#ffffff',[['sigil',{r:36}],['glyph',{ch:'🗡️',m:'rise',sz:32}],['sparks',{n:10}]]);
+  F('bf_haste','Экстра ход','#7ae0ff','#ffffff',[['nova',{r:70,on:'q',ph:'hit'}],['glyph',{ch:'⏩',m:'rise',sz:32}]]);
+  /* дебаффы — на цели */
+  const D=(id,n,c,c2,st,o={})=>A('debuff',id,n,c,c2,st,o);
+  D('db_hex','Сглаз','#a06bff','#ff5cf0',[['swirl',{n:8}],['sigil',{r:28,flat:1}]]);
+  D('db_curse','Проклятие','#a06bff','#2a1745',[['sigil',{r:40,flat:1}],['swirl',{n:12}],['glyph',{ch:'💀',m:'pop',sz:36}]]);
+  D('db_poison','Отравление','#8fe35a','#e3ff9a',[['cloud',{n:6}],['rise',{n:6,sz:6}]]);
+  D('db_burn','Поджог','#ff7a3d','#ffd166',[['boom',{r:34}],['rise',{n:6,ch:'🔥',sz:22}]]);
+  D('db_bleed','Кровотечение','#ff3b4f','#ffb0b8',[['slash',{p:'1',w:3}],['sparks',{n:12}]]);
+  D('db_stun','Оглушение','#ffd166','#ffffff',[['glyph',{ch:'💫',m:'spin',sz:36}],['ring',{r:44}]]);
+  D('db_sleep','Усыпление','#ff9cf5','#ffffff',[['cloud',{n:4}],['rise',{n:4,ch:'💤',sz:26}]]);
+  D('db_fear','Страх','#a06bff','#ffffff',[['swirl',{n:10}],['glyph',{ch:'😱',m:'pop',sz:38}]]);
+  D('db_slow','Замедление','#4fb3ff','#cfe9ff',[['glyph',{ch:'🐌',m:'pop',sz:36}],['ring',{r:50,dur:.8}]]);
+  D('db_freeze','Заморозка','#8fe3ff','#ffffff',[['spikes',{n:7}],['bubble',{r:44}]]);
+  D('db_mark','Метка','#ff3b4f','#ffffff',[['reticle',{}]]);
+  D('db_silence','Немота','#b8bdd6','#ffffff',[['glyph',{ch:'🤐',m:'pop',sz:36}],['ring',{r:44}]]);
+  D('db_blind','Ослепление','#ffffff','#ffe27a',[['flash',{}],['glyph',{ch:'🙈',m:'pop',sz:36}]]);
+  D('db_taunt','Провокация','#ff3b4f','#ffd166',[['glyph',{ch:'💢',m:'pop',sz:38}],['ring',{r:52}]]);
+  D('db_weak','Слабость','#8a90a8','#ffffff',[['swirl',{n:8}],['glyph',{ch:'📉',m:'pop',sz:32}]]);
+  D('db_armor','Пробитие брони','#b8bdd6','#ff6b5e',[['glyph',{ch:'🛡️',m:'pop',sz:36}],['slash',{p:'x',w:5,c:'#ff6b5e',dl:.12}]]);
+  D('db_chains','Цепи','#b8bdd6','#ffffff',[['glyph',{ch:'⛓️',m:'pop',sz:38}],['ring',{r:44}]]);
+  D('db_seal','Печать','#ff3b4f','#ffd166',[['sigil',{r:42,flat:1}],['glyph',{ch:'🔏',m:'pop',sz:32}]]);
+  D('db_rot','Порча','#5a3d6b','#8fe35a',[['cloud',{n:6}],['swirl',{n:8}]]);
+  D('db_drain','Похищение жизни','#ff3b4f','#ffb0b8',[['drain',{n:14}]]);
+  D('db_mana','Высасывание сил','#4fb3ff','#bfe8ff',[['drain',{n:14}],['ring',{r:36}]]);
+  D('db_madness','Безумие','#ff9cf5','#ffffff',[['swirl',{n:14,r:80}],['glyph',{ch:'🌀',m:'spin',sz:34}]]);
+  D('db_bomb','Заминировать','#ff7a3d','#ffd166',[['glyph',{ch:'💣',m:'drop',sz:34}],['ring',{r:36}]]);
+  D('db_doom','Приговор','#a06bff','#2a1745',[['sigil',{r:52,flat:1}],['pillar',{w:44}],['glyph',{ch:'⚰️',m:'pop',sz:36}]],{cast:.2});
+  return L; })();
+const EP_ANM=Object.fromEntries(EP_AN.map(P=>[P.id,P]));
+const EP_CLSAN={warrior:'st_sword',ranger:'sh_arrow',mage:'mg_arcane_1',knight:'st_shield',thief:'st_dagger',healer:'mg_storm_1'};
+const EP_ANPH={proj:'go',beam:'go',chain:'go',charge:'cast',nova:'cast'};
+/* через сколько секунд от начала анимации удар доходит до цели */
+function epAnHitP(P){ if(P._h!=null) return P._h; let t=0; for(const [k,s] of P.st){ const ph=s.ph||EP_ANPH[k]; if(ph!=='go') continue; t=Math.max(t,k==='proj'?(s.dur||.4)+((s.n||1)>1?(s.st??0)*0:0):k==='beam'?.24:k==='chain'?.15:0); }
+  if(!t) t=P.lunge?(P.lunge===2?.18:.3):.22; return P._h=Math.round(((P.cast||0)+t)*100)/100; }
+const epAnHit=id=>EP_ANM[id]?epAnHitP(EP_ANM[id]):.25;
+function epAnId(A,P,t){ const a=P&&P.anim; if(a==='none') return ''; if(a&&EP_ANM[a]) return a; if(((P&&P.type)||'atk')==='atk') return EP_CLSAN[A.cls]||'st_basic'; return t&&t.side!==A.side?'db_hex':'bf_glow'; }
+function epAnName(P){ const a=P&&P.anim; if(a==='none') return 'без анимации'; if(a&&EP_ANM[a]) return EP_ANM[a].n; return ((P&&P.type)||'atk')==='atk'?'по классу':'по умолчанию'; }
+/* слой для анимаций: svg на весь слой + div-ы; ago — сколько секунд действия уже прошло (отрицательные задержки) */
+function epFxCtx(lay,ago,W,H){ const NS='http://www.w3.org/2000/svg'; const svg=document.createElementNS(NS,'svg'); svg.setAttribute('width',W); svg.setAttribute('height',H); lay.append(svg);
+  const X={W,H,ago,svg,lay,k:1};
+  X.sv=(tag,at,par=svg,vis)=>{ const e=document.createElementNS(NS,tag); for(const k in at) e.setAttribute(k,at[k]); if(!vis) e.style.opacity=0; par.append(e); return e; };
+  X.dv=(cls,txt,x,y,css='')=>{ const n=document.createElement('div'); n.className=cls; n.textContent=txt; n.style.cssText=`left:${x}px;top:${y}px;opacity:0;${css}`; lay.append(n); return n; };
+  X.run=(n,kf,dur,d,o={})=>{ try{ const a=n.animate(kf,{duration:Math.max(10,dur*1000),delay:(d-X.ago)*1000,fill:o.fill||'forwards',easing:o.e||'linear'}); if(!o.keep) a.onfinish=()=>n.remove(); return a; }catch(e){ if(!o.keep) n.remove(); } };
+  return X; }
+/* фигуры снарядов: нарисованы вокруг (0,0) носом по +x, размер ~10 */
+function epShape(X,g,sh,c,c2){ const s=(t,a)=>X.sv(t,a,g,1); const glow=`filter:drop-shadow(0 0 6px ${c})`;
+  if(sh==='arrow'){ s('line',{x1:-26,y1:0,x2:8,y2:0,stroke:'#f3e3b5','stroke-width':3,'stroke-linecap':'round'}); s('path',{d:'M6,-7 L23,0 L6,7 Z',fill:c}); s('path',{d:'M-24,0 L-33,-7 M-24,0 L-33,7 M-18,0 L-27,-7 M-18,0 L-27,7',stroke:c2,'stroke-width':2}); }
+  else if(sh==='bolt'){ s('line',{x1:-22,y1:0,x2:8,y2:0,stroke:c,'stroke-width':8,'stroke-linecap':'round',style:glow}); s('line',{x1:-16,y1:0,x2:6,y2:0,stroke:c2,'stroke-width':3,'stroke-linecap':'round'}); }
+  else if(sh==='star'){ s('path',{d:'M0,-12 L3,-3 L12,0 L3,3 L0,12 L-3,3 L-12,0 L-3,-3 Z',fill:c,stroke:c2,'stroke-width':1.5,style:glow}); }
+  else if(sh==='shard'){ s('path',{d:'M15,0 L0,-6 L-13,0 L0,6 Z',fill:c,stroke:c2,'stroke-width':1.5,style:glow}); }
+  else if(sh==='rock'){ s('path',{d:'M-9,-6 L-2,-10 L8,-7 L11,1 L5,9 L-6,9 L-11,2 Z',fill:c,stroke:c2,'stroke-width':1.5}); }
+  else if(sh==='knife'){ s('path',{d:'M15,0 L-2,-3.5 L-2,3.5 Z',fill:'#eef3fa'}); s('rect',{x:-11,y:-2.5,width:9,height:5,rx:1.5,fill:c2}); }
+  else if(sh==='bullet'){ s('line',{x1:-34,y1:0,x2:-6,y2:0,stroke:c,'stroke-width':2,opacity:.6}); s('rect',{x:-6,y:-2.5,width:12,height:5,rx:2.5,fill:c2,style:glow}); }
+  else if(sh==='wave'){ s('path',{d:'M-4,-16 Q14,0 -4,16 Q5,0 -4,-16 Z',fill:c2,stroke:c,'stroke-width':2,style:glow}); }
+  else if(sh==='spear'){ s('line',{x1:-30,y1:0,x2:10,y2:0,stroke:c2,'stroke-width':3,'stroke-linecap':'round',style:glow}); s('path',{d:'M8,-6 L22,0 L8,6 Z',fill:c,style:glow}); }
+  else if(sh==='drop'){ s('path',{d:'M10,0 C4,-6 -6,-6 -6,0 C-6,6 4,6 10,0 Z',fill:c,stroke:c2,'stroke-width':1.2,style:glow}); }
+  else { s('circle',{cx:0,cy:0,r:10,fill:c,style:glow}); s('circle',{cx:0,cy:0,r:5,fill:c2}); } }
+/* летящий снаряд по дуге (h — высота дуги вверх), n штук веером, tr — шлейф из копий */
+function epProj(X,s,p,q,d,c,c2){ const dx=q.x-p.x, dy=q.y-p.y, L=Math.hypot(dx,dy); if(L<20) return; let ux=-dy/L, uy=dx/L; if(uy>0){ ux=-ux; uy=-uy; } const n=s.n||1, dur=s.dur||.4, k=(s.sz||10)/10;
+  for(let i=0;i<n;i++){ const off=n>1?(i-(n-1)/2)*(s.sp??16):0; const h=(s.h||0)+off; const dd=d+i*(s.st??0); const qe={x:q.x+ux*off*.25,y:q.y+uy*off*.25}; const mx=(p.x+qe.x)/2+ux*h*2, my=(p.y+qe.y)/2+uy*h*2;
+    for(let gh=0; gh<=(s.tr||0); gh++){ const g=X.sv('g',{}); epShape(X,g,s.sh||'orb',c,c2); const kf=[];
+      for(let j=0;j<=10;j++){ const t=j/10, u=1-t; const x=u*u*p.x+2*u*t*mx+t*t*qe.x, y=u*u*p.y+2*u*t*my+t*t*qe.y; const tx=2*u*(mx-p.x)+2*t*(qe.x-mx), ty=2*u*(my-p.y)+2*t*(qe.y-my);
+        const a=s.spin?t*900:Math.atan2(ty,tx)*180/Math.PI; kf.push({transform:`translate(${x}px,${y}px) rotate(${a}deg) scale(${k*(1-.16*gh)})`,opacity:(j===0||j===10?0:1)*(gh?.5/gh:1)}); }
+      X.run(g,kf,dur,dd+gh*.035,{e:s.e||'linear'}); } } }
+function epRing(X,q,d,col,r1=34,dur=.42){ X.run(X.sv('circle',{cx:0,cy:0,r:10,fill:'none',stroke:col,'stroke-width':3,'vector-effect':'non-scaling-stroke'}),[{transform:`translate(${q.x}px,${q.y}px) scale(.4)`,opacity:1},{transform:`translate(${q.x}px,${q.y}px) scale(${r1/10})`,opacity:0}],dur,d,{e:'ease-out'}); }
+const epRnd=i=>{ const x=Math.sin(i*127.1+311.7)*43758.5453; return x-Math.floor(x); }; // повторяемое «случайное» число
+const EP_SLASH={'1':[[-48,-42,32,-36,42,46]],x:[[-34,-30,0,-6,32,30],[34,-30,0,-6,-32,30]],'3':[[-50,-30,10,-30,30,40],[-40,-40,20,-40,40,30],[-30,-50,30,-50,50,20]],claw:[[-30,-36,-10,0,10,38],[-16,-40,4,-2,24,36],[-2,-42,18,-4,38,32]],cross:[[-44,0,0,4,44,0],[0,-44,-4,0,0,44]],thrust:[[-62,0,0,0,40,0]],v:[[-30,-34,-12,0,0,30],[30,-34,12,0,0,30]],up:[[-30,40,-36,-10,30,-46]],down:[[-10,-58,8,0,-4,52]],z:[[-34,-30,0,-30,34,-30],[34,-30,0,0,-34,30],[-34,30,0,30,34,30]]};
+function epSlash(X,s,q,d,c,sg){ const k=s.sz||1, w=s.w||6, dur=s.dur||.36; const one=(L,dd)=>{ const [x1,y1,cx,cy,x2,y2]=L.map((v,i)=>v*k*(i%2?1:sg)); X.run(X.sv('path',{d:`M${q.x+x1},${q.y+y1} Q${q.x+cx},${q.y+cy} ${q.x+x2},${q.y+y2}`,fill:'none',stroke:c,'stroke-width':w,'stroke-linecap':'round',pathLength:100,'stroke-dasharray':100,style:`filter:drop-shadow(0 0 5px ${c})`}),[{strokeDashoffset:'100px',opacity:1},{strokeDashoffset:'0px',opacity:1,offset:.45},{strokeDashoffset:'0px',opacity:0}],dur,dd,{e:'ease-out'}); };
+  if(s.p==='spin'){ const r=42*k; X.run(X.sv('path',{d:`M${q.x-r},${q.y} A${r},${r} 0 1,1 ${q.x},${q.y-r}`,fill:'none',stroke:c,'stroke-width':w,'stroke-linecap':'round',pathLength:100,'stroke-dasharray':100,style:`filter:drop-shadow(0 0 6px ${c})`}),[{strokeDashoffset:'100px',opacity:1},{strokeDashoffset:'0px',opacity:1,offset:.55},{strokeDashoffset:'0px',opacity:0}],dur*1.3,d,{e:'ease-out'}); return; }
+  if(s.p==='multi'){ for(let i=0;i<5;i++){ const a=epRnd(i+1)*Math.PI, r=40; one([Math.cos(a)*-r,Math.sin(a)*-r,0,0,Math.cos(a)*r,Math.sin(a)*r],d+i*.06); } return; }
+  (EP_SLASH[s.p]||EP_SLASH['1']).forEach((L,i)=>one(L,d+i*(s.p==='x'?.1:.05))); }
+/* подскок к цели (элемент бойца со сдвигом translate(-50%,-50%)) */
+function epLunge(X,n,p,q,d,dur,hit){ if(!n) return; const dx=q.x-p.x, dy=q.y-p.y, len=Math.hypot(dx,dy); if(len<60) return; const stop=Math.min(110,len*.45), k=(len-stop)/len*X.k; const T=(x,y)=>`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;
+  X.run(n,[{transform:T(0,0),zIndex:6},{transform:T(dx*k,dy*k),zIndex:6,offset:Math.min(.8,hit/dur)},{transform:T(dx*k*.93,dy*k*.93),zIndex:6,offset:Math.min(.9,hit/dur+.2)},{transform:T(0,0),zIndex:6}],dur,d,{keep:1,fill:'none',e:'ease-in-out'}); }
+function epAnStep(X,k,s,at,p,q,t,c,c2,sg){ const tr=(x,y,extra='')=>`translate(${x}px,${y}px) ${extra}`;
+  switch(k){
+  case 'proj': epProj(X,s,p,q,t,c,c2); break;
+  case 'beam': { if(Math.hypot(q.x-p.x,q.y-p.y)<20) break; const a={x1:p.x,y1:p.y,x2:q.x,y2:q.y,'stroke-linecap':'round',pathLength:100,'stroke-dasharray':100}; const w=s.w||16, pu=s.pulse;
+    const kf=(m,o2)=>[{strokeWidth:w*m*.35+'px',strokeDashoffset:'100px',opacity:1},{strokeWidth:w*m+'px',strokeDashoffset:'0px',opacity:1,offset:.35},...(pu?[{strokeWidth:w*m*.5+'px',strokeDashoffset:'0px',opacity:1,offset:.5},{strokeWidth:w*m*1.1+'px',strokeDashoffset:'0px',opacity:1,offset:.62}]:[]),{strokeWidth:w*m*.7+'px',strokeDashoffset:'0px',opacity:o2,offset:.75},{strokeWidth:'0px',strokeDashoffset:'0px',opacity:0}];
+    X.run(X.sv('line',{...a,stroke:c,style:`filter:drop-shadow(0 0 8px ${c})`}),kf(1,.9),.7,t,{e:'ease-out'}); X.run(X.sv('line',{...a,stroke:c2}),kf(.32,.9),.7,t,{e:'ease-out'}); break; }
+  case 'chain': { if(Math.hypot(q.x-p.x,q.y-p.y)<20) break; const J=s.j||30; const zig=()=>{ const n=Math.max(4,Math.round(Math.hypot(q.x-p.x,q.y-p.y)/30)), nx=-(q.y-p.y), ny=q.x-p.x, l=Math.hypot(nx,ny)||1; let r=''; for(let i=0;i<=n;i++){ const f=i/n, j=(i&&i<n)?(Math.random()-.5)*J:0; r+=`${(p.x+(q.x-p.x)*f+nx/l*j).toFixed(1)},${(p.y+(q.y-p.y)*f+ny/l*j).toFixed(1)} `; } return r; };
+    const L=[[6,c,0],[2.5,c2,0],[4,c,.13]]; for(let i=3;i<=(s.n||2);i++) L.push([3,c,.06*i]); for(const [w,col,dl] of L) X.run(X.sv('polyline',{points:zig(),fill:'none',stroke:col,'stroke-width':w,'stroke-linejoin':'round',style:`filter:drop-shadow(0 0 6px ${c})`}),[{opacity:0},{opacity:1,offset:.1},{opacity:.2,offset:.3},{opacity:1,offset:.45},{opacity:.4,offset:.7},{opacity:0}],.5,t+dl); break; }
+  case 'boom': { const r=(s.r||40)/10; X.run(X.sv('circle',{cx:0,cy:0,r:10,fill:c,style:`filter:drop-shadow(0 0 12px ${c})`}),[{transform:tr(at.x,at.y,'scale(.2)'),opacity:.95},{transform:tr(at.x,at.y,`scale(${r})`),opacity:.55,offset:.45},{transform:tr(at.x,at.y,`scale(${r*1.15})`),opacity:0}],.5,t,{e:'ease-out'});
+    X.run(X.sv('circle',{cx:0,cy:0,r:10,fill:c2}),[{transform:tr(at.x,at.y,'scale(.1)'),opacity:1},{transform:tr(at.x,at.y,`scale(${r*.5})`),opacity:0}],.35,t,{e:'ease-out'}); break; }
+  case 'ring': for(let i=0;i<(s.n||1);i++) epRing(X,at,t+i*.09,c,s.r||34,s.dur||.42); break;
+  case 'sparks': for(let i=0;i<(s.n||8);i++){ const a=i/(s.n||8)*360+epRnd(i)*30, R=(s.r||46)*(.7+epRnd(i+9)*.6); const g=X.sv('line',{x1:0,y1:0,x2:9,y2:0,stroke:i%2?c:c2,'stroke-width':2.5,'stroke-linecap':'round'}); X.run(g,[{transform:tr(at.x,at.y,`rotate(${a}deg) translate(6px,0)`),opacity:1},{transform:tr(at.x,at.y,`rotate(${a}deg) translate(${R}px,0)`),opacity:0}],.45,t,{e:'ease-out'}); } break;
+  case 'slash': epSlash(X,s,at,t,c,sg); break;
+  case 'pillar': { const w=s.w||40, h=at.y+60; const g=X.sv('g',{}); X.sv('rect',{x:-w/2,y:-h,width:w,height:h,fill:c,opacity:.5,rx:w/2,style:`filter:drop-shadow(0 0 14px ${c})`},g,1); X.sv('rect',{x:-w/6,y:-h,width:w/3,height:h,fill:c2,opacity:.9,rx:w/6},g,1);
+    X.run(g,[{transform:tr(at.x,at.y+40,'scale(.2,0)'),opacity:1},{transform:tr(at.x,at.y+40,'scale(1,1)'),opacity:1,offset:.25},{transform:tr(at.x,at.y+40,'scale(.7,1)'),opacity:.9,offset:.7},{transform:tr(at.x,at.y+40,'scale(0,1)'),opacity:0}],s.dur||.7,t,{e:'ease-out'}); break; }
+  case 'sigil': { const R=s.r||40, g=X.sv('g',{}); X.sv('circle',{cx:0,cy:0,r:R,fill:'none',stroke:c,'stroke-width':2.5,style:`filter:drop-shadow(0 0 6px ${c})`},g,1); X.sv('circle',{cx:0,cy:0,r:R*.78,fill:'none',stroke:c2,'stroke-width':1.5,'stroke-dasharray':'6 5'},g,1);
+    let d=''; for(let i=0;i<=5;i++){ const a=(i*2%5)/5*Math.PI*2-Math.PI/2; d+=(i?'L':'M')+(Math.cos(a)*R*.78).toFixed(1)+','+(Math.sin(a)*R*.78).toFixed(1); } X.sv('path',{d,fill:'none',stroke:c,'stroke-width':1.8},g,1);
+    const y=s.flat?at.y+30:at.y, f=s.flat?'scale(1,.42) ':''; X.run(g,[{transform:tr(at.x,y,f+'rotate(0deg) scale(.2)'),opacity:0},{transform:tr(at.x,y,f+'rotate(100deg) scale(1)'),opacity:1,offset:.3},{transform:tr(at.x,y,f+'rotate(220deg) scale(1)'),opacity:1,offset:.8},{transform:tr(at.x,y,f+'rotate(280deg) scale(1.1)'),opacity:0}],s.dur||.8,t,{e:'ease-out'}); break; }
+  case 'glyph': { const sz=s.sz||40; const mk=(dx,dy,dd)=>{ const n=X.dv('epglyph',s.ch||'✨',at.x+dx,at.y+dy,`font-size:${sz}px`); const m=s.m||'pop';
+      const kf=m==='rise'?[{opacity:0,transform:'translate(-50%,-30%) scale(.6)'},{opacity:1,transform:'translate(-50%,-60%) scale(1.1)',offset:.2},{opacity:1,transform:'translate(-50%,-120%) scale(1)',offset:.7},{opacity:0,transform:'translate(-50%,-170%) scale(1)'}]
+        :m==='drop'?[{opacity:0,transform:'translate(-50%,-260%) scale(1)'},{opacity:1,transform:'translate(-50%,-260%)',offset:.05},{opacity:1,transform:'translate(-50%,-50%) scale(1.2,.85)',offset:.4},{opacity:1,transform:'translate(-50%,-60%) scale(1)',offset:.55},{opacity:0,transform:'translate(-50%,-60%) scale(1.3)'}]
+        :m==='spin'?[{opacity:0,transform:'translate(-50%,-150%) rotate(0deg) scale(.4)'},{opacity:1,transform:'translate(-50%,-150%) rotate(240deg) scale(1)',offset:.25},{opacity:1,transform:'translate(-50%,-150%) rotate(600deg) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-150%) rotate(720deg) scale(.8)'}]
+        :[{opacity:0,transform:'translate(-50%,-50%) scale(.3)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.5)',offset:.25},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.45},{opacity:0,transform:'translate(-50%,-70%) scale(1.1)'}];
+      X.run(n,kf,s.dur||(m==='drop'?.7:m==='spin'?1.1:.8),dd,{e:'ease-out'}); };
+    if(s.m==='multi') for(let i=0;i<(s.n||3);i++) mk((epRnd(i+3)-.5)*60,(epRnd(i+7)-.5)*40,t+i*.09); else mk(0,0,t); break; }
+  case 'aura': { const col=s.c||c; X.run(X.sv('ellipse',{cx:0,cy:0,rx:36,ry:12,fill:col,'fill-opacity':.18,stroke:col,'stroke-width':2.5,style:`filter:drop-shadow(0 0 8px ${col})`}),[{transform:tr(at.x,at.y+34,'scale(.3)'),opacity:0},{transform:tr(at.x,at.y+30,'scale(1)'),opacity:1,offset:.3},{transform:tr(at.x,at.y-10,'scale(.8)'),opacity:0}],.9,t,{e:'ease-out'});
+    X.run(X.sv('circle',{cx:0,cy:0,r:10,fill:col,style:`filter:blur(6px)`}),[{transform:tr(at.x,at.y,'scale(1)'),opacity:0},{transform:tr(at.x,at.y,'scale(4)'),opacity:.35,offset:.35},{transform:tr(at.x,at.y,'scale(4.4)'),opacity:0}],.9,t);
+    for(let i=0;i<8;i++){ const x=at.x+(epRnd(i)-.5)*64; X.run(X.sv('circle',{cx:0,cy:0,r:3,fill:i%2?col:c2}),[{transform:tr(x,at.y+34),opacity:0},{transform:tr(x,at.y+20),opacity:1,offset:.2},{transform:tr(x,at.y-50-epRnd(i+5)*20),opacity:0}],.85,t+i*.05,{e:'ease-out'}); } break; }
+  case 'rise': for(let i=0;i<(s.n||6);i++){ const x=(epRnd(i+2)-.5)*70, y0=at.y+20, y1=at.y-50-epRnd(i+4)*30; const n=s.ch?X.dv('epglyph',s.ch,at.x+x,y0,`font-size:${s.sz||20}px`):X.sv('circle',{cx:0,cy:0,r:s.sz||4,fill:'none',stroke:i%2?c:c2,'stroke-width':2});
+      X.run(n,s.ch?[{opacity:0,transform:'translate(-50%,-50%)'},{opacity:1,transform:'translate(-50%,-150%)',offset:.25},{opacity:0,transform:`translate(-50%,${(y1-y0)/((s.sz||20))*100-50}%)`}]:[{transform:tr(at.x+x,y0),opacity:0},{transform:tr(at.x+x,y0-14),opacity:1,offset:.25},{transform:tr(at.x+x,y1),opacity:0}],.9,t+i*.07,{e:'ease-out'}); } break;
+  case 'swirl': for(let i=0;i<(s.n||10);i++){ const a0=i/(s.n||10)*360, R=s.r||70; const n=X.sv('circle',{cx:0,cy:0,r:3.5,fill:i%2?c:c2,style:`filter:drop-shadow(0 0 4px ${c})`}); const kf=[]; for(let j=0;j<=6;j++){ const f=j/6; kf.push({transform:tr(at.x,at.y,`rotate(${a0+f*300}deg) translate(${R*(1-f)}px,0)`),opacity:j===0?0:j===6?0:1}); } X.run(n,kf,.7,t+i*.02,{e:'ease-in'}); } break;
+  case 'spikes': for(let i=0;i<(s.n||5);i++){ const x=at.x+((i/((s.n||5)-1||1))-.5)*84, h=.6+epRnd(i+11)*.6; const n=X.sv('path',{d:'M-7,0 L0,-36 L7,0 Z',fill:c,stroke:c2,'stroke-width':1.5,style:`filter:drop-shadow(0 0 5px ${c})`}); X.run(n,[{transform:tr(x,at.y+40,'scale(1,0)'),opacity:1},{transform:tr(x,at.y+40,`scale(1,${h*1.15})`),opacity:1,offset:.2},{transform:tr(x,at.y+40,`scale(1,${h})`),opacity:1,offset:.75},{transform:tr(x,at.y+40,'scale(1,0)'),opacity:0}],.8,t+i*.03,{e:'ease-out'}); } break;
+  case 'nova': { const R=(s.r||90)/10; X.run(X.sv('circle',{cx:0,cy:0,r:10,fill:'none',stroke:c,'stroke-width':4,'vector-effect':'non-scaling-stroke',style:`filter:drop-shadow(0 0 8px ${c})`}),[{transform:tr(at.x,at.y,'scale(.3)'),opacity:1},{transform:tr(at.x,at.y,`scale(${R})`),opacity:0}],.55,t,{e:'ease-out'}); X.run(X.sv('circle',{cx:0,cy:0,r:10,fill:c2}),[{transform:tr(at.x,at.y,'scale(.5)'),opacity:.8},{transform:tr(at.x,at.y,'scale(3)'),opacity:0}],.4,t,{e:'ease-out'}); break; }
+  case 'charge': for(let i=0;i<(s.n||10);i++){ const a=epRnd(i+21)*Math.PI*2, R=60+epRnd(i+3)*30; X.run(X.sv('circle',{cx:0,cy:0,r:3,fill:i%2?c:c2,style:`filter:drop-shadow(0 0 4px ${c})`}),[{transform:tr(at.x+Math.cos(a)*R,at.y+Math.sin(a)*R),opacity:0},{transform:tr(at.x+Math.cos(a)*R*.8,at.y+Math.sin(a)*R*.8),opacity:1,offset:.2},{transform:tr(at.x,at.y),opacity:.2}],.42,t+epRnd(i)*.1,{e:'ease-in'}); } break;
+  case 'bubble': { const r=(s.r||46)/10, col=s.c||c; X.run(X.sv('circle',{cx:0,cy:0,r:10,fill:col,'fill-opacity':.2,stroke:col,'stroke-width':2.5,'vector-effect':'non-scaling-stroke',style:`filter:drop-shadow(0 0 8px ${col})`}),[{transform:tr(at.x,at.y,'scale(.3)'),opacity:0},{transform:tr(at.x,at.y,`scale(${r*1.12})`),opacity:1,offset:.25},{transform:tr(at.x,at.y,`scale(${r})`),opacity:1,offset:.75},{transform:tr(at.x,at.y,`scale(${r*1.05})`),opacity:0}],s.dur||.95,t,{e:'ease-out'}); break; }
+  case 'reticle': { const g=X.sv('g',{}); X.sv('circle',{cx:0,cy:0,r:26,fill:'none',stroke:c,'stroke-width':2.5},g,1); X.sv('path',{d:'M0,-38 L0,-16 M0,16 L0,38 M-38,0 L-16,0 M16,0 L38,0',stroke:c,'stroke-width':2.5},g,1); X.sv('circle',{cx:0,cy:0,r:3,fill:c2},g,1);
+    X.run(g,[{transform:tr(at.x,at.y,'rotate(90deg) scale(2.2)'),opacity:0},{transform:tr(at.x,at.y,'rotate(0deg) scale(1)'),opacity:1,offset:.45},{transform:tr(at.x,at.y,'rotate(0deg) scale(1)'),opacity:1,offset:.85},{transform:tr(at.x,at.y,'scale(.8)'),opacity:0}],s.dur||.8,t,{e:'ease-out'}); break; }
+  case 'cloud': for(let i=0;i<(s.n||5);i++){ const x=at.x+(epRnd(i+1)-.5)*60, y=at.y+(epRnd(i+6)-.5)*36, r=1.8+epRnd(i+2)*.9, col=s.c||(i%2?c:c2); X.run(X.sv('circle',{cx:0,cy:0,r:10,fill:col,style:'filter:blur(3px)'}),[{transform:tr(x,y,'scale(.3)'),opacity:0},{transform:tr(x,y,`scale(${r})`),opacity:.5,offset:.4},{transform:tr(x,y-12,`scale(${r*1.3})`),opacity:0}],1,t+i*.05,{e:'ease-out'}); } break;
+  case 'drain': for(let i=0;i<(s.n||12);i++){ const h=(epRnd(i)-.5)*120; epProj(X,{sh:'orb',sz:4,dur:.55,h},q,p,t+i*.035,c,c2); } epRing(X,p,t+.6,c,40); break;
+  case 'rain': { const n=s.n||8, st=s.st??.045, sp=s.sp??50, dur=.32; for(let i=0;i<n;i++){ const x=at.x+(n>1?(epRnd(i+1)*2-1)*sp:0), y=at.y+(epRnd(i+4)-.5)*20, t0=t-dur+i*st-(n-1)*st/2;
+      if(s.sh==='zap'){ let pts=''; const N=8; for(let j=0;j<=N;j++){ const f=j/N; pts+=`${(x+(j&&j<N?(Math.random()-.5)*26:0)).toFixed(1)},${(-20+(y+20)*f).toFixed(1)} `; } for(const [w,col] of [[6,c],[2.5,c2]]) X.run(X.sv('polyline',{points:pts,fill:'none',stroke:col,'stroke-width':w,'stroke-linejoin':'round',style:`filter:drop-shadow(0 0 8px ${c})`}),[{opacity:0},{opacity:1,offset:.1},{opacity:.3,offset:.35},{opacity:1,offset:.5},{opacity:0}],.45,t0+dur-.06); continue; }
+      const sx=x+70*sg*-1, sy=y-240, a=Math.atan2(y-sy,x-sx)*180/Math.PI, k2=(s.sz||(s.sh==='arrow'?12:s.sh==='orb'?13:10))/10; const g=X.sv('g',{}); epShape(X,g,s.sh||'orb',c,c2);
+      X.run(g,[{transform:`translate(${sx}px,${sy}px) rotate(${a}deg) scale(${k2})`,opacity:1},{transform:`translate(${x}px,${y}px) rotate(${a}deg) scale(${k2})`,opacity:1,offset:.95},{transform:`translate(${x}px,${y}px) rotate(${a}deg) scale(${k2})`,opacity:0}],dur,t0,{e:'ease-in'}); epRing(X,{x,y},t0+dur,c,22,.3); } break; }
+  case 'flash': X.run(X.dv('epflash','',0,0,`background:${s.c||c}`),[{opacity:0},{opacity:.42,offset:.25},{opacity:0}],.3,t); break;
+  case 'shake': { const st=X.st; if(!st) break; const m=6*(s.k||1); X.run(st,[{transform:'translate(0,0)'},{transform:`translate(${m}px,${-m/2}px)`},{transform:`translate(${-m}px,${m/2}px)`},{transform:`translate(${m/2}px,${m/2}px)`},{transform:`translate(${-m/2}px,${-m/2}px)`},{transform:'translate(0,0)'}],.32,t,{keep:1,fill:'none'}); break; } } }
+/* проиграть пресет: p — кто применяет, q — цель, d — секунда действия; o.aEl — элемент бойца для подскока */
+function epAnDraw(X,P,p,q,d,o={}){ const cast=P.cast||0, hit=epAnHitP(P), sg=q.x<p.x?-1:1;
+  if(P.lunge) epLunge(X,o.aEl,p,q,d+cast,P.lunge===2?.42:.62,hit-cast);
+  for(const [k,s] of P.st){ const ph=s.ph||EP_ANPH[k]||'hit'; const t=d+(ph==='cast'?0:ph==='go'?cast:hit)+(s.dl||0); const at=s.on==='p'?p:s.on==='q'?q:ph==='cast'?p:q;
+    try{ epAnStep(X,k,s,at,p,q,t,s.c||P.c,s.c2||P.c2||'#ffffff',sg); }catch(e){ console.warn('anim',P.id,k,e); } } }
+/* ---------- библиотека анимаций: сетка карточек с мини-сценой (наведи — проиграется) ---------- */
+function epAnPlayCard(card){ const P=EP_ANM[card.dataset.id]; const st=$('.epanst',card); if(!P||!st) return; $$('.epfxl',st).forEach(x=>x.remove()); const R=st.getBoundingClientRect(); if(!R.width) return; const sc=.5, W=R.width/sc, H=R.height/sc;
+  const lay=document.createElement('div'); lay.className='epfxl'; lay.style.cssText=`inset:auto;left:0;top:0;width:${W}px;height:${H}px;transform:scale(${sc});transform-origin:0 0`; st.append(lay);
+  const X=epFxCtx(lay,0,W,H); X.st=st; X.k=sc; const cen=e=>{ const r=e.getBoundingClientRect(); return {x:(r.left+r.width/2-R.left)/sc,y:(r.top+r.height/2-R.top)/sc,top:(r.top-R.top)/sc}; };
+  const a=$('.d.a',st), b=$('.d.b',st); epAnDraw(X,P,cen(a),cen(b),.05,{aEl:a}); }
+function epAnCard(P,cur){ const g=EP_ANG.find(x=>x[0]===P.g)||EP_ANG[0]; const E=P.el?EP_ANEL[P.el]:null;
+  return `<div class="epanc ${P.g==='buff'?'ally':''} ${cur===P.id?'cur':''}" data-id="${P.id}" style="--ac:${P.c}" title="${esc(P.n)}"><div class="epanst"><i class="d a"></i><i class="d b"></i></div><div class="nm">${esc(P.n)}</div><div class="tg">${g[1]} ${esc(E?E[0]:g[2])}</div></div>`; }
+function epAnGallery(box,o={}){ let grp='', q=''; try{ grp=localStorage.getItem('epAnG')||''; }catch{} if(grp&&!EP_ANG.some(g=>g[0]===grp)) grp='';
+  box.innerHTML=`<div class="epanbar"><input class="q" placeholder="🔍 поиск: огонь, стрела, лечение…"><span class="chips"></span></div>${o.pick?`<div class="epanspec"><button class="btn sm ${!o.cur?'on':''}" data-v="">${o.isAtk?'⚔ По классу бойца':'✨ По умолчанию (сияние / сглаз)'}</button><button class="btn sm ${o.cur==='none'?'on':''}" data-v="none">∅ Без анимации</button></div>`:''}<div class="epangrid"></div>`;
+  const chips=$('.chips',box), grid=$('.epangrid',box);
+  const drawChips=()=>{ chips.innerHTML=[['','Все',EP_AN.length,'#ffd166'],...EP_ANG.map(g=>[g[0],g[1]+' '+g[2],EP_AN.filter(P=>P.g===g[0]).length,g[3]])].map(([k,n,c,col])=>`<button class="btn sm ${grp===k?'on':''}" data-g="${k}" style="--gc:${col}">${esc(n)} <span class="faint">${c}</span></button>`).join('');
+    $$('button',chips).forEach(b=>b.onclick=()=>{ grp=b.dataset.g; try{ localStorage.setItem('epAnG',grp); }catch{} drawChips(); drawGrid(); }); };
+  const drawGrid=()=>{ const ql=q.toLowerCase(); const L=EP_AN.filter(P=>(!grp||P.g===grp)&&(!ql||(P.n+' '+(P.el?EP_ANEL[P.el][0]:'')+' '+(EP_ANG.find(g=>g[0]===P.g)||[])[2]).toLowerCase().includes(ql)));
+    let h='', last=''; for(const P of L){ const sec=P.g==='magic'?'magic:'+P.el:P.g; if(sec!==last&&(grp||!ql)){ const g=EP_ANG.find(x=>x[0]===P.g); h+=`<div class="epanh" style="--gc:${P.g==='magic'?EP_ANEL[P.el][1]:g[3]}">${P.g==='magic'?'🔮 Магия · '+esc(EP_ANEL[P.el][0]):g[1]+' '+esc(g[2])}</div>`; last=sec; } h+=epAnCard(P,o.cur); }
+    grid.innerHTML=h||'<div class="faint">Ничего не нашлось.</div>';
+    $$('.epanc',grid).forEach(c=>{ let tm=0; c.onmouseenter=()=>{ epAnPlayCard(c); clearInterval(tm); tm=setInterval(()=>{ if(!c.isConnected) return clearInterval(tm); epAnPlayCard(c); },1900); }; c.onmouseleave=()=>clearInterval(tm);
+      c.onclick=()=>{ if(o.pick&&o.onPick) o.onPick(c.dataset.id); else epAnPlayCard(c); }; }); };
+  $('.q',box).oninput=e=>{ q=e.target.value.trim(); drawGrid(); };
+  $$('.epanspec button',box).forEach(b=>b.onclick=()=>o.onPick&&o.onPick(b.dataset.v));
+  drawChips(); drawGrid(); }
+/* выбор анимации скилла — поверх окна способности */
+function epAnPicker(cur,isAtk,onPick){ const ov=el(`<div class="epanov"><div class="epanpn"><div class="hd"><b>🎬 Анимация скилла</b><span class="faint" style="font-size:12.5px">наведи — проиграется, клик — выбрать</span><span class="grow"></span><button class="btn sm icon x" title="Закрыть">✕</button></div><div class="gal"></div></div></div>`);
+  const close=()=>{ ov.remove(); document.removeEventListener('keydown',ek,true); }; const ek=e=>{ if(e.key==='Escape'){ e.stopPropagation(); e.preventDefault(); close(); } };
+  document.addEventListener('keydown',ek,true); ov.onclick=e=>{ if(e.target===ov) close(); }; $('.x',ov).onclick=close; document.body.append(ov);
+  epAnGallery($('.gal',ov),{pick:1,cur,isAtk,onPick:id=>{ close(); onPick(id); }}); const c=cur&&$(`.epanc[data-id="${cur}"]`,ov); if(c) c.scrollIntoView({block:'center'}); }
+/* анимации действия поверх сцены: удары и заклинания (пресеты EP_AN), COUNTER/DUO, переход на другую позицию.
    Время считается от момента, когда этот зритель увидел действие, — перерисовка страницы продолжает анимацию с того же места */
-function epPlay(page,B){ const sn=EP_SEEN[B.id]; const ago=sn&&sn.at?(Date.now()-sn.at)/1000:1e9; const st=$('.epstage',page); const L=(B.an||[]).filter(a=>a.d+1.7>ago); if(!st||!L.length) return; const R=st.getBoundingClientRect(); if(!R.width) return;
-  const lay=document.createElement('div'); lay.className='epfxl'; st.append(lay); const NS='http://www.w3.org/2000/svg'; const svg=document.createElementNS(NS,'svg'); svg.setAttribute('width',R.width); svg.setAttribute('height',R.height); lay.append(svg);
+function epPlay(page,B){ const sn=EP_SEEN[B.id]; const ago=sn&&sn.at?(Date.now()-sn.at)/1000:1e9; const st=$('.epstage',page); const L=(B.an||[]).filter(a=>a.d+2.2>ago); if(!st||!L.length) return; const R=st.getBoundingClientRect(); if(!R.width) return;
+  const lay=document.createElement('div'); lay.className='epfxl'; st.append(lay); const X=epFxCtx(lay,ago,R.width,R.height); X.st=st;
   const U=id=>$(`.epu[data-u="${id}"]`,st); const C=id=>{ const u=U(id); if(!u) return null; const r=($('.por',u)||u).getBoundingClientRect(); return {x:r.left+r.width/2-R.left,y:r.top+r.height/2-R.top,top:u.getBoundingClientRect().top-R.top}; };
-  const sv=(tag,at,par=svg)=>{ const e=document.createElementNS(NS,tag); for(const k in at) e.setAttribute(k,at[k]); e.style.opacity=0; par.append(e); return e; };
-  const dv=(cls,txt,x,y)=>{ const n=document.createElement('div'); n.className=cls; n.textContent=txt; n.style.left=x+'px'; n.style.top=y+'px'; n.style.opacity=0; lay.append(n); return n; };
-  const run=(n,kf,dur,d,o={})=>{ const a=n.animate(kf,{duration:dur*1000,delay:(d-ago)*1000,fill:o.fill||'forwards',easing:o.e||'linear'}); if(!o.keep) a.onfinish=()=>n.remove(); return a; };
-  const ring=(q,d,col,r1=34)=>run(sv('circle',{cx:0,cy:0,r:10,fill:'none',stroke:col,'stroke-width':3,'vector-effect':'non-scaling-stroke'}),[{transform:`translate(${q.x}px,${q.y}px) scale(.4)`,opacity:1},{transform:`translate(${q.x}px,${q.y}px) scale(${r1/10})`,opacity:0}],.42,d,{e:'ease-out'});
-  const slash=(q,x1,y1,cx,cy,x2,y2,w,col,d)=>run(sv('path',{d:`M${q.x+x1},${q.y+y1} Q${q.x+cx},${q.y+cy} ${q.x+x2},${q.y+y2}`,fill:'none',stroke:col,'stroke-width':w,'stroke-linecap':'round',pathLength:100,'stroke-dasharray':100,style:`filter:drop-shadow(0 0 5px ${col})`}),[{strokeDashoffset:'100px',opacity:1},{strokeDashoffset:'0px',opacity:1,offset:.45},{strokeDashoffset:'0px',opacity:0}],.36,d,{e:'ease-out'});
   const T=(x,y)=>`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;
-  const lunge=(id,p,q,d,dur,hit)=>{ const n=U(id); if(!n) return; const dx=q.x-p.x, dy=q.y-p.y, len=Math.hypot(dx,dy); if(len<130) return; const k=(len-110)/len;
-    run(n,[{transform:T(0,0),zIndex:6},{transform:T(dx*k,dy*k),zIndex:6,offset:hit/dur},{transform:T(dx*k*.93,dy*k*.93),zIndex:6,offset:Math.min(.9,hit/dur+.2)},{transform:T(0,0),zIndex:6}],dur,d,{keep:1,fill:'none',e:'ease-in-out'}); };
   for(const a of L){ const d=a.d;
-    if(a.k==='tag'){ const p=C(a.u); if(!p) continue; run(dv('eptag '+(a.c||''),a.txt,p.x,p.top-6),[{opacity:0,transform:'translate(-50%,-50%) scale(.3)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.3)',offset:.12},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.25},{opacity:1,transform:'translate(-50%,-85%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-130%) scale(1)'}],1.6,d,{e:'ease-out'}); continue; }
+    if(a.k==='tag'){ const p=C(a.u); if(!p) continue; X.run(X.dv('eptag '+(a.c||''),a.txt,p.x,p.top-6),[{opacity:0,transform:'translate(-50%,-50%) scale(.3)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.3)',offset:.12},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.25},{opacity:1,transform:'translate(-50%,-85%) scale(1)',offset:.8},{opacity:0,transform:'translate(-50%,-130%) scale(1)'}],1.6,d,{e:'ease-out'}); continue; }
     if(a.k==='mv'){ const n=U(a.u), u=epU(B,a.u); const f=u&&EP_POSXY[u.side][a.from], t=u&&EP_POSXY[u.side][u.pos]; if(!n||!f||!t) continue;
-      run(n,[{transform:T((f[0]-t[0])*R.width/100,(f[1]-t[1])*R.height/100),zIndex:6},{transform:T(0,0),zIndex:6}],.6,d,{keep:1,fill:'backwards',e:'ease-in-out'}); continue; }
-    if(a.k!=='atk') continue; const p=C(a.a), q=C(a.t); if(!p||!q) continue; const c=a.c, hit=EP_IMP[c]||.25, sg=q.x<p.x?-1:1; const ang=Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI;
-    if(c==='ranger'){ /* стрела летит в цель */ const g=sv('g',{}); for(const [tg,at] of [['line',{x1:-26,y1:0,x2:8,y2:0,stroke:'#f3e3b5','stroke-width':3,'stroke-linecap':'round'}],['path',{d:'M6,-7 L23,0 L6,7 Z',fill:'#ffd166'}],['path',{d:'M-24,0 L-33,-7 M-24,0 L-33,7 M-18,0 L-27,-7 M-18,0 L-27,7',stroke:'#ff8a6a','stroke-width':2}]]) sv(tg,at,g).style.opacity=1;
-      const tr=(f)=>`translate(${p.x+(q.x-p.x)*f}px,${p.y+(q.y-p.y)*f}px) rotate(${ang}deg) scale(1.45)`; run(g,[{transform:tr(0),opacity:0},{transform:tr(.08),opacity:1,offset:.08},{transform:tr(.94),opacity:1,offset:.96},{transform:tr(1),opacity:0}],hit,d,{e:'ease-in'}); ring(q,d+hit,'#ffd166'); }
-    else if(c==='mage'){ /* луч: растёт от мага к цели, вспыхивает и гаснет */ const at={x1:p.x,y1:p.y,x2:q.x,y2:q.y,'stroke-linecap':'round',pathLength:100,'stroke-dasharray':100};
-      run(sv('line',{...at,stroke:'#b48cff',style:'filter:drop-shadow(0 0 8px #b48cff)'}),[{strokeWidth:'6px',strokeDashoffset:'100px',opacity:1},{strokeWidth:'18px',strokeDashoffset:'0px',opacity:1,offset:.35},{strokeWidth:'12px',strokeDashoffset:'0px',opacity:.9,offset:.7},{strokeWidth:'0px',strokeDashoffset:'0px',opacity:0}],.7,d,{e:'ease-out'});
-      run(sv('line',{...at,stroke:'#fff'}),[{strokeWidth:'2px',strokeDashoffset:'100px',opacity:1},{strokeWidth:'5px',strokeDashoffset:'0px',opacity:1,offset:.35},{strokeWidth:'3px',strokeDashoffset:'0px',opacity:.9,offset:.7},{strokeWidth:'0px',strokeDashoffset:'0px',opacity:0}],.7,d,{e:'ease-out'});
-      run(sv('circle',{cx:0,cy:0,r:12,fill:'#e2c8ff',style:'filter:drop-shadow(0 0 10px #b48cff)'}),[{transform:`translate(${p.x}px,${p.y}px) scale(0)`,opacity:1},{transform:`translate(${p.x}px,${p.y}px) scale(1.5)`,opacity:.9,offset:.3},{transform:`translate(${p.x}px,${p.y}px) scale(0)`,opacity:0}],.6,d-.05,{e:'ease-out'}); ring(q,d+hit,'#e2c8ff',46); }
-    else if(c==='healer'){ /* молния: ломаная, мерцает */ const zig=()=>{ const n=Math.max(4,Math.round(Math.hypot(q.x-p.x,q.y-p.y)/30)), nx=-(q.y-p.y), ny=q.x-p.x, l=Math.hypot(nx,ny)||1; let s=''; for(let i=0;i<=n;i++){ const f=i/n, j=(i&&i<n)?(Math.random()-.5)*30:0; s+=`${(p.x+(q.x-p.x)*f+nx/l*j).toFixed(1)},${(p.y+(q.y-p.y)*f+ny/l*j).toFixed(1)} `; } return s; };
-      for(const [w,col,dl] of [[6,'#7ae0ff',0],[2.5,'#ffffff',0],[4,'#ffe27a',.13]]) run(sv('polyline',{points:zig(),fill:'none',stroke:col,'stroke-width':w,'stroke-linejoin':'round',style:'filter:drop-shadow(0 0 6px #7ae0ff)'}),[{opacity:0},{opacity:1,offset:.1},{opacity:.2,offset:.3},{opacity:1,offset:.45},{opacity:.4,offset:.7},{opacity:0}],.5,d+dl);
-      ring(q,d+hit,'#ffe27a',42); }
-    else if(c==='warrior'||c==='knight'||c==='thief'){ lunge(a.a,p,q,d,c==='thief'?.42:.62,hit);
-      if(c==='knight'){ /* удар щитом: щит врезается, ударная волна */ run(dv('epshield','🛡️',q.x,q.y),[{opacity:0,transform:'translate(-50%,-50%) scale(.4)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.5)',offset:.3},{opacity:0,transform:'translate(-50%,-50%) scale(1.9)'}],.5,d+hit-.08,{e:'ease-out'}); ring(q,d+hit,'#4fb3ff',58); ring(q,d+hit+.1,'#cfe9ff',40); }
-      else if(c==='warrior'){ /* мечом: широкий взмах */ slash(q,-48*sg,-42,32*sg,-36,42*sg,46,8,'#ffffff',d+hit-.06); slash(q,-42*sg,-32,28*sg,-28,36*sg,42,3,'#ff6b5e',d+hit-.03); }
-      else { /* кинжалом: два быстрых крест-накрест */ slash(q,-34,-30,0,-6,32,30,3,'#e8fff0',d+hit-.05); slash(q,34,-30,0,-6,-32,30,3,'#8fd16a',d+hit+.08); } }
-    else { slash(q,-36*sg,-30,20*sg,-24,30*sg,34,5,'#ffffff',d+hit-.05); ring(q,d+hit,'#ffffff',30); } } }
+      X.run(n,[{transform:T((f[0]-t[0])*R.width/100,(f[1]-t[1])*R.height/100),zIndex:6},{transform:T(0,0),zIndex:6}],.6,d,{keep:1,fill:'backwards',e:'ease-in-out'}); continue; }
+    if(a.k!=='atk') continue; const p=C(a.a), q=C(a.t); if(!p||!q) continue;
+    const P=EP_ANM[a.an]||EP_ANM[EP_CLSAN[a.c]]||EP_ANM.st_basic; epAnDraw(X,P,p,q,d,{aEl:U(a.a)}); } }
 /* ---------- карточка юнита на сцене ---------- */
 function epUnitHTML(B,u,fl,ago=0){ const s=epUS(u); const mh=s.mhp, hp=Math.max(0,u.hp??mh); const [x,y]=EP_POSXY[u.side][u.pos]; const el_=EP_EL.find(e=>e[0]===u.el); const cl=EP_CLS.find(e=>e[0]===u.cls);
   const A=EPT.bid===B.id?epU(B,EPT.uid):null; const pk=A?epPickable(B,A,EPT.sk,EPT.code,u):false; const pick=(EPT.picks||[]).includes(u.id); const set=B.ph==='setup';
@@ -8511,7 +8769,7 @@ function renderBattle(m){ epSubscribe(); const dm=isDM()&&!viewAs; const B=state
   if(mvA) for(const [p,pn] of EP_POS){ if(B.units.some(u=>u.side===mvA.side&&u.pos===p)) continue; const [x,y]=EP_POSXY[mvA.side][p]; slots.push(`<div class="epu empty pk s-${mvA.side}" data-mv="${p}" style="left:${x}%;top:${y}%" title="${esc(epPosTxt(p))}"><div class="plus">⇄</div><div class="ppos">${pn}</div><div class="faint" style="font-size:10.5px">свободно</div></div>`); }
   const ord=fight?[B.cur,...(B.extra||[]),...(B.queue||[])].filter(Boolean).map(id=>epU(B,id)).filter(Boolean):[];
   const ordH=ord.map((u,i)=>{ const nx=ord[i+1]; const sw=i>0&&nx&&u.side==='a'&&nx.side==='a'&&(+u.init||0)===(+nx.init||0)&&(B.queue||[]).includes(u.id)&&(B.queue||[]).includes(nx.id)&&(dm||epCtl(u)||epCtl(nx)); const isCur=i===0&&!!B.cur, drg=dm&&!isCur; return `<span class="oc ${u.side} ${isCur?'cur':''}" ${drg?`draggable="true" data-id="${u.id}"`:''} title="инициатива ${u.init||0}${drg?' · перетащи, чтобы поменять порядок':''}">${esc(u.nm)}</span>${sw?`<button class="x-btn epsw" data-a="${u.id}" data-b="${nx.id}" title="Равная инициатива — игроки решают, кто первый: поменять местами">⇄</button>`:''}`; }).join('<span class="faint">›</span>');
-  const page=el(`<div class="page epbpage"><div class="head"><button class="btn sm" id="epBack" title="Все бои">←</button>${dm?`<input id="epName" value="${esc(B.name||'')}" class="epname">`:`<h1>${esc(B.name||'Бой')}</h1>`}<span class="grow"></span><button class="btn sm" id="epPosI" title="Что дают позиции и их способности">ℹ Позиции</button>
+  const page=el(`<div class="page epbpage"><div class="head"><button class="btn sm" id="epBack" title="Все бои">←</button>${dm?`<input id="epName" value="${esc(B.name||'')}" class="epname">`:`<h1>${esc(B.name||'Бой')}</h1>`}<span class="grow"></span><button class="btn sm" id="epPosI" title="Что дают позиции и их способности">ℹ Позиции</button>${dm&&EPS().music!==false&&musOn()?'<button class="btn sm" id="epMus" title="Музыка для всех: трек или плейлист YouTube">♫ Музыка</button>':''}
       ${dm?`${set?`<button class="btn sm" id="epBg" title="Картинка заднего плана">🖼 Фон</button>${B.bg?'<button class="btn sm" id="epBgX" title="Убрать фон">✕ фон</button>':''}<button class="btn sm" id="epResnap" title="Взять статы, скиллы и снаряжение из листов персонажей заново">⟳ Из листов</button><button class="btn sm primary" id="epStart">▶ Начать бой</button>`:''}${fight?`${B.prev?'<button class="btn sm" id="epUndo" title="Отменить последнее действие">↶ Отменить</button>':''}${cur?'<button class="btn sm" id="epSkip" title="Текущий боец пропускает ход">↷ Пропустить ход</button>':''}${B.win?'':`<button class="btn sm ${B.pend?'primary':''}" id="epPhase" title="Закончить фазу: кто не сходил — не ходит; новый бросок инициативы">⏭ Закончить фазу</button>`}<button class="btn sm" id="epStop">■ Завершить бой</button>`:''}${B.ph==='end'?'<button class="btn sm" id="epAgain" title="Вернуть бой в подготовку: те же бойцы, всё обнулится">↺ В подготовку</button>':''}`:''}</div>
     <div class="epstage ${EPT.bid===B.id?'picking':''}">${B.bg?`<img class="epbg" data-img="${esc(B.bg)}" style="display:none">`:''}<div class="epmid"></div>
       <div class="eptop">${fight?`<span class="epround">Фаза ${B.round||1}</span>${B.pend?'<span class="epround pend">окончена</span>':''}<div class="epord">${ordH}</div>${dm&&!B.win&&ord.length>1?'<button class="x-btn epordb" id="epOrd" title="Порядок ходов">⇅</button>':''}`:set?`<span class="epround">Подготовка</span>`:`<span class="epround">Бой завершён</span>`}${fight||B.ph==='end'?`<span class="epsoulb" title="Души команды игроков — на соул бёрн">👻 ${+B.souls||0}</span>`:''}</div>
@@ -8547,7 +8805,7 @@ function renderBattle(m){ epSubscribe(); const dm=isDM()&&!viewAs; const B=state
   on('#epBg',()=>pickFiles(async files=>{ const ids=await uploadImages(files,B.id); if(ids[0]){ B.bg=ids[0]; touch(B); render(); } })); on('#epBgX',()=>{ delete B.bg; touch(B); render(); });
   on('#epResnap',()=>{ let n=0; for(const u of B.units){ const ch=byId(world.characters,u.ref); if(ch){ Object.assign(u,epSnap(ch)); n++; } } epNames(B); touch(B); render(); toast('Обновлено из листов: '+n); });
   on('#epStart',()=>{ if(!B.units.some(u=>u.side==='a')||!B.units.some(u=>u.side==='e')){ toast('Нужен хотя бы один союзник и один враг',true); return; } for(const u of B.units){ const c=byId(world.characters,u.ref); if(c) Object.assign(u,epSnap(c)); } epNames(B); const log=[]; delete B.prev; B.fl=[]; B.an=[]; epStart(B,log); epPost(B,'начало боя',log); touch(B); render(); });
-  on('#epSkip',()=>epSkip(B)); on('#epPhase',()=>epPhaseEnd(B)); on('#epPhase2',()=>epPhaseEnd(B)); on('#epOrd',()=>epOrderDlg(B));
+  on('#epSkip',()=>epSkip(B)); on('#epMus',()=>musicDialog()); on('#epPhase',()=>epPhaseEnd(B)); on('#epPhase2',()=>epPhaseEnd(B)); on('#epOrd',()=>epOrderDlg(B));
   on('#epUndo',()=>{ if(!B.prev) return; Object.assign(B,JSON.parse(B.prev)); delete B.prev; B.fl=[]; B.an=[]; epClear(); epPost(B,'отмена',['↶ Мастер отменил последнее действие']); touch(B); render(); });
   on('#epStop',async()=>{ if(!await confirmDlg('Завершить бой? Ресурсы боя обнулятся, листы персонажей не меняются.','Завершить')) return; B.ph='end'; B.cur=null; B.queue=[]; delete B.prev; epPost(B,'конец боя',['■ Бой завершён'+(B.win?(B.win==='a'?' победой':' поражением'):'')]); touch(B); render(); });
   on('#epAgain',()=>{ Object.assign(B,{ph:'setup',cur:null,queue:[],extra:[],round:0,souls:0,win:null}); for(const u of B.units){ u.fx=[]; u.dead=0; delete u.hp; } delete B.prev; touch(B); render(); });
