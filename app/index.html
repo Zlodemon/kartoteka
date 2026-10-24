@@ -9383,10 +9383,10 @@ function epAnGallery(box,o={}){ epGLLoad(); let grp='', q='', el=o.el||''; try{ 
   $$('.epanspec button',box).forEach(b=>b.onclick=()=>o.onPick&&o.onPick(b.dataset.v,el)); { const cs=$('.epancol',box); if(cs) cs.onchange=()=>{ el=cs.value; }; }
   drawChips(); drawGrid(); }
 /* выбор анимации скилла — поверх окна способности */
-function epAnPicker(cur,isAtk,onPick,el){ const ov=el(`<div class="epanov"><div class="epanpn"><div class="hd"><b>🎬 Анимация скилла</b><span class="faint" style="font-size:12.5px">наведи — проиграется, клик — выбрать</span><span class="grow"></span><button class="btn sm icon x" title="Закрыть">✕</button></div><div class="gal"></div></div></div>`);
+function epAnPicker(cur,isAtk,onPick,elem){ const ov=el(`<div class="epanov"><div class="epanpn"><div class="hd"><b>🎬 Анимация скилла</b><span class="faint" style="font-size:12.5px">наведи — проиграется, клик — выбрать</span><span class="grow"></span><button class="btn sm icon x" title="Закрыть">✕</button></div><div class="gal"></div></div></div>`);
   const close=()=>{ ov.remove(); document.removeEventListener('keydown',ek,true); }; const ek=e=>{ if(e.key==='Escape'){ e.stopPropagation(); e.preventDefault(); close(); } };
   document.addEventListener('keydown',ek,true); ov.onclick=e=>{ if(e.target===ov) close(); }; $('.x',ov).onclick=close; document.body.append(ov);
-  epAnGallery($('.gal',ov),{pick:1,cur,isAtk,el,onPick:(id,e)=>{ close(); onPick(id,e); }}); const c=cur&&$(`.epanc[data-id="${cur}"]`,ov); if(c) c.scrollIntoView({block:'center'}); }
+  epAnGallery($('.gal',ov),{pick:1,cur,isAtk,el:elem,onPick:(id,e)=>{ close(); onPick(id,e); }}); const c=cur&&$(`.epanc[data-id="${cur}"]`,ov); if(c) c.scrollIntoView({block:'center'}); }
 /* анимации действия поверх сцены: удары и заклинания (пресеты EP_AN), COUNTER/DUO, переход на другую позицию.
    Время считается от момента, когда этот зритель увидел действие, — перерисовка страницы продолжает анимацию с того же места */
 function epPlay(page,B){ const sn=EP_SEEN[B.id]; const ago=sn&&sn.at?(Date.now()-sn.at)/1000:1e9; const st=$('.epstage',page); const L=(B.an||[]).filter(a=>a.d+3.5>ago); if(!st||!L.length) return; const R=st.getBoundingClientRect(); if(!R.width) return;
