@@ -54,8 +54,10 @@ else {
 }
 
 Step 3 'Выкладываю сайт'
-if (-not (Migrate-Data $cfg)) { Bad 'Не удалось перенести данные в папку игры (сообщение выше). Сайт не обновлён, данные не тронуты — попробуйте ещё раз.'; Pause-Enter 'Enter — закрыть окно'; exit 1 }
+$migrated = Migrated-Before
+if ($migrated) { Ok 'Данные уже в папке игры (перенесены при прошлом обновлении) — базу не трогаю.' }
+elseif (-not (Migrate-Data $cfg)) { Bad 'Не удалось перенести данные в папку игры (сообщение выше). Сайт не обновлён, данные не тронуты — попробуйте ещё раз.'; Pause-Enter 'Enter — закрыть окно'; exit 1 }
 Build-Site $cfg; Ok 'Сайт собран'
-if (Deploy-Site $cfg) { [void](Migrate-Data $cfg -Delta); Ok "Готово! Сайт обновлён: https://$($cfg.projectId).web.app"; Say '  Игрокам достаточно обновить страницу (F5).' }
+if (Deploy-Site $cfg) { if (-not $migrated) { [void](Migrate-Data $cfg -Delta) }; Ok "Готово! Сайт обновлён: https://$($cfg.projectId).web.app"; Say '  Игрокам достаточно обновить страницу (F5).' }
 else { Bad 'Выложить не получилось — посмотрите сообщение выше и попробуйте ещё раз. Данные не тронуты.' }
 Pause-Enter 'Enter — закрыть окно'

@@ -68,7 +68,9 @@ function Deploy-Site($cfg) {
 
 # версия шаблона в папке app и версия, которая реально выложена на сайт (siteDEPLOYED.txt пишется только после успешной выкладки)
 function App-Version { $f = Join-Path $AppDir 'VERSION.txt'; if (Test-Path $f) { (Get-Content $f -Raw -Encoding UTF8).Trim() } else { '' } }
-function Deployed-Version { $f = Join-Path $SiteDir 'DEPLOYED.txt'; if (Test-Path $f) { (Get-Content $f -Raw -Encoding UTF8).Trim() } else { '' } }
+function Deployed-Version { $f = Join-Path $SiteDir 'DEPLOYED.txt'; if (Test-Path $f) { "$(Get-Content $f -Raw -Encoding UTF8)".Trim() } else { '' } }
+# на сайте уже версия с папками игр (с 2026-10-21 18:52 выкладка шла только после успешного переноса) — перенос сделан, базу для него читать не нужно
+function Migrated-Before { if ((Deployed-Version) -match '(\d{4}-\d{2}-\d{2} \d{2}:\d{2})') { return ($Matches[1] -ge '2026-10-21 18:52') } return $false }
 
 # ===== обновление с GitHub и бэкап данных =====
 $Repo      = 'Zlodemon/kartoteka'                               # владелец/репозиторий на GitHub, откуда берутся обновления

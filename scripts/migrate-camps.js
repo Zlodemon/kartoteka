@@ -39,16 +39,15 @@ async function accessToken() {
   // перенос уже сделан и проверен (есть отчёт) — базу не трогаем, обновление от неё не зависит. Перепроверить по базе — --again
   if (!delta && !again && fs.existsSync(manifestFile)) { const m = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
     if (m.end) { console.log(`Перенос уже сделан ${new Date(m.end).toLocaleString('ru-RU')} (отчёт ${manifestFile}) — базу не читаю.`); return; } }
+  if (delta && !fs.existsSync(manifestFile)) { console.log('Нет отчёта переноса (' + manifestFile + ') — докопировать нечего.'); return; }
   // FIRESTORE_EMULATOR_HOST=localhost:8080 — проверка на эмуляторе (вход не нужен)
   const EMU = process.env.FIRESTORE_EMULATOR_HOST;
   const root = `projects/${project}/databases/(default)/documents`, base = (EMU ? `http://${EMU}/v1/` : 'https://firestore.googleapis.com/v1/') + root;
   let tok = EMU ? 'owner' : await accessToken();
-  // x-goog-user-project: квота запросов — на свой проект. Без него Google считает её на общий проект OAuth-клиента Firebase CLI → 429 у всех подряд.
-  // Нет права serviceusage.services.use на проект — один раз пробуем без заголовка
-  let qp = !EMU;
-  const api = async (url, opts = {}, allow404) => { for (let i = 0; ; i++) { const r = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), authorization: 'Bearer ' + tok, ...(qp ? { 'x-goog-user-project': project } : {}) } });
+  const api = async (url, opts = {}, allow404) => { for (let i = 0; ; i++) { const r = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), authorization: 'Bearer ' + tok } });
       if (r.ok) return r.json(); if (r.status === 404 && allow404) return null; const txt = await r.text(); if (r.status === 401 && i === 0 && !EMU) { tok = await accessToken(); continue; }
-      if (r.status === 403 && qp && /USER_PROJECT_DENIED|serviceusage/i.test(txt)) { qp = false; continue; }
+      // суточный бесплатный лимит базы (тариф Spark) кончился — повторять бессмысленно, до сброса не пройдёт
+      if (r.status === 429 && /"Quota exceeded\."/.test(txt)) throw new Error('закончился суточный бесплатный лимит базы Firebase (HTTP 429 «Quota exceeded», тариф Spark). Он сбрасывается в полночь по Калифорнии — 10:00 по Москве (с 1 ноября — 11:00). Сайт можно выложить и сейчас, без бэкапа: выкладка базу не читает');
       if ((r.status === 429 || r.status >= 500) && i < 4) { await new Promise(res => setTimeout(res, 1500 * (i + 1))); continue; }
       throw new Error(`HTTP ${r.status}: ${txt.slice(0, 300)}`); } };
   const post = (url, body) => api(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
