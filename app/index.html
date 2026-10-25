@@ -59,6 +59,8 @@ h1,h2,h3{margin:0;font-weight:700}
 .ro input[type=checkbox]:not(.keep){opacity:.5}
 .ro .portrait,.ro .energy svg{cursor:default}
 .ro .seg span{pointer-events:none}
+/* организация/локация вне правки: текстовые поля как обычный текст (строка добавления — нет) */
+.locked :not(.addrow)>:is(input,textarea):not([type=checkbox],[type=color],[type=range],.keep){pointer-events:none;border-color:transparent;background:transparent;resize:none}
 
 /* ===== экран входа ===== */
 #login{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:26px;text-align:center;padding:40px}
@@ -2431,6 +2433,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-25',t:'Организации и локации: поля не правятся случайно',items:['На странице организации и локации все текстовые поля (название, описание, «Кратко для игроков», роли участников, заметки «Кто здесь», подписи связей) показываются как готовый текст. Кнопка «✎ править» в шапке открывает их на правку, «✓ готово» — закрывает. Новая организация или локация открывается сразу в правке.','В «+ Участник» и «+ Привязать» уже добавленные стоят в конце списка с пометкой ✓.']},
   {d:'2026-10-25',t:'Предупреждение «Кэш базы не работает»',items:['Если браузер не даёт сайту сохранить базу у себя (приватное окно, запрет на данные сайтов, нет места), под названием сайта появляется красное «⚠ Кэш базы не работает». Без кэша каждый заход и каждый F5 читает всю базу заново из суточного лимита; с кэшем повторный заход стоит единицы чтений. Нажми на надпись — там что сделать.','Настройки → «Данные»: работает ли кэш в этом браузере, сколько было заходов сегодня и сколько чтений стоил каждый.','Если страница начнёт перезагружаться по кругу (при переключении игры), после трёх раз за минуту она остановится и скажет об этом.']},
   {d:'2026-10-25',t:'Меньше чтений базы',items:['Картинки, которых уже нет в базе (удалённый портрет, на который ещё ссылаются копия, клон или карта), больше не запрашиваются заново при каждой перерисовке страницы. Раньше любое изменение у любого участника заставляло каждую открытую вкладку снова спрашивать сервер про каждую такую картинку — это тихо съедало суточный лимит чтений.','Карта местности больше не переспрашивает базу про клонов персонажей, чьи токены стоят на других картах, при каждой перерисовке: проверенный клон не проверяется 30 минут. Раньше это тихо тратило суточный лимит чтений, пока мастер сидел на карте.','Настройки → «Данные»: под счётчиком чтений теперь видны и прошлые дни этого браузера — что съело лимит, если вчера была ошибка «Quota exceeded».']},
   {d:'2026-10-25',t:'Карточки: поиск в любом падеже',items:['Поиск в библиотеке карт и в справочнике кейвордов находит слово в любом падеже: «шипы» найдёт «4 шипа», «горения» — «горение», «дальнюю» — «Дальняя». Недописанное слово ищется как раньше, кусочком; несколько слов — все, в любом порядке. Ищется и по цели, и по улучшениям.']},
@@ -2805,9 +2808,10 @@ async function duplicateEntity(ent){ const t=typeOf(ent.id); const coll={c:'char
   await createDoc(coll,c); toast('Скопировано: '+c.name); return c; }
 function headBlock(ent,backView,namePh,titlePh){
   const ed=canEdit(ent);
-  const h=el(`<div class="head ${ed?'':'ro'}"><button class="btn icon" title="Назад">←</button><div class="grow"><input class="title-in" placeholder="${namePh}" value="${esc(ent.name)}"><input class="sub-in" placeholder="${titlePh}" value="${esc(ent.title||'')}"></div>${isDM()||ent.owner===effUid()?'':`<span class="faint" style="font-size:12px">автор: ${esc(userName(ent.owner))}</span>`}${ed&&(typeOf(ent.id)!=='c'||isDM())?`<button class="btn icon dup" title="Дублировать (копия со всеми полями и картинками)">⧉</button>`:''}${isDM()?`<div class="seg visctl" title="Кто и что видит: видна полностью / только кратко / скрыта от игроков"><span data-v="full" class="${visOf(ent)==='full'?'on':''}">видна</span><span data-v="brief" class="${visOf(ent)==='brief'?'on':''}">кратко</span><span data-v="hidden" class="${visOf(ent)==='hidden'?'on':''}">скрыта</span></div><button class="btn sm vfor ${visForN(ent)?'active':''}" title="Видимость и права отдельных игроков${visForN(ent)?': '+[...Object.entries(ent.visFor||{}).map(([u,v])=>userName(u)+' — '+VIS_NAMES[v]),...(ent.editors||[]).map(u=>userName(u)+' — ✎ правит')].join(', '):''}">👥${visForN(ent)?' '+visForN(ent):''}</button>`:''}${isDM()||(ent.owner===effUid()&&!viewAs)?'<button class="btn danger sm w">Удалить</button>':''}</div>`);
+  const h=el(`<div class="head ${ed?'':'ro'}"><button class="btn icon" title="Назад">←</button><div class="grow"><input class="title-in" placeholder="${namePh}" value="${esc(ent.name)}"><input class="sub-in" placeholder="${titlePh}" value="${esc(ent.title||'')}"></div>${pageLockable(ent)&&ed&&!viewAs&&!ent._draft?`<button class="btn sm pedit ${pageLocked(ent)?'':'primary'}" title="${pageLocked(ent)?'открыть название, описание и остальные поля на правку':'закрыть правку и показать готовый текст'}">${pageLocked(ent)?'✎ править':'✓ готово'}</button>`:''}${isDM()||ent.owner===effUid()?'':`<span class="faint" style="font-size:12px">автор: ${esc(userName(ent.owner))}</span>`}${ed&&(typeOf(ent.id)!=='c'||isDM())?`<button class="btn icon dup" title="Дублировать (копия со всеми полями и картинками)">⧉</button>`:''}${isDM()?`<div class="seg visctl" title="Кто и что видит: видна полностью / только кратко / скрыта от игроков"><span data-v="full" class="${visOf(ent)==='full'?'on':''}">видна</span><span data-v="brief" class="${visOf(ent)==='brief'?'on':''}">кратко</span><span data-v="hidden" class="${visOf(ent)==='hidden'?'on':''}">скрыта</span></div><button class="btn sm vfor ${visForN(ent)?'active':''}" title="Видимость и права отдельных игроков${visForN(ent)?': '+[...Object.entries(ent.visFor||{}).map(([u,v])=>userName(u)+' — '+VIS_NAMES[v]),...(ent.editors||[]).map(u=>userName(u)+' — ✎ правит')].join(', '):''}">👥${visForN(ent)?' '+visForN(ent):''}</button>`:''}${isDM()||(ent.owner===effUid()&&!viewAs)?'<button class="btn danger sm w">Удалить</button>':''}</div>`);
   $$('.visctl span',h).forEach(x=>x.onclick=()=>{ ent.visibility=x.dataset.v; touch(ent); render(); });
   { const vf=$('.vfor',h); if(vf) vf.onclick=()=>visForDialog(ent,()=>render()); }
+  { const pe=$('.pedit',h); if(pe) pe.onclick=()=>{ if(PAGE_EDIT.has(ent.id)) PAGE_EDIT.delete(ent.id); else PAGE_EDIT.add(ent.id); render(); }; }
   $('.icon',h).onclick=()=>goBack(backView); const dupB=$('.dup',h); if(dupB) dupB.onclick=async()=>{ const c=await duplicateEntity(ent); if(c) open(c.id); };
   $('.title-in',h).oninput=e=>{ ent.name=e.target.value; touch(ent); };
   $('.sub-in',h).oninput=e=>{ ent.title=e.target.value; touch(ent); };
@@ -2816,16 +2820,24 @@ function headBlock(ent,backView,namePh,titlePh){
 }
 /* описание закрыто от случайной правки: по умолчанию готовый текст с цветами, 🔒 — открыть редактор (только в этой вкладке) */
 const DESC_OPEN=new Set();
+/* у организаций и локаций так закрыты все текстовые поля страницы: «✎ править» в шапке открывает их разом (только в этой вкладке) */
+const PAGE_EDIT=new Set(); let PAGE_LAST=null;
+/* перешёл на другую организацию/локацию — правка прошлой закрывается; новая (черновик) открыта сразу */
+function pageEnter(ent){ if(PAGE_LAST!==ent.id){ PAGE_EDIT.clear(); PAGE_LAST=ent.id; } if(ent._draft) PAGE_EDIT.add(ent.id); }
+const pageLockable=ent=>'ol'.includes(typeOf(ent.id)||'-');
+const pageLocked=ent=>pageLockable(ent)&&canEdit(ent)&&!viewAs&&!ent._draft&&!PAGE_EDIT.has(ent.id);
+function lockPage(page,ent){ if(!pageLocked(ent)) return; page.classList.add('locked');
+  page.addEventListener('focusin',e=>{ const t=e.target; if(t.matches('input:not([type=checkbox],[type=color],[type=range],.keep),textarea')&&!t.closest('.addrow')) t.readOnly=true; },true); }
 function descBlock(ent,ph='Описание, история, характер, мотивы…'){
-  const ed=canEdit(ent)&&!viewAs; const txt=ent.description||''; const open_=ed&&(DESC_OPEN.has(ent.id)||!txt.trim());
-  const p=el(`<div class="panel ${ed?'':'ro'}"><h3>Описание${ed&&txt.trim()?`<button class="btn sm lock keep" style="margin-left:auto" title="${open_?'закрыть правку и показать готовый текст':'открыть описание на правку'}">${open_?'✓ готово':'🔒 править'}</button>`:''}</h3>${open_?`<textarea class="rich" placeholder="${ph}" style="width:100%;min-height:140px">${esc(txt)}</textarea>`:`<div class="richview" style="min-height:40px;line-height:1.6">${rich(txt)||'<span class="faint">—</span>'}</div>`}</div>`);
+  const ed=canEdit(ent)&&!viewAs; const txt=ent.description||''; const pl=pageLockable(ent); const open_=ed&&(pl?!pageLocked(ent):(DESC_OPEN.has(ent.id)||!txt.trim()));
+  const p=el(`<div class="panel ${ed?'':'ro'}"><h3>Описание${ed&&!pl&&txt.trim()?`<button class="btn sm lock keep" style="margin-left:auto" title="${open_?'закрыть правку и показать готовый текст':'открыть описание на правку'}">${open_?'✓ готово':'🔒 править'}</button>`:''}</h3>${open_?`<textarea class="rich" placeholder="${ph}" style="width:100%;min-height:140px">${esc(txt)}</textarea>`:`<div class="richview" style="min-height:40px;line-height:1.6">${rich(txt)||'<span class="faint">—</span>'}</div>`}</div>`);
   const ta=$('textarea',p); if(ta){ const fit=()=>{ ta.style.height='auto'; ta.style.height=Math.max(140,ta.scrollHeight+4)+'px'; };
     ta.oninput=()=>{ DESC_OPEN.add(ent.id); ent.description=ta.value; touch(ent); fit(); }; setTimeout(fit,0); }
   const lk=$('.lock',p); if(lk) lk.onclick=()=>{ if(open_) DESC_OPEN.delete(ent.id); else DESC_OPEN.add(ent.id); render(); };
   return p;
 }
 function briefBlock(ent){
-  if(isDM()) { const p=el(`<div class="panel"><h3>Кратко для игроков</h3><textarea class="rich" placeholder="Что видят игроки, когда сущность в режиме «кратко»: пара фраз, без секретов" style="width:100%;min-height:70px">${esc(ent.brief||'')}</textarea><div class="faint" style="font-size:12px;margin-top:6px">Показывается вместо описания, если видимость — «кратко». Сейчас: <b>${ {full:'видна полностью',brief:'кратко',hidden:'скрыта от игроков'}[visOf(ent)] }</b>.</div></div>`); $('textarea',p).oninput=e=>{ ent.brief=e.target.value; touch(ent); }; return p; }
+  if(isDM()) { const p=el(`<div class="panel"><h3>Кратко для игроков</h3>${pageLocked(ent)?`<div class="richview" style="line-height:1.6">${rich(ent.brief||'')||'<span class="faint">—</span>'}</div>`:`<textarea class="rich" placeholder="Что видят игроки, когда сущность в режиме «кратко»: пара фраз, без секретов" style="width:100%;min-height:70px">${esc(ent.brief||'')}</textarea>`}<div class="faint" style="font-size:12px;margin-top:6px">Показывается вместо описания, если видимость — «кратко». Сейчас: <b>${ {full:'видна полностью',brief:'кратко',hidden:'скрыта от игроков'}[visOf(ent)] }</b>.</div></div>`); const ta=$('textarea',p); if(ta) ta.oninput=e=>{ ent.brief=e.target.value; touch(ent); }; return p; }
   return el(`<div class="panel"><h3>Описание</h3><div style="line-height:1.6;white-space:pre-wrap">${rich(ent.brief||'')||'<span class="faint">Ничего не известно.</span>'}</div></div>`);
 }
 function musicEmbed(url){
@@ -2839,7 +2851,7 @@ function musicEmbed(url){
   return '<div class="faint">Не понимаю ссылку</div>';
 }
 function musicBlock(ent){
-  const ed=canEdit(ent); const mu=ent.music||{};
+  const ed=canEdit(ent)&&!pageLocked(ent); const mu=ent.music||{};
   if(!ed&&!mu.url) return null;
   const p=el(`<div class="panel ${ed?'':'ro'}"><h3>Музыка${mu.title?` <span class="muted" style="letter-spacing:0;text-transform:none;font-weight:400;margin-left:6px">· ${esc(mu.title)}</span>`:''}</h3><div class="player">${musicEmbed(mu.url)}</div>
     ${ed?`<div class="stack w" style="margin-top:10px;gap:6px"><input class="url" placeholder="Ссылка: YouTube, SoundCloud, Spotify, Яндекс.Музыка или прямой mp3" value="${esc(mu.url||'')}"><input class="ttl" placeholder="Название трека (необязательно)" value="${esc(mu.title||'')}"><div class="faint" style="font-size:12px;line-height:1.5">Файл хранится там, где лежит, — сюда только ссылка. Прямой mp3 можно положить, например, в Dropbox («скачать»-ссылка с dl=1) или на любой хостинг.</div></div>`:''}</div>`);
@@ -3807,8 +3819,10 @@ document.addEventListener('focusout',e=>{ if(e.target===richTarget){ richHide=se
 document.addEventListener('scroll',()=>{ if(richTarget) showRichbar(richTarget); },true);
 function entityChip(id,extraCls=''){ const e=findEntity(id); const t=typeOf(id); if(e&&!visibleEnt(e)) return `<span class="chip">неизвестно</span>`; return `<span class="chip ${t||''} click ${extraCls}" data-open="${id}">${esc(e?.name||'?')||'без имени'}</span>`; }
 function bindOpen(root){ $$('[data-open]',root).forEach(c=>c.onclick=ev=>{ ev.stopPropagation(); open(c.dataset.open); }); }
-function entitySelect(exclude,types='col'){
-  const groups=[]; const add=(t,arr,label)=>{ if(!types.includes(t)) return; const opts=arr.filter(e=>e.id!==exclude).map(e=>`<option value="${e.id}">${esc(e.name)||'без имени'}</option>`).join(''); if(opts) groups.push(`<optgroup label="${label}">${opts}</optgroup>`); };
+/* added — id уже добавленных: они уходят в конец своей группы с пометкой ✓ */
+function entitySelect(exclude,types='col',added){
+  const has=e=>!!added&&added.has(e.id);
+  const groups=[]; const add=(t,arr,label)=>{ if(!types.includes(t)) return; const L=arr.filter(e=>e.id!==exclude); const opts=[...L.filter(e=>!has(e)),...L.filter(has)].map(e=>`<option value="${e.id}">${has(e)?'✓ ':''}${esc(e.name)||'без имени'}</option>`).join(''); if(opts) groups.push(`<optgroup label="${label}">${opts}</optgroup>`); };
   add('c',V.chars(),'Персонажи'); add('o',V.orgs(),'Организации'); add('l',V.locs(),'Локации');
   return `<select><option value="">— выбрать —</option>${groups.join('')}</select>`;
 }
@@ -4630,8 +4644,8 @@ function membershipsBlock(ch){
    ============================================================ */
 function renderOrg(m,o){
   if(!o||!visibleEnt(o)){ go('orgs'); return; }
-  const ed=canEdit(o);
-  const page=el(`<div class="page"></div>`);
+  const ed=canEdit(o); pageEnter(o);
+  const page=el(`<div class="page"></div>`); lockPage(page,o);
   page.append(headBlock(o,'orgs','Название организации','чем занимается одной строкой'));
   const d=el(`<div class="detail"><div class="stack left"></div><div class="stack right"></div></div>`);
   const L=$('.left',d), R=$('.right',d);
@@ -4640,10 +4654,11 @@ function renderOrg(m,o){
   B.music=musicBlock(o);
   const mem=el(`<div class="panel ${ed?'':'ro'}"><h3>Участники <button class="btn sm w">+ Участник</button></h3><div class="list"></div><div class="addrow row" style="display:none;margin-top:8px">${entitySelect(o.id,'c')}<input class="grow" placeholder="роль / должность"><button class="btn sm">Ок</button></div></div>`);
   const list=$('.list',mem), addrow=$('.addrow',mem);
-  $('h3 .btn',mem).onclick=()=>{ if(!V.chars().length){ toast('Нет персонажей'); return; } addrow.style.display='flex'; $('select',addrow).focus(); };
+  const shown=()=>{ const all=world.memberships.filter(x=>x.orgId===o.id); return [all,isDM()?all:all.filter(mm=>memVisible(mm)&&visibleEnt(byId(world.characters,mm.charId)))]; };
+  $('h3 .btn',mem).onclick=()=>{ if(!V.chars().length){ toast('Нет персонажей'); return; } $('select',addrow).outerHTML=entitySelect(o.id,'c',new Set(shown()[1].map(x=>x.charId))); addrow.style.display='flex'; $('select',addrow).focus(); };
   $('.addrow .btn',mem).onclick=async()=>{ const id=$('select',addrow).value; if(!id) return; await createDoc('memberships',{id:uid(),charId:id,orgId:o.id,role:$('input',addrow).value,revealed:!isDM()}); addrow.style.display='none'; $('input',addrow).value=''; draw(); };
   const draw=()=>{
-    list.innerHTML=''; const all=world.memberships.filter(x=>x.orgId===o.id); const ms=isDM()?all:all.filter(mm=>memVisible(mm)&&visibleEnt(byId(world.characters,mm.charId)));
+    list.innerHTML=''; const [all,ms]=shown();
     const hiddenN=all.length-ms.length;
     if(!ms.length&&!hiddenN){ list.innerHTML='<div class="faint" style="padding:6px 0">Пока никого.</div>'; return; }
     for(const mm of ms){ const row=el(`<div class="memrow ${canEditEdge(mm)?'':'ro'}"><div>${entityChip(mm.charId)}</div><input value="${esc(mm.role||'')}" placeholder="роль"><div class="row" style="gap:0">${eyeBtn(mm)}<button class="x-btn w">×</button></div></div>`);
@@ -4656,8 +4671,8 @@ function renderOrg(m,o){
 }
 function renderLocation(m,l){
   if(!l||!visibleEnt(l)){ go('locations'); return; }
-  const ed=canEdit(l);
-  const page=el(`<div class="page"></div>`);
+  const ed=canEdit(l); pageEnter(l);
+  const page=el(`<div class="page"></div>`); lockPage(page,l);
   page.append(headBlock(l,'locations','Название локации','где это / что это одной строкой'));
   const d=el(`<div class="detail loc"><div class="stack left"></div><div class="stack right"></div></div>`);
   const L=$('.left',d), R=$('.right',d);
@@ -4668,7 +4683,7 @@ function renderLocation(m,l){
   B.music=musicBlock(l);
   const who=el(`<div class="panel ${canWrite()?'':'ro'}"><h3>Кто здесь <button class="btn sm w">+ Привязать</button></h3><div class="list"></div><div class="addrow row" style="display:none;margin-top:8px">${entitySelect(l.id,'co')}<input class="grow" placeholder="заметка"><button class="btn sm">Ок</button></div></div>`);
   const list=$('.list',who), addrow=$('.addrow',who);
-  $('h3 .btn',who).onclick=()=>{ addrow.style.display='flex'; $('select',addrow).focus(); };
+  $('h3 .btn',who).onclick=()=>{ $('select',addrow).outerHTML=entitySelect(l.id,'co',new Set(V.locLinks().filter(x=>x.locId===l.id).map(x=>x.entityId))); addrow.style.display='flex'; $('select',addrow).focus(); };
   $('.addrow .btn',who).onclick=async()=>{ const id=$('select',addrow).value; if(!id) return; await createDoc('locLinks',{id:uid(),entityId:id,entityType:typeOf(id),locId:l.id,note:$('input',addrow).value}); addrow.style.display='none'; $('input',addrow).value=''; draw(); };
   const draw=()=>{
     list.innerHTML=''; const ls=V.locLinks().filter(x=>x.locId===l.id);
