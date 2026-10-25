@@ -1,7 +1,8 @@
 // Перенос данных картотеки в папку игры: корневые коллекции (characters, meta, maps, …) копируются в campaigns/main/<коллекция>.
 // Нужен один раз при переходе на версию с несколькими играми (2026-10-21). Корень НЕ удаляется — остаётся архивом.
 // Запуск:  node migrate-camps.js <id проекта Firebase> [папка для отчёта] [--delta] [--dry]
-//   без флагов — перенос; если в campaigns/main уже есть данные, ничего не делает (можно запускать при каждом обновлении)
+//   без флагов — перенос; если есть отчёт migrate-<проект>.json или в campaigns/main уже есть данные, ничего не делает (можно запускать при каждом обновлении).
+//                При отчёте база вовсе не читается; --again — всё равно проверить по базе
 //   --delta    — после выкладки новой версии: докопировать то, что старые вкладки успели поменять в корне после переноса
 //                (берёт отчёт migrate-<проект>.json; если документ уже правили в новой папке — не трогает и сообщает).
 //                Делается один раз: после выкладки правила не пускают писать в корень, он больше не меняется, а перечитывать
@@ -35,12 +36,19 @@ async function accessToken() {
   // дельта уже была — корень с тех пор не меняется, базу не читаем вовсе
   if (delta && !again && fs.existsSync(manifestFile)) { const m = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
     if (m.deltaAt) { console.log(`Дельта переноса уже сделана ${new Date(m.deltaAt).toLocaleString('ru-RU')} — старый корень больше не меняется, перечитывать не нужно.`); return; } }
+  // перенос уже сделан и проверен (есть отчёт) — базу не трогаем, обновление от неё не зависит. Перепроверить по базе — --again
+  if (!delta && !again && fs.existsSync(manifestFile)) { const m = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+    if (m.end) { console.log(`Перенос уже сделан ${new Date(m.end).toLocaleString('ru-RU')} (отчёт ${manifestFile}) — базу не читаю.`); return; } }
   // FIRESTORE_EMULATOR_HOST=localhost:8080 — проверка на эмуляторе (вход не нужен)
   const EMU = process.env.FIRESTORE_EMULATOR_HOST;
   const root = `projects/${project}/databases/(default)/documents`, base = (EMU ? `http://${EMU}/v1/` : 'https://firestore.googleapis.com/v1/') + root;
   let tok = EMU ? 'owner' : await accessToken();
-  const api = async (url, opts = {}, allow404) => { for (let i = 0; ; i++) { const r = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), authorization: 'Bearer ' + tok } });
+  // x-goog-user-project: квота запросов — на свой проект. Без него Google считает её на общий проект OAuth-клиента Firebase CLI → 429 у всех подряд.
+  // Нет права serviceusage.services.use на проект — один раз пробуем без заголовка
+  let qp = !EMU;
+  const api = async (url, opts = {}, allow404) => { for (let i = 0; ; i++) { const r = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), authorization: 'Bearer ' + tok, ...(qp ? { 'x-goog-user-project': project } : {}) } });
       if (r.ok) return r.json(); if (r.status === 404 && allow404) return null; const txt = await r.text(); if (r.status === 401 && i === 0 && !EMU) { tok = await accessToken(); continue; }
+      if (r.status === 403 && qp && /USER_PROJECT_DENIED|serviceusage/i.test(txt)) { qp = false; continue; }
       if ((r.status === 429 || r.status >= 500) && i < 4) { await new Promise(res => setTimeout(res, 1500 * (i + 1))); continue; }
       throw new Error(`HTTP ${r.status}: ${txt.slice(0, 300)}`); } };
   const post = (url, body) => api(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });

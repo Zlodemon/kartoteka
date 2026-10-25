@@ -44,11 +44,15 @@ function fields(f) { const o = {}; for (const k of Object.keys(f)) o[k] = val(f[
 const EMU = process.env.FIRESTORE_EMULATOR_HOST;
 const base = (EMU ? `http://${EMU}/v1/` : 'https://firestore.googleapis.com/v1/') + `projects/${project}/databases/(default)/documents`;
 let tok = null;
+// x-goog-user-project: квота запросов — на свой проект. Без него Google считает её на общий проект OAuth-клиента Firebase CLI → 429 у всех подряд.
+// Нет права serviceusage.services.use на проект — один раз пробуем без заголовка
+let qp = !EMU;
 const enc = p => p.split('/').map(encodeURIComponent).join('/');
 async function api(url, opts = {}) { if (!tok) tok = EMU ? 'owner' : await accessToken();
-  for (let i = 0; ; i++) { const r = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), authorization: 'Bearer ' + tok } });
+  for (let i = 0; ; i++) { const r = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), authorization: 'Bearer ' + tok, ...(qp ? { 'x-goog-user-project': project } : {}) } });
     if (r.ok) return r.json(); if (r.status === 404) return null; const txt = await r.text();
     if (r.status === 401 && i === 0 && !EMU) { tok = await accessToken(); continue; }
+    if (r.status === 403 && qp && /USER_PROJECT_DENIED|serviceusage/i.test(txt)) { qp = false; continue; }
     if ((r.status === 429 || r.status >= 500) && i < 4) { await new Promise(res => setTimeout(res, 1500 * (i + 1))); continue; }
     throw new Error(`HTTP ${r.status}: ${txt.slice(0, 300)}`); } }
 const getDoc = async p => { const d = await api(`${base}/${enc(p)}`); return d ? { ...fields(d.fields || {}), id: p.split('/').pop() } : null; };
