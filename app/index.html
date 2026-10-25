@@ -107,7 +107,7 @@ h1,h2,h3{margin:0;font-weight:700}
 
 /* ===== карточки ===== */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
-.lsecs{display:flex;flex-direction:column;gap:14px}.lsec .lsh{display:flex;gap:8px;align-items:center;padding:6px 10px;margin-bottom:10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--line);cursor:pointer;user-select:none;font-size:14px}.lsec .lsh:hover{background:rgba(255,255,255,.06)}.lsec .lsh.over{border-color:var(--gold);background:rgba(255,209,102,.08)}.lsec .lsh .arr{transition:transform .15s;color:var(--muted);font-size:12px}.lsec.shut .lsh .arr{transform:rotate(-90deg)}.lsec.shut .lsh{margin-bottom:0}.lsec.shut>.grid{display:none}.lsec:not(.own) .ftag{display:none}.seg.visctl.sm span{padding:3px 8px;font-size:12px}
+.lsecs{display:flex;flex-direction:column;gap:14px}.lsec .lsh{display:flex;gap:8px;align-items:center;padding:6px 10px;margin-bottom:10px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--line);cursor:pointer;user-select:none;font-size:14px}.lsec .lsh:hover{background:rgba(255,255,255,.06)}.lsec .lsh.over{border-color:var(--gold);background:rgba(255,209,102,.08)}.lsec .lsh .arr{transition:transform .15s;color:var(--muted);font-size:12px}.lsec.shut .lsh .arr{transform:rotate(-90deg)}.lsec.shut .lsh{margin-bottom:0}.lsec.shut>.grid{display:none}.card.dropB{box-shadow:-4px 0 0 var(--gold)}.card.dropA{box-shadow:4px 0 0 var(--gold)}.lrow.dropB{box-shadow:0 -3px 0 var(--gold)}.lrow.dropA{box-shadow:0 3px 0 var(--gold)}.lsec:not(.own) .ftag{display:none}.seg.visctl.sm span{padding:3px 8px;font-size:12px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .15s;position:relative}
 .card:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .card .pic{aspect-ratio:1/1;background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.01));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
@@ -2713,11 +2713,16 @@ function gsOpen(){ if(!me||$('#gsearch')) return; closeModal();
   inp.onkeydown=e=>{ if(e.key==='ArrowDown'){ e.preventDefault(); cur=Math.min(list.length-1,cur+1); mark(); } else if(e.key==='ArrowUp'){ e.preventDefault(); cur=Math.max(0,cur-1); mark(); } else if(e.key==='Enter'){ e.preventDefault(); pick(cur); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
   $('#gsx',w).onclick=close; w.addEventListener('mousedown',e=>{ if(e.target===w) close(); }); draw(); setTimeout(()=>inp.focus(),20); }
 document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.shiftKey&&(e.code==='KeyK'||e.key==='k'||e.key==='K'||e.key==='л'||e.key==='Л')){ if(!me||!world.settings) return; e.preventDefault(); e.stopPropagation(); gsOpen(); } },true);
+/* ручной порядок карточек: у дм — общий (settings.listOrder[t]), у остальных — свой в localStorage поверх общего */
+function listOrder(t){ if(!isDM()){ try{ const o=JSON.parse(localStorage.getItem('list.order.'+t)||'null'); if(Array.isArray(o)) return o; }catch{} } return (world.settings.listOrder&&world.settings.listOrder[t])||[]; }
+function listOrderSet(t,ids){ if(isDM()){ const S=world.settings; S.listOrder={...(S.listOrder||{}),[t]:ids}; touch(S); } else try{ localStorage.setItem('list.order.'+t,JSON.stringify(ids)); }catch{} }
+function listSorted(t,arr){ const ix=new Map(listOrder(t).map((id,i)=>[id,i])); return arr.map((e,i)=>[e,ix.has(e.id)?ix.get(e.id):1e6+i]).sort((a,b)=>a[1]-b[1]).map(x=>x[0]); }
+let LIST_DRAG=null;
 function renderList(m,t){
   const cfg={c:{title:'Персонажи',arr:V.chars(),add:async()=>{const c=await newCharacter();go('characters',c.id);},ph:'Поиск по имени, тегам, организации…',can:isDM()||(isPlayer()&&!viewAs&&can('plCharNew'))},
              o:{title:'Организации',arr:V.orgs(),add:async()=>{const o=await newOrg();go('orgs',o.id);},ph:'Поиск…',can:canWrite()},
              l:{title:'Локации',arr:V.locs(),add:async()=>{const l=await newLocation();go('locations',l.id);},ph:'Поиск…',can:canWrite()}}[t];
-  const page=el(`<div class="page"><div class="head"><h1>${cfg.title}</h1><input class="search grow" placeholder="${cfg.ph}" value="${esc(state.q)}">${cfg.can?'<button class="btn primary">+ Добавить</button>':''}</div><div class="fsrow"><div class="fslot"></div><div class="lvbar"><select class="lvsort" title="Порядок"><option value="folders">по папкам</option><option value="name">по имени</option><option value="recent">недавно изменённые</option></select><span class="lvview"><button class="btn sm icon" data-v="cards" title="Карточки">▦</button><button class="btn sm icon" data-v="list" title="Список — компактно, по строке на запись">☰</button></span></div></div><div class="grid"></div></div>`);
+  const page=el(`<div class="page"><div class="head"><h1>${cfg.title}</h1><input class="search grow" placeholder="${cfg.ph}" value="${esc(state.q)}">${cfg.can?'<button class="btn primary">+ Добавить</button>':''}</div><div class="fsrow"><div class="fslot"></div><div class="lvbar"><select class="lvsort" title="Порядок"><option value="folders">по папкам (свой порядок)</option><option value="name">по имени</option><option value="recent">недавно изменённые</option></select><span class="lvview"><button class="btn sm icon" data-v="cards" title="Карточки">▦</button><button class="btn sm icon" data-v="list" title="Список — компактно, по строке на запись">☰</button></span></div></div><div class="grid"></div></div>`);
   { const LS=listPref(t); const s=$('.lvsort',page); s.value=LS.sort; s.onchange=()=>{ listPrefSet(t,'sort',s.value); draw(); }; $$('.lvview button',page).forEach(b=>{ b.classList.toggle('on',b.dataset.v===LS.view); b.onclick=()=>{ listPrefSet(t,'view',b.dataset.v); $$('.lvview button',page).forEach(x=>x.classList.toggle('on',x===b)); draw(); }; }); }
   const ab=$('.head .btn',page); if(ab) ab.onclick=cfg.add;
   const grid=$('.grid',page), search=$('.search',page);
@@ -2728,6 +2733,7 @@ function renderList(m,t){
     let arr=cfg.arr.filter(e=>{ if(F.active==='__none'&&F.map[e.id]) return false; if(F.active&&F.active!=='__none'&&F.map[e.id]!==F.active) return false; if(!q) return true; let hay=[e.name,e.title,plHid(e,'desc')?'':e.description,...(e.tags||[])].join(' ').toLowerCase();
       if(t==='c') hay+=' '+world.memberships.filter(x=>x.charId===e.id).map(x=>byId(world.orgs,x.orgId)?.name||'').join(' ').toLowerCase(); return hay.includes(q); });
     const LS=listPref(t); const asRow=LS.view==='list';
+    if(LS.sort==='folders') arr=listSorted(t,arr);
     if(LS.sort==='name') arr=[...arr].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ru')); else if(LS.sort==='recent') arr=[...arr].sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
     if(t==='c'&&isPlayer()) arr=[...arr].sort((a,b)=>(canEdit(b)?1:0)-(canEdit(a)?1:0));
     grid.innerHTML=''; grid.className=asRow?'lrows':'grid';
@@ -2753,6 +2759,10 @@ function renderList(m,t){
     for(const e of arr) grid.append(mkCard(e,asRow));
     hydrate(grid);
   };
+  /* перетаскивание карточки на карточку: встать до/после неё (и в её папку) */
+  const listMove=(id,tid,after)=>{ const F=FB.F; const ids=listSorted(t,cfg.arr).map(x=>x.id).filter(x=>x!==id); const i=ids.indexOf(tid); if(i<0) return; ids.splice(i+(after?1:0),0,id);
+    const fd=F.map[tid]||''; if((F.map[id]||'')!==fd){ if(fd) F.map[id]=fd; else delete F.map[id]; saveFolders(t,F); rebuildBar(); }
+    listOrderSet(t,ids); draw(); };
   const mkCard=(e,asRow)=>{ const F=FB.F; const q=state.q.trim().toLowerCase(); {
       let sub='', chips='', letters='', mini='';
       const brief=briefOnly(e);
@@ -2769,8 +2779,13 @@ function renderList(m,t){
         <div class="body"><div class="name">${esc(e.name)||'<span class="faint">без имени</span>'}</div><div class="sub">${esc(sub)||'&nbsp;'}</div>${chips?`<div class="chips" data-ent="${e.id}" data-lines="2">${chips}</div>`:''}${letters?`<div class="letters">${letters}</div>`:''}${fname?`<div class="ftag">📁 ${esc(fname)}</div>`:''}</div></div>`);
       { const pim=$('.pic img',card); if(pim){ const ok=()=>{ if(pim.naturalWidth) $('.pic',card).classList.add('hasimg'); }; if(pim.complete) ok(); pim.addEventListener('load',ok); } } /* прозрачная картинка: имя-заглушка не просвечивает */
       card.onclick=ev=>{ if(ev.target.classList.contains('fbtn')){ ev.stopPropagation(); folderMenu(t,e.id,card,()=>{ rebuildBar(); draw(); }); return; } open(e.id); };
-      card.ondragstart=ev=>{ ev.dataTransfer.setData('text/plain',e.id); ev.dataTransfer.effectAllowed='move'; card.classList.add('dragging'); };
-      card.ondragend=()=>card.classList.remove('dragging');
+      card.ondragstart=ev=>{ ev.dataTransfer.setData('text/plain',e.id); ev.dataTransfer.effectAllowed='move'; card.classList.add('dragging'); LIST_DRAG={t,id:e.id}; };
+      card.ondragend=()=>{ card.classList.remove('dragging'); LIST_DRAG=null; $$('.dropA,.dropB',grid).forEach(x=>x.classList.remove('dropA','dropB')); };
+      const reord=()=>LIST_DRAG&&LIST_DRAG.t===t&&LIST_DRAG.id!==e.id&&listPref(t).sort==='folders';
+      const after=ev=>{ const r=card.getBoundingClientRect(); return asRow?ev.clientY>r.top+r.height/2:ev.clientX>r.left+r.width/2; };
+      card.ondragover=ev=>{ if(!reord()) return; ev.preventDefault(); ev.dataTransfer.dropEffect='move'; const a=after(ev); card.classList.toggle('dropA',a); card.classList.toggle('dropB',!a); };
+      card.ondragleave=()=>card.classList.remove('dropA','dropB');
+      card.ondrop=ev=>{ if(!reord()) return; ev.preventDefault(); ev.stopPropagation(); card.classList.remove('dropA','dropB'); listMove(LIST_DRAG.id,e.id,after(ev)); };
       return card;
     } };
   search.oninput=()=>{ state.q=search.value; draw(); };
@@ -5549,6 +5564,7 @@ const techById=id=>techItems().find(i=>i.id===id);
 const techBranch=id=>techCat().branches.find(b=>b.id===id);
 const techCost=it=>typeof it.cost==='number'?it.cost:(isFinite(parseFloat(it.cost))?parseFloat(it.cost):null);
 const techName=id=>techById(id)?.name||'?';
+const techFatLbl=it=>/^[\d\s.,]+$/.test(String(it.fatigue))||/усталост/i.test(it.fatigue)?'Усталость':'Цена';
 const techRanks=it=>Math.max(1,Math.min(20,Math.round(+it.ranks||1)));
 /* цена ранга r (1 — первый): первый ранг — cost; дальше rankCost (число или формула с rank), иначе снова cost */
 function techRankCost(it,r){ if(r<=1||it.rankCost==null||it.rankCost==='') return techCost(it); if(typeof it.rankCost==='number') return it.rankCost; const x=fxRun(String(it.rankCost),{stats:{},bars:[]},{rank:r}); return x.ok?Math.max(0,Math.round(x.v)):null; }
@@ -5585,7 +5601,7 @@ function techTipHtml(it,ch){ const st=techStatus(ch,it); const c=ch?techNextCost
   return `<h4><span style="color:${b?.color||'#fff'}">${it.main?'◆':'●'}</span>${esc(it.name)}${it.hidden&&isDM()?'<span class="faint" style="font-size:11px;font-weight:400">· скрыта</span>':''}${it.tag?`<span class="faint" style="font-size:11px;font-weight:400">· ${esc(it.tag)}</span>`:''}<span class="cost">${ch&&techRanks(it)>1?`ранг ${techRank(ch,it)}/${techRanks(it)} · `:''}${(()=>{ const c=ch?techNextCost(ch,it):techCost(it); return c!=null?c+' очк.':(ch&&techRank(ch,it)?'макс.':esc(it.cost||'?')); })()}</span></h4>${it.roll?`<div class="sec"><b>Бросок</b><code style="font-size:12px">${esc(it.roll)}</code></div>`:''}
    <div class="muted" style="font-size:12.5px">${rich(it.desc)}</div>
    ${it.effect?`<div class="sec"><b>Эффект</b><span class="eff">${rich(it.effect)}</span></div>`:''}
-   ${it.fatigue?`<div class="sec"><b>Усталость</b>${esc(it.fatigue)}</div>`:''}
+   ${it.fatigue?`<div class="sec"><b>${techFatLbl(it)}</b>${esc(it.fatigue)}</div>`:''}
    ${it.req?.length?`<div class="sec"><b>Требует</b><span class="req">${it.req.map(id=>techById(id)&&techVisible(techById(id),ch)?techName(id):'???').join(it.reqAny?' или ':' + ')}</span></div>`:''}
    ${it.special?`<div class="sec"><b>Особое условие</b><span class="req">${esc(it.special)}</span></div>`:''}
    ${inc.length?`<div class="sec"><b>Несовместимо</b><span class="inc">${inc.map(techName).join(', ')}</span></div>`:''}
@@ -7051,7 +7067,7 @@ const canMove=it=>ed||(it._doc&&((it.t==='marker'&&(it.layer||'normal')==='norma
       else toast('Обычный режим'); WM.fitChat&&WM.fitChat(); }; }
   if(meBtn) meBtn.onclick=()=>{ WM.showMe=!WM.showMe; localStorage.setItem('wm.showMe',WM.showMe?'1':'0'); meBtn.classList.toggle('active',WM.showMe); meBox.classList.toggle('on',WM.showMe); if(WM.showMe) drawMe(); };
   const abShare=(ch,a)=>{ const parts=[]; if(a.kind==='cond'&&a.condition) parts.push('[b]Условие:[/b] '+a.condition); if(a.description) parts.push(a.description); if(a.cost) parts.push('[b]Цена:[/b] '+a.cost); if(a.comment) parts.push('[i]'+a.comment+'[/i]'); return {title:a.name||'без названия',sub:'Способность · '+(ch.name||'без имени')+(a.kind==='cond'?' · по условию':''),body:parts.join('\n'),n:ch.name||me.name,c:ch.id,color:'#8ef7c1',roll:a.roll||'',abId:a.id,bg:a.bg||'',fg:a.fg||'',ru:ruOn()&&(a.dice||[]).length?1:0,pas:ruOn()&&!(a.dice||[]).length&&(a.ruCond||a.on||(a.mods||[]).length)?1:0}; };
-  const tkShare=(ch,it)=>{ const b=techBranch(it.branch); const parts=[]; if(it.desc) parts.push(it.desc); if(it.effect) parts.push('[b]Эффект:[/b] '+it.effect); if(it.fatigue) parts.push('[b]Усталость:[/b] '+it.fatigue); return {title:(it.main?'◆ ':'')+it.name,sub:[b?.name,it.tag,techCost(it)!=null?techCost(it)+' очк.':''].filter(Boolean).join(' · ')+' · '+(ch.name||''),body:parts.join('\n'),n:ch.name||me.name,c:ch.id,color:b?.color||'#ffd166'}; };
+  const tkShare=(ch,it)=>{ const b=techBranch(it.branch); const parts=[]; if(it.desc) parts.push(it.desc); if(it.effect) parts.push('[b]Эффект:[/b] '+it.effect); if(it.fatigue) parts.push('[b]'+techFatLbl(it)+':[/b] '+it.fatigue); return {title:(it.main?'◆ ':'')+it.name,sub:[b?.name,it.tag,techCost(it)!=null?techCost(it)+' очк.':''].filter(Boolean).join(' · ')+' · '+(ch.name||''),body:parts.join('\n'),n:ch.name||me.name,c:ch.id,color:b?.color||'#ffd166'}; };
   const toMap=card=>{ const w=toWorld(W()/2,H()/2); const p=snapP(w.x,w.y,false); const c={t:'card',x:Math.round(p.x),y:Math.round(p.y),w:WM_CARD_W,title:card.title,sub:card.sub,body:card.body,color:card.color,ref:card.c}; if(card.roll) c.roll=card.roll; if(card.ru) c.ru=1; if(card.abId) c.abId=card.abId; if(card.pas) c.pas=1; if(card.bg) c.bg=card.bg; if(card.fg) c.fg=card.fg; addItem(c); toast(card.roll?'Карточка на карте — в центре экрана. 🎲 на ней — бросок':'Карточка на карте — в центре экрана'); };
   function openLeft(id){ if(WM.dock&&meBox&&meBox.closest('#chat')){ WM.meChar=id; dockTab('me'); return; } WM.meChar=id; if(!WM.showMe){ WM.showMe=true; localStorage.setItem('wm.showMe','1'); } meBox.classList.add('on'); if(meBtn) meBtn.classList.add('active'); drawMe(); }
   /* панель «Рука»: карточки страниц в руке (колода / случайная рука / закреплённые в режиме «все»); клик — на первый свободный куб скорости и выбор цели */
@@ -7818,7 +7834,7 @@ function chatRender(){ const box=$('#chat .msgs'); if(!box) return; const all=ch
   const unread=CHAT.open?0:all.filter(m=>m.t>CHAT.seen&&m.u!==me?.uid).length; const n=$('#chatBtn .n'); n.textContent=unread||''; n.classList.toggle('on',unread>0); { const pn=$('#pnav .n'); if(pn) pn.textContent=unread||''; } if(CHAT.open){ CHAT.seen=Date.now(); localStorage.setItem('chatSeen',CHAT.seen); } }
 function chatOpen(v){ CHAT.open=v; $('#chat').classList.toggle('on',v); document.body.classList.toggle('chat-open',v); setTimeout(chatTall,0); WM.fitChat&&WM.fitChat(); if(state.view==='wmap'&&state.id&&WM.redraw) setTimeout(()=>WM.redraw&&WM.redraw(),80); /* полоса инициативы и кнопки подстраиваются под ширину */ if(v){ CHAT.seen=Date.now(); localStorage.setItem('chatSeen',CHAT.seen); if(!PHONE()) setTimeout(()=>$('#chatText').focus(),50); } chatRender(); pnavRender(); }
 async function chatShare(card){ if(!me||viewAs) return; const m={i:uid(),t:Date.now(),u:me.uid,n:card.n||me.name,k:'card',col:chatColorOf()||null,ti:String(card.title||'').slice(0,120),su:String(card.sub||'').slice(0,160),m:String(card.body||'').slice(0,2000)}; if(card.c) m.c=card.c; const day=dayId(m.t); try{ await chatPut('chat',m); chatOpen(true); toast('Отправлено в чат'); }catch(e){ console.error(e); toast('Не отправилось: '+(e.code||e.message),true); } }
-function techShareCard(it,ch){ const b=techBranch(it.branch); const parts=[]; if(it.desc) parts.push(it.desc); if(it.effect) parts.push('[b]Эффект:[/b] '+it.effect); if(it.fatigue) parts.push('[b]Усталость:[/b] '+it.fatigue); if(it.special) parts.push('[b]Особое условие:[/b] '+it.special); chatShare({title:(it.main?'◆ ':'')+it.name,sub:[b?.name,it.tag,techCost(it)!=null?techCost(it)+' очк.':it.cost].filter(Boolean).join(' · ')+(ch?' · '+(ch.name||'без имени'):''),body:parts.join('\n'),n:ch?.name||me.name,c:ch?.id}); }
+function techShareCard(it,ch){ const b=techBranch(it.branch); const parts=[]; if(it.desc) parts.push(it.desc); if(it.effect) parts.push('[b]Эффект:[/b] '+it.effect); if(it.fatigue) parts.push('[b]'+techFatLbl(it)+':[/b] '+it.fatigue); if(it.special) parts.push('[b]Особое условие:[/b] '+it.special); chatShare({title:(it.main?'◆ ':'')+it.name,sub:[b?.name,it.tag,techCost(it)!=null?techCost(it)+' очк.':it.cost].filter(Boolean).join(' · ')+(ch?' · '+(ch.name||'без имени'):''),body:parts.join('\n'),n:ch?.name||me.name,c:ch?.id}); }
 function chatSpeaker(){ const sel=$('#chatAs'); const id=sel&&sel.value; const c=id&&findEntity(id); return c?{c:c.id,n:c.name||'без имени'}:null; }
 function chatRollAs(ch,expr,label,gm,rr){ const r=rr||parseRoll(expr+(label?' '+label:'')); if(rr&&label) rr.l=label; if(!r){ toast('Не понял бросок',true); return; } const m={i:uid(),t:Date.now(),u:me.uid,n:ch?(ch.name||me.name):me.name,r}; if(ch){ m.c=ch.id; if(ch.color) m.col=ch.color; } const day=dayId(m.t); chatPut(gm?'chatdm':'chat',m).catch(e=>toast('Не отправилось',true)); }
 function chatStatAs(ch,name,v,L){ const m={i:uid(),t:Date.now(),u:me.uid,n:ch?(ch.name||me.name):me.name,k:'stat',ti:String(name).slice(0,60),v:String(v),L:String(L||'')}; if(ch){ m.c=ch.id; if(ch.color) m.col=ch.color; } const day=dayId(m.t); chatPut('chat',m).catch(()=>toast('Не отправилось',true)); }
