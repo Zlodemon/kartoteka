@@ -79,9 +79,9 @@ service cloud.firestore {
       function isEditor() { return isPlayer() && uid() in resource.data.get('editors', []); }
       // ===== досинхронизация (этап 1 — 2026-10-26). В коллекциях персонажей, организаций, локаций, членства, привязок, связей, карт связей, карт мира,
       // токенов, рисунков, личных слоёв, документов и карточек каждая запись ставит _t (время, мс от 2026-01-01) и _r (случайное число); удаление и смена полей,
-      // от которых зависит, кому виден документ, в той же пачке пишут «надгробие» gone/<коллекция>__<id>. Пока SYNC_ENFORCE() == false, сервер этого
-      // не требует (старые вкладки пишут без меток). Включить на этапе 2, когда все обновятся: тогда правка без новой метки или без надгробия отклоняется
-      function SYNC_ENFORCE() { return false; }
+      // от которых зависит, кому виден документ, в той же пачке пишут «надгробие» gone/<коллекция>__<id>. С 2026-10-26 (включено дочитывание) сервер это
+      // требует: правка без новой метки или без надгробия отклоняется — иначе дочитывание у других её бы не увидело. false — не требовать (старые вкладки)
+      function SYNC_ENFORCE() { return true; }
       function goneP(coll, id) { return path('/databases/' + database + '/documents/campaigns/' + cid + '/gone/' + coll + '__' + id); }
       function syncC() { return !SYNC_ENFORCE() || request.resource.data.get('_t', null) is int; }
       function syncU(coll, id) { return !SYNC_ENFORCE() || (request.resource.data.get('_t', null) is int && request.resource.data._t != resource.data.get('_t', -1)
