@@ -441,7 +441,10 @@ h1,h2,h3{margin:0;font-weight:700}
 .cddc{display:flex;align-items:center;gap:8px;font-size:15px}
 .cddc b{min-width:34px;text-align:center;color:#c792ff}
 .cddc .btn{min-width:28px;padding:2px 8px}
-.cddeck .cdhb{margin-left:auto;display:inline-flex;gap:6px}
+.cddeck .cdhb{margin-left:auto;display:inline-flex;gap:6px;align-items:center}
+.cddpub{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0;cursor:pointer;margin-right:6px;white-space:nowrap}
+.cddpub input{width:14px;height:14px;margin:0}
+.cddpub.on{color:#c792ff}
 .cdmode{margin-left:12px}
 .cddks{display:flex;flex-direction:column;gap:14px;margin-top:14px}
 .cddk1{border:1px solid var(--line2);border-radius:14px;background:rgba(199,146,255,.04);padding:10px 14px}
@@ -2467,6 +2470,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-26',t:'Колода «видна всем»',items:['На листе персонажа, в блоке «Колода персонажа», у мастера есть галочка «видна всем». С ней колоду этого персонажа видят все игроки, даже если сам персонаж открыт им только «кратко». Без галочки при «кратко» колода скрыта.']},
   {d:'2026-10-26',t:'Быстрые клики игрока больше не теряются',items:['Если игрок быстро нажимал «+» (колода, полоски, счётчики) у своего персонажа, одно из нажатий иногда пропадало. Исправлено.','Изменения колоды не пишутся в журнал — вдвое меньше записей в базу на каждый клик.']},
   {d:'2026-10-26',t:'Все колоды и колода в TTS',items:['Вверху «Карточек» — переключатель «📚 Библиотека / 🃏 Колоды». Во вкладке «Колоды» видны колоды всех персонажей сразу: карты, число копий, −/+ для своих, «✎ Собирать», «лист →».','«🎲 В TTS» у колоды (во вкладке «Колоды» и на листе персонажа) — игрок сам сохраняет свою колоду в Tabletop Simulator: Сохранённые объекты → Картотека → «Колода — имя». Картинки берутся с сайта картинок мастера, поэтому мастер должен сначала выгрузить сеты через «🎲 В TTS» — окно подскажет, каких картинок не хватает.']},
   {d:'2026-10-26',t:'Колода персонажа',items:['Вверху вкладки «Карточки» — выбор «🃏 Колода: персонаж» (свои персонажи; у мастера — любые). Клик по карте → «+ Добавить в колоду» / «− Убрать из колоды»; у мастера эти кнопки в подвале конструктора и в меню ПКМ. На плитках виден значок «×N» — сколько копий уже в колоде.','На листе персонажа появилась вкладка «🃏 Колода» (когда включён режим карточек): карты колоды, под каждой — число копий и −/+. «🃏 Добавить карты» открывает библиотеку сразу с этим персонажем.','У карты с улучшениями в колоду кладётся та версия, которая сейчас показана, — базовая и улучшенная считаются отдельно.']},
@@ -4477,7 +4481,7 @@ function renderCharacter(m,ch){
   const d=el(`<div class="detail"><div class="stack left"></div><div class="stack right"></div></div>`);
   const L=$('.left',d), R=$('.right',d);
   const B={gallery:galleryBlock(ch)}; const DEF={left:['gallery','players','tags','epic','stats','bars','auras','effects','energy'],right:['brief','desc','music','backstory','abilities','skills','epgear','inventory','deck','memberships','locLinks','relations']};
-  if(briefOnly(ch)){ B.brief=briefBlock(ch); B.music=musicBlock(ch); B.memberships=membershipsBlock(ch); B.locLinks=locLinksBlock(ch); B.relations=relationsBlock(ch); arrangeBlocks(d,ch,B,DEF); page.append(d); m.append(page); return; }
+  if(briefOnly(ch)){ B.brief=briefBlock(ch); if(cdOn()&&ch.deckPub) B.deck=cdDeckBlock(ch); /* колоду мастер открыл всем */ B.music=musicBlock(ch); B.memberships=membershipsBlock(ch); B.locLinks=locLinksBlock(ch); B.relations=relationsBlock(ch); arrangeBlocks(d,ch,B,DEF); page.append(d); m.append(page); return; }
   if(isDM()) B.brief=briefBlock(ch);
   B.music=musicBlock(ch);
   /* игроки (дм) */
@@ -10277,7 +10281,7 @@ const cdModeWire=page=>$$('.cdmode span',page).forEach(x=>x.onclick=()=>{ cdUiSe
 /* все колоды на одной странице: персонажи с колодами (свои — первыми), у мастера и пустые колоды персонажей игроков */
 function cdDecksPage(m){ const dm=isDM(); const tw={s:120,m:150,l:200}[cdUiGet('size','m')]||150; const closed=new Set(JSON.parse(cdUiGet('dclosed','[]')||'[]'));
   const mine=c=>(c.players||[]).includes(me&&me.uid); const has=c=>Array.isArray(c.deck)&&c.deck.some(e=>e&&+e.n>0);
-  const L=V.chars().filter(c=>!briefOnly(c)&&(has(c)||(dm&&(c.players||[]).length))).sort((a,b)=>(mine(b)-mine(a))||(has(b)-has(a))||String(a.name||'').localeCompare(String(b.name||''),'ru'));
+  const L=V.chars().filter(c=>(!briefOnly(c)||c.deckPub)&&(has(c)||(dm&&(c.players||[]).length))).sort((a,b)=>(mine(b)-mine(a))||(has(b)-has(a))||String(a.name||'').localeCompare(String(b.name||''),'ru'));
   const page=el(`<div class="page cdlib cddecks"><div class="head"><h1>Карточки</h1>${cdModeSeg()}<span class="grow"></span><span class="seg cdsz">${['s','m','l'].map(s=>`<span data-s="${s}" class="${cdUiGet('size','m')===s?'on':''}" title="Размер карт">${{s:'▪',m:'◼',l:'⬛'}[s]}</span>`).join('')}</span></div>
     <div class="faint">Колоды персонажей. Собирать колоду — в «📚 Библиотеке»: выбери персонажа вверху и кликай по картам.</div><div class="cddks"></div></div>`);
   const box=$('.cddks',page);
@@ -10446,8 +10450,9 @@ function cdDeckRefresh(ch){ const cur=cdDeckChar(); if(cur&&cur.id===ch.id) $$('
 function cdDeckSel(){ const L=cdDeckChars(); if(!L.length) return ''; const cur=cdDeckChar(), n=cur?cdDeckList(cur).n:0;
   return `<span class="cddsel" title="Чью колоду собираешь: клик по карте → «Добавить в колоду» / «Убрать из колоды»">🃏 Колода: <select id="cdDeck"><option value="-">— не собираю —</option>${L.map(c=>`<option value="${esc(c.id)}" ${cur&&cur.id===c.id?'selected':''}>${esc(c.name)||'без имени'}</option>`).join('')}</select>${cur?`<button class="btn sm ghost" id="cdDeckGo" title="Открыть колоды (вкладка «🃏 Колоды»)">${n} ${plural(n,'карта','карты','карт')} →</button>`:''}</span>`; }
 function cdDeckBlock(ch){ if(Array.isArray(ch.deck)&&ch.deck.length) cdSubscribe(); /* пустая колода — карты не читаем */ const ed=canEdit(ch)&&!viewAs;
-  const p=el(`<div class="panel cddeck ${ed?'':'ro'}" data-ch="${esc(ch.id)}"><h3>Колода персонажа <span class="faint cddn" style="font-weight:400"></span>${ed?'<span class="cdhb"><button class="btn sm w cdgo" title="Открыть библиотеку карт с этой колодой: клик по карте → «Добавить в колоду»">🃏 Добавить карты</button><button class="btn sm w cdtt" title="Сохранить колоду в Tabletop Simulator (Сохранённые объекты → Картотека)">🎲 В TTS</button></span>':''}</h3><div class="cddbody"></div></div>`);
+  const p=el(`<div class="panel cddeck ${ed?'':'ro'}" data-ch="${esc(ch.id)}"><h3>Колода персонажа <span class="faint cddn" style="font-weight:400"></span>${ed?'<span class="cdhb">'+(isDM()&&!viewAs?`<label class="cddpub ${ch.deckPub?'on':''}" title="Колода видна всем игрокам, даже если персонаж открыт им «кратко». Без галочки при «кратко» колоду не видно (на листе и во вкладке «Колоды»)"><input type="checkbox" ${ch.deckPub?'checked':''}> видна всем</label>`:'')+'<button class="btn sm w cdgo" title="Открыть библиотеку карт с этой колодой: клик по карте → «Добавить в колоду»">🃏 Добавить карты</button><button class="btn sm w cdtt" title="Сохранить колоду в Tabletop Simulator (Сохранённые объекты → Картотека)">🎲 В TTS</button></span>':''}</h3><div class="cddbody"></div></div>`);
   p._draw=()=>{ const D=cdDeckList(ch); $('.cddn',p).textContent=D.n?'· '+D.n+' '+plural(D.n,'карта','карты','карт'):''; cdDeckFill($('.cddbody',p),ch,ed,150); }; p._draw();
+  const dp=$('.cddpub input',p); if(dp){ dp.onclick=e=>e.stopPropagation(); dp.onchange=()=>{ if(dp.checked) ch.deckPub=true; else delete ch.deckPub; touch(ch); $('.cddpub',p).classList.toggle('on',dp.checked); toast(dp.checked?'Колоду видят все игроки':'Колода видна по видимости персонажа'); }; }
   const g=$('.cdgo',p); if(g) g.onclick=()=>{ cdUiSet('deck',ch.id); cdUiSet('mode','lib'); go('cards'); }; const t=$('.cdtt',p); if(t) t.onclick=()=>cdDeckTtsDlg(ch); return p; }
 /* сетка колоды: карты, под каждой ×N и −/+ (ed), внизу — сколько скрыто */
 function cdDeckFill(body,ch,ed,tw){ const draw=()=>{ const D=cdDeckList(ch); body.innerHTML='';
