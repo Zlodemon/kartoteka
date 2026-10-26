@@ -441,7 +441,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .cddc{display:flex;align-items:center;gap:8px;font-size:15px}
 .cddc b{min-width:34px;text-align:center;color:#c792ff}
 .cddc .btn{min-width:28px;padding:2px 8px}
-.cddeck .cdgo{margin-left:auto}
+.cddeck .cdhb{margin-left:auto;display:inline-flex;gap:6px}
 .cdmode{margin-left:12px}
 .cddks{display:flex;flex-direction:column;gap:14px;margin-top:14px}
 .cddk1{border:1px solid var(--line2);border-radius:14px;background:rgba(199,146,255,.04);padding:10px 14px}
@@ -10446,7 +10446,7 @@ function cdDeckRefresh(ch){ const cur=cdDeckChar(); if(cur&&cur.id===ch.id) $$('
 function cdDeckSel(){ const L=cdDeckChars(); if(!L.length) return ''; const cur=cdDeckChar(), n=cur?cdDeckList(cur).n:0;
   return `<span class="cddsel" title="Чью колоду собираешь: клик по карте → «Добавить в колоду» / «Убрать из колоды»">🃏 Колода: <select id="cdDeck"><option value="-">— не собираю —</option>${L.map(c=>`<option value="${esc(c.id)}" ${cur&&cur.id===c.id?'selected':''}>${esc(c.name)||'без имени'}</option>`).join('')}</select>${cur?`<button class="btn sm ghost" id="cdDeckGo" title="Открыть колоды (вкладка «🃏 Колоды»)">${n} ${plural(n,'карта','карты','карт')} →</button>`:''}</span>`; }
 function cdDeckBlock(ch){ if(Array.isArray(ch.deck)&&ch.deck.length) cdSubscribe(); /* пустая колода — карты не читаем */ const ed=canEdit(ch)&&!viewAs;
-  const p=el(`<div class="panel cddeck ${ed?'':'ro'}" data-ch="${esc(ch.id)}"><h3>Колода персонажа <span class="faint cddn" style="font-weight:400"></span>${ed?'<button class="btn sm w cdgo" title="Открыть библиотеку карт с этой колодой: клик по карте → «Добавить в колоду»">🃏 Добавить карты</button><button class="btn sm w cdtt" title="Сохранить колоду в Tabletop Simulator (Сохранённые объекты → Картотека)">🎲 В TTS</button>':''}</h3><div class="cddbody"></div></div>`);
+  const p=el(`<div class="panel cddeck ${ed?'':'ro'}" data-ch="${esc(ch.id)}"><h3>Колода персонажа <span class="faint cddn" style="font-weight:400"></span>${ed?'<span class="cdhb"><button class="btn sm w cdgo" title="Открыть библиотеку карт с этой колодой: клик по карте → «Добавить в колоду»">🃏 Добавить карты</button><button class="btn sm w cdtt" title="Сохранить колоду в Tabletop Simulator (Сохранённые объекты → Картотека)">🎲 В TTS</button></span>':''}</h3><div class="cddbody"></div></div>`);
   p._draw=()=>{ const D=cdDeckList(ch); $('.cddn',p).textContent=D.n?'· '+D.n+' '+plural(D.n,'карта','карты','карт'):''; cdDeckFill($('.cddbody',p),ch,ed,150); }; p._draw();
   const g=$('.cdgo',p); if(g) g.onclick=()=>{ cdUiSet('deck',ch.id); cdUiSet('mode','lib'); go('cards'); }; const t=$('.cdtt',p); if(t) t.onclick=()=>cdDeckTtsDlg(ch); return p; }
 /* сетка колоды: карты, под каждой ×N и −/+ (ed), внизу — сколько скрыто */
