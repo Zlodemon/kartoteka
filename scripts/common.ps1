@@ -61,7 +61,7 @@ function Build-Site($cfg) {
 # выложить сайт и правила баз в интернет
 function Deploy-Site($cfg) {
   Push-Location $SiteDir
-  try { $ok = FB deploy --only 'hosting,firestore:rules,database' --project $cfg.projectId --non-interactive } finally { Pop-Location }
+  try { $ok = FB deploy --only 'hosting,firestore:rules,firestore:indexes,database' --project $cfg.projectId --non-interactive } finally { Pop-Location }
   if ($ok) { $v = App-Version; if ($v) { [IO.File]::WriteAllText((Join-Path $SiteDir 'DEPLOYED.txt'), $v, (New-Object System.Text.UTF8Encoding($false))) } }
   return $ok
 }

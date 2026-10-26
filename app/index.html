@@ -1650,7 +1650,9 @@ if(MOCK){
   if(LOCAL){ try{ A.connectAuthEmulator(auth,'http://'+LOCAL+':9099',{disableWarnings:true}); F.connectFirestoreEmulator(db,LOCAL,8080); R.connectDatabaseEmulator(rtdb,LOCAL,9000); }catch(e){ console.error(e); } }
   /* часы у игроков могут расходиться (у кого-то на минуты). Живой слой хранит t в серверном времени: при записи местное + смещение, при чтении обратно в местное —
      тогда сравнения «Date.now() − d.t» верны у всех. Смещение даёт сам Realtime Database (.info/serverTimeOffset). Раньше пинг «из будущего» давал отрицательный радиус и ошибку в каждом кадре */
-  let CLK=0; try{ R.onValue(R.ref(rtdb,'.info/serverTimeOffset'),sn=>{ const v=+sn.val(); if(isFinite(v)){ CLK=v; if(Math.abs(v)>5000) console.warn('часы этого компьютера расходятся с сервером на',Math.round(v/1000),'с — время живого слоя поправлено'); } }); }catch(e){ console.warn(e); }
+  /* CLK_OK — поправка уже пришла (или ждать перестали через 10 с): метка _t досинхронизации без неё может уйти по сбитым часам */
+  let CLK=0, CLK_OK=false, clkOk; const CLK_P=new Promise(r=>clkOk=()=>{ if(!CLK_OK){ CLK_OK=true; r(); } }); setTimeout(()=>clkOk(),10000);
+  try{ R.onValue(R.ref(rtdb,'.info/serverTimeOffset'),sn=>{ const v=+sn.val(); if(isFinite(v)){ CLK=v; clkOk(); if(Math.abs(v)>5000) console.warn('часы этого компьютера расходятся с сервером на',Math.round(v/1000),'с — время живого слоя поправлено'); } }); }catch(e){ console.warn(e); }
   const tOut=o=>(o&&typeof o.t==='number')?{...o,t:o.t+CLK}:o, tIn=v=>(v&&typeof v.t==='number')?{...v,t:v.t-CLK}:v;
   { const liveMap=new Map(); const vol=new Set(); LIVE={ set:(id,o)=>R.set(R.ref(rtdb,'live/'+CAMP+'/'+id),clean(tOut(o))), remove:id=>R.remove(R.ref(rtdb,'live/'+CAMP+'/'+id)), volatile(id){ if(vol.has(id)) return; vol.add(id); R.onDisconnect(R.ref(rtdb,'live/'+CAMP+'/'+id)).remove().catch(()=>{}); },
     subscribe(cb){ const r=R.ref(rtdb,'live/'+CAMP); const emit=()=>cb([...liveMap.values()]); R.onChildAdded(r,sn=>{ liveMap.set(sn.key,{...tIn(sn.val()),id:sn.key}); emit(); }); R.onChildChanged(r,sn=>{ liveMap.set(sn.key,{...tIn(sn.val()),id:sn.key}); emit(); }); R.onChildRemoved(r,sn=>{ liveMap.delete(sn.key); emit(); }); } };
@@ -1685,12 +1687,55 @@ if(MOCK){
       if(!await thEnsure(ref,t,id)) return data;
       data.thumbRef=ref; if(full) delete data.thumb; else data.thumb=DB.DEL; if(mig) TH_LEGACY.delete(key); return data; }
     catch(e){ console.warn('thumb',e); return data; } }
+  /* ===== досинхронизация, этап 1 (2026-10-26): метки на запись; чтение пока прежнее.
+     В коллекциях SYNC каждая запись ставит _t (время по часам сервера, мс от 2026-01-01) и _r (случайное число) — по ним этап 2 будет дочитывать
+     только изменённое и сверять с сервером контрольные суммы. Удаление и смена полей, от которых зависит, кому виден документ (SYNC_F), в той же пачке
+     пишут «надгробие» gone/<коллекция>__<id> — иначе дочитывание не узнает, что документ пропал или скрыт. Приложение этих полей не видит: clean() убирает поля на «_».
+     Запись, подтверждённая сервером позже чем через 2 мин (шла без сети, в т.ч. из прошлого захода) или сделанная до поправки часов, получает свежую метку повторно */
+  const SYNC=new Set(['characters','orgs','locations','memberships','locLinks','relations','maps','wmaps','wmarkers','wmdraw','wmpriv','docs','cards','cardsets']);
+  const SYNC_F=['visibility','players','visUids','owner','shared','pub','given','uids','mapId','t'], SYNC_T0=Date.UTC(2026,0,1), RESTAMP_MS=2*60e3;
+  const SK=new Map(); // путь документа → {f: поля SYNC_F, как их видит этот клиент (снимки + свои записи), t: последняя известная метка}
+  const cbase=coll=>coll.split('/').pop(), isSync=coll=>SYNC.has(cbase(coll)), skey=(coll,id)=>cpath(coll).join('/')+'/'+id;
+  const gkey=(coll,id)=>[...cpath(coll).slice(0,-1),'gone',cbase(coll)+'__'+id].join('/');
+  const sf=d=>JSON.stringify(SYNC_F.map(k=>d[k]===undefined?null:d[k]));
+  function syncSeen(coll,id,d){ if(!isSync(coll)) return; const k=skey(coll,id), s=SK.get(k); SK.set(k,{f:sf(d),t:Math.max(s?s.t:0,Number.isInteger(d._t)?d._t:0)}); }
+  /* метка строго больше последней известной для документа: правила этапа 2 требуют, чтобы каждая запись её меняла */
+  function syncStamp(k){ const s=SK.get(k)||{}; const t=Math.max(Date.now()+CLK-SYNC_T0,(s.t||0)+1); SK.set(k,{...s,t}); return {_t:t,_r:Math.floor(Math.random()*1073741824)}; }
+  /* нужно ли надгробие: part — записываемые поля (DB.DEL — удалить поле), full — документ целиком. Незнакомый клиенту документ целиком — новый,
+     частично — надгробие на всякий случай. Запоминает новые значения как свой взгляд на документ */
+  function syncGone(k,part,full){ if(!full&&!SYNC_F.some(x=>x in part)) return false; const s=SK.get(k)||{}, cur=s.f?JSON.parse(s.f):null;
+    const v=x=>{ const y=part[x]; return y===DB.DEL||y===undefined?undefined:clean(y); };
+    const nx=sf(Object.fromEntries(SYNC_F.map((x,i)=>[x,full||x in part?v(x):(cur?(cur[i]??undefined):undefined)]))); SK.set(k,{...s,f:nx});
+    return cur?nx!==s.f:!full; }
+  const UNACK=new Map(); try{ for(const [k,t] of Object.entries(JSON.parse(localStorage.getItem('fsUnack')||'{}'))) UNACK.set(k,t); }catch{}
+  const UNACK_OLD=[...UNACK.keys()]; let UNACK_T=0;
+  const unackSave=now=>{ clearTimeout(UNACK_T); const f=()=>{ try{ if(UNACK.size) localStorage.setItem('fsUnack',JSON.stringify(Object.fromEntries(UNACK))); else localStorage.removeItem('fsUnack'); }catch{} }; if(now) f(); else UNACK_T=setTimeout(f,1000); };
+  addEventListener('pagehide',()=>unackSave(true));
+  function syncTrack(p,keys,t){ const ok0=CLK_OK; for(const k of keys) UNACK.set(k,t); unackSave();
+    p.then(()=>{ const late=!ok0||Date.now()+CLK-SYNC_T0-t>RESTAMP_MS; for(const k of keys){ if(UNACK.get(k)===t) UNACK.delete(k); if(late) syncRestamp(k); } unackSave(); },
+      ()=>{ for(const k of keys) if(UNACK.get(k)===t) UNACK.delete(k); unackSave(); });
+    return p; }
+  /* свежая метка поверх текущей на сервере (её читаем: после перезахода этот клиент документ ещё не видел, а прежняя метка могла уйти по спешащим часам). Документа нет — удалён, метка не нужна */
+  function syncRestamp(k){ CLK_P.then(async()=>{ const r=F.doc(db,k); try{ const s=await F.getDoc(r); if(!s.metadata.fromCache) fsCount(k.split('/').slice(-2,-1)[0],1); if(!s.exists()) return;
+      const t=s.data()._t, c=SK.get(k)||{}; if(Number.isInteger(t)&&t>(c.t||0)) SK.set(k,{...c,t}); }catch{ return; }
+    const st=syncStamp(k); STAT.w++; STAT.restamp=(STAT.restamp||0)+1; syncTrack(F.updateDoc(r,st),[k],st._t).catch(()=>{}); }); }
+  /* запись в коллекцию SYNC: op(пачка|null, метка) делает саму запись; g — нужно надгробие (тогда всё одной пачкой). Сервер отказал, а надгробия не было
+     (правила этапа 2 его требуют, а этот клиент не знал прежних значений полей) — один повтор с надгробием */
+  function syncWrite(coll,id,g,op,isDel,retry){ const k=skey(coll,id), st=syncStamp(k), keys=isDel?[]:[k]; let p;
+    if(!g) p=op(null,st);
+    else { const b=F.writeBatch(db); op(b,st); const gk=gkey(coll,id); SK.set(gk,{t:st._t}); b.set(F.doc(db,gk),{coll:cbase(coll),id,_t:st._t,by:me.uid,kind:isDel?'del':'vis'}); STAT.w++; STAT.gone=(STAT.gone||0)+1; keys.push(gk); p=b.commit(); }
+    syncTrack(p,keys,st._t);
+    return retry&&!g?p.catch(e=>{ if(e&&e.code==='permission-denied') return syncWrite(coll,id,true,op,isDel,false); throw e; }):p; }
+  function wSet(coll,id,d){ const r=F.doc(db,...cpath(coll),id); if(!isSync(coll)) return F.setDoc(r,d);
+    return syncWrite(coll,id,syncGone(skey(coll,id),d,true),(b,st)=>b?b.set(r,{...d,...st}):F.setDoc(r,{...d,...st}),false,true); }
+  function wUpd(coll,id,p){ const r=F.doc(db,...cpath(coll),id), u=Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)])); if(!isSync(coll)) return F.updateDoc(r,u);
+    return syncWrite(coll,id,syncGone(skey(coll,id),p,false),(b,st)=>b?b.update(r,{...u,...st}):F.updateDoc(r,{...u,...st}),false,true); }
   DB={
     subscribe(coll,opts,cb){ let q=F.collection(db,...cpath(coll)); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts);
       let last=null, first=true, fired=false; const conv=snap=>snap.docs.map(d=>({...d.data(),id:d.id,_pending:d.metadata.hasPendingWrites}));
       /* includeMetadataChanges — только чтобы увидеть момент, когда подписка снова в связи с сервером (fsResync); такие события без изменений в приложение не идут */
       const L={coll,key:cpath(coll).join('/')+'|'+JSON.stringify(opts||{}),n:0,on:false,full:0}; FS_LIVE.add(L);
-      const un=F.onSnapshot(q,{includeMetadataChanges:true}, snap=>{ const ch=snap.docChanges(); try{ fsResync(L,snap,ch); }catch{}
+      const un=F.onSnapshot(q,{includeMetadataChanges:true}, snap=>{ const ch=snap.docChanges(); try{ fsResync(L,snap,ch); if(isSync(coll)) for(const c of ch) if(c.type!=='removed') syncSeen(coll,c.doc.id,c.doc.data()); }catch{}
         if(fired&&!ch.length) return; fired=true; last=snap;
         if(!TH_COLLS.has(coll)){ cb(conv(snap)); return; }
         const docs=conv(snap); const miss=thAttach(coll,docs); const again=()=>{ if(last!==snap) return; const d2=conv(snap); thAttach(coll,d2); cb(d2); };
@@ -1698,16 +1743,22 @@ if(MOCK){
         if(miss.length&&first){ first=false; Promise.race([Promise.all(miss.map(thLoad)),new Promise(r=>setTimeout(r,2500))]).then(again); return; }
         first=false; cb(docs); if(miss.length) Promise.all(miss.map(thLoad)).then(again); }, err=>{ console.error(coll,err); if(err.code==='permission-denied') toast('Нет доступа: '+coll,true); });
       return ()=>{ if(L.on) fsLiveSet(L.key,Date.now()); FS_LIVE.delete(L); un(); }; },
-    set:(coll,id,data)=>(STAT.w++,TH_COLLS.has(coll)?thOut(coll,id,clean(data),true).then(d=>F.setDoc(F.doc(db,...cpath(coll),id),clean(d))):F.setDoc(F.doc(db,...cpath(coll),id),clean(data))),
-    update:(coll,id,part)=>{ STAT.w++; const go=p=>F.updateDoc(F.doc(db,...cpath(coll),id),Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]))); return TH_COLLS.has(coll)?thOut(coll,id,{...part},false).then(go):go(part); },
+    set:(coll,id,data)=>{ STAT.w++; const go=d=>wSet(coll,id,clean(d)); return TH_COLLS.has(coll)?thOut(coll,id,clean(data),true).then(go):go(data); },
+    update:(coll,id,part)=>{ STAT.w++; const go=p=>wUpd(coll,id,p); return TH_COLLS.has(coll)?thOut(coll,id,{...part},false).then(go):go(part); },
     /* запись с чтением свежей версии: fn(текущее на сервере) → поля для записи. Если документ успели поменять между чтением и записью, Firestore повторит сам */
-    mergeUpdate:(coll,id,fn)=>F.runTransaction(db,async t=>{ const ref=F.doc(db,...cpath(coll),id); const s=await t.get(ref); STAT.r++; if(!s.exists()) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur=s.data(); const part=fn(JSON.parse(JSON.stringify(cur))); STAT.w++; t.update(ref,Object.fromEntries(Object.entries(part).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]))); const nx={...cur}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete nx[k]; else nx[k]=clean(v); } return nx; }),
-    push:(coll,id,field,value,extra)=>(STAT.w++,F.setDoc(F.doc(db,...cpath(coll),id),{...clean(extra||{}),[field]:F.arrayUnion(clean(value))},{merge:true})),
-    async list(coll,opts){ let q=F.collection(db,...cpath(coll)); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts); const snap=await F.getDocs(q); if(!snap.metadata.fromCache) fsCount(coll,Math.max(1,snap.size)); return snap.docs.map(d=>({...d.data(),id:d.id})); },
-    async listServer(coll){ const snap=await F.getDocsFromServer(F.collection(db,...cpath(coll))); fsCount(coll,Math.max(1,snap.size)); return snap.docs.map(d=>({...d.data(),id:d.id})); },
+    mergeUpdate:(coll,id,fn)=>F.runTransaction(db,async t=>{ const ref=F.doc(db,...cpath(coll),id); const s=await t.get(ref); STAT.r++; if(!s.exists()) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur=s.data(); const part=fn(JSON.parse(JSON.stringify(cur))); STAT.w++; const upd=Object.fromEntries(Object.entries(part).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]));
+      if(isSync(coll)){ const k=skey(coll,id); syncSeen(coll,id,cur); const g=syncGone(k,part,false), st=syncStamp(k); Object.assign(upd,st);
+        if(g){ const gk=gkey(coll,id); SK.set(gk,{t:st._t}); t.set(F.doc(db,gk),{coll:cbase(coll),id,_t:st._t,by:me.uid,kind:'vis'}); STAT.w++; STAT.gone=(STAT.gone||0)+1; } }
+      t.update(ref,upd); const nx={...cur}; for(const [k,v] of Object.entries(part)){ if(v===DB.DEL) delete nx[k]; else nx[k]=clean(v); } return nx; }),
+    push:(coll,id,field,value,extra)=>{ STAT.w++; const r=F.doc(db,...cpath(coll),id), x={...clean(extra||{}),[field]:F.arrayUnion(clean(value))}; if(!isSync(coll)) return F.setDoc(r,x,{merge:true});
+      const g=SYNC_F.includes(field)||syncGone(skey(coll,id),clean(extra||{}),false); return syncWrite(coll,id,g,(b,st)=>b?b.set(r,{...x,...st},{merge:true}):F.setDoc(r,{...x,...st},{merge:true}),false,true); },
+    async list(coll,opts){ let q=F.collection(db,...cpath(coll)); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts); const snap=await F.getDocs(q); if(!snap.metadata.fromCache) fsCount(coll,Math.max(1,snap.size)); for(const d of snap.docs) syncSeen(coll,d.id,d.data()); return snap.docs.map(d=>({...d.data(),id:d.id})); },
+    async listServer(coll){ const snap=await F.getDocsFromServer(F.collection(db,...cpath(coll))); fsCount(coll,Math.max(1,snap.size)); for(const d of snap.docs) syncSeen(coll,d.id,d.data()); return snap.docs.map(d=>({...d.data(),id:d.id})); },
     DEL:Symbol('del'),
-    delete:(coll,id)=>(STAT.w++,F.deleteDoc(F.doc(db,...cpath(coll),id))),
-    async get(coll,id){ const s=await F.getDoc(F.doc(db,...cpath(coll),id)); if(!s.metadata.fromCache) fsCount(coll,1); if(!s.exists()) return null; const d={...s.data(),id:s.id}; if(TH_COLLS.has(coll)) thAttach(coll,[d]); return d; },
+    delete:(coll,id)=>{ STAT.w++; const r=F.doc(db,...cpath(coll),id); if(!isSync(coll)) return F.deleteDoc(r); const k=skey(coll,id), s=SK.get(k); SK.set(k,{t:s?s.t:0}); return syncWrite(coll,id,true,b=>b.delete(r),true,false); },
+    /* записи, не подтверждённые сервером в прошлый заход (вкладку закрыли без сети): SDK отправит их сам, после этого — свежая метка */
+    syncResume(){ if(!UNACK_OLD.length) return; const ks=UNACK_OLD.splice(0); F.waitForPendingWrites(db).then(()=>{ for(const k of ks){ UNACK.delete(k); syncRestamp(k); } unackSave(); }).catch(()=>{}); },
+    async get(coll,id){ const s=await F.getDoc(F.doc(db,...cpath(coll),id)); if(!s.metadata.fromCache) fsCount(coll,1); if(!s.exists()) return null; syncSeen(coll,s.id,s.data()); const d={...s.data(),id:s.id}; if(TH_COLLS.has(coll)) thAttach(coll,[d]); return d; },
     async getImg(coll,id){ try{ const s=await F.getDocFromCache(F.doc(db,...cpath(coll),id)); if(s.exists()) return {...s.data(),id:s.id}; }catch{} return DB.get(coll,id); },
   };
   AUTH={
@@ -1925,7 +1976,7 @@ let CDSUB=null, EPSUB=null; const CD_LOADED={cards:false,sets:false}; // при�
 function cdSubscribe(){ if(CDSUB||!me) return; const o=realDM()?null:{where:[['pub','==',true]]}; CDSUB=[DB.subscribe('cards',o,docs=>{ CD_LOADED.cards=true; applyDocs('cards','cards',docs); }),DB.subscribe('cardsets',o,docs=>{ CD_LOADED.sets=true; applyDocs('cardsets','cardsets',docs); })]; }
 function lazyReset(){ for(const v of WMSUB.values()) v.un.forEach(f=>{ try{ f(); }catch{} }); WMSUB.clear(); for(const k of Object.keys(world)) if(wmAlias(k)) delete world[k]; world.wmarkers=[]; world.wmdraw=[];
   if(LOGSUB){ try{ LOGSUB.un(); }catch{} LOGSUB=null; } if(CDSUB){ CDSUB.forEach(f=>{ try{ f(); }catch{} }); CDSUB=null; } CD_LOADED.cards=CD_LOADED.sets=false; world.cards=[]; world.cardsets=[]; if(EPSUB){ try{ EPSUB(); }catch{} EPSUB=null; } EP_LOADED=false; world.battles=[]; }
-function subscribeAll(){ lazyReset();
+function subscribeAll(){ lazyReset(); DB.syncResume&&DB.syncResume();
   const sub=(coll,key,opts,post)=>unsubs.push(DB.subscribe(coll,opts,docs=>{ applyDocs(key,coll,docs,post); }));
   sub('meta','_settings',null,()=>{ const s=world._settings.find(x=>x.id==='settings'); const fresh=s?{...defaultSettings(),...s}:{...defaultSettings(),id:'settings'}; if(!world.settings) world.settings=fresh; else if(!pending.has('settings')&&!(s&&s.updatedAt&&s.updatedAt===world.settings.updatedAt)){ for(const k of Object.keys(world.settings)) if(!(k in fresh)) delete world.settings[k]; Object.assign(world.settings,fresh); } const t=world._settings.find(x=>x.id==='timeline'); if(!pending.has('timeline')&&!(t&&world.timeline&&t.updatedAt&&t.updatedAt===world.timeline.updatedAt)) world.timeline=t?t:{id:'timeline',nodes:[]}; const tc=world._settings.find(x=>x.id==='techniques'); if(!pending.has('techniques')&&!(tc&&world.techniques&&tc.updatedAt&&tc.updatedAt===world.techniques.updatedAt)){ world.techniques=tc?tc:(realDM()?techBaseCatalog():{id:'techniques',branches:[],groups:[]}); techLayoutCache={}; } applySiteName(); });
   CW.site=CW.camps=CW.users=false; world.campaigns=[]; world._site=[];

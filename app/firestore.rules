@@ -77,38 +77,56 @@ service cloud.firestore {
         && request.resource.data.get('visFor', {}) == resource.data.get('visFor', {}) && request.resource.data.get('visUids', []) == resource.data.get('visUids', [])
         && request.resource.data.get('editors', []) == resource.data.get('editors', []); }
       function isEditor() { return isPlayer() && uid() in resource.data.get('editors', []); }
+      // ===== досинхронизация (этап 1 — 2026-10-26). В коллекциях персонажей, организаций, локаций, членства, привязок, связей, карт связей, карт мира,
+      // токенов, рисунков, личных слоёв, документов и карточек каждая запись ставит _t (время, мс от 2026-01-01) и _r (случайное число); удаление и смена полей,
+      // от которых зависит, кому виден документ, в той же пачке пишут «надгробие» gone/<коллекция>__<id>. Пока SYNC_ENFORCE() == false, сервер этого
+      // не требует (старые вкладки пишут без меток). Включить на этапе 2, когда все обновятся: тогда правка без новой метки или без надгробия отклоняется
+      function SYNC_ENFORCE() { return false; }
+      function goneP(coll, id) { return path('/databases/' + database + '/documents/campaigns/' + cid + '/gone/' + coll + '__' + id); }
+      function syncC() { return !SYNC_ENFORCE() || request.resource.data.get('_t', null) is int; }
+      function syncU(coll, id) { return !SYNC_ENFORCE() || (request.resource.data.get('_t', null) is int && request.resource.data._t != resource.data.get('_t', -1)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['visibility', 'players', 'visUids', 'owner', 'shared', 'pub', 'given', 'uids', 'mapId', 't'])
+          || getAfter(goneP(coll, id)).data._t == request.resource.data._t)); }
+      function syncD(coll, id) { return !SYNC_ENFORCE() || (existsAfter(goneP(coll, id)) && (!exists(goneP(coll, id)) || getAfter(goneP(coll, id)).data._t != get(goneP(coll, id)).data._t)); }
+      // надгробия: читают все в игре, пишет тот, кто удаляет или скрывает (от своего имени), чистит мастер
+      match /gone/{id} {
+        allow read: if signedIn();
+        allow create, update: if canWrite() && request.resource.data.by == uid() && request.resource.data._t is int && id == request.resource.data.coll + '__' + request.resource.data.id;
+        allow delete: if isDM();
+      }
+
       // зафиксированную предысторию игрок персонажа может сам вернуть в работу (с 2026-09-24)
       match /characters/{id} {
         allow read: if isDM() || (signedIn() && (visibleToAll() || uid() in resource.data.players || uid() in resource.data.get('editors', [])));
         // игрок создаёт персонажа только на себя (owner и единственный игрок = он), видимым всем; удаляет только созданного им
-        allow create: if isDM() || (isPlayer() && can('plCharNew') && request.resource.data.owner == uid()
-          && request.resource.data.players == [uid()] && request.resource.data.get('visibility', 'full') == 'full');
-        allow delete: if isDM() || (isPlayer() && resource.data.get('owner', '') == uid());
-        allow update: if isDM() || ((playsChar(id) || isEditor())
+        allow create: if (isDM() || (isPlayer() && can('plCharNew') && request.resource.data.owner == uid()
+          && request.resource.data.players == [uid()] && request.resource.data.get('visibility', 'full') == 'full')) && syncC();
+        allow delete: if (isDM() || (isPlayer() && resource.data.get('owner', '') == uid())) && syncD('characters', id);
+        allow update: if (isDM() || ((playsChar(id) || isEditor())
           && request.resource.data.players == resource.data.players
           && request.resource.data.owner == resource.data.owner
           && sameVisibility())
           // урон в бою: игрок меняет только полоски и статусы любого персонажа, если это разрешено в настройках
-          || (isPlayer() && pvpEdit() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bars','statuses','effects','ruina','wounds','dead','updatedAt','updatedBy']));
+          || (isPlayer() && pvpEdit() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bars','statuses','effects','ruina','wounds','dead','updatedAt','updatedBy', '_t', '_r']))) && syncU('characters', id);
       }
 
       // ===== организации и локации: создаёт дм или игрок (owner = он сам), правит дм или автор
       match /orgs/{id} {
         allow read: if isDM() || (signedIn() && (visibleToAll() || resource.data.owner == uid() || uid() in resource.data.get('editors', [])));
-        allow create: if isDM() || (isPlayer() && request.resource.data.owner == uid());
-        allow update: if isDM() || (isPlayer() && (resource.data.owner == uid() || isEditor()) && request.resource.data.owner == resource.data.owner && sameVisibility());
-        allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
+        allow create: if (isDM() || (isPlayer() && request.resource.data.owner == uid())) && syncC();
+        allow update: if (isDM() || (isPlayer() && (resource.data.owner == uid() || isEditor()) && request.resource.data.owner == resource.data.owner && sameVisibility())) && syncU('orgs', id);
+        allow delete: if (isDM() || (isPlayer() && resource.data.owner == uid())) && syncD('orgs', id);
       }
       match /locations/{id} {
         allow read: if isDM() || (signedIn() && (visibleToAll() || resource.data.owner == uid() || uid() in resource.data.get('editors', [])));
-        allow create: if isDM() || (isPlayer() && request.resource.data.owner == uid());
-        allow update: if isDM() || (isPlayer() && (resource.data.owner == uid() || isEditor()) && request.resource.data.owner == resource.data.owner && sameVisibility());
-        allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
+        allow create: if (isDM() || (isPlayer() && request.resource.data.owner == uid())) && syncC();
+        allow update: if (isDM() || (isPlayer() && (resource.data.owner == uid() || isEditor()) && request.resource.data.owner == resource.data.owner && sameVisibility())) && syncU('locations', id);
+        allow delete: if (isDM() || (isPlayer() && resource.data.owner == uid())) && syncD('locations', id);
       }
 
       // ===== карточки (TTS): правит мастер; игроки читают только открытые (pub — сет открыт и карта не скрыта)
-      match /cards/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow write: if isDM(); }
-      match /cardsets/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow write: if isDM(); }
+      match /cards/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow create: if (isDM()) && syncC(); allow update: if (isDM()) && syncU('cards', id); allow delete: if (isDM()) && syncD('cards', id); }
+      match /cardsets/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow create: if (isDM()) && syncC(); allow update: if (isDM()) && syncU('cardsets', id); allow delete: if (isDM()) && syncD('cardsets', id); }
       // картинки карт для TTS: рисует браузер мастера, забирает программа 4_KARTY_V_TTS
       // ===== «Эпик-бой»: документ боя. Ходы пишет тот, кто действует (мастер или игрок), создаёт и удаляет мастер
       match /battles/{id} { allow read: if signedIn(); allow create, delete: if isDM(); allow update: if isDM() || isPlayer(); }
@@ -125,84 +143,84 @@ service cloud.firestore {
       // ===== членство: если можешь править персонажа или организацию
       match /memberships/{id} {
         allow read: if signedIn();
-        allow create: if isDM() || canEditEntity('c', request.resource.data.charId) || canEditEntity('o', request.resource.data.orgId);
-        allow update, delete: if isDM() || canEditEntity('c', resource.data.charId) || canEditEntity('o', resource.data.orgId);
+        allow create: if (isDM() || canEditEntity('c', request.resource.data.charId) || canEditEntity('o', request.resource.data.orgId)) && syncC();
+        allow update: if (isDM() || canEditEntity('c', resource.data.charId) || canEditEntity('o', resource.data.orgId)) && syncU('memberships', id); allow delete: if (isDM() || canEditEntity('c', resource.data.charId) || canEditEntity('o', resource.data.orgId)) && syncD('memberships', id);
       }
 
       // ===== привязка к локации: если можешь править сущность или локацию
       match /locLinks/{id} {
         allow read: if signedIn();
-        allow create: if isDM() || canEditEntity(request.resource.data.entityType, request.resource.data.entityId) || canEditEntity('l', request.resource.data.locId);
-        allow update, delete: if isDM() || canEditEntity(resource.data.entityType, resource.data.entityId) || canEditEntity('l', resource.data.locId);
+        allow create: if (isDM() || canEditEntity(request.resource.data.entityType, request.resource.data.entityId) || canEditEntity('l', request.resource.data.locId)) && syncC();
+        allow update: if (isDM() || canEditEntity(resource.data.entityType, resource.data.entityId) || canEditEntity('l', resource.data.locId)) && syncU('locLinks', id); allow delete: if (isDM() || canEditEntity(resource.data.entityType, resource.data.entityId) || canEditEntity('l', resource.data.locId)) && syncD('locLinks', id);
       }
 
       // ===== связи: личные (owner) или общие (shared)
       match /relations/{id} {
         // мастер создаёт и чужие документы (восстановление из бэкапа, перенос игры) — раньше «Восстановить» молча теряло связи, карты связей, чат, журнал и корзину
         allow read: if isDM() || (signedIn() && (resource.data.owner == uid() || resource.data.shared == true));
-        allow create: if isDM() || (canWrite() && request.resource.data.owner == uid());
-        allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid());
-        allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
+        allow create: if (isDM() || (canWrite() && request.resource.data.owner == uid())) && syncC();
+        allow update: if (isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid())) && syncU('relations', id);
+        allow delete: if (isDM() || (isPlayer() && resource.data.owner == uid())) && syncD('relations', id);
       }
 
       // ===== карты связей: личные (owner) или общие (shared)
       match /maps/{id} {
         allow read: if isDM() || (signedIn() && (resource.data.owner == uid() || resource.data.shared == true));
-        allow create: if isDM() || (canWrite() && request.resource.data.owner == uid());
-        allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid());
-        allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
+        allow create: if (isDM() || (canWrite() && request.resource.data.owner == uid())) && syncC();
+        allow update: if (isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid())) && syncU('maps', id);
+        allow delete: if (isDM() || (isPlayer() && resource.data.owner == uid())) && syncD('maps', id);
       }
 
       // ===== карты мира: правит дм, видят все (скрытую — только дм); скрытые элементы — в dm/wm_<id>
       match /wmaps/{id} {
         allow read: if isDM() || (signedIn() && resource.data.visibility == 'full');
-        allow create, delete: if isDM();
+        allow create: if (isDM()) && syncC(); allow delete: if (isDM()) && syncD('wmaps', id);
         // «Вести бой» (Права игроков): ход и раунды — поле init видимой карты
-        allow update: if isDM() || (isPlayer() && can('plInit') && resource.data.visibility == 'full' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['init', 'updatedAt', 'updatedBy']));
+        allow update: if (isDM() || (isPlayer() && can('plInit') && resource.data.visibility == 'full' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['init', 'updatedAt', 'updatedBy', '_t', '_r']))) && syncU('wmaps', id);
       }
 
       // ===== фишки игроков на карте мира: игрок ставит/двигает только своих персонажей, дм — любые
       match /wmarkers/{id} {
         allow read: if signedIn();
         // свои токены игрок ставит, двигает, разворачивает и убирает всегда — замок карт на них не действует
-        allow create: if isDM() || (isPlayer() && (!mapsLocked() || isHelper() || can('plTokens')) && playsChar(request.resource.data.ref) && request.resource.data.owner == uid());
-        allow update: if isDM() || (isPlayer() && (!mapsLocked() || isHelper() || can('plTokens')) && playsChar(resource.data.ref) && request.resource.data.ref == resource.data.ref)
+        allow create: if (isDM() || (isPlayer() && (!mapsLocked() || isHelper() || can('plTokens')) && playsChar(request.resource.data.ref) && request.resource.data.owner == uid())) && syncC();
+        allow update: if (isDM() || (isPlayer() && (!mapsLocked() || isHelper() || can('plTokens')) && playsChar(resource.data.ref) && request.resource.data.ref == resource.data.ref)
           || (isPlayer() && can('plMoveAll') && request.resource.data.ref == resource.data.ref)
-          || (isPlayer() && can('plInit') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['inCombat', 'init', 'initMod', 'initRound', 'updatedAt', 'updatedBy']));
-        allow delete: if isDM() || (isPlayer() && (!mapsLocked() || isHelper() || can('plTokens')) && playsChar(resource.data.ref));
+          || (isPlayer() && can('plInit') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['inCombat', 'init', 'initMod', 'initRound', 'updatedAt', 'updatedBy', '_t', '_r']))) && syncU('wmarkers', id);
+        allow delete: if (isDM() || (isPlayer() && (!mapsLocked() || isHelper() || can('plTokens')) && playsChar(resource.data.ref))) && syncD('wmarkers', id);
       }
 
       // ===== рисунки игроков на картах (линии, области, места, подписи): свой — правит и удаляет автор, дм — любые
       match /wmdraw/{id} {
         allow read: if signedIn();
         // что игрок может класть и менять — по правам разметки (drawOk); выложенный предмет подбирает любой, если разрешено
-        allow create: if isDM() || (isPlayer() && request.resource.data.owner == uid() && drawOk(request.resource.data));
-        allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && drawOk(resource.data))
+        allow create: if (isDM() || (isPlayer() && request.resource.data.owner == uid() && drawOk(request.resource.data))) && syncC();
+        allow update: if (isDM() || (isPlayer() && resource.data.owner == uid() && drawOk(resource.data))
           // право «двигать все документы»: у документа на карте игрок меняет только координаты
-          || (isPlayer() && can('plDocMove') && resource.data.get('t', '') == 'note' && resource.data.get('layer', 'normal') == 'normal' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['x','y','updatedAt','updatedBy']));
-        allow delete: if isDM() || (isPlayer() && resource.data.owner == uid() && drawOk(resource.data)) || (isPlayer() && can('plPick') && resource.data.get('t', '') == 'loot' && resource.data.get('drop', false) == true);
+          || (isPlayer() && can('plDocMove') && resource.data.get('t', '') == 'note' && resource.data.get('layer', 'normal') == 'normal' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['x','y','updatedAt','updatedBy', '_t', '_r']))) && syncU('wmdraw', id);
+        allow delete: if (isDM() || (isPlayer() && resource.data.owner == uid() && drawOk(resource.data)) || (isPlayer() && can('plPick') && resource.data.get('t', '') == 'loot' && resource.data.get('drop', false) == true)) && syncD('wmdraw', id);
       }
 
       // ===== элементы карты личного слоя (uids — кому видно): пишет дм, читают дм и эти игроки
       match /wmpriv/{id} {
         allow read: if isDM() || (signedIn() && uid() in resource.data.uids);
-        allow write: if isDM();
+        allow create: if (isDM()) && syncC(); allow update: if (isDM()) && syncU('wmpriv', id); allow delete: if (isDM()) && syncD('wmpriv', id);
       }
 
       // ===== документы (письма, улики, дневники): видят мастер, автор, те, кому выдан (given), и все — если лежит на виду (pub)
       // игрок может «забрать себе» документ, лежащий на виду: только дописать себя в given
       match /docs/{id} {
         allow read: if isDM() || (signedIn() && (resource.data.pub == true || uid() in resource.data.given || resource.data.owner == uid()));
-        allow create: if isDM() || (isPlayer() && can('plDocNew') && request.resource.data.owner == uid());
-        allow update: if isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid())
-          || (isPlayer() && can('plDocTake') && resource.data.pub == true && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['given','updatedAt','updatedBy'])
+        allow create: if (isDM() || (isPlayer() && can('plDocNew') && request.resource.data.owner == uid())) && syncC();
+        allow update: if (isDM() || (isPlayer() && resource.data.owner == uid() && request.resource.data.owner == uid())
+          || (isPlayer() && can('plDocTake') && resource.data.pub == true && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['given','updatedAt','updatedBy', '_t', '_r'])
               && request.resource.data.given.hasAll(resource.data.given) && request.resource.data.given.size() == resource.data.given.size() + 1 && uid() in request.resource.data.given)
           // выданный документ игрок может убрать из своего списка (только себя из given)
-          || (isPlayer() && uid() in resource.data.given && !(uid() in request.resource.data.given) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['given','dropped','updatedAt','updatedBy'])
+          || (isPlayer() && uid() in resource.data.given && !(uid() in request.resource.data.given) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['given','dropped','updatedAt','updatedBy', '_t', '_r'])
               && resource.data.given.hasAll(request.resource.data.given) && request.resource.data.given.size() == resource.data.given.size() - 1)
           // тот, у кого документ есть, может открыть его всем (только pub → true)
-          || (isPlayer() && can('plDocShow') && uid() in resource.data.given && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pub','updatedAt','updatedBy']) && request.resource.data.pub == true);
-        allow delete: if isDM() || (isPlayer() && resource.data.owner == uid());
+          || (isPlayer() && can('plDocShow') && uid() in resource.data.given && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pub','updatedAt','updatedBy', '_t', '_r']) && request.resource.data.pub == true)) && syncU('docs', id);
+        allow delete: if (isDM() || (isPlayer() && resource.data.owner == uid())) && syncD('docs', id);
       }
       // ===== живые события карты (пинг, след хода): перезаписываемые документы, читают и пишут все вошедшие
       match /live/{id} { allow read, write: if signedIn(); }
