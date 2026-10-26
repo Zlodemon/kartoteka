@@ -437,7 +437,11 @@ h1,h2,h3{margin:0;font-weight:700}
 .cdedeck:empty{display:none}
 .cdedeck b{color:#c792ff}
 .cddgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px 12px;justify-items:center;margin-top:6px}
-.cddt{display:flex;flex-direction:column;align-items:center;gap:6px}
+.cddt{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+.cddt[draggable=true] .cdtile{cursor:grab}.cddt.drag{opacity:.35}
+.cddt.dbefore::before,.cddt.dafter::after{content:'';position:absolute;top:0;bottom:30px;width:4px;border-radius:2px;background:#c792ff;box-shadow:0 0 10px #c792ff}
+.cddt.dbefore::before{left:-8px}.cddt.dafter::after{right:-8px}
+.cddord{margin-top:10px;display:flex;align-items:center;gap:8px}
 .cddc{display:flex;align-items:center;gap:8px;font-size:15px}
 .cddc b{min-width:34px;text-align:center;color:#c792ff}
 .cddc .btn{min-width:28px;padding:2px 8px}
@@ -2667,6 +2671,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-26',t:'Колоды: порядок, размер, текст карт',items:['Порядок карт в колоде меняется перетаскиванием — на листе персонажа (вкладка «Колода») и в «Карточки → 🃏 Колоды». Вернуть порядок библиотеки — «↺ как в библиотеке» под колодой. В TTS колода уходит в том же порядке.','Во вкладке «Колода» у карт больше не пропадает текст.','В «Колодах» крупные карты больше не налезают друг на друга.','Игрок видит на листе своего персонажа «Кратко для игроков» — то, что мастер написал для остальных (только чтение).','Мастер может закрепить персонажа за собой: «+ Мне» в блоке «Игроки» (или себя в списке «+ Игрок»). Такой персонаж — в «★ Твои персонажи», его колода выбирается в «Карточках» по умолчанию.']},
   {d:'2026-10-26',t:'Новый выбор персонажа в списках',items:['Списки «— выбрать —» (участник организации, организация персонажа, локация, «Кто здесь», новая связь, привязка к событию) открывают аккуратную панель вместо системного списка: поиск по имени и подписи, портреты, группы. Уже добавленные помечены «✓ уже есть» и стоят в конце.','Можно сразу начать печатать имя — список откроется с поиском. Стрелки, Enter и Esc тоже работают.']},
   {d:'2026-10-26',t:'Колода «видна всем»',items:['На листе персонажа, в блоке «Колода персонажа», у мастера есть галочка «видна всем». С ней колоду этого персонажа видят все игроки, даже если сам персонаж открыт им только «кратко». Без галочки при «кратко» колода скрыта.']},
   {d:'2026-10-26',t:'Быстрые клики игрока больше не теряются',items:['Если игрок быстро нажимал «+» (колода, полоски, счётчики) у своего персонажа, одно из нажатий иногда пропадало. Исправлено.','Изменения колоды не пишутся в журнал — вдвое меньше записей в базу на каждый клик.']},
@@ -2973,7 +2978,7 @@ function renderList(m,t){
     grid.innerHTML=''; grid.className=asRow?'lrows':'grid';
     if(!arr.length){ grid.append(el(`<div class="empty" style="grid-column:1/-1">${q?'Ничего не найдено':(cfg.can?'Пока пусто — нажми «Добавить»':'Пока пусто')}</div>`)); return; }
     /* «Все»: раскрывающиеся блоки по папкам; свои персонажи игрока — отдельным блоком сверху */
-    const mineOf=e=>t==='c'&&isPlayer()&&canEdit(e);
+    const mineOf=e=>t==='c'&&(isPlayer()?canEdit(e):(e.players||[]).includes(effUid()));
     if(LS.sort==='folders'&&F.active===''&&(F.folders.length||arr.some(mineOf))){ grid.className='lsecs';
       const fids=new Set(F.folders.map(f=>f.id)); const secs=[];
       const mine=arr.filter(mineOf); if(mine.length) secs.push({id:'__mine',name:mine.length>1?'Твои персонажи':'Твой персонаж',icon:'★',items:mine});
@@ -3094,6 +3099,8 @@ function briefBlock(ent){
   if(isDM()) { const p=el(`<div class="panel"><h3>Кратко для игроков</h3>${pageLocked(ent)?`<div class="richview" style="line-height:1.6">${rich(ent.brief||'')||'<span class="faint">—</span>'}</div>`:`<textarea class="rich" placeholder="Что видят игроки, когда сущность в режиме «кратко»: пара фраз, без секретов" style="width:100%;min-height:70px">${esc(ent.brief||'')}</textarea>`}<div class="faint" style="font-size:12px;margin-top:6px">Показывается вместо описания, если видимость — «кратко». Сейчас: <b>${ {full:'видна полностью',brief:'кратко',hidden:'скрыта от игроков'}[visOf(ent)] }</b>.</div></div>`); const ta=$('textarea',p); if(ta) ta.oninput=e=>{ ent.brief=e.target.value; touch(ent); }; return p; }
   return el(`<div class="panel"><h3>Описание</h3><div style="line-height:1.6;white-space:pre-wrap">${rich(ent.brief||'')||'<span class="faint">Ничего не известно.</span>'}</div></div>`);
 }
+/* владелец видит полный лист, а «кратко» — то, что мастер написал для остальных игроков: показываем ему только для чтения */
+const briefOwn=ent=>!isDM()&&!!String(ent.brief||'').trim()&&(ownsOrPlays(ent)||isEditorOf(ent))?el(`<div class="panel ro"><h3>Кратко для игроков</h3><div style="line-height:1.6;white-space:pre-wrap">${rich(ent.brief)}</div><div class="faint" style="font-size:12px;margin-top:6px">Так тебя видят игроки, которым мастер открыл тебя «кратко». Пишет мастер.</div></div>`):null;
 function musicEmbed(url){
   if(!url) return '';
   let m=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/))([\w-]{11})/);
@@ -4243,7 +4250,7 @@ function layoutTabs(page,ch,B){
   const show=()=>{ body.innerHTML=''; const t=TABS.find(x=>x.id===cur)||TABS[0]; $$('span',bar).forEach(sp=>sp.classList.toggle('on',sp.dataset.t===t.id));
     const g=el(`<div class="tabgrid" style="grid-template-columns:${t.tpl}"></div>`);
     for(const col of t.cols){ const st=el('<div class="stack"></div>'); for(const id of col) if(B[id]){ st.append(B[id]); B[id].classList.toggle('empty',blockEmpty(id,ch,B[id])); } g.append(st); }
-    body.append(g); hydrate(body); $$('textarea',body).forEach(ta=>{ ta.style.height='auto'; ta.style.height=Math.max(parseFloat(getComputedStyle(ta).minHeight)||28,ta.scrollHeight+2)+'px'; }); };
+    body.append(g); hydrate(body); if($('canvas.cdcv',body)) cdRefresh(); /* холсты карт вкладки рисовались вне документа — без текста */ $$('textarea',body).forEach(ta=>{ ta.style.height='auto'; ta.style.height=Math.max(parseFloat(getComputedStyle(ta).minHeight)||28,ta.scrollHeight+2)+'px'; }); };
   $$('span',bar).forEach(sp=>sp.onclick=()=>{ cur=sp.dataset.t; charTab[ch.id]=cur; show(); routeSync('replace'); });
   show(); page.append(d);
 }
@@ -4711,13 +4718,16 @@ function renderCharacter(m,ch){
   const L=$('.left',d), R=$('.right',d);
   const B={gallery:galleryBlock(ch)}; const DEF={left:['gallery','players','tags','epic','stats','bars','auras','effects','energy'],right:['brief','desc','music','backstory','abilities','skills','epgear','inventory','deck','memberships','locLinks','relations']};
   if(briefOnly(ch)){ B.brief=briefBlock(ch); if(cdOn()&&ch.deckPub) B.deck=cdDeckBlock(ch); /* колоду мастер открыл всем */ B.music=musicBlock(ch); B.memberships=membershipsBlock(ch); B.locLinks=locLinksBlock(ch); B.relations=relationsBlock(ch); arrangeBlocks(d,ch,B,DEF); page.append(d); m.append(page); return; }
-  if(isDM()) B.brief=briefBlock(ch);
+  B.brief=isDM()?briefBlock(ch):briefOwn(ch);
   B.music=musicBlock(ch);
   /* игроки (дм) */
   if(isDM()){
-    const pl=el(`<div class="panel"><h3>Игроки <button class="btn sm" title="Игрок сможет редактировать персонажа; изменения попадают в журнал">+ Игрок</button></h3><div class="chips"></div><div class="addrow row" style="display:none;margin-top:8px"><select class="grow"><option value="">— выбрать игрока —</option>${world.users.filter(u=>u.role==='player'&&!(ch.players||[]).includes(u.id)).map(u=>`<option value="${u.id}">${esc(u.name||u.email)}</option>`).join('')}</select><button class="btn sm">Ок</button></div></div>`);
-    const drawP=()=>{ const c=$('.chips',pl); c.innerHTML=(ch.players||[]).map(u=>`<span class="chip u">${esc(userName(u))}<span class="x" data-u="${u}">×</span></span>`).join('')||'<span class="faint">не закреплён ни за кем</span>'; $$('.x',c).forEach(x=>x.onclick=()=>{ ch.players=ch.players.filter(u=>u!==x.dataset.u); touch(ch); render(); }); };
-    $('h3 .btn',pl).onclick=()=>{ $('.addrow',pl).style.display='flex'; };
+    /* закрепить можно и за мастером (в т.ч. за собой): персонаж станет «твоим» — ★ в списке, своя колода по умолчанию */
+    const muid=effUid(), mineP=(ch.players||[]).includes(muid);
+    const pl=el(`<div class="panel"><h3>Игроки ${mineP?'':'<button class="btn sm me" title="Закрепить персонажа за собой: он будет среди «★ Твоих персонажей», его колода выбирается по умолчанию">+ Мне</button>'}<button class="btn sm add" title="Игрок сможет редактировать персонажа; изменения попадают в журнал">+ Игрок</button></h3><div class="chips"></div><div class="addrow row" style="display:none;margin-top:8px"><select class="grow"><option value="">— выбрать игрока —</option>${world.users.filter(u=>(u.role==='player'||u.role==='dm')&&!(ch.players||[]).includes(u.id)).sort((a,b)=>(a.role==='dm')-(b.role==='dm')).map(u=>`<option value="${u.id}">${esc(u.name||u.email)}${u.role==='dm'?' (мастер)':''}</option>`).join('')}</select><button class="btn sm">Ок</button></div></div>`);
+    const drawP=()=>{ const c=$('.chips',pl); c.innerHTML=(ch.players||[]).map(u=>`<span class="chip u">${esc(userName(u))}${u===muid?' <span class="faint">(ты)</span>':''}<span class="x" data-u="${u}">×</span></span>`).join('')||'<span class="faint">не закреплён ни за кем</span>'; $$('.x',c).forEach(x=>x.onclick=()=>{ ch.players=ch.players.filter(u=>u!==x.dataset.u); touch(ch); render(); }); };
+    $('h3 .add',pl).onclick=()=>{ $('.addrow',pl).style.display='flex'; };
+    const bm=$('h3 .me',pl); if(bm) bm.onclick=()=>{ (ch.players??=[]).push(muid); touch(ch); render(); };
     $('.addrow .btn',pl).onclick=()=>{ const u=$('select',pl).value; if(!u) return; (ch.players??=[]).push(u); touch(ch); render(); };
     drawP(); B.players=pl;
   } else if(ch.players?.length){ B.players=el(`<div class="panel"><h3>Игроки</h3><div class="chips">${ch.players.map(u=>`<span class="chip u">${esc(userName(u))}</span>`).join('')}</div></div>`); }
@@ -4954,7 +4964,7 @@ function renderOrg(m,o){
   const d=el(`<div class="detail"><div class="stack left"></div><div class="stack right"></div></div>`);
   const L=$('.left',d), R=$('.right',d);
   const B={gallery:galleryBlock(o),locLinks:locLinksBlock(o)}; const DEF={left:['gallery','locLinks'],right:['brief','desc','music','members','relations']};
-  if(briefOnly(o)) B.brief=briefBlock(o); else { if(isDM()) B.brief=briefBlock(o); B.desc=descBlock(o,'Цели, структура, история, ресурсы…'); }
+  if(briefOnly(o)) B.brief=briefBlock(o); else { B.brief=isDM()?briefBlock(o):briefOwn(o); B.desc=descBlock(o,'Цели, структура, история, ресурсы…'); }
   B.music=musicBlock(o);
   const mem=el(`<div class="panel ${ed?'':'ro'}"><h3>Участники <button class="btn sm w">+ Участник</button></h3><div class="list"></div><div class="addrow row" style="display:none;margin-top:8px">${entitySelect(o.id,'c')}<input class="grow" placeholder="роль / должность"><button class="btn sm">Ок</button></div></div>`);
   const list=$('.list',mem), addrow=$('.addrow',mem);
@@ -4982,7 +4992,7 @@ function renderLocation(m,l){
   const L=$('.left',d), R=$('.right',d);
   const B={gallery:galleryBlock(l,true)}; const DEF={left:['gallery'],right:['brief','desc','music','who','relations']};
   if(briefOnly(l)){ B.brief=briefBlock(l); B.music=musicBlock(l); B.relations=relationsBlock(l); arrangeBlocks(d,l,B,DEF); page.append(d); m.append(page); return; }
-  if(isDM()) B.brief=briefBlock(l);
+  B.brief=isDM()?briefBlock(l):briefOwn(l);
   B.desc=descBlock(l,'Что здесь находится, атмосфера, опасности, кто владеет…');
   B.music=musicBlock(l);
   const who=el(`<div class="panel ${canWrite()?'':'ro'}"><h3>Кто здесь <button class="btn sm w">+ Привязать</button></h3><div class="list"></div><div class="addrow row" style="display:none;margin-top:8px">${entitySelect(l.id,'co')}<input class="grow" placeholder="заметка"><button class="btn sm">Ок</button></div></div>`);
@@ -10661,16 +10671,23 @@ function cdZoom(id,ids,opt={}){ ids=ids&&ids.length?ids:[id]; const K=k=>{ const
    ch.deck = [{c: id карты, u?: id улучшения, n: сколько копий}]; собирают хозяин персонажа и мастер — на вкладке «Карточки» выбирают персонажа,
    клик по карте → «Добавить в колоду» / «Убрать из колоды». Список виден на листе (вкладка «Колода»), когда включён режим карточек */
 const cdDeckChars=()=>V.chars().filter(c=>isDM()||canEdit(c));
-/* выбранный на вкладке «Карточки» персонаж; '-' — «не собираю»; у игрока по умолчанию первый свой */
-function cdDeckChar(){ const L=cdDeckChars(), id=cdUiGet('deck',''); if(id==='-') return null; return L.find(c=>c.id===id)||(isDM()?null:L[0]||null); }
+/* выбранный на вкладке «Карточки» персонаж; '-' — «не собираю»; по умолчанию первый свой (у мастера — закреплённый за ним, иначе никакой) */
+function cdDeckChar(){ const L=cdDeckChars(), id=cdUiGet('deck',''); if(id==='-') return null; return L.find(c=>c.id===id)||(isDM()?L.find(c=>(c.players||[]).includes(effUid())):L[0])||null; }
 function cdDeckN(ch,cid,u){ let n=0; for(const e of (ch&&Array.isArray(ch.deck)?ch.deck:[])) if(e&&e.c===cid&&(e.u||'')===(u||'')) n+=+e.n||0; return n; }
 function cdDeckAdd(ch,cid,u,d){ if(!ch||!canEdit(ch)) return; u=u||''; const L=ch.deck=Array.isArray(ch.deck)?ch.deck:[]; let e=L.find(x=>x&&x.c===cid&&(x.u||'')===u);
   if(!e){ if(d<=0) return; e={c:cid,n:0}; if(u) e.u=u; L.push(e); } e.n=Math.max(0,(+e.n||0)+d); if(!e.n) L.splice(L.indexOf(e),1); touch(ch); cdDeckRefresh(ch); }
-/* что показать: карты по порядку библиотеки; hid — карты, которых этот зритель не видит (скрытый сет / удалены) */
+/* что показать: карты по порядку библиотеки, а если колоду переставляли руками (ch.deckOwn) — в порядке ch.deck; hid — карты, которых этот зритель не видит (скрытый сет / удалены) */
 function cdDeckList(ch){ const so=new Map(cdSets().map((s,i)=>[s.id,i])); const L=[]; let n=0, hid=0, gone=0;
   for(const e of (Array.isArray(ch.deck)?ch.deck:[])){ if(!e||!(+e.n>0)) continue; const c=byId(world.cards,e.c); if(!c||!(isDM()||c.pub)){ hid+=+e.n; if(!c) gone+=+e.n; continue; } L.push({e,c,k:e.c+(e.u?'~'+e.u:'')}); n+=+e.n; }
-  L.sort((a,b)=>(so.get(a.c.set)??1e9)-(so.get(b.c.set)??1e9)||(a.c.order??0)-(b.c.order??0)||String(a.e.u||'').localeCompare(String(b.e.u||'')));
+  if(!ch.deckOwn) L.sort((a,b)=>(so.get(a.c.set)??1e9)-(so.get(b.c.set)??1e9)||(a.c.order??0)-(b.c.order??0)||String(a.e.u||'').localeCompare(String(b.e.u||'')));
   return {L,n,hid,gone}; }
+/* перетаскивание внутри колоды: k — ключ карты, before — ключ, перед которым поставить (null — в конец); невидимые этому зрителю записи остаются на своих местах */
+function cdDeckMove(ch,k,before){ const D=cdDeckList(ch), keys=D.L.map(x=>x.k); if(!keys.includes(k)||k===before) return;
+  const ord=keys.filter(x=>x!==k); let i=before?ord.indexOf(before):-1; if(i<0) i=ord.length; ord.splice(i,0,k);
+  const byK=new Map(D.L.map(x=>[x.k,x.e])), seen=new Set(keys); let j=0;
+  ch.deck=(ch.deck||[]).map(e=>e&&seen.has(e.c+(e.u?'~'+e.u:''))?byK.get(ord[j++]):e); ch.deckOwn=true; touch(ch); cdDeckRefresh(ch); }
+function cdDeckSortLib(ch){ delete ch.deckOwn; touch(ch); cdDeckRefresh(ch); }
+let CD_DKDRAG=null; /* {ch, k} — карта колоды, которую тащат */
 function cdDeckBadge(t,ch){ const b=$('.cddk',t); if(!b) return; let n=0; if(ch) for(const e of (Array.isArray(ch.deck)?ch.deck:[])) if(e&&e.c===t.dataset.id) n+=+e.n||0; b.textContent=n?'×'+n:''; b.title=n?'В колоде «'+(ch.name||'без имени')+'»':''; }
 function cdDeckRefresh(ch){ const cur=cdDeckChar(); if(cur&&cur.id===ch.id) $$('.cdlib .cdtile').forEach(t=>cdDeckBadge(t,cur));
   $$('.cddeck,.cddk1').forEach(p=>{ if(p.dataset.ch===ch.id&&p._draw) p._draw(); });
@@ -10687,13 +10704,20 @@ function cdDeckBlock(ch){ if(Array.isArray(ch.deck)&&ch.deck.length) cdSubscribe
 function cdDeckFill(body,ch,ed,tw){ const draw=()=>{ const D=cdDeckList(ch); body.innerHTML='';
     if(!CD_LOADED.cards&&D.hid){ body.append(el('<div class="faint">Загружаю карты…</div>')); return; }
     if(!D.L.length&&!D.hid) body.append(el(`<div class="faint">${ed?'Колода пуста. «🃏 Добавить карты» откроет библиотеку с этим персонажем — клик по карте → «Добавить в колоду».':'Колода пуста.'}</div>`));
-    if(D.L.length){ const g=el('<div class="cddgrid"></div>'), keys=D.L.map(x=>x.k);
-      for(const {e,k} of D.L){ const t=el(`<div class="cddt"><div class="cdtile"><canvas></canvas></div><div class="cddc">${ed?'<button class="btn sm m" title="Убрать из колоды">−</button>':''}<b title="Копий в колоде">×${+e.n}</b>${ed?'<button class="btn sm p" title="Добавить в колоду">+</button>':''}</div></div>`);
+    if(D.L.length){ const g=el(`<div class="cddgrid" style="grid-template-columns:repeat(auto-fill,minmax(${tw+12}px,1fr))"></div>`), keys=D.L.map(x=>x.k);
+      for(const {e,k} of D.L){ const t=el(`<div class="cddt" data-k="${esc(k)}" ${ed&&D.L.length>1?'draggable="true" title="Перетащи, чтобы поменять порядок"':''}><div class="cdtile"><canvas></canvas></div><div class="cddc">${ed?'<button class="btn sm m" title="Убрать из колоды">−</button>':''}<b title="Копий в колоде">×${+e.n}</b>${ed?'<button class="btn sm p" title="Добавить в колоду">+</button>':''}</div></div>`);
         cdCanvas($('canvas',t),tw,()=>{ const o=byId(world.cards,e.c); return o?cdUpCard(o,e.u||''):null; });
         $('.cdtile',t).onclick=()=>cdZoom(k,keys,{ch:ch.id});
         if(ed){ $('.m',t).onclick=()=>cdDeckAdd(ch,e.c,e.u,-1); $('.p',t).onclick=()=>cdDeckAdd(ch,e.c,e.u,1); }
+        if(ed&&D.L.length>1){ const side=ev=>{ const r=t.getBoundingClientRect(); return ev.clientX>r.left+r.width/2; }, clr=()=>$$('.cddt.dbefore,.cddt.dafter').forEach(x=>x.classList.remove('dbefore','dafter'));
+          t.ondragstart=ev=>{ CD_DKDRAG={ch:ch.id,k}; ev.dataTransfer.effectAllowed='move'; try{ ev.dataTransfer.setData('text/plain',k); }catch{} setTimeout(()=>t.classList.add('drag'),0); };
+          t.ondragend=()=>{ CD_DKDRAG=null; t.classList.remove('drag'); clr(); };
+          t.ondragover=ev=>{ if(!CD_DKDRAG||CD_DKDRAG.ch!==ch.id||CD_DKDRAG.k===k) return; ev.preventDefault(); ev.dataTransfer.dropEffect='move'; const a=side(ev); if(!t.classList.contains(a?'dafter':'dbefore')){ clr(); t.classList.add(a?'dafter':'dbefore'); } };
+          t.ondragleave=ev=>{ if(!t.contains(ev.relatedTarget)) t.classList.remove('dbefore','dafter'); };
+          t.ondrop=ev=>{ ev.preventDefault(); const d=CD_DKDRAG; CD_DKDRAG=null; clr(); if(!d||d.ch!==ch.id||d.k===k) return; const i=keys.indexOf(k); cdDeckMove(ch,d.k,side(ev)?(keys[i+1]===d.k?keys[i+2]:keys[i+1])||null:k); }; }
         g.append(t); }
-      body.append(g); }
+      body.append(g);
+      if(ed&&ch.deckOwn){ const r=el('<div class="faint cddord">Свой порядок карт <button class="btn sm ghost" title="Разложить карты, как они лежат в библиотеке (по сетам)">↺ как в библиотеке</button></div>'); $('button',r).onclick=()=>cdDeckSortLib(ch); body.append(r); } }
     if(D.hid){ const x=el(`<div class="faint" style="margin-top:10px">${isDM()?`Ещё ${D.hid} ${plural(D.hid,'карта','карты','карт')} — удалены из библиотеки${ed?' <button class="btn sm ghost rmg">убрать из колоды</button>':''}`:`Ещё ${D.hid} ${plural(D.hid,'карта','карты','карт')} скрыты мастером`}</div>`); const r=$('.rmg',x);
       if(r) r.onclick=()=>{ ch.deck=(ch.deck||[]).filter(e=>e&&byId(world.cards,e.c)); touch(ch); cdDeckRefresh(ch); }; body.append(x); } }; draw(); }
 
