@@ -9,8 +9,6 @@ icons.json — 62 силуэта с game-icons.net (авторы: Lorc, Delapoui
 lib/pixi-7.4.2.min.js — PixiJS 7.4.2 (https://pixijs.com), лицензия MIT.
 lib/pixi-filters-5.3.0.js — pixi-filters 5.3.0 (https://github.com/pixijs/filters), лицензия MIT.
 
-sfx.webm / sfx.m4a — звуки боя, нарезанные в один файл (громкость выровнена, тишина обрезана, без других изменений):
-  JC Sounds — «Fantasy SFX Pack Vol 1» (мечи, кинжал, лук, магия огня/льда/молнии, лечение, щит, телепорт, тьма),
-    лицензия CC BY 4.0: https://creativecommons.org/licenses/by/4.0/ — https://opengameart.org/content/jc-sounds-fantasy-sfx-pack-vol-1
-  Kenney (www.kenney.nl) — «Impact Sounds» (удары, металл, камень) и «Sci-fi Sounds» (взрывы, заряды, силовое поле), лицензия CC0.
-  rubberduck (OpenGameArt) — «40 CC0 water / splash / slime SFX» и «80 CC0 RPG SFX» (вода, слизь, камни, заклинания, цепи), лицензия CC0.
+sfx.webm / sfx.m4a — звуки боя: студийные звуковые эффекты Mixkit (https://mixkit.co/free-sound-effects/), лицензия Mixkit Sound Effects Free License
+  (https://mixkit.co/license/#sfxFree): можно в проектах и приложениях без указания автора; раздавать сами звуки отдельно, как библиотеку, нельзя.
+  83 звука нарезаны в один файл (обрезана тишина, выровнена громкость). Номера звуков на mixkit.co — ключи EP_SFXMAN в index.html (m2763 → mixkit.co sfx 2763).
