@@ -94,6 +94,8 @@ service cloud.firestore {
         allow create, update: if canWrite() && request.resource.data.by == uid() && request.resource.data._t is int && id == request.resource.data.coll + '__' + request.resource.data.id;
         allow delete: if isDM();
       }
+      // журнал проверки дочитывания (расхождения, сверки, откаты на полную загрузку): пишет любой вошедший в игру от своего имени, читает и чистит мастер
+      match /syncdiag/{id} { allow create: if signedIn() && request.resource.data.by == uid(); allow read, delete: if isDM(); }
 
       // зафиксированную предысторию игрок персонажа может сам вернуть в работу (с 2026-09-24)
       match /characters/{id} {

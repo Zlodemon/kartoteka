@@ -1566,7 +1566,12 @@ try{ const old=Date.now()-2*864e5; for(const k of Object.keys(localStorage)) if(
 const FS_NAMES={characters:'Персонажи',orgs:'Организации',locations:'Локации',memberships:'Членство в организациях',locLinks:'Связи с локациями',relations:'Связи',maps:'Карты связей',wmaps:'Карты местности',wmarkers:'Токены на картах',wmdraw:'Рисунки и листы на картах',wmpriv:'Личные слои карт',docs:'Документы',chat:'Чат',chatdm:'Чат мастера',log:'Журнал',users:'Участники',meta:'Настройки',dm:'Скрытое мастера',images:'Картинки',trash:'Корзина',cards:'Карточки',cardsets:'Сеты карточек',cardfaces:'Картинки карточек для TTS',campaigns:'Игры',site:'Сайт',live:'Живой слой'};
 function fsStatHTML(){ let day=null; try{ day=(FS_DAY&&FS_DAY.d===fsDayId())?FS_DAY:JSON.parse(localStorage.getItem('fsStat.'+fsDayId())||'null'); }catch{} day=day||{r:0,by:{}};
   const rows=Object.entries(day.by).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([k,v])=>`<tr><td>${esc(FS_NAMES[k]||k)}</td><td style="text-align:right"><b>${v}</b></td><td style="text-align:right" class="faint">${STAT.by[k]||0}</td></tr>`).join('');
-  return `Чтения базы с сервера: <b>${STAT.r}</b> за эту вкладку, <b>${day.r}</b> сегодня в этом браузере; записей за вкладку — <b>${STAT.w}</b>. <span class="faint">Бесплатный лимит — 50 000 чтений и 20 000 записей в сутки на всех вместе, сбрасывается около 10:00 по Москве. Здесь только этот браузер; общий расход проекта — в Firebase Console → Firestore → Usage. Живые сигналы карты (линейка, пинги, перетаскивание) идут через Realtime Database и сюда не входят. Полное перечитывание после перерыва больше 30 минут (заход, F5, сон компьютера) учтено по оценке; проверки прав внутри правил базы Firebase тоже считает чтениями — их здесь не видно.</span>${fsLoadsHTML()}${rows?`<table class="fstab"><tr><th>На что ушли чтения сегодня (этот браузер)</th><th style="text-align:right">сегодня</th><th style="text-align:right">вкладка</th></tr>${rows}</table>`:''}${fsPastHTML()}`; }
+  return `${fsSyncHTML()}Чтения базы с сервера: <b>${STAT.r}</b> за эту вкладку, <b>${day.r}</b> сегодня в этом браузере; записей за вкладку — <b>${STAT.w}</b>. <span class="faint">Бесплатный лимит — 50 000 чтений и 20 000 записей в сутки на всех вместе, сбрасывается около 10:00 по Москве. Здесь только этот браузер; общий расход проекта — в Firebase Console → Firestore → Usage. Живые сигналы карты (линейка, пинги, перетаскивание) идут через Realtime Database и сюда не входят. Полное перечитывание после перерыва больше 30 минут (заход, F5, сон компьютера) учтено по оценке; проверки прав внутри правил базы Firebase тоже считает чтениями — их здесь не видно.</span>${fsLoadsHTML()}${rows?`<table class="fstab"><tr><th>На что ушли чтения сегодня (этот браузер)</th><th style="text-align:right">сегодня</th><th style="text-align:right">вкладка</th></tr>${rows}</table>`:''}${fsPastHTML()}`; }
+/* дочитывание (режим и сверки за этот заход); режим меняет мастер — у всех со следующего захода */
+function fsSyncHTML(){ const i=DB&&DB.syncInfo?DB.syncInfo():null; if(!i) return ''; const nm={off:'выключено — каждый заход грузит всё',shadow:'проверка — данные грузятся как раньше, рядом сверяется дочитывание',on:'включено — с сервера только изменённое, со сверкой'};
+  const red=v=>v?`<b style="color:var(--red,#ff6b6b)">${v}</b>`:'<b>0</b>';
+  return `<div style="margin-bottom:8px"><b>Дочитывание:</b> ${realDM()?`<select id="syncMode" title="Действует у каждого со следующего захода. «Выключено» при работающем дочитывании — сразу">${SYNC_MODE_NAMES.map(([m,n])=>`<option value="${m}" ${m===i.mode?'selected':''}>${n}</option>`).join('')}</select> `:''}<span class="faint">${nm[i.mode]||''}</span>${i.mode==='off'?'':`<br>За этот заход: сверок с сервером <b>${i.ver}</b>, не сошлось ${red(i.verBad)}; сравнений с полной загрузкой <b>${i.cmp}</b>, расхождений ${red(i.diff)}; переходов на полную загрузку ${red(i.fall)}.`}</div>`; }
+const SYNC_MODE_NAMES=[['off','выключено'],['shadow','проверка'],['on','включено']];
 /* прошлые дни этого браузера (хранятся 8 дней) — чтобы после «Quota exceeded» было видно, что съело лимит вчера */
 function fsPastHTML(){ let L=[]; try{ const today='fsStat.'+fsDayId(); L=Object.keys(localStorage).filter(k=>k.startsWith('fsStat.')&&k!==today).sort().reverse().map(k=>JSON.parse(localStorage.getItem(k))).filter(d=>d&&d.r); }catch{} if(!L.length) return '';
   return `<div style="margin-top:10px"><b>Прошлые дни (этот браузер):</b>${L.map(d=>`<div style="font-size:12.5px;margin-top:3px">${esc(d.d)} — <b>${d.r}</b>${d.loads?` за ${d.loads} ${plural(d.loads,'заход','захода','заходов')}`:''}: ${Object.entries(d.by||{}).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>esc(FS_NAMES[k]||k)+' '+v).join(', ')}</div>`).join('')}</div>`; }
@@ -1651,8 +1656,9 @@ if(MOCK){
   /* часы у игроков могут расходиться (у кого-то на минуты). Живой слой хранит t в серверном времени: при записи местное + смещение, при чтении обратно в местное —
      тогда сравнения «Date.now() − d.t» верны у всех. Смещение даёт сам Realtime Database (.info/serverTimeOffset). Раньше пинг «из будущего» давал отрицательный радиус и ошибку в каждом кадре */
   /* CLK_OK — поправка уже пришла (или ждать перестали через 10 с): метка _t досинхронизации без неё может уйти по сбитым часам */
-  let CLK=0, CLK_OK=false, clkOk; const CLK_P=new Promise(r=>clkOk=()=>{ if(!CLK_OK){ CLK_OK=true; r(); } }); setTimeout(()=>clkOk(),10000);
-  try{ R.onValue(R.ref(rtdb,'.info/serverTimeOffset'),sn=>{ const v=+sn.val(); if(isFinite(v)){ CLK=v; clkOk(); if(Math.abs(v)>5000) console.warn('часы этого компьютера расходятся с сервером на',Math.round(v/1000),'с — время живого слоя поправлено'); } }); }catch(e){ console.warn(e); }
+  /* CLK_PERF — то же время сервера по монотонному таймеру браузера: его не сдвигает перевод системных часов (см. clkNow) */
+  let CLK=0, CLK_OK=false, CLK_PERF=null, clkOk; const CLK_P=new Promise(r=>clkOk=()=>{ if(!CLK_OK){ CLK_OK=true; r(); } }); setTimeout(()=>clkOk(),10000);
+  try{ R.onValue(R.ref(rtdb,'.info/serverTimeOffset'),sn=>{ const v=+sn.val(); if(isFinite(v)){ CLK=v; CLK_PERF=Date.now()+CLK-performance.now(); clkOk(); if(Math.abs(v)>5000) console.warn('часы этого компьютера расходятся с сервером на',Math.round(v/1000),'с — время живого слоя поправлено'); } }); }catch(e){ console.warn(e); }
   const tOut=o=>(o&&typeof o.t==='number')?{...o,t:o.t+CLK}:o, tIn=v=>(v&&typeof v.t==='number')?{...v,t:v.t-CLK}:v;
   { const liveMap=new Map(); const vol=new Set(); LIVE={ set:(id,o)=>R.set(R.ref(rtdb,'live/'+CAMP+'/'+id),clean(tOut(o))), remove:id=>R.remove(R.ref(rtdb,'live/'+CAMP+'/'+id)), volatile(id){ if(vol.has(id)) return; vol.add(id); R.onDisconnect(R.ref(rtdb,'live/'+CAMP+'/'+id)).remove().catch(()=>{}); },
     subscribe(cb){ const r=R.ref(rtdb,'live/'+CAMP); const emit=()=>cb([...liveMap.values()]); R.onChildAdded(r,sn=>{ liveMap.set(sn.key,{...tIn(sn.val()),id:sn.key}); emit(); }); R.onChildChanged(r,sn=>{ liveMap.set(sn.key,{...tIn(sn.val()),id:sn.key}); emit(); }); R.onChildRemoved(r,sn=>{ liveMap.delete(sn.key); emit(); }); } };
@@ -1698,9 +1704,12 @@ if(MOCK){
   const cbase=coll=>coll.split('/').pop(), isSync=coll=>SYNC.has(cbase(coll)), skey=(coll,id)=>cpath(coll).join('/')+'/'+id;
   const gkey=(coll,id)=>[...cpath(coll).slice(0,-1),'gone',cbase(coll)+'__'+id].join('/');
   const sf=d=>JSON.stringify(SYNC_F.map(k=>d[k]===undefined?null:d[k]));
-  function syncSeen(coll,id,d){ if(!isSync(coll)) return; const k=skey(coll,id), s=SK.get(k); SK.set(k,{f:sf(d),t:Math.max(s?s.t:0,Number.isInteger(d._t)?d._t:0)}); }
+  /* время сервера по этому клиенту: наибольшее из системных часов с поправкой и монотонного таймера (часы перевели назад — таймер не заметит, таймер
+     стоял во сне — часы верны). Метка берёт ещё и самую свежую увиденную метку: чтобы правка «опоздала» мимо дочитывания у других, должны ошибиться все три */
+  let SEEN_MAX=0; const clkNow=()=>Math.floor(Math.max(Date.now()+CLK,CLK_PERF==null?0:CLK_PERF+performance.now())), stampNow=()=>Math.max(clkNow(),SEEN_MAX)-SYNC_T0;
+  function syncSeen(coll,id,d){ if(!isSync(coll)) return; const k=skey(coll,id), s=SK.get(k), t=Number.isInteger(d._t)?d._t:0; if(t+SYNC_T0>SEEN_MAX) SEEN_MAX=t+SYNC_T0; SK.set(k,{f:sf(d),t:Math.max(s?s.t:0,t)}); }
   /* метка строго больше последней известной для документа: правила этапа 2 требуют, чтобы каждая запись её меняла */
-  function syncStamp(k){ const s=SK.get(k)||{}; const t=Math.max(Date.now()+CLK-SYNC_T0,(s.t||0)+1); SK.set(k,{...s,t}); return {_t:t,_r:Math.floor(Math.random()*1073741824)}; }
+  function syncStamp(k){ const s=SK.get(k)||{}; const t=Math.max(stampNow(),(s.t||0)+1); SK.set(k,{...s,t}); return {_t:t,_r:Math.floor(Math.random()*1073741824)}; }
   /* нужно ли надгробие: part — записываемые поля (DB.DEL — удалить поле), full — документ целиком. Незнакомый клиенту документ целиком — новый,
      частично — надгробие на всякий случай. Запоминает новые значения как свой взгляд на документ */
   function syncGone(k,part,full){ if(!full&&!SYNC_F.some(x=>x in part)) return false; const s=SK.get(k)||{}, cur=s.f?JSON.parse(s.f):null;
@@ -1712,7 +1721,7 @@ if(MOCK){
   const unackSave=now=>{ clearTimeout(UNACK_T); const f=()=>{ try{ if(UNACK.size) localStorage.setItem('fsUnack',JSON.stringify(Object.fromEntries(UNACK))); else localStorage.removeItem('fsUnack'); }catch{} }; if(now) f(); else UNACK_T=setTimeout(f,1000); };
   addEventListener('pagehide',()=>unackSave(true));
   function syncTrack(p,keys,t){ const ok0=CLK_OK; for(const k of keys) UNACK.set(k,t); unackSave();
-    p.then(()=>{ const late=!ok0||Date.now()+CLK-SYNC_T0-t>RESTAMP_MS; for(const k of keys){ if(UNACK.get(k)===t) UNACK.delete(k); if(late) syncRestamp(k); } unackSave(); },
+    p.then(()=>{ const late=!ok0||clkNow()-SYNC_T0-t>RESTAMP_MS; for(const k of keys){ if(UNACK.get(k)===t) UNACK.delete(k); if(late) syncRestamp(k); } unackSave(); },
       ()=>{ for(const k of keys) if(UNACK.get(k)===t) UNACK.delete(k); unackSave(); });
     return p; }
   /* свежая метка поверх текущей на сервере (её читаем: после перезахода этот клиент документ ещё не видел, а прежняя метка могла уйти по спешащим часам). Документа нет — удалён, метка не нужна */
@@ -1730,19 +1739,122 @@ if(MOCK){
     return syncWrite(coll,id,syncGone(skey(coll,id),d,true),(b,st)=>b?b.set(r,{...d,...st}):F.setDoc(r,{...d,...st}),false,true); }
   function wUpd(coll,id,p){ const r=F.doc(db,...cpath(coll),id), u=Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)])); if(!isSync(coll)) return F.updateDoc(r,u);
     return syncWrite(coll,id,syncGone(skey(coll,id),p,false),(b,st)=>b?b.update(r,{...u,...st}):F.updateDoc(r,{...u,...st}),false,true); }
+  /* ===== дочитывание вместо полной загрузки (этапы 2–3, 2026-10-26). Режим — site/main.sync, действует со следующего захода (localStorage fsSyncMode):
+     'shadow' (по умолчанию) — данные идут как раньше (полная подписка), а рядом то же собирается дочитыванием и сравнивается с ней; расхождения — в syncdiag и «Данные».
+     'on' — полной подписки нет: основа — кэш браузера, с сервера — только изменённое после прошлой сверки (_t > x − 10 мин) и надгробия. Сразу после загрузки,
+     после обрыва связи и раз в 30 мин сервер считает число документов запроса и сумму их меток — не сошлось дважды подряд → подписка до конца захода работает
+     по-старому. 'off' — как до этапа 2. x — время (по clkNow), на которое данные запроса были полны и сверены (localStorage fsSync.<запрос>); полная загрузка —
+     не реже раза в 7 дней. Сверка в работе — раз в 30 мин и после обрыва связи (не чаще раза в 10 мин): каждая стоит 2 чтения на подписку */
+  const SYNC_MARGIN=10*60e3, SYNC_FULL_MS=7*864e5, SYNC_VERIFY_MS=30*60e3, SYNC_REVERIFY_MS=10*60e3, SYNC_MODES=['off','shadow','on'];
+  const SYNC_MODE=(()=>{ try{ const m=localStorage.getItem('fsSyncMode'); return SYNC_MODES.includes(m)?m:'shadow'; }catch{ return 'shadow'; } })();
+  const SYNC_STAT={ver:0,verBad:0,cmp:0,diff:0,fall:0,live:0,shadow:0,diag:0,log:[]};
+  const syncGet=k=>{ try{ return JSON.parse(localStorage.getItem('fsSync.'+k)||'null'); }catch{ return null; } };
+  const syncPut=(k,o)=>{ try{ localStorage.setItem('fsSync.'+k,JSON.stringify(o)); }catch{} };
+  try{ const old=Date.now()-SYNC_FULL_MS-864e5; for(const k of Object.keys(localStorage)) if(k.startsWith('fsSync.')){ const o=JSON.parse(localStorage.getItem(k)||'null'); if(!o||!(o.at>old)) localStorage.removeItem(k); } }catch{}
+  const syncOk=(coll,opts)=>SYNC_MODE!=='off'&&isSync(coll)&&!opts?.orderBy&&!opts?.limit&&(!LOCAL||!!localStorage.getItem('lt.pc'))&&CACHE.on!==false;
+  const syncSum=m=>{ let n=0,k=0,t=0; for(const v of m.values()){ n++; if(Number.isInteger(v.d._t)){ k++; t+=v.d._t; } } return {n,k,t}; };
+  const syncDocs=m=>[...m.entries()].map(([id,v])=>({...v.d,id,_pending:v.p}));
+  /* при закрытии вкладки подписки не отписываются — точки сверки сохраняем здесь */
+  const SYNC_SAVERS=new Set(); addEventListener('pagehide',()=>{ for(const f of SYNC_SAVERS) try{ f(); }catch{} });
+  function syncDiag(kind,coll,info){ SYNC_STAT.log.unshift({at:Date.now(),kind,coll,info}); SYNC_STAT.log.length=Math.min(SYNC_STAT.log.length,20);
+    try{ localStorage.setItem('fsSyncLog',JSON.stringify(SYNC_STAT.log)); }catch{}
+    if(SYNC_STAT.diag++<20&&me){ STAT.w++; F.setDoc(F.doc(F.collection(db,...cpath('syncdiag'))),{by:me.uid,at:Date.now(),kind,coll:String(coll),mode:SYNC_MODE,info:JSON.stringify(info).slice(0,1500)}).catch(()=>{}); } }
+  /* сервер: число документов запроса; число документов с меткой и сумма меток — отдельным запросом (вместе с sum() Firestore считает только документы,
+     где это поле есть). Каждый — одно чтение на 1000 документов */
+  async function syncAgg(coll,q){ const [a,b]=await Promise.all([F.getAggregateFromServer(q,{n:F.count()}),F.getAggregateFromServer(q,{k:F.count(),t:F.sum('_t')})]); const A=a.data(), Bd=b.data();
+    fsCount(cbase(coll),Math.max(1,Math.ceil((A.n||0)/1000))+Math.max(1,Math.ceil((Bd.k||0)/1000))); return {n:A.n||0,k:Bd.k||0,t:Bd.t||0}; }
+  /* надгробия: одна подписка на игру — с последней сверки надгробий (fsSync.gone|…); принятые запоминаются (fsDead.<игра>), чтобы удалённое или скрытое
+     не «воскресло» из кэша в следующий заход */
+  const GONE={key:'',dead:new Map(),un:null,from:null,synced:false,subs:new Set()};
+  function goneInit(){ const k=cpath('gone').join('/'); if(GONE.key===k) return; GONE.key=k; try{ GONE.dead=new Map(Object.entries(JSON.parse(localStorage.getItem('fsDead.'+k)||'{}'))); }catch{ GONE.dead=new Map(); } }
+  let GONE_T=0; const goneSave=()=>{ clearTimeout(GONE_T); GONE_T=setTimeout(()=>{ try{ const old=Date.now()+CLK-SYNC_T0-SYNC_FULL_MS-864e5, o={}; for(const [k,t] of GONE.dead) if(t>old) o[k]=t; localStorage.setItem('fsDead.'+GONE.key,JSON.stringify(o)); }catch{} },1000); };
+  function goneStart(x){ goneInit(); const g=syncGet('gone|'+GONE.key), from=g&&Number.isFinite(g.x)?g.x:x;
+    if(GONE.un&&GONE.from<=from) return; if(GONE.un) GONE.un(); GONE.from=from; GONE.synced=false;
+    const L={coll:'gone',key:'gone|'+GONE.key,n:0,on:false,full:0}; FS_LIVE.add(L);
+    const un=F.onSnapshot(F.query(F.collection(db,...cpath('gone')),F.where('_t','>',from-SYNC_MARGIN)),{includeMetadataChanges:true},snap=>{ const ch=snap.docChanges(); try{ fsResync(L,snap,ch); }catch{}
+        const hit=new Set(); for(const c of ch){ if(c.type==='removed') continue; const d=c.doc.data(), k=d.coll+'/'+d.id; if(Number.isInteger(d._t)&&!(GONE.dead.get(k)>=d._t)){ GONE.dead.set(k,d._t); hit.add(d.coll); } }
+        if(hit.size) goneSave(); const now=!GONE.synced&&!snap.metadata.fromCache; GONE.synced=!snap.metadata.fromCache;
+        if(GONE.synced&&!snap.metadata.hasPendingWrites) syncPut('gone|'+GONE.key,{x:Math.max(from,clkNow()-SYNC_T0),at:Date.now()});
+        for(const S of [...GONE.subs]) S.gone(hit.has(S.c),now); },
+      err=>{ console.warn('надгробия',err); for(const S of [...GONE.subs]) S.fail('надгробия: '+(err.code||err.message)); });
+    const mark=()=>{ if(GONE.synced&&GONE.un) syncPut('gone|'+GONE.key,{x:Math.max(from,clkNow()-SYNC_T0),at:Date.now()}); }; SYNC_SAVERS.add(mark);
+    GONE.un=()=>{ SYNC_SAVERS.delete(mark); FS_LIVE.delete(L); un(); GONE.un=null; }; }
+  /* подписка на изменённое после x (с запасом на расхождение часов) */
+  function syncDelta(coll,q,key,x,on,fail){ const D={c:cbase(coll),delta:new Map(),synced:false,pend:false};
+    const L={coll,key:'Δ'+key,n:0,on:false,full:0}; FS_LIVE.add(L);
+    const un=F.onSnapshot(F.query(q,F.where('_t','>',x-SYNC_MARGIN)),{includeMetadataChanges:true},snap=>{ const ch=snap.docChanges(); try{ fsResync(L,snap,ch); for(const c of ch) if(c.type!=='removed') syncSeen(coll,c.doc.id,c.doc.data()); }catch{}
+        D.delta=new Map(snap.docs.map(d=>[d.id,{d:d.data(),p:d.metadata.hasPendingWrites}])); const now=!D.synced&&!snap.metadata.fromCache; D.synced=!snap.metadata.fromCache; D.pend=snap.metadata.hasPendingWrites; on(ch.length>0,now); },
+      err=>fail('дочитывание: '+(err.code||err.message)));
+    D.un=()=>{ FS_LIVE.delete(L); un(); }; return D; }
+  /* что показывать: дочитанное + основа из кэша без того, что дочитано заново, и без удалённого/скрытого после её версии (надгробие новее копии) */
+  function syncMerge(D,base){ const out=new Map(); for(const [id,v] of base){ if(D.delta.has(id)) continue; const t=GONE.dead.get(D.c+'/'+id); if(t!=null&&t>(Number.isInteger(v.d._t)?v.d._t:0)) continue; out.set(id,v); } for(const [id,v] of D.delta) out.set(id,v); return out; }
+  /* сверка с сервером: два раза с паузой 3 с (между запросом и подсчётом могла прийти чужая правка). null — не удалось спросить (нет сети) */
+  async function syncCheck(coll,q,local,alive){ for(let k=0;k<2;k++){ if(k) await new Promise(r=>setTimeout(r,3000)); try{ await F.waitForPendingWrites(db); }catch{} if(!alive()) return null;
+      let a; try{ a=await syncAgg(coll,q); }catch(e){ return null; } if(!alive()) return null; const l=local(); if(a.n===l.n&&a.k===l.k&&a.t===l.t) return {ok:true}; if(k) return {ok:false,srv:a,loc:l}; } }
+  /* emit(build): build() — свежий массив документов для приложения; миниатюры персонажей подставляются как раньше */
+  function syncEmitter(coll,cb){ let last=null, first=true; return build=>{ last=build;
+      if(!TH_COLLS.has(coll)){ cb(build()); return; }
+      const docs=build(); const miss=thAttach(coll,docs); const again=()=>{ if(last!==build) return; const d2=build(); thAttach(coll,d2); cb(d2); };
+      /* первый снимок чуть придерживаем, пока грузятся миниатюры (из кэша — миллисекунды), чтобы портреты не мигали буквами */
+      if(miss.length&&first){ first=false; Promise.race([Promise.all(miss.map(thLoad)),new Promise(r=>setTimeout(r,2500))]).then(again); return; }
+      first=false; cb(docs); if(miss.length) Promise.all(miss.map(thLoad)).then(again); }; }
+  /* обычная (полная) подписка; заодно запоминает x для дочитывания и в режиме проверки сравнивает с ним */
+  function syncPlain(coll,q,key,emit,shadow){ let fired=false, first=true, truth=null, Sh=null, sv=0;
+    const conv=snap=>snap.docs.map(d=>({...d.data(),id:d.id,_pending:d.metadata.hasPendingWrites}));
+    /* includeMetadataChanges — чтобы видеть, когда подписка снова в связи с сервером (fsResync, дочитывание); такие события без изменений в приложение не идут */
+    const L={coll,key,n:0,on:false,full:0}; FS_LIVE.add(L);
+    const un=F.onSnapshot(q,{includeMetadataChanges:true}, snap=>{ const ch=snap.docChanges(); try{ fsResync(L,snap,ch); if(isSync(coll)) for(const c of ch) if(c.type!=='removed') syncSeen(coll,c.doc.id,c.doc.data()); }catch{}
+        if(first){ first=false; if(shadow&&snap.metadata.fromCache) try{ Sh=syncShadow(coll,q,key,snap,()=>truth); }catch(e){ console.warn('дочитывание',e); } }
+        truth=snap; if(isSync(coll)&&!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites){ clearTimeout(sv); const xs=clkNow()-SYNC_T0; sv=setTimeout(()=>syncPut(key,{x:xs,n:snap.size,full:Date.now(),at:Date.now()}),1500); }
+        if(Sh) Sh.check();
+        if(fired&&!ch.length) return; fired=true; emit(()=>conv(snap)); }, err=>{ console.error(coll,err); if(err.code==='permission-denied') toast('Нет доступа: '+coll,true); });
+    return ()=>{ if(L.on) fsLiveSet(L.key,Date.now()); FS_LIVE.delete(L); un(); if(Sh) Sh.stop(); }; }
+  /* режим проверки: основа — первый (кэшированный) снимок полной подписки, рядом дочитывание; через 5 с тишины сравниваем с полной подпиской.
+     Расхождение записываем, только если оно повторилось через 6 с (иначе это одна подписка получила правку раньше другой) */
+  function syncShadow(coll,q,key,snap0,getTruth){ const st=syncGet(key); if(!st||!Number.isFinite(st.x)||!(Date.now()-st.full<SYNC_FULL_MS)) return null;
+    const base=new Map(snap0.docs.map(d=>[d.id,{d:d.data(),p:false}])); if(!base.size&&st.n) return null;
+    SYNC_STAT.shadow++; const S={c:cbase(coll)}; let off=false, ct=0, prev='', verAt=0; const seen=new Set();
+    const tmap=()=>new Map(getTruth().docs.map(d=>[d.id,{d:d.data(),p:false}]));
+    const ready=()=>{ const t=getTruth(); return !off&&t&&!t.metadata.fromCache&&!t.metadata.hasPendingWrites&&D.synced&&!D.pend&&GONE.synced; };
+    const cmp=async()=>{ if(!ready()) return; const tm=tmap(), sm=syncMerge(D,base), miss=[], extra=[], chg=[];
+      for(const [id,v] of tm){ const x=sm.get(id); if(!x) miss.push(id); else if(x.d._t!==v.d._t||stableStr(clean(x.d))!==stableStr(clean(v.d))) chg.push(id); } for(const id of sm.keys()) if(!tm.has(id)) extra.push(id);
+      SYNC_STAT.cmp++; const sig=JSON.stringify([miss,extra,chg]), bad=miss.length||extra.length||chg.length;
+      if(bad){ if(sig===prev){ if(!seen.has(sig)){ seen.add(sig); SYNC_STAT.diff++; syncDiag('diff',coll,{key,miss:miss.slice(0,20),extra:extra.slice(0,20),chg:chg.slice(0,20),n:tm.size}); } } else { clearTimeout(ct); ct=setTimeout(cmp,6000); } }
+      prev=sig; if(bad||Date.now()-verAt<SYNC_VERIFY_MS) return; verAt=Date.now();
+      /* та же сверка, что в рабочем режиме: должна сходиться и у полной подписки, и у дочитывания */
+      const r=await syncCheck(coll,q,()=>{ const a=syncSum(tmap()), b=syncSum(syncMerge(D,base)); return a.n===b.n&&a.k===b.k&&a.t===b.t?a:{n:-1,k:-1,t:-1,truth:a,shadow:b}; },ready);
+      if(!r){ verAt=0; return; } if(r.ok) SYNC_STAT.ver++; else { SYNC_STAT.verBad++; syncDiag('verify',coll,{key,srv:r.srv,loc:r.loc}); } };
+    const R={check(){ clearTimeout(ct); ct=setTimeout(cmp,5000); },stop(){ off=true; clearTimeout(ct); D.un(); GONE.subs.delete(S); }};
+    S.gone=()=>R.check(); S.fail=why=>{ syncDiag('shadow-error',coll,{key,why}); R.stop(); };
+    const D=syncDelta(coll,q,key,st.x,()=>R.check(),S.fail);
+    GONE.subs.add(S); goneStart(st.x); return R; }
+  /* рабочий режим: основа из кэша, дочитывание, сверки; не сошлось / ошибка → plain() (полная подписка) до конца захода */
+  function syncLive(coll,q,key,st,emit,plain){ let off=false, back=null, base=null, D=null, ok=false, x=st.x, vt=0, tm=0, vAt=0;
+    const S={c:cbase(coll)}; SYNC_STAT.live++;
+    const show=()=>{ if(off||back||!base||!D) return; const m=syncMerge(D,base); emit(()=>syncDocs(m)); };
+    const stop=()=>{ if(D) D.un(); GONE.subs.delete(S); clearTimeout(vt); clearInterval(tm); SYNC_SAVERS.delete(save); };
+    const fail=why=>{ if(off||back) return; SYNC_STAT.fall++; syncDiag('fallback',coll,{key,why}); stop(); back=plain(); };
+    const save=()=>{ if(!ok||!base||!D||back||!D.synced) return; x=Math.max(x,clkNow()-SYNC_T0); syncPut(key,{x,n:syncMerge(D,base).size,full:st.full,at:Date.now()}); };
+    const alive=()=>!off&&!back&&D&&D.synced&&GONE.synced;
+    const verify=(ms=1500)=>{ clearTimeout(vt); vt=setTimeout(async()=>{ if(!alive()) return; const r=await syncCheck(coll,q,()=>syncSum(syncMerge(D,base)),alive);
+        if(!r) return; vAt=Date.now(); if(r.ok){ SYNC_STAT.ver++; ok=true; save(); } else { SYNC_STAT.verBad++; fail({srv:r.srv,loc:r.loc}); } },ms); };
+    const reverify=()=>{ if(!ok||Date.now()-vAt>SYNC_REVERIFY_MS) verify(); }; /* первая сверка — всегда, после обрыва связи — не чаще раза в 10 мин */
+    S.gone=(hit,now)=>{ if(hit) show(); if(hit||now) reverify(); }; S.fail=fail;
+    (async()=>{ let snap; try{ snap=await F.getDocsFromCache(q); }catch(e){ return fail('кэш: '+(e.code||e.message)); } if(off) return;
+      base=new Map(snap.docs.map(d=>[d.id,{d:d.data(),p:false}])); if(!base.size&&st.n) return fail('кэш пуст');
+      for(const [id,v] of base) syncSeen(coll,id,v.d);
+      D=syncDelta(coll,q,key,x,(chg,now)=>{ if(chg){ show(); save(); } if(now) reverify(); },fail); if(back) return;
+      GONE.subs.add(S); goneStart(x); show(); SYNC_SAVERS.add(save);
+      tm=setInterval(()=>{ if(document.visibilityState==='visible') verify(0); },SYNC_VERIFY_MS); })();
+    return ()=>{ save(); off=true; stop(); if(back) back(); }; }
   DB={
     subscribe(coll,opts,cb){ let q=F.collection(db,...cpath(coll)); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts);
-      let last=null, first=true, fired=false; const conv=snap=>snap.docs.map(d=>({...d.data(),id:d.id,_pending:d.metadata.hasPendingWrites}));
-      /* includeMetadataChanges — только чтобы увидеть момент, когда подписка снова в связи с сервером (fsResync); такие события без изменений в приложение не идут */
-      const L={coll,key:cpath(coll).join('/')+'|'+JSON.stringify(opts||{}),n:0,on:false,full:0}; FS_LIVE.add(L);
-      const un=F.onSnapshot(q,{includeMetadataChanges:true}, snap=>{ const ch=snap.docChanges(); try{ fsResync(L,snap,ch); if(isSync(coll)) for(const c of ch) if(c.type!=='removed') syncSeen(coll,c.doc.id,c.doc.data()); }catch{}
-        if(fired&&!ch.length) return; fired=true; last=snap;
-        if(!TH_COLLS.has(coll)){ cb(conv(snap)); return; }
-        const docs=conv(snap); const miss=thAttach(coll,docs); const again=()=>{ if(last!==snap) return; const d2=conv(snap); thAttach(coll,d2); cb(d2); };
-        /* первый снимок чуть придерживаем, пока грузятся миниатюры (из кэша — миллисекунды), чтобы портреты не мигали буквами */
-        if(miss.length&&first){ first=false; Promise.race([Promise.all(miss.map(thLoad)),new Promise(r=>setTimeout(r,2500))]).then(again); return; }
-        first=false; cb(docs); if(miss.length) Promise.all(miss.map(thLoad)).then(again); }, err=>{ console.error(coll,err); if(err.code==='permission-denied') toast('Нет доступа: '+coll,true); });
-      return ()=>{ if(L.on) fsLiveSet(L.key,Date.now()); FS_LIVE.delete(L); un(); }; },
+      const emit=syncEmitter(coll,cb), key=cpath(coll).join('/')+'|'+JSON.stringify(opts||{}), ok=syncOk(coll,opts);
+      if(ok&&SYNC_MODE==='on'){ const st=syncGet(key); if(st&&Number.isFinite(st.x)&&Date.now()-st.full<SYNC_FULL_MS) return syncLive(coll,q,key,st,emit,()=>syncPlain(coll,q,key,emit,false)); }
+      return syncPlain(coll,q,key,emit,ok&&SYNC_MODE==='shadow'); },
+    syncInfo:()=>({mode:SYNC_MODE,...SYNC_STAT}),
+    /* режим из site/main.sync; действует со следующего захода. Выключение при работающем дочитывании — сразу (перезагрузка) */
+    syncModeSet(v){ v=SYNC_MODES.includes(v)?v:'shadow'; try{ localStorage.setItem('fsSyncMode',v); }catch{} if(v==='off'&&SYNC_MODE==='on'&&SYNC_STAT.live&&reloadOk()) location.reload(); },
     set:(coll,id,data)=>{ STAT.w++; const go=d=>wSet(coll,id,clean(d)); return TH_COLLS.has(coll)?thOut(coll,id,clean(data),true).then(go):go(data); },
     update:(coll,id,part)=>{ STAT.w++; const go=p=>wUpd(coll,id,p); return TH_COLLS.has(coll)?thOut(coll,id,{...part},false).then(go):go(part); },
     /* запись с чтением свежей версии: fn(текущее на сервере) → поля для записи. Если документ успели поменять между чтением и записью, Firestore повторит сам */
@@ -1980,7 +2092,7 @@ function subscribeAll(){ lazyReset(); DB.syncResume&&DB.syncResume();
   const sub=(coll,key,opts,post)=>unsubs.push(DB.subscribe(coll,opts,docs=>{ applyDocs(key,coll,docs,post); }));
   sub('meta','_settings',null,()=>{ const s=world._settings.find(x=>x.id==='settings'); const fresh=s?{...defaultSettings(),...s}:{...defaultSettings(),id:'settings'}; if(!world.settings) world.settings=fresh; else if(!pending.has('settings')&&!(s&&s.updatedAt&&s.updatedAt===world.settings.updatedAt)){ for(const k of Object.keys(world.settings)) if(!(k in fresh)) delete world.settings[k]; Object.assign(world.settings,fresh); } const t=world._settings.find(x=>x.id==='timeline'); if(!pending.has('timeline')&&!(t&&world.timeline&&t.updatedAt&&t.updatedAt===world.timeline.updatedAt)) world.timeline=t?t:{id:'timeline',nodes:[]}; const tc=world._settings.find(x=>x.id==='techniques'); if(!pending.has('techniques')&&!(tc&&world.techniques&&tc.updatedAt&&tc.updatedAt===world.techniques.updatedAt)){ world.techniques=tc?tc:(realDM()?techBaseCatalog():{id:'techniques',branches:[],groups:[]}); techLayoutCache={}; } applySiteName(); });
   CW.site=CW.camps=CW.users=false; world.campaigns=[]; world._site=[];
-  sub('site','_site',null,()=>{ SITE=world._site.find(x=>x.id==='main')||null; CW.site=true; campCheck(); }); sub('campaigns','campaigns',null,()=>{ CW.camps=true; campCheck(); });
+  sub('site','_site',null,()=>{ SITE=world._site.find(x=>x.id==='main')||null; CW.site=true; DB.syncModeSet&&DB.syncModeSet(SITE&&SITE.sync); campCheck(); }); sub('campaigns','campaigns',null,()=>{ CW.camps=true; campCheck(); });
   sub('memberships','memberships'); sub('locLinks','locLinks'); sub('users','users',null,()=>{ CW.users=true; campCheck(); }); sub('wmdraw','_wmdraw_notes',{where:[['t','==','note']]},()=>wmMerge('wmdraw')); if(state.view==='wmap'&&state.id) setTimeout(()=>wmSubMap(state.id),0);
   world._live=[]; WM.liveStart=Date.now(); LIVE.subscribe(docs=>{ world._live=docs; liveGoto(docs); WM.onLive&&WM.onLive(); if(state.view==='wmap'&&!state.id) wmListPresence(); musSync(); }); presenceStart();
   world._chat=[]; sub('chat','_chat',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); if(realDM()){ world._chatdm=[]; sub('chatdm','_chatdm',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); }
@@ -11564,6 +11676,7 @@ function renderSettings(m){
       const [col,ic,lab]=$$('input',row); col.oninput=()=>{ t.color=col.value; touch(s); }; ic.oninput=()=>{ t.icon=ic.value; touch(s); }; { const pk=el('<button class="btn sm icon" title="Выбрать эмодзи из палитры">🙂</button>'); ic.after(pk); pk.onclick=()=>emojiPicker(pk,x=>{ t.icon=x; ic.value=x; if(t.image){ DB.delete('images',t.image).catch(()=>{}); delete t.image; } touch(s); drawIcons(); }); } lab.oninput=()=>{ t.label=lab.value; touch(s); }; $('.pic',row).onclick=()=>pickFiles(async files=>{ const ids=await uploadImages(files,'status'); if(ids[0]){ if(t.image) DB.delete('images',t.image).catch(()=>{}); t.image=ids[0]; touch(s); drawIcons(); } }); $('.x-btn',row).onclick=()=>{ if(t.image) DB.delete('images',t.image).catch(()=>{}); s.statusIcons.splice(i,1); touch(s); drawIcons(); }; il.append(row); }); hydrate(il); };
   $('.sticons h3 .btn',page).onclick=()=>go('stlib');
   drawIcons();
+  { const sm=$('#syncMode',page); if(sm) sm.onchange=async()=>{ if(await campSite({sync:sm.value})) toast('Дочитывание: «'+sm.selectedOptions[0].textContent+'» — у каждого со следующего захода'); }; }
   $('#fullExp',page).onclick=()=>fullBackup($('#bkProg',page)); $('#fullImp',page).onclick=()=>{ const fi=$('#jsonIn'); fi.value=''; fi.onchange=()=>{ if(fi.files[0]) fullRestore(fi.files[0],$('#bkProg',page)); }; fi.click(); }; { const pi=$('#partImp',page); if(pi) pi.onclick=partRestorePick; }
   $('#exp',page).onclick=()=>{ const a=document.createElement('a'); const w={...world}; delete w.users; delete w.log; a.href=URL.createObjectURL(new Blob([JSON.stringify(w,null,2)],{type:'application/json'})); a.download='kartoteka-backup.json'; a.click(); };
   $('#imp',page).onclick=()=>{ const fi=$('#jsonIn'); fi.value=''; fi.onchange=()=>importLocal(fi.files[0]); fi.click(); };
