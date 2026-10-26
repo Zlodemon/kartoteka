@@ -1548,10 +1548,25 @@ let FS_DAY=null, FS_SAVE=0;
 function fsCount(coll,n){ if(!n) return; coll=String(coll).split('/').pop(); STAT.r+=n; STAT.by[coll]=(STAT.by[coll]||0)+n;
   try{ const d=fsDayId(); if(!FS_DAY||FS_DAY.d!==d) FS_DAY=JSON.parse(localStorage.getItem('fsStat.'+d)||'null')||{d,r:0,by:{}}; FS_DAY.r+=n; FS_DAY.by[coll]=(FS_DAY.by[coll]||0)+n;
     clearTimeout(FS_SAVE); FS_SAVE=setTimeout(()=>{ try{ localStorage.setItem('fsStat.'+FS_DAY.d,JSON.stringify(FS_DAY)); const old='fsStat.'+new Date(Date.now()-8*864e5).toISOString().slice(0,10); for(const k of Object.keys(localStorage)) if(k.startsWith('fsStat.')&&k<old) localStorage.removeItem(k); }catch{} },3000); }catch{} }
+/* подписки: Firebase заново берёт плату за ВЕСЬ запрос, если подписка была без связи с сервером дольше 30 минут (новый заход или F5 через полчаса,
+   сон компьютера, вкладка телефона в фоне). Снимок с сервера при этом приносит только изменённые документы — раньше счётчик видел почти ноль там,
+   где списывалась вся база. Когда подписка последний раз была в связи с сервером — localStorage fsLive.<запрос> (общий для вкладок: одну подписку держит одна вкладка) */
+const FS_RESYNC_MS=30*60e3, FS_LIVE=new Set(); let FS_TICK=Date.now();
+function fsLiveGet(k){ try{ return +localStorage.getItem('fsLive.'+k)||0; }catch{ return 0; } }
+function fsLiveSet(k,t){ try{ localStorage.setItem('fsLive.'+k,String(t)); }catch{} }
+function fsResync(L,snap,ch){ const now=Date.now(), srv=!snap.metadata.fromCache;
+  if(srv){ let n=ch.filter(c=>!c.doc.metadata.hasPendingWrites).length; if(!L.on&&now-fsLiveGet(L.key)>FS_RESYNC_MS){ n=Math.max(n,snap.size,1); L.full=now; }
+    fsCount(L.coll,n); fsLiveSet(L.key,now); }
+  L.on=srv; L.n=snap.size; }
+/* раз в минуту отмечаем подписки, которые в связи. Пропуск больше 30 мин — компьютер спал или браузер заморозил вкладку: сервер перечитает
+   весь запрос, а SDK может и не сообщить о потере связи — считаем по размеру последнего снимка (если после пробуждения это уже не учёл fsResync) */
+setInterval(()=>{ const now=Date.now(), prev=FS_TICK, slept=now-prev>FS_RESYNC_MS; FS_TICK=now;
+  for(const L of FS_LIVE){ if(!L.on) continue; if(slept&&L.full<=prev){ fsCount(L.coll,Math.max(1,L.n)); L.full=now; } fsLiveSet(L.key,now); } },60e3);
+try{ const old=Date.now()-2*864e5; for(const k of Object.keys(localStorage)) if(k.startsWith('fsLive.')&&(+localStorage.getItem(k)||0)<old) localStorage.removeItem(k); }catch{}
 const FS_NAMES={characters:'Персонажи',orgs:'Организации',locations:'Локации',memberships:'Членство в организациях',locLinks:'Связи с локациями',relations:'Связи',maps:'Карты связей',wmaps:'Карты местности',wmarkers:'Токены на картах',wmdraw:'Рисунки и листы на картах',wmpriv:'Личные слои карт',docs:'Документы',chat:'Чат',chatdm:'Чат мастера',log:'Журнал',users:'Участники',meta:'Настройки',dm:'Скрытое мастера',images:'Картинки',trash:'Корзина',cards:'Карточки',cardsets:'Сеты карточек',cardfaces:'Картинки карточек для TTS',campaigns:'Игры',site:'Сайт',live:'Живой слой'};
 function fsStatHTML(){ let day=null; try{ day=(FS_DAY&&FS_DAY.d===fsDayId())?FS_DAY:JSON.parse(localStorage.getItem('fsStat.'+fsDayId())||'null'); }catch{} day=day||{r:0,by:{}};
   const rows=Object.entries(day.by).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([k,v])=>`<tr><td>${esc(FS_NAMES[k]||k)}</td><td style="text-align:right"><b>${v}</b></td><td style="text-align:right" class="faint">${STAT.by[k]||0}</td></tr>`).join('');
-  return `Чтения базы с сервера: <b>${STAT.r}</b> за эту вкладку, <b>${day.r}</b> сегодня в этом браузере; записей за вкладку — <b>${STAT.w}</b>. <span class="faint">Бесплатный лимит — 50 000 чтений и 20 000 записей в сутки на всех вместе, сбрасывается около 10:00 по Москве. Здесь только этот браузер; общий расход проекта — в Firebase Console → Firestore → Usage. Живые сигналы карты (линейка, пинги, перетаскивание) идут через Realtime Database и сюда не входят.</span>${fsLoadsHTML()}${rows?`<table class="fstab"><tr><th>На что ушли чтения сегодня (этот браузер)</th><th style="text-align:right">сегодня</th><th style="text-align:right">вкладка</th></tr>${rows}</table>`:''}${fsPastHTML()}`; }
+  return `Чтения базы с сервера: <b>${STAT.r}</b> за эту вкладку, <b>${day.r}</b> сегодня в этом браузере; записей за вкладку — <b>${STAT.w}</b>. <span class="faint">Бесплатный лимит — 50 000 чтений и 20 000 записей в сутки на всех вместе, сбрасывается около 10:00 по Москве. Здесь только этот браузер; общий расход проекта — в Firebase Console → Firestore → Usage. Живые сигналы карты (линейка, пинги, перетаскивание) идут через Realtime Database и сюда не входят. Полное перечитывание после перерыва больше 30 минут (заход, F5, сон компьютера) учтено по оценке; проверки прав внутри правил базы Firebase тоже считает чтениями — их здесь не видно.</span>${fsLoadsHTML()}${rows?`<table class="fstab"><tr><th>На что ушли чтения сегодня (этот браузер)</th><th style="text-align:right">сегодня</th><th style="text-align:right">вкладка</th></tr>${rows}</table>`:''}${fsPastHTML()}`; }
 /* прошлые дни этого браузера (хранятся 8 дней) — чтобы после «Quota exceeded» было видно, что съело лимит вчера */
 function fsPastHTML(){ let L=[]; try{ const today='fsStat.'+fsDayId(); L=Object.keys(localStorage).filter(k=>k.startsWith('fsStat.')&&k!==today).sort().reverse().map(k=>JSON.parse(localStorage.getItem(k))).filter(d=>d&&d.r); }catch{} if(!L.length) return '';
   return `<div style="margin-top:10px"><b>Прошлые дни (этот браузер):</b>${L.map(d=>`<div style="font-size:12.5px;margin-top:3px">${esc(d.d)} — <b>${d.r}</b>${d.loads?` за ${d.loads} ${plural(d.loads,'заход','захода','заходов')}`:''}: ${Object.entries(d.by||{}).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>esc(FS_NAMES[k]||k)+' '+v).join(', ')}</div>`).join('')}</div>`; }
@@ -1672,13 +1687,17 @@ if(MOCK){
     catch(e){ console.warn('thumb',e); return data; } }
   DB={
     subscribe(coll,opts,cb){ let q=F.collection(db,...cpath(coll)); const parts=[]; for(const [f,op,v] of (opts?.where||[])) parts.push(F.where(f,op,v)); if(opts?.orderBy) parts.push(F.orderBy(opts.orderBy,'desc')); if(opts?.limit) parts.push(F.limit(opts.limit)); if(parts.length) q=F.query(q,...parts);
-      let last=null, first=true; const conv=snap=>snap.docs.map(d=>({...d.data(),id:d.id,_pending:d.metadata.hasPendingWrites}));
-      return F.onSnapshot(q, snap=>{ try{ if(!snap.metadata.fromCache) fsCount(coll,snap.docChanges().filter(c=>!c.doc.metadata.hasPendingWrites).length); }catch{} last=snap;
+      let last=null, first=true, fired=false; const conv=snap=>snap.docs.map(d=>({...d.data(),id:d.id,_pending:d.metadata.hasPendingWrites}));
+      /* includeMetadataChanges — только чтобы увидеть момент, когда подписка снова в связи с сервером (fsResync); такие события без изменений в приложение не идут */
+      const L={coll,key:cpath(coll).join('/')+'|'+JSON.stringify(opts||{}),n:0,on:false,full:0}; FS_LIVE.add(L);
+      const un=F.onSnapshot(q,{includeMetadataChanges:true}, snap=>{ const ch=snap.docChanges(); try{ fsResync(L,snap,ch); }catch{}
+        if(fired&&!ch.length) return; fired=true; last=snap;
         if(!TH_COLLS.has(coll)){ cb(conv(snap)); return; }
         const docs=conv(snap); const miss=thAttach(coll,docs); const again=()=>{ if(last!==snap) return; const d2=conv(snap); thAttach(coll,d2); cb(d2); };
         /* первый снимок чуть придерживаем, пока грузятся миниатюры (из кэша — миллисекунды), чтобы портреты не мигали буквами */
         if(miss.length&&first){ first=false; Promise.race([Promise.all(miss.map(thLoad)),new Promise(r=>setTimeout(r,2500))]).then(again); return; }
-        first=false; cb(docs); if(miss.length) Promise.all(miss.map(thLoad)).then(again); }, err=>{ console.error(coll,err); if(err.code==='permission-denied') toast('Нет доступа: '+coll,true); }); },
+        first=false; cb(docs); if(miss.length) Promise.all(miss.map(thLoad)).then(again); }, err=>{ console.error(coll,err); if(err.code==='permission-denied') toast('Нет доступа: '+coll,true); });
+      return ()=>{ if(L.on) fsLiveSet(L.key,Date.now()); FS_LIVE.delete(L); un(); }; },
     set:(coll,id,data)=>(STAT.w++,TH_COLLS.has(coll)?thOut(coll,id,clean(data),true).then(d=>F.setDoc(F.doc(db,...cpath(coll),id),clean(d))):F.setDoc(F.doc(db,...cpath(coll),id),clean(data))),
     update:(coll,id,part)=>{ STAT.w++; const go=p=>F.updateDoc(F.doc(db,...cpath(coll),id),Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]))); return TH_COLLS.has(coll)?thOut(coll,id,{...part},false).then(go):go(part); },
     /* запись с чтением свежей версии: fn(текущее на сервере) → поля для записи. Если документ успели поменять между чтением и записью, Firestore повторит сам */
