@@ -442,6 +442,17 @@ h1,h2,h3{margin:0;font-weight:700}
 .cddc b{min-width:34px;text-align:center;color:#c792ff}
 .cddc .btn{min-width:28px;padding:2px 8px}
 .cddeck .cdgo{margin-left:auto}
+.cdmode{margin-left:12px}
+.cddks{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.cddk1{border:1px solid var(--line2);border-radius:14px;background:rgba(199,146,255,.04);padding:10px 14px}
+.cddk1 .hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer}
+.cddk1 .hd .av{width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none;background:var(--line2)}
+.cddk1 .hd b.nm{font-size:16px}
+.cddk1.closed .cddbody{display:none}
+.cddk1.closed .chev{transform:rotate(-90deg)}
+.cddk1 .chev{transition:transform .15s;color:var(--muted)}
+.cdtrow{display:flex;gap:10px;align-items:flex-start;padding:8px 0}
+.cdtrow .ic{font-size:18px;width:24px;text-align:center}
 .cdupb{position:absolute;bottom:8px;right:8px;line-height:1;font-size:11.5px;font-weight:700;background:rgba(0,0,0,.72);color:var(--gold);padding:4px 7px;border-radius:8px;pointer-events:none}
 .cdzups{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}.cdzups:empty{display:none}
 .cdzups .q,.cdups .q{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12.5px;cursor:pointer;color:var(--muted);transition:all .12s}.cdzups .q:hover{color:var(--text);border-color:var(--line2)}.cdzups .q.on{background:var(--panel2);color:#fff;border-color:var(--line2)}
@@ -2454,6 +2465,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-26',t:'Все колоды и колода в TTS',items:['Вверху «Карточек» — переключатель «📚 Библиотека / 🃏 Колоды». Во вкладке «Колоды» видны колоды всех персонажей сразу: карты, число копий, −/+ для своих, «✎ Собирать», «лист →».','«🎲 В TTS» у колоды (во вкладке «Колоды» и на листе персонажа) — игрок сам сохраняет свою колоду в Tabletop Simulator: Сохранённые объекты → Картотека → «Колода — имя». Картинки берутся с сайта картинок мастера, поэтому мастер должен сначала выгрузить сеты через «🎲 В TTS» — окно подскажет, каких картинок не хватает.']},
   {d:'2026-10-26',t:'Колода персонажа',items:['Вверху вкладки «Карточки» — выбор «🃏 Колода: персонаж» (свои персонажи; у мастера — любые). Клик по карте → «+ Добавить в колоду» / «− Убрать из колоды»; у мастера эти кнопки в подвале конструктора и в меню ПКМ. На плитках виден значок «×N» — сколько копий уже в колоде.','На листе персонажа появилась вкладка «🃏 Колода» (когда включён режим карточек): карты колоды, под каждой — число копий и −/+. «🃏 Добавить карты» открывает библиотеку сразу с этим персонажем.','У карты с улучшениями в колоду кладётся та версия, которая сейчас показана, — базовая и улучшенная считаются отдельно.']},
   {d:'2026-10-25',t:'Организации и локации: поля не правятся случайно',items:['На странице организации и локации все текстовые поля (название, описание, «Кратко для игроков», роли участников, заметки «Кто здесь», подписи связей) показываются как готовый текст. Кнопка «✎ править» в шапке открывает их на правку, «✓ готово» — закрывает. Новая организация или локация открывается сразу в правке.','В «+ Участник» и «+ Привязать» уже добавленные стоят в конце списка с пометкой ✓.']},
   {d:'2026-10-25',t:'Предупреждение «Кэш базы не работает»',items:['Если браузер не даёт сайту сохранить базу у себя (приватное окно, запрет на данные сайтов, нет места), под названием сайта появляется красное «⚠ Кэш базы не работает». Без кэша каждый заход и каждый F5 читает всю базу заново из суточного лимита; с кэшем повторный заход стоит единицы чтений. Нажми на надпись — там что сделать.','Настройки → «Данные»: работает ли кэш в этом браузере, сколько было заходов сегодня и сколько чтений стоил каждый.','Если страница начнёт перезагружаться по кругу (при переключении игры), после трёх раз за минуту она остановится и скажет об этом.']},
@@ -10257,10 +10269,29 @@ function cdQMatcher(q){ q=cdNorm(q); if(CD_QM.q===q) return CD_QM.f; let f=null;
   CD_QM={q,f}; return f; }
 function cdMatch(c){ const f=cdQMatcher(CD_UI.q); if(f&&!f(cdNorm((c.name||'')+' '+(c.text||'')+' '+(c.flav||'')+' '+(c.tags||[]).join(' ')+' '+(c.tgt||'')+' '+cdUps(c).map(u=>[u.name,u.text,u.lbl,(u.tags||[]).join(' '),u.tgt].join(' ')).join(' ')))) return false;
   if(CD_UI.tag&&!(c.tags||[]).some(t=>cdNorm(t)===cdNorm(CD_UI.tag))) return false; if(CD_UI.tgt&&cdNorm(c.tgt)!==cdNorm(CD_UI.tgt)) return false; if(CD_UI.en!==''&&String(c.en??'').trim().toUpperCase()!==CD_UI.en) return false; return true; }
-function renderCards(m){ cdSubscribe(); const dm=isDM(); if(dm&&(world.cardsets||[]).length+(world.cards||[]).length) cdStylesInit(); const tw={s:150,m:200,l:270}[cdUiGet('size','m')]||200; const closed=new Set(JSON.parse(cdUiGet('closed','[]')||'[]'));
+const cdModeSeg=()=>`<span class="seg cdmode">${[['lib','📚 Библиотека'],['decks','🃏 Колоды']].map(([k,n])=>`<span data-mode="${k}" class="${cdUiGet('mode','lib')===k?'on':''}">${n}</span>`).join('')}</span>`;
+const cdModeWire=page=>$$('.cdmode span',page).forEach(x=>x.onclick=()=>{ cdUiSet('mode',x.dataset.mode); render(); });
+/* все колоды на одной странице: персонажи с колодами (свои — первыми), у мастера и пустые колоды персонажей игроков */
+function cdDecksPage(m){ const dm=isDM(); const tw={s:120,m:150,l:200}[cdUiGet('size','m')]||150; const closed=new Set(JSON.parse(cdUiGet('dclosed','[]')||'[]'));
+  const mine=c=>(c.players||[]).includes(me&&me.uid); const has=c=>Array.isArray(c.deck)&&c.deck.some(e=>e&&+e.n>0);
+  const L=V.chars().filter(c=>has(c)||(dm&&(c.players||[]).length)).sort((a,b)=>(mine(b)-mine(a))||(has(b)-has(a))||String(a.name||'').localeCompare(String(b.name||''),'ru'));
+  const page=el(`<div class="page cdlib cddecks"><div class="head"><h1>Карточки</h1>${cdModeSeg()}<span class="grow"></span><span class="seg cdsz">${['s','m','l'].map(s=>`<span data-s="${s}" class="${cdUiGet('size','m')===s?'on':''}" title="Размер карт">${{s:'▪',m:'◼',l:'⬛'}[s]}</span>`).join('')}</span></div>
+    <div class="faint">Колоды персонажей. Собирать колоду — в «📚 Библиотеке»: выбери персонажа вверху и кликай по картам.</div><div class="cddks"></div></div>`);
+  const box=$('.cddks',page);
+  if(!L.length) box.append(el('<div class="cdhero"><div class="big">🃏</div><b>Колод пока нет</b><div class="faint">Открой «📚 Библиотеку», выбери персонажа в «🃏 Колода:» и добавляй карты.</div></div>'));
+  for(const ch of L){ const ed=canEdit(ch)&&!viewAs, im=ch.thumb||ch.mainImage;
+    const sec=el(`<section class="cddk1 ${closed.has(ch.id)?'closed':''}" data-ch="${esc(ch.id)}"><div class="hd"><span class="chev">▾</span>${im?'<img class="av" alt="">':`<span class="av"></span>`}<b class="nm">${esc(ch.name||'без имени')}</b><span class="faint cnt"></span><span class="grow"></span>${ed?'<button class="btn sm ed" title="Открыть библиотеку с этим персонажем">✎ Собирать</button><button class="btn sm tt" title="Сохранить колоду в Tabletop Simulator">🎲 В TTS</button>':''}<button class="btn sm ghost sh" title="Открыть лист персонажа на вкладке «Колода»">лист →</button></div><div class="cddbody"></div></section>`);
+    if(im){ const img=$('img.av',sec); if(ch.thumb) img.src=ch.thumb; else imgURL(ch.mainImage,true).then(u=>{ if(u) img.src=u; }).catch(()=>{}); }
+    sec._draw=()=>{ const D=cdDeckList(ch); $('.cnt',sec).textContent=D.n?D.n+' '+plural(D.n,'карта','карты','карт'):'пусто'; cdDeckFill($('.cddbody',sec),ch,ed,tw); }; sec._draw();
+    $('.hd',sec).onclick=e=>{ if(e.target.closest('button')) return; sec.classList.toggle('closed'); sec.classList.contains('closed')?closed.add(ch.id):closed.delete(ch.id); cdUiSet('dclosed',JSON.stringify([...closed])); };
+    const b1=$('.ed',sec); if(b1) b1.onclick=()=>{ cdUiSet('deck',ch.id); cdUiSet('mode','lib'); render(); }; const b2=$('.tt',sec); if(b2) b2.onclick=()=>cdDeckTtsDlg(ch);
+    $('.sh',sec).onclick=()=>{ charTab[ch.id]='deck'; go('characters',ch.id); };
+    box.append(sec); }
+  cdModeWire(page); $$('.cdsz span',page).forEach(s=>s.onclick=()=>{ cdUiSet('size',s.dataset.s); render(); }); m.append(page); }
+function renderCards(m){ cdSubscribe(); if(cdUiGet('mode','lib')==='decks') return cdDecksPage(m); const dm=isDM(); if(dm&&(world.cardsets||[]).length+(world.cards||[]).length) cdStylesInit(); const tw={s:150,m:200,l:270}[cdUiGet('size','m')]||200; const closed=new Set(JSON.parse(cdUiGet('closed','[]')||'[]'));
   const all=cdCards(); const tags=[...new Set([...cdGet('tags').map(t=>t.n),...all.flatMap(c=>c.tags||[])])]; const tgts=[...new Set([...cdGet('tgts'),...all.map(c=>c.tgt).filter(Boolean)])]; const ens=[...new Set(all.map(c=>String(c.en??'').trim().toUpperCase()).filter(Boolean))].sort();
   const opt=(L,v)=>L.map(t=>`<option ${cdNorm(t)===cdNorm(v)?'selected':''}>${esc(t)}</option>`).join('');
-  const page=el(`<div class="page cdlib ${dm&&CD_SELMODE?'selmode':''}"><div class="head"><h1>Карточки</h1><span class="faint cdcnt">${all.length} ${plural(all.length,'карта','карты','карт')}</span>${cdDeckSel()}${dm&&CDS().bg?'<span class="cdtts" id="cdTts"></span>':''}<span class="grow"></span>
+  const page=el(`<div class="page cdlib ${dm&&CD_SELMODE?'selmode':''}"><div class="head"><h1>Карточки</h1>${cdModeSeg()}<span class="faint cdcnt">${all.length} ${plural(all.length,'карта','карты','карт')}</span>${cdDeckSel()}${dm&&CDS().bg?'<span class="cdtts" id="cdTts"></span>':''}<span class="grow"></span>
     ${dm?`<button class="btn sm ${CD_SELMODE?'on':''}" id="cdSelB" title="Выбрать несколько карт и разом перенести в сет, разложить по сетам, скрыть, удалить. Без режима: Ctrl+клик — выбрать, Shift+клик — диапазон">☑ Выбрать</button><button class="btn sm" id="cdTtsB" title="Выгрузить сеты в Tabletop Simulator: картинки — на сайт картинок, колоды — в папку TTS">🎲 В TTS</button><button class="btn sm" id="cdStyB" title="Стили оформления: лица и рубашки, где применяются, правила по тегам">🎨 Оформление</button><button class="btn sm" id="cdLists" title="Теги, цели, цвета текста, подсветка, оформление по умолчанию">⚙ Справочники</button><button class="btn sm" id="cdIO" title="Перенести сеты с картами и артами в другую игру или на другой сайт">⇅ Импорт / экспорт</button><button class="btn" id="cdNewSet">+ Сет</button><button class="btn primary" id="cdNew">+ Карта</button>`:''}</div>
     ${dm&&!cdOn()?'<div class="cdwarn">Режим карточек выключен — у игроков раздела нет. Включить: <b>Настройки → 🃏 Карточки</b>.</div>':''}
     <div class="cdbar"><input id="cdQ" placeholder="поиск по названию, тексту, тегам…" value="${esc(CD_UI.q)}"><select id="cdT"><option value="">все теги</option>${opt(tags,CD_UI.tag)}</select><select id="cdG"><option value="">любая цель</option>${opt(tgts,CD_UI.tgt)}</select><select id="cdE"><option value="">энергия: любая</option>${ens.map(e=>`<option value="${esc(e)}" ${CD_UI.en===e?'selected':''}>энергия ${esc(e)}</option>`).join('')}</select><span class="grow"></span><span class="seg cdsz">${['s','m','l'].map(s=>`<span data-s="${s}" class="${cdUiGet('size','m')===s?'on':''}" title="Размер карт">${{s:'▪',m:'◼',l:'⬛'}[s]}</span>`).join('')}</span></div>
@@ -10290,7 +10321,8 @@ function renderCards(m){ cdSubscribe(); const dm=isDM(); if(dm&&(world.cardsets|
   const q=$('#cdQ',page); q.oninput=()=>{ CD_UI.q=q.value; clearTimeout(q._t); q._t=setTimeout(()=>{ render(); },250); };
   $('#cdT',page).onchange=e=>{ CD_UI.tag=e.target.value; render(); }; $('#cdG',page).onchange=e=>{ CD_UI.tgt=e.target.value; render(); }; $('#cdE',page).onchange=e=>{ CD_UI.en=e.target.value; render(); };
   $$('.cdsz span',page).forEach(s=>s.onclick=()=>{ cdUiSet('size',s.dataset.s); render(); });
-  { const ds=$('#cdDeck',page); if(ds) ds.onchange=()=>{ cdUiSet('deck',ds.value); render(); }; const dg=$('#cdDeckGo',page); if(dg) dg.onclick=()=>{ const ch=cdDeckChar(); if(ch){ charTab[ch.id]='deck'; go('characters',ch.id); } }; }
+  cdModeWire(page);
+  { const ds=$('#cdDeck',page); if(ds) ds.onchange=()=>{ cdUiSet('deck',ds.value); render(); }; const dg=$('#cdDeckGo',page); if(dg) dg.onclick=()=>{ cdUiSet('mode','decks'); render(); }; }
   if(dm){ $('#cdStyB',page).onclick=()=>cdStylesDlg(); $('#cdTtsB',page).onclick=()=>cdTtsDlg(); $('#cdNew',page).onclick=()=>cdNewCard(sets[0]?sets[0].id:''); $('#cdNewSet',page).onclick=cdNewSet; $('#cdLists',page).onclick=()=>cdListsDlg(); $('#cdIO',page).onclick=cdIODlg; const h=$('#cdHeroSet',page); if(h) h.onclick=cdNewSet; }
   if(dm){ for(const id of [...CD_SEL]) if(!byId(world.cards,id)) CD_SEL.delete(id); page.append(el('<div class="cdselbar" hidden></div>')); $('#cdSelB',page).onclick=()=>{ CD_SELMODE=!CD_SELMODE; if(!CD_SELMODE) CD_SEL.clear(); cdSelUpd(); }; }
   m.append(page); if(dm){ cdSelUpd(); cdFaceBadge(); cdFaceSched(1200); } }
@@ -10404,26 +10436,28 @@ function cdDeckList(ch){ const so=new Map(cdSets().map((s,i)=>[s.id,i])); const 
   return {L,n,hid,gone}; }
 function cdDeckBadge(t,ch){ const b=$('.cddk',t); if(!b) return; let n=0; if(ch) for(const e of (Array.isArray(ch.deck)?ch.deck:[])) if(e&&e.c===t.dataset.id) n+=+e.n||0; b.textContent=n?'×'+n:''; b.title=n?'В колоде «'+(ch.name||'без имени')+'»':''; }
 function cdDeckRefresh(ch){ const cur=cdDeckChar(); if(cur&&cur.id===ch.id) $$('.cdlib .cdtile').forEach(t=>cdDeckBadge(t,cur));
-  $$('.cddeck').forEach(p=>{ if(p.dataset.ch===ch.id&&p._draw) p._draw(); });
+  $$('.cddeck,.cddk1').forEach(p=>{ if(p.dataset.ch===ch.id&&p._draw) p._draw(); });
   const tb=$('.tabbar span[data-t="deck"]'); if(tb&&state.id===ch.id){ const n=cdDeckList(ch).n; let x=$('b',tb); if(!n){ if(x) x.remove(); } else { if(!x){ x=document.createElement('b'); tb.append(x); } x.textContent=n; } }
   const dg=$('#cdDeckGo'); if(dg&&cur&&cur.id===ch.id){ const n=cdDeckList(ch).n; dg.textContent=n+' '+plural(n,'карта','карты','карт')+' →'; } }
 function cdDeckSel(){ const L=cdDeckChars(); if(!L.length) return ''; const cur=cdDeckChar(), n=cur?cdDeckList(cur).n:0;
-  return `<span class="cddsel" title="Чью колоду собираешь: клик по карте → «Добавить в колоду» / «Убрать из колоды»">🃏 Колода: <select id="cdDeck"><option value="-">— не собираю —</option>${L.map(c=>`<option value="${esc(c.id)}" ${cur&&cur.id===c.id?'selected':''}>${esc(c.name)||'без имени'}</option>`).join('')}</select>${cur?`<button class="btn sm ghost" id="cdDeckGo" title="Открыть колоду на листе персонажа">${n} ${plural(n,'карта','карты','карт')} →</button>`:''}</span>`; }
+  return `<span class="cddsel" title="Чью колоду собираешь: клик по карте → «Добавить в колоду» / «Убрать из колоды»">🃏 Колода: <select id="cdDeck"><option value="-">— не собираю —</option>${L.map(c=>`<option value="${esc(c.id)}" ${cur&&cur.id===c.id?'selected':''}>${esc(c.name)||'без имени'}</option>`).join('')}</select>${cur?`<button class="btn sm ghost" id="cdDeckGo" title="Открыть колоды (вкладка «🃏 Колоды»)">${n} ${plural(n,'карта','карты','карт')} →</button>`:''}</span>`; }
 function cdDeckBlock(ch){ cdSubscribe(); const ed=canEdit(ch)&&!viewAs;
-  const p=el(`<div class="panel cddeck ${ed?'':'ro'}" data-ch="${esc(ch.id)}"><h3>Колода персонажа <span class="faint cddn" style="font-weight:400"></span>${ed?'<button class="btn sm w cdgo" title="Открыть библиотеку карт с этой колодой: клик по карте → «Добавить в колоду»">🃏 Добавить карты</button>':''}</h3><div class="cddbody"></div></div>`);
-  const draw=()=>{ const D=cdDeckList(ch), body=$('.cddbody',p); $('.cddn',p).textContent=D.n?'· '+D.n+' '+plural(D.n,'карта','карты','карт'):''; body.innerHTML='';
+  const p=el(`<div class="panel cddeck ${ed?'':'ro'}" data-ch="${esc(ch.id)}"><h3>Колода персонажа <span class="faint cddn" style="font-weight:400"></span>${ed?'<button class="btn sm w cdgo" title="Открыть библиотеку карт с этой колодой: клик по карте → «Добавить в колоду»">🃏 Добавить карты</button><button class="btn sm w cdtt" title="Сохранить колоду в Tabletop Simulator (Сохранённые объекты → Картотека)">🎲 В TTS</button>':''}</h3><div class="cddbody"></div></div>`);
+  p._draw=()=>{ const D=cdDeckList(ch); $('.cddn',p).textContent=D.n?'· '+D.n+' '+plural(D.n,'карта','карты','карт'):''; cdDeckFill($('.cddbody',p),ch,ed,150); }; p._draw();
+  const g=$('.cdgo',p); if(g) g.onclick=()=>{ cdUiSet('deck',ch.id); cdUiSet('mode','lib'); go('cards'); }; const t=$('.cdtt',p); if(t) t.onclick=()=>cdDeckTtsDlg(ch); return p; }
+/* сетка колоды: карты, под каждой ×N и −/+ (ed), внизу — сколько скрыто */
+function cdDeckFill(body,ch,ed,tw){ const draw=()=>{ const D=cdDeckList(ch); body.innerHTML='';
     if(!CD_LOADED.cards&&D.hid){ body.append(el('<div class="faint">Загружаю карты…</div>')); return; }
     if(!D.L.length&&!D.hid) body.append(el(`<div class="faint">${ed?'Колода пуста. «🃏 Добавить карты» откроет библиотеку с этим персонажем — клик по карте → «Добавить в колоду».':'Колода пуста.'}</div>`));
     if(D.L.length){ const g=el('<div class="cddgrid"></div>'), keys=D.L.map(x=>x.k);
       for(const {e,k} of D.L){ const t=el(`<div class="cddt"><div class="cdtile"><canvas></canvas></div><div class="cddc">${ed?'<button class="btn sm m" title="Убрать из колоды">−</button>':''}<b title="Копий в колоде">×${+e.n}</b>${ed?'<button class="btn sm p" title="Добавить в колоду">+</button>':''}</div></div>`);
-        cdCanvas($('canvas',t),150,()=>{ const o=byId(world.cards,e.c); return o?cdUpCard(o,e.u||''):null; });
+        cdCanvas($('canvas',t),tw,()=>{ const o=byId(world.cards,e.c); return o?cdUpCard(o,e.u||''):null; });
         $('.cdtile',t).onclick=()=>cdZoom(k,keys,{ch:ch.id});
         if(ed){ $('.m',t).onclick=()=>cdDeckAdd(ch,e.c,e.u,-1); $('.p',t).onclick=()=>cdDeckAdd(ch,e.c,e.u,1); }
         g.append(t); }
       body.append(g); }
     if(D.hid){ const x=el(`<div class="faint" style="margin-top:10px">${isDM()?`Ещё ${D.hid} ${plural(D.hid,'карта','карты','карт')} — удалены из библиотеки${ed?' <button class="btn sm ghost rmg">убрать из колоды</button>':''}`:`Ещё ${D.hid} ${plural(D.hid,'карта','карты','карт')} скрыты мастером`}</div>`); const r=$('.rmg',x);
-      if(r) r.onclick=()=>{ ch.deck=(ch.deck||[]).filter(e=>e&&byId(world.cards,e.c)); touch(ch); draw(); }; body.append(x); } };
-  p._draw=draw; draw(); const g=$('.cdgo',p); if(g) g.onclick=()=>{ cdUiSet('deck',ch.id); go('cards'); }; return p; }
+      if(r) r.onclick=()=>{ ch.deck=(ch.deck||[]).filter(e=>e&&byId(world.cards,e.c)); touch(ch); cdDeckRefresh(ch); }; body.append(x); } }; draw(); }
 
 /* ============ текст карты «как на карте» ============
    модель — массив символов {ch, id?, b?}: id — код ручного цвета ('-' — «без цвета»), b — жирный; из неё собирается обычная разметка {код|…} и **…**.
@@ -11133,14 +11167,61 @@ const cdTtsT=(x=0,y=1,z=0)=>{ const S=cdTtsSc(); return {posX:x,posY:y,posZ:z,ro
 const CD_TTS_COMMON={ColorDiffuse:{r:0.713235259,g:0.713235259,b:0.713235259},LayoutGroupSortIndex:0,Value:0,Locked:false,Grid:true,Snap:true,IgnoreFoW:false,MeasureMovement:false,DragSelectable:true,Autoraise:true,Sticky:true,Tooltip:true,GridProjection:false,HideWhenFaceDown:true,Hands:true,SidewaysCard:false,LuaScript:'',LuaScriptState:'',XmlUI:''};
 /* подписи картинок для выгрузки: id карты → лицо; «id~улучшение» → лицо улучшения (только у карт с улучшениями) */
 function cdTtsSigs(cards){ const o={}; for(const c of cards){ o[c.id]=cdSigCard(c); for(const {u} of cdUpTree(c)) o[c.id+'~'+u.id]=cdSigCard(cdUpCard(c,u.id)); } return o; }
-function cdTtsDeck(s,cards,url,bsig,sigs){ const back=url+'b-'+bsig+'.jpg', v=x=>String(x??'').trim()||'—'; let nk=cards.length;
-  const one=(c,face,k,lbl)=>({GUID:cdTtsGuid(),Name:'CardCustom',Transform:cdTtsT(),Nickname:c.name||'',Description:[lbl?`⬆ Улучшение${lbl===true?'':': '+lbl}`:'',`Энергия ${v(c.en)} · Инициатива ${v(c.ini)}`,[(c.tags||[]).join(', '),c.tgt].filter(Boolean).join(' · '),'',cdTtsPlain(c.text),cdFlav(c)?'\n«'+cdFlav(c)+'»':''].filter((x,i)=>i||x).join('\n').trim(),
-      GMNotes:JSON.stringify({kartoteka:c.id,...(c._up?{up:c._up}:{}),en:c.en??'',ini:c.ini??'',tags:c.tags||[],tgt:c.tgt||''}),Tags:(c.tags||[]).filter(Boolean).map(String),...CD_TTS_COMMON,CardID:k*100,
-      CustomDeck:{[k]:{FaceURL:url+'f-'+face+'.jpg',BackURL:back,NumWidth:1,NumHeight:1,BackIsHidden:true,UniqueBack:false,Type:0}}});
+function cdTtsDeck(s,cards,url,bsig,sigs){ const back=url+'b-'+bsig+'.jpg'; let nk=cards.length;
+  const one=(c,face,k,lbl)=>cdTtsOne(c,url+'f-'+face+'.jpg',back,k,lbl);
   /* улучшения — стейты той же карты (2, 3…; переключение в TTS цифрами или через меню); у карт без улучшений поля States нет */
   const objs=cards.map((c,i)=>{ const o=one(c,sigs[c.id],i+1), T=cdUpTree(c); if(T.length){ o.States={}; T.forEach(({u},j)=>{ o.States[j+2]=one(cdUpCard(c,u.id),sigs[c.id+'~'+u.id],++nk,cdUpTag(c,u)||true); }); } return o; });
   const obj=objs.length===1?{...objs[0],Transform:cdTtsT()}:{GUID:cdTtsGuid(),Name:'Deck',Transform:cdTtsT(),Nickname:s.name||'Сет',Description:`Картотека: ${cards.length} ${plural(cards.length,'карта','карты','карт')}${s.pub?'':' · скрытый сет'}`,GMNotes:JSON.stringify({kartoteka:s.id}),Tags:[],...CD_TTS_COMMON,Hands:false,DeckIDs:objs.map((o,i)=>(i+1)*100),CustomDeck:Object.assign({},...objs.map(o=>o.CustomDeck)),ContainedObjects:objs};
-  return {SaveName:s.name||'Сет',Date:'',VersionNumber:'',GameMode:'',GameType:'',GameComplexity:'',Tags:[],Gravity:0.5,PlayArea:0.5,Table:'',Sky:'',Note:'',TabStates:{},LuaScript:'',LuaScriptState:'',XmlUI:'',ObjectStates:[obj]}; }
+  return cdTtsSave(s.name||'Сет',obj); }
+const cdTtsSave=(name,obj)=>({SaveName:name,Date:'',VersionNumber:'',GameMode:'',GameType:'',GameComplexity:'',Tags:[],Gravity:0.5,PlayArea:0.5,Table:'',Sky:'',Note:'',TabStates:{},LuaScript:'',LuaScriptState:'',XmlUI:'',ObjectStates:[obj]});
+/* одна карта TTS (CardCustom 1×1) с лицом face и рубашкой back (полные адреса), k — номер в CustomDeck */
+function cdTtsOne(c,face,back,k,lbl){ const v=x=>String(x??'').trim()||'—';
+  return ({GUID:cdTtsGuid(),Name:'CardCustom',Transform:cdTtsT(),Nickname:c.name||'',Description:[lbl?`⬆ Улучшение${lbl===true?'':': '+lbl}`:'',`Энергия ${v(c.en)} · Инициатива ${v(c.ini)}`,[(c.tags||[]).join(', '),c.tgt].filter(Boolean).join(' · '),'',cdTtsPlain(c.text),cdFlav(c)?'\n«'+cdFlav(c)+'»':''].filter((x,i)=>i||x).join('\n').trim(),
+      GMNotes:JSON.stringify({kartoteka:c.id,...(c._up?{up:c._up}:{}),en:c.en??'',ini:c.ini??'',tags:c.tags||[],tgt:c.tgt||''}),Tags:(c.tags||[]).filter(Boolean).map(String),...CD_TTS_COMMON,CardID:k*100,
+      CustomDeck:{[k]:{FaceURL:face,BackURL:back,NumWidth:1,NumHeight:1,BackIsHidden:true,UniqueBack:false,Type:0}}}); }
+
+/* --- колода персонажа в TTS (может и игрок): картинки берутся с сайта картинок мастера (адрес = подпись картинки),
+   сама колода — одним объектом Deck: копии карты, у карты с улучшениями — стейты (выбранная версия сверху) --- */
+function cdDeckTtsPlan(ch){ const url=cdTtsUrl(), D=cdDeckList(ch), need=new Map(), noset=[]; let k=0, total=0, first=null; const ids=[], objs=[], CD={};
+  for(const {e,c} of D.L){ const st=cdSetOf(c); if(!st){ noset.push(c); continue; } const bsig=cdSigBack(st), back=url+'b-'+bsig+'.jpg'; need.set(back,st.id); first??=st;
+    const vs=['',...cdUpTree(c).map(z=>z.u.id)], tpl=vs.map(vid=>{ const cc=vid?cdUpCard(c,vid):c, f=url+'f-'+cdSigCard(cc)+'.jpg'; need.set(f,st.id); ++k; return {cc,f,k,lbl:vid?cdUpTag(c,cdUpOf(c,vid))||true:''}; });
+    const cur=Math.max(0,vs.indexOf(e.u||''));
+    for(let n=0;n<(+e.n||0);n++){ const mk=j=>cdTtsOne(tpl[j].cc,tpl[j].f,back,tpl[j].k,tpl[j].lbl), o=mk(cur);
+      if(vs.length>1){ o.States={}; vs.forEach((_,j)=>{ if(j!==cur) o.States[j+1]=mk(j); }); }
+      objs.push(o); ids.push(o.CardID); Object.assign(CD,o.CustomDeck); total++; } }
+  const nm='Колода — '+(ch.name||'персонаж');
+  const obj=objs.length===1?{...objs[0],Transform:cdTtsT()}:{GUID:cdTtsGuid(),Name:'Deck',Transform:cdTtsT(),Nickname:nm,Description:`Картотека: ${total} ${plural(total,'карта','карты','карт')}`,GMNotes:JSON.stringify({kartoteka:'deck:'+ch.id}),Tags:[],...CD_TTS_COMMON,Hands:false,DeckIDs:ids,CustomDeck:CD,ContainedObjects:objs};
+  return {nm,json:objs.length?cdTtsSave(nm,obj):null,need,noset,total,hid:D.hid,first}; }
+/* есть ли картинка на сайте картинок (без CORS — грузим как <img>) */
+function cdImgThere(u){ return new Promise(r=>{ const i=new Image(); const t=setTimeout(()=>r(false),15000); i.onload=()=>{ clearTimeout(t); r(true); }; i.onerror=()=>{ clearTimeout(t); r(false); }; i.src=u; }); }
+async function cdDeckTtsDlg(ch){ if(!ch) return; const b=openModal(`<h2>🎲 Колода «${esc(ch.name||'без имени')}» в Tabletop Simulator</h2><div class="cdttsst"></div><div class="cdttsimg"></div><div class="faint cdhint cdttsp"></div>
+    <div class="faint cdhint">В TTS колода появится в <b>Объекты → Сохранённые объекты → Картотека</b> под именем «Колода — ${esc(ch.name||'')}». Поменял колоду на сайте — сохрани ещё раз и возьми её из меню заново (на столе сама не обновится).</div>
+    <div class="modal-actions"><span class="grow"></span><button class="btn" id="dNo">Закрыть</button><button class="btn primary" id="dGo" disabled>⬇ Сохранить в TTS</button></div>`,true);
+  b.classList.add('cdbox','cdlbox'); const P=t=>{ const p=$('.cdttsp',b); if(p) p.textContent=t; }; let plan=null, miss=[];
+  const drawSt=async()=>{ const h=$('.cdttsst',b); if(!h) return; const dir=await cdTtsDir(false), saved=dir||CD_TTS.dir||await cdIdb(true).catch(()=>null);
+    h.innerHTML=`<div class="cdttsrow"><span class="ic">${dir?'✅':saved?'🔓':'📁'}</span><span class="grow"><b>Папка TTS:</b> ${dir?esc(dir.name)+' → Картотека':saved?'выбрана, браузер спросит разрешение при сохранении':window.showDirectoryPicker?'не выбрана — файл скачается, его надо будет положить в папку самому':'этот браузер не пишет в папки — файл колоды скачается'}<br><span class="faint">Документы → My Games → Tabletop Simulator → Saves → Saved Objects (можно выбрать любую из этих папок).</span></span>${window.showDirectoryPicker?`<button class="btn sm" id="tDir">${saved?'Другая папка…':'Выбрать папку…'}</button>`:''}</div>`;
+    const d=$('#tDir',h); if(d) d.onclick=async()=>{ await cdTtsPick(); drawSt(); }; };
+  const check=async()=>{ const h=$('.cdttsimg',b); if(!h) return; plan=cdDeckTtsPlan(ch);
+    if(!plan.json){ h.innerHTML='<div class="cdttsrow"><span class="ic">∅</span><span class="grow">В колоде нет карт, которые можно выгрузить.</span></div>'; $('#dGo',b).disabled=true; return; }
+    h.innerHTML=`<div class="cdttsrow"><span class="ic">⏳</span><span class="grow">Проверяю картинки карт на ${esc(cdTtsSiteId())}.web.app…</span></div>`;
+    const urls=[...plan.need.keys()], ok=await Promise.all(urls.map(cdImgThere)); miss=urls.filter((u,i)=>!ok[i]); if(!$('.cdttsimg',b)) return;
+    const msets=[...new Set(miss.map(u=>plan.need.get(u)))].map(id=>byId(world.cardsets,id)).filter(Boolean);
+    const extra=(plan.noset.length?`<br><span class="faint">Без сета (не выгружаются): ${plan.noset.map(c=>esc(c.name||'')).join(', ')}</span>`:'')+(plan.hid?`<br><span class="faint">Ещё ${plan.hid} ${plural(plan.hid,'карта','карты','карт')} тебе не видны — их в файле не будет.</span>`:'');
+    h.innerHTML=miss.length?`<div class="cdttsrow"><span class="ic">⚠</span><span class="grow"><b>${miss.length} ${plural(miss.length,'картинки','картинок','картинок')} ещё нет на сайте картинок</b> — ${isDM()?'выгрузи эти сеты в TTS (картинки выложатся), потом сохрани колоду':'мастер ещё не выгружал в TTS свежие версии этих карт. Попроси его нажать «🎲 В TTS» в «Карточках»'}: ${msets.map(x=>'«'+esc(x.name||'Без названия')+'»').join(', ')}.<br><span class="faint">Можно сохранить и сейчас — эти карты в TTS будут без картинки, пока мастер их не выложит (потом просто возьми колоду заново).</span>${extra}</span>${isDM()&&msets.length?'<button class="btn sm primary" id="dSets">⬆ Выгрузить сеты</button>':''}</div>`
+      :`<div class="cdttsrow"><span class="ic">✅</span><span class="grow"><b>${plan.total} ${plural(plan.total,'карта','карты','карт')}</b> — все картинки на месте.${extra}</span></div>`;
+    $('#dGo',b).disabled=false;
+    const ds=$('#dSets',h); if(ds) ds.onclick=async()=>{ if(!cdTokOk()){ try{ await cdTtsLogin(); }catch(e){ toast('Вход не удался: '+(e.code||e.message),true); return; } } ds.disabled=true; await cdTtsExport(msets.map(x=>x.id),P); check(); }; };
+  $('#dNo',b).onclick=closeModal;
+  $('#dGo',b).onclick=async()=>{ const go=$('#dGo',b); go.disabled=true; try{ plan=cdDeckTtsPlan(ch); if(!plan.json) return; const name=cdTtsName({name:plan.nm}), json=JSON.stringify(plan.json,null,2);
+      let dir=await cdTtsDir(true), sub=null; if(dir){ try{ sub=await dir.getDirectoryHandle('Картотека',{create:true}); }catch(e){ console.error(e); } }
+      if(sub){ await cdWriteFile(sub,name+'.json',json); try{ const st=plan.first;
+          if(st){ const th=await cdJpeg((x,w)=>cdDrawBack(x,st,w,true),[cdBackImg(cdBackOf(st))],cdBackFonts(cdBackOf(st)),256,358); await cdWriteFile(sub,name+'.png',await cdBlob(th)); } }catch(e){ console.warn('deck thumb',e); }
+        P('Готово: в TTS → Объекты → Сохранённые объекты → Картотека → «'+name+'».'); toast('Колода сохранена в папку TTS'); }
+      else { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([json],{type:'application/json'})); a.download=name+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+        P('Файл скачан — положи его в Документы\\My Games\\Tabletop Simulator\\Saves\\Saved Objects.'); } }
+    catch(e){ console.error('deck tts',e); toast('Не получилось сохранить: '+(e.message||e),true); }
+    finally{ if($('#dGo',b)) go.disabled=false; drawSt(); } };
+  drawSt(); check(); }
 const cdTtsName=s=>(String(s.name||'Сет').replace(/[\\/:*?"<>|\x00-\x1f]+/g,'_').replace(/[. ]+$/,'').trim()||'Сет').slice(0,80);
 const cdBlob=u=>fetch(u).then(r=>r.blob());
 
@@ -11379,7 +11460,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{EPX,cdDeckAdd,cdDeckN,cdDeckChar,cdDeckList,charTab,barTurnGain,woundGain,woundAdd,woundsHTML,woundsWire,epStrike,epHurt,epApply,epUse,epUS,epJoin,epInit,epSnap,epStart,epNext,epUnitDlg,epFxRows,epTex,epEmit,epPx,epFxCtx,epAnDraw,epUlt,EP_ANM,EPG,epGLLoad,epGLScene,epGLDraw,epGLTex,wmTmplGeo,wmTmplHandles,fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdKwFind,cdKwScan,cdKwSet,cdKwFromRows,cdCsv,cdKwMerge,cdKwFetchSheet,cdKwCsv,cdRunsSig,cdUpCard,cdUpTree,cdQMatcher,cdTtsDeck,cdTtsSigs,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{EPX,cdDeckTtsPlan,cdDeckTtsDlg,cdTtsDeck,cdDeckAdd,cdDeckN,cdDeckChar,cdDeckList,charTab,barTurnGain,woundGain,woundAdd,woundsHTML,woundsWire,epStrike,epHurt,epApply,epUse,epUS,epJoin,epInit,epSnap,epStart,epNext,epUnitDlg,epFxRows,epTex,epEmit,epPx,epFxCtx,epAnDraw,epUlt,EP_ANM,EPG,epGLLoad,epGLScene,epGLDraw,epGLTex,wmTmplGeo,wmTmplHandles,fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdKwFind,cdKwScan,cdKwSet,cdKwFromRows,cdCsv,cdKwMerge,cdKwFetchSheet,cdKwCsv,cdRunsSig,cdUpCard,cdUpTree,cdQMatcher,cdTtsDeck,cdTtsSigs,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
