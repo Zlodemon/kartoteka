@@ -633,6 +633,21 @@ body.phone .cdsh{flex-wrap:wrap;row-gap:8px}body.phone .cdsh .grow{flex-basis:10
 #ginfo{position:absolute;right:14px;bottom:14px;width:260px;max-height:calc(100% - 90px);overflow:auto;background:rgba(7,9,15,.85);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:none}
 #ginfo.on{display:block}
 #wmc{display:block;width:100%;height:100%;cursor:grab;touch-action:none}.wmlayers{position:absolute;left:14px;bottom:44px;background:rgba(7,9,15,.85);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px;padding:5px 8px;display:none;gap:4px;align-items:center;font-size:12px;flex-wrap:wrap;max-width:calc(100% - 28px)}.wmlayers.on{display:flex}.wmlayers .cap{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);margin-right:2px}.wmlayers .lr{display:flex;align-items:center;gap:1px;border:1px solid var(--line);border-radius:8px;padding:2px 3px 2px 6px;cursor:pointer;color:var(--muted)}.wmlayers .lr.act{border-color:var(--orange);color:var(--text);background:rgba(255,138,61,.12)}.wmlayers .lr.sec.act{border-color:#c04be0;background:rgba(192,75,224,.14)}.wmlayers .lr.mapl.act{border-color:var(--mint);background:rgba(142,247,193,.12)}.wmlayers .lr .n{padding-right:4px}.wmlayers .lr button{background:none;border:none;cursor:pointer;font-size:12px;padding:0 2px;color:var(--text);line-height:1}.wmlayers .lr button.off{opacity:.35}.wmlayers .lr button.on{color:var(--gold)}.wminfo textarea{padding:5px 9px;font-size:13px}.wmtools .tw{display:inline-flex;gap:3px;align-items:center}.wmtools select{max-width:130px}.wminfo .field{margin-bottom:0}.wminfo input,.wminfo select{padding:5px 9px;font-size:13px}
+.entpick{position:fixed;z-index:1001;display:flex;flex-direction:column;background:rgba(12,14,22,.98);border:1px solid var(--line2);border-radius:12px;box-shadow:0 14px 44px rgba(0,0,0,.55);overflow:hidden;backdrop-filter:blur(6px)}
+.entpick .epq{margin:8px 8px 4px;width:auto;flex:none}
+.entpick .epl{overflow:auto;padding:0 5px 6px;min-height:0}
+.entpick .epg{position:sticky;top:0;z-index:1;background:rgba(12,14,22,.98);font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:9px 8px 5px}
+.entpick .epi{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:9px;cursor:pointer}
+.entpick .epi.cur{background:rgba(255,255,255,.07)}
+.entpick .epi img,.entpick .epi .av{width:30px;height:30px;border-radius:50%;object-fit:cover;flex:none;border:1px solid rgba(255,255,255,.12)}
+.entpick .epi .av{display:inline-flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;background:hsl(var(--h) 42% 30%);color:#fff}
+.entpick .epi .tx{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.25}
+.entpick .epi .tx b{font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.entpick .epi .tx small{color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.entpick .epi.sel .tx b{color:var(--gold)}
+.entpick .epi.done{opacity:.5}
+.entpick .epi .ok{font-size:11px;color:var(--muted);flex:none;white-space:nowrap}
+.entpick .epe{padding:14px;color:var(--muted);text-align:center;font-size:13px}
 .ctxmenu{position:fixed;z-index:1000;background:rgba(12,14,22,.97);border:1px solid var(--line2);border-radius:10px;padding:4px;min-width:190px;box-shadow:0 12px 40px rgba(0,0,0,.5)}.ctxmenu button{display:flex;gap:8px;align-items:center;width:100%;text-align:left;background:none;border:none;color:var(--text);padding:7px 10px;border-radius:7px;font-size:13px;cursor:pointer}.ctxmenu button:hover{background:rgba(255,255,255,.07)}.ctxmenu button.danger{color:var(--red)}.ctxmenu button:disabled{opacity:.4;cursor:default}.ctxmenu .sep{height:1px;background:var(--line);margin:4px 6px}.ctxmenu .hdr{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);padding:6px 10px 2px}.ctxmenu .ic{width:18px;text-align:center}.ctxmenu .crow{display:flex;align-items:center;gap:6px;padding:4px 10px;font-size:12px;color:var(--muted)}.ctxmenu .crow input[type=range]{flex:1;min-width:120px}.ctxmenu .crow input[type=number]{width:56px;padding:2px 4px;font-size:12px}.ctxmenu .crow select.visSel{flex:1;max-width:none;font-size:12.5px;padding:5px 24px 5px 8px}#wmbar select.visSel{max-width:160px;padding:4px 22px 4px 8px;font-size:11.5px}#ginfo select.visSel{max-width:170px;font-size:12px;padding:4px 22px 4px 8px}
 .wminfo .tb{margin-top:8px;border-top:1px solid var(--line);padding-top:8px}.wminfo .tb h4{margin:0 0 6px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:6px}.wminfo .tbar{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:4px;font-size:12px}.wminfo .tbar .track{height:8px}.wminfo .tbar .vals{display:flex;gap:2px;align-items:center}.wminfo .tbar .vals input{width:40px;padding:2px 4px;font-size:12px;text-align:center}.wminfo .stlist{margin-top:4px}
 #chatBtn{position:fixed;right:18px;bottom:18px;z-index:900;width:46px;height:46px;border-radius:50%;border:1px solid var(--line2);background:rgba(12,14,22,.95);color:var(--text);font-size:20px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.45)}#chatBtn .n{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--orange);color:#111;font-size:11px;font-weight:700;line-height:18px;padding:0 5px;display:none}#chatBtn .n.on{display:block}
@@ -2470,6 +2485,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-26',t:'Новый выбор персонажа в списках',items:['Списки «— выбрать —» (участник организации, организация персонажа, локация, «Кто здесь», новая связь, привязка к событию) открывают аккуратную панель вместо системного списка: поиск по имени и подписи, портреты, группы. Уже добавленные помечены «✓ уже есть» и стоят в конце.','Можно сразу начать печатать имя — список откроется с поиском. Стрелки, Enter и Esc тоже работают.']},
   {d:'2026-10-26',t:'Колода «видна всем»',items:['На листе персонажа, в блоке «Колода персонажа», у мастера есть галочка «видна всем». С ней колоду этого персонажа видят все игроки, даже если сам персонаж открыт им только «кратко». Без галочки при «кратко» колода скрыта.']},
   {d:'2026-10-26',t:'Быстрые клики игрока больше не теряются',items:['Если игрок быстро нажимал «+» (колода, полоски, счётчики) у своего персонажа, одно из нажатий иногда пропадало. Исправлено.','Изменения колоды не пишутся в журнал — вдвое меньше записей в базу на каждый клик.']},
   {d:'2026-10-26',t:'Все колоды и колода в TTS',items:['Вверху «Карточек» — переключатель «📚 Библиотека / 🃏 Колоды». Во вкладке «Колоды» видны колоды всех персонажей сразу: карты, число копий, −/+ для своих, «✎ Собирать», «лист →».','«🎲 В TTS» у колоды (во вкладке «Колоды» и на листе персонажа) — игрок сам сохраняет свою колоду в Tabletop Simulator: Сохранённые объекты → Картотека → «Колода — имя». Картинки берутся с сайта картинок мастера, поэтому мастер должен сначала выгрузить сеты через «🎲 В TTS» — окно подскажет, каких картинок не хватает.']},
@@ -3893,8 +3909,39 @@ function entitySelect(exclude,types='col',added){
   const has=e=>!!added&&added.has(e.id);
   const groups=[]; const add=(t,arr,label)=>{ if(!types.includes(t)) return; const L=arr.filter(e=>e.id!==exclude); const opts=[...L.filter(e=>!has(e)),...L.filter(has)].map(e=>`<option value="${e.id}">${has(e)?'✓ ':''}${esc(e.name)||'без имени'}</option>`).join(''); if(opts) groups.push(`<optgroup label="${label}">${opts}</optgroup>`); };
   add('c',V.chars(),'Персонажи'); add('o',V.orgs(),'Организации'); add('l',V.locs(),'Локации');
-  return `<select><option value="">— выбрать —</option>${groups.join('')}</select>`;
+  return `<select class="entsel"><option value="">— выбрать —</option>${groups.join('')}</select>`;
 }
+/* выпадающий список сущностей: вместо системного (белые заголовки групп, без поиска) — своя панель с поиском, группами и портретами.
+   <select class="entsel"> остаётся источником значения: группы, исключения и «✓ уже добавлен» берутся из его option, выбор ставит value и шлёт change */
+let ESP=null;
+function entPickClose(){ if(!ESP) return; ESP.box.remove(); document.removeEventListener('pointerdown',ESP.out,true); document.removeEventListener('scroll',ESP.scr,true); window.removeEventListener('resize',entPickClose); ESP=null; }
+function entPickOpen(sel){ entPickClose(); const items=[];
+  for(const g of sel.children){ if(g.tagName==='OPTGROUP'){ for(const o of g.children) if(o.value) items.push({v:o.value,g:g.label,t:o.textContent}); } else if(g.value) items.push({v:g.value,g:'',t:g.textContent}); }
+  const box=el('<div class="entpick"><input class="epq" placeholder="поиск по имени…" autocomplete="off"><div class="epl"></div></div>'); document.body.append(box);
+  const L=$('.epl',box), q=$('.epq',box); let cur=0, vis=[];
+  const row=it=>{ const e=findEntity(it.v), done=it.t.startsWith('✓ '), nm=done?it.t.slice(2):it.t, sub=e&&e.title?String(e.title):'';
+    return `<div class="epi ${done?'done':''} ${sel.value===it.v?'sel':''}" data-v="${esc(it.v)}">${e&&e.thumb?`<img src="${esc(e.thumb)}" alt="">`:`<span class="av" style="--h:${entHue(e||{name:nm})}">${esc(e?entAbbr(e):'?')}</span>`}<span class="tx"><b>${esc(nm)}</b>${sub?`<small>${esc(sub)}</small>`:''}</span>${done?'<span class="ok">✓ уже есть</span>':''}</div>`; };
+  const hl=(scroll=true)=>{ const R=$$('.epi',L); R.forEach((r,i)=>r.classList.toggle('cur',i===cur)); if(scroll&&R[cur]) R[cur].scrollIntoView({block:'nearest'}); };
+  const pick=v=>{ sel.value=v; sel.dispatchEvent(new Event('change',{bubbles:true})); entPickClose(); sel.focus(); };
+  const draw=()=>{ const t=cdNorm(q.value); vis=items.filter(it=>!t||cdNorm(it.t).includes(t)||cdNorm(findEntity(it.v)?.title).includes(t)); let h='', g=null;
+    for(const it of vis){ if(it.g!==g){ g=it.g; if(g) h+=`<div class="epg">${esc(g)}</div>`; } h+=row(it); } L.innerHTML=h||'<div class="epe">Никого не нашлось</div>';
+    cur=Math.max(0,vis.findIndex(it=>it.v===sel.value)); hl();
+    $$('.epi',L).forEach((r,i)=>{ r.onclick=()=>pick(r.dataset.v); r.onmousemove=()=>{ if(cur!==i){ cur=i; hl(false); } }; }); };
+  const place=()=>{ const r=sel.getBoundingClientRect(), w=Math.min(innerWidth-16,Math.max(r.width,320)); box.style.width=w+'px'; box.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+'px';
+    const below=innerHeight-r.bottom-12, above=r.top-12, up=below<260&&above>below, h=Math.min(400,up?above:below); box.style.maxHeight=h+'px';
+    if(up){ box.style.top=''; box.style.bottom=(innerHeight-r.top+4)+'px'; } else { box.style.bottom=''; box.style.top=(r.bottom+4)+'px'; } };
+  q.oninput=draw;
+  q.onkeydown=e=>{ if(e.key==='ArrowDown'){ e.preventDefault(); cur=Math.min(vis.length-1,cur+1); hl(); } else if(e.key==='ArrowUp'){ e.preventDefault(); cur=Math.max(0,cur-1); hl(); }
+    else if(e.key==='Enter'){ e.preventDefault(); if(vis[cur]) pick(vis[cur].v); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); entPickClose(); sel.focus(); } else if(e.key==='Tab') entPickClose(); };
+  draw(); place(); q.focus();
+  ESP={box,sel,out:e=>{ if(!box.contains(e.target)&&e.target!==sel) entPickClose(); },scr:e=>{ if(!box.contains(e.target)) entPickClose(); }};
+  document.addEventListener('pointerdown',ESP.out,true); document.addEventListener('scroll',ESP.scr,true); window.addEventListener('resize',entPickClose); return box; }
+/* открытие: клик/тап по списку (системный не показываем), Enter/Пробел/стрелки, или сразу набор букв — уходит в поиск */
+document.addEventListener('pointerdown',e=>{ const s=e.target.closest&&e.target.closest('select.entsel'); if(!s||e.button>0||s.disabled) return; e.preventDefault(); if(ESP&&ESP.sel===s) entPickClose(); else entPickOpen(s); },true);
+for(const t of ['mousedown','click']) document.addEventListener(t,e=>{ if(e.target.closest&&e.target.closest('select.entsel')) e.preventDefault(); },true);
+document.addEventListener('keydown',e=>{ const s=e.target; if(ESP||!(s&&s.matches&&s.matches('select.entsel'))) return;
+  if(['Enter',' ','ArrowDown','ArrowUp'].includes(e.key)){ e.preventDefault(); entPickOpen(s); }
+  else if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey){ e.preventDefault(); const b=entPickOpen(s), q=$('.epq',b); q.value=e.key; q.dispatchEvent(new Event('input')); } },true);
 
 /* --- связи (личные / общие) --- */
 function relationsBlock(ent){
