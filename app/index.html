@@ -5289,7 +5289,7 @@ function graphEngine(wrap,cv,opts){
   const toWorld=(sx,sy)=>({x:(sx-W()/2)/cam.k-cam.x,y:(sy-H()/2)/cam.k-cam.y});
   const imgs=new Map(); let hovEdge=null; let labelHits=[], edgeHits=[], linkDrag=null, drag=null, pan=null, moved=false, resize=null;
   const blk=e=>opts.block?opts.block(e):null;
-  const F_=id=>(opts.find||findEntity)(id), T_=e=>e._t||typeOf(e.id), eid_=e=>e._ent?e._ent.id:e.id; // копия на карте: e.id = ключ узла, e._ent = сама сущность
+  const F_=id=>(opts.find||findEntity)(id), T_=e=>e._gt||typeOf(e.id), eid_=e=>e._ent?e._ent.id:e.id; // копия на карте: e.id = ключ узла, e._ent = сама сущность, e._gt — её тип (не _t: это метка синхронизации в самих документах)
   const notes=()=>opts.notes?opts.notes():[];
   let noteDrag=null, noteResize=null;
   const hexA=(hex,a)=>{ const h=hex.replace('#',''); const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; };
@@ -5700,8 +5700,8 @@ function renderMap(m,mp){
   /* узел карты: {id сущности, k? — ключ копии, x, y, block?}; ключ узла = k || id, так один элемент можно положить несколько раз */
   const nKey=n=>n.k||n.id;
   const nodeMap=()=>new Map((mp.nodes||[]).map(n=>[nKey(n),n]));
-  const wraps=new Map(); const wrapN=n=>{ const e=findEntity(n.id); if(!e) return null; if(!n.k) return e; let w=wraps.get(n.k); if(!w||w._ent!==e){ w=Object.create(e); Object.defineProperty(w,'id',{value:n.k}); w._ent=e; w._t=typeOf(e.id); wraps.set(n.k,w); } return w; };
-  const nodes=()=>(mp.nodes||[]).map(wrapN).filter(e=>e&&visibleEnt(e._ent||e)).map(e=>({e,t:e._t||typeOf(e.id)}));
+  const wraps=new Map(); const wrapN=n=>{ const e=findEntity(n.id); if(!e) return null; if(!n.k) return e; let w=wraps.get(n.k); if(!w||w._ent!==e){ w=Object.create(e); Object.defineProperty(w,'id',{value:n.k}); w._ent=e; w._gt=typeOf(e.id); wraps.set(n.k,w); } return w; };
+  const nodes=()=>(mp.nodes||[]).map(wrapN).filter(e=>e&&visibleEnt(e._ent||e)).map(e=>({e,t:e._gt||typeOf(e.id)}));
   /* фильтр связей: у редактора — общий для карты (mp.relF), у остальных — свой, в localStorage */
   const RFK='relF.'+mp.id; const rfGet=()=>{ if(!ed){ try{ const v=localStorage.getItem(RFK); if(v) return rfNorm(JSON.parse(v)); }catch{} } return rfNorm(mp.relF,mp.showData===false&&!mp.relF); };
   const rfSet=f=>{ if(ed){ mp.relF=f; mp.showData=!!(f.rel||f.mem||f.loc); touch(mp); } else { try{ localStorage.setItem(RFK,JSON.stringify(f)); }catch{} } eng.draw(); };
