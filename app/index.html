@@ -2707,6 +2707,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-27',t:'Эпик-бой: лечение, новые условия пассивок, атака пассивки, ружья',items:['Новый эффект «💖 Лечение». У лечения и барьера в строке эффекта — «от чего»: N единиц или N% от макс. ХП / атаки / защиты наложившего, макс. ХП цели, недостающего ХП цели или от урона (скилла или события).','Пассивки: новые условия «умер враг», «своё ХП / ХП союзника / ХП врага упало ниже половины», шанс срабатывания, эффекты «на участника события».','Пассивка может сама атаковать при срабатывании: секция «⚔ Атака при срабатывании» — по кому (виновник события, случайный, самый раненый, все враги), урон «стат × множитель», анимация и звук.','Новые анимации выстрелов: прицельный выстрел из мушкета, залп шеренги, два пистоля, мушкетон, огненная пуля, навылет, рикошет, веер ружей, ружья с неба; ультимейты «Три тысячи миров» (стена золотых ружей), «Расстрельное кольцо», «Небесная батарея».']},
   {d:'2026-10-27',t:'Карточки: словарь кейвордов для игроков',items:['В «Карточках» у игроков кнопка «📖 Кейворды» (и в библиотеке, и в колодах): все кейворды по группам — что значат, длительность, мощность, примечание; поиск по названию и описанию. «N карт →» показывает эти карты в библиотеке. Удобно на телефоне, где подсказки по наведению нет.']},
   {d:'2026-10-27',t:'Кнопки действий у техник',items:['У техники могут быть кнопки (редактор техники → «Кнопки действий»): клик выполняет формулу — тихо, всплывашкой (галка «в чат» у кнопки — карточкой в чат), панель при этом не сдвигается, «−» — отмена шага, на кнопке счётчик (например 2/4), с максимумом 1 — переключатель. Кнопки видны тем, кто изучил технику: «Мой» → вкладка «Техники» и блок «Техники» на листе. «📌 кнопки на экран» во вкладке «Техники» — маленькое окно только с кнопками поверх карты (таскается за заголовок, место запоминается, «▁» сворачивает до заголовка). Наведи на кнопку — описание техники.','Кнопка «▁» в «Моём» снова сворачивает панель до заголовка (раньше оставалась пустая коробка).','Исправлено: «снять_эффект(имя, 1)» снимал эффект целиком, а не один стак.']},
   {d:'2026-10-27',t:'Характеристики: группы, капы и типы бонусов',items:['Настройки → Характеристики: у каждой характеристики группа (физические / ментальные / гибридные) — на листе и в «Моём» они идут по группам, а в модификаторах можно выбрать всю группу сразу.','Там же «Капы и типы бонусов» (по умолчанию выключено): у модификатора характеристики появляется тип — базовый (база + базовые бонусы не выше капа базы), предельный, сверхъестественный, мастерство… Плюсы одного типа в сумме не больше его капа. На листе под характеристикой — метки типов, сгоревшее зачёркнуто.','Итог может уйти выше максимума шкалы: на радаре — за контуром, полоска на листе светится.','Новые цели модификаторов: «Минимум кубика» (бросок характеристики не ниже N), «Кап базы», «Не ниже», «Ситуативно» (отдельная строка вроде «Реакция · на звук» с 🎲), «Раны: ресурс за рану», «Минимум полоски» (можно уйти в минус). У эффекта — «Не действует, если» (иммунитет).','В формулах: раны.тяжелая, react.база, react.предел.']},
@@ -8650,7 +8651,8 @@ const EP_FX=[
   {id:'effUp',k:'buff',icon:'🔮',name:'Повышение эффективности',d:'эффективность +{v}'},
   {id:'immortal',k:'buff',icon:'♾️',name:'Бессмертие',d:'ХП не опускается ниже 1, пока действует'},
   {id:'riposte',k:'buff',icon:'↩️',name:'Рипост',d:'шанс контратаки +{v}'},
-  {id:'barrier',k:'buff',icon:'🔵',name:'Барьер',d:'щит поверх ХП',n:20,nl:'единиц барьера'},
+  {id:'heal',k:'buff',icon:'💖',name:'Лечение',d:'сразу восстанавливает ХП (сколько и от чего — на скилле)',inst:1,n:20,nl:'единиц или %'},
+  {id:'barrier',k:'buff',icon:'🔵',name:'Барьер',d:'щит поверх ХП (сколько и от чего — на скилле)',n:20,nl:'единиц или %'},
   {id:'immunity',k:'buff',icon:'✨',name:'Иммунитет',d:'пока действует, на цель не накладываются дебаффы'},
   {id:'invinc',k:'buff',icon:'💠',name:'Неуязвимость',d:'не получает урон'},
   {id:'nullify',k:'buff',icon:'🚫',name:'Скилл нулифаер',d:'игнорирует следующий скилл врага (и урон, и эффекты)'},
@@ -8707,7 +8709,15 @@ const EP_FX=[
 const epFx=id=>{ if(!id) return null; if(String(id).startsWith('lib:')){ const d=effLib().find(x=>x.id===id.slice(4)); return d?{id,k:'lib',icon:d.icon||'✨',name:d.name,d:d.description||''}:null; } return EP_FX.find(f=>f.id===id)||null; };
 const EP_TGT=[['e1','один враг'],['e2','два врага'],['e3','три врага'],['eA','все враги'],['s','себя'],['a1','один союзник'],['aA','все союзники']];
 const EP_FXON=[['tgt','на цель скилла'],['self','на себя'],['aA','на всех союзников'],['eA','на всех врагов'],['a1','на союзника (выбор)']];
-const EP_TRIG=[['always','всегда (модификаторы)'],['start','начало боя'],['turn','начало своего хода'],['tend','конец своего хода'],['hurt','получил урон'],['lethal','летальный урон'],['hit','попал атакой'],['kill','убил врага'],['allyDead','погиб союзник']];
+const EP_TRIG=[['always','всегда (модификаторы)'],['start','начало боя'],['turn','начало своего хода'],['tend','конец своего хода'],['hurt','получил урон'],['lethal','летальный урон'],['hit','попал атакой'],['kill','убил врага'],['allyDead','погиб союзник'],['foeDead','умер враг (любой)'],['selfHalf','своё ХП упало ниже половины'],['allyHalf','ХП союзника упало ниже половины'],['foeHalf','ХП врага упало ниже половины']];
+/* «на цель» в эффектах пассивки — кто это при каждом условии */
+const EP_TRIGO={hurt:'тот, кто ударил',lethal:'тот, кто ударил',hit:'тот, по кому попал',kill:'убитый враг',allyDead:'погибший союзник',foeDead:'погибший враг',selfHalf:'тот, кто ударил',allyHalf:'этот союзник',foeHalf:'этот враг'};
+/* атака пассивки: по кому бьёт */
+const EP_PATGT=[['ctx','виновник события (иначе случайный враг)'],['e1','случайный враг'],['low','враг с наименьшим ХП'],['eA','все враги']];
+/* лечение и барьер: от чего считается N (EP_FXSCD — по умолчанию) */
+const EP_FXSC=[['n','N единиц'],['mhp','N% макс. ХП наложившего'],['atk','N% атаки наложившего'],['def','N% защиты наложившего'],['tmhp','N% макс. ХП цели'],['lost','N% недостающего ХП цели'],['dmg','N% урона (скилла или события)']];
+const EP_FXSCD={heal:'mhp',barrier:'n'};
+const epFxScTxt=r=>{ const sc=r.sc||EP_FXSCD[r.id]||'n', n=r.n??epP(r.id,'n'); return sc==='n'?String(n):n+'% '+({mhp:'макс. ХП',atk:'атаки',def:'защиты',tmhp:'макс. ХП цели',lost:'недостающего ХП',dmg:'урона'}[sc]||''); };
 const EP_TYPE=[['atk','Атакующая'],['sup','Не атакующая'],['pas','Пассивная']];
 const epSel=(L,v,cls,attr='')=>`<select class="${cls}" ${attr}>${L.map(([k,n])=>`<option value="${esc(k)}" ${String(v??'')===String(k)?'selected':''}>${esc(n)}</option>`).join('')}</select>`;
 
@@ -8781,22 +8791,26 @@ const epSec=(cls,col,ic,title,sub,body)=>`<div class="epc ${cls}" style="--sc:${
 /* строки эффектов скилла: карточка на эффект, цвет по виду (бафф / дебафф / особый / из библиотеки) */
 function epFxRows(box,arr,onChange,opts={}){ const draw=()=>{ box.innerHTML=''; if(!arr.length) box.append(el('<div class="faint" style="font-size:12px;margin-bottom:6px">Эффектов нет.</div>'));
     arr.forEach((r,i)=>{ const f=epFx(r.id); const kc=f?(EP_KC[f.k]||'#9aa3bf'):'#9aa3bf';
-      const row=el(`<div class="epfxr" style="--kc:${kc}"><span class="ic">${f?f.icon:'✚'}</span><div class="mn"><select class="id">${epFxOptions(r.id)}</select>${f?`<div class="d">${esc(epFxD(f))}</div>`:'<div class="d">выбери эффект</div>'}</div><div class="ps">${f&&f.inst?'<span class="tag">мгновенно</span>':`<label title="сколько ходов держится"><span>ходов</span><input class="dur" type="number" min="0" max="99" value="${r.dur??2}"></label>`}<label title="Для дебаффов: шанс + эффективность − эффект резист цели против d100"><span>шанс %</span><input class="ch" type="number" min="0" max="999" value="${r.ch??100}"></label>${f&&f.n!=null?`<label title="${esc(f.nl||'')}"><span>N</span><input class="n" type="number" step="any" value="${r.n??epP(f.id,'n')}"></label>`:''}<label><span>на кого</span>${epSel(EP_FXON,r.on||'tgt','on')}</label>${opts.noWhen?'':`<label><span>когда</span>${epSel([['post','после удара'],['pre','до удара']],r.when||'post','wh')}</label>`}${f&&!f.inst?`<label title="Очищение, Снятие бафов и «Помощь» этот эффект не снимают (мастер вручную — может)"><span>нельзя развеять</span><input type="checkbox" class="nd" ${r.nd?'checked':''}></label>`:''}</div><button class="x-btn" title="убрать">×</button></div>`);
-      $('.id',row).onchange=e=>{ r.id=e.target.value; delete r.n; onChange(); draw(); };
+      const row=el(`<div class="epfxr" style="--kc:${kc}"><span class="ic">${f?f.icon:'✚'}</span><div class="mn"><select class="id">${epFxOptions(r.id)}</select>${f?`<div class="d">${esc(epFxD(f))}</div>`:'<div class="d">выбери эффект</div>'}</div><div class="ps">${f&&f.inst?'<span class="tag">мгновенно</span>':`<label title="сколько ходов держится"><span>ходов</span><input class="dur" type="number" min="0" max="99" value="${r.dur??2}"></label>`}<label title="Для дебаффов: шанс + эффективность − эффект резист цели против d100"><span>шанс %</span><input class="ch" type="number" min="0" max="999" value="${r.ch??100}"></label>${f&&f.n!=null?`<label title="${esc(f.nl||'')}"><span>N${EP_FXSCD[f.id]&&(r.sc||EP_FXSCD[f.id])!=='n'?' %':''}</span><input class="n" type="number" step="any" value="${r.n??epP(f.id,'n')}"></label>`:''}${f&&EP_FXSCD[f.id]?`<label title="От чего считается N: число как есть или процент от характеристики. «Урон» — сколько нанёс этот скилл (у пассивки — урон события: полученный, нанесённый, атаки пассивки)"><span>от чего</span>${epSel(EP_FXSC,r.sc||EP_FXSCD[f.id],'sc')}</label>`:''}<label><span>на кого</span>${epSel(opts.ev?[...EP_FXON,['ev','на участника события']]:EP_FXON,r.on||'tgt','on')}</label>${opts.noWhen?'':`<label><span>когда</span>${epSel([['post','после удара'],['pre','до удара']],r.when||'post','wh')}</label>`}${f&&!f.inst?`<label title="Очищение, Снятие бафов и «Помощь» этот эффект не снимают (мастер вручную — может)"><span>нельзя развеять</span><input type="checkbox" class="nd" ${r.nd?'checked':''}></label>`:''}</div><button class="x-btn" title="убрать">×</button></div>`);
+      $('.id',row).onchange=e=>{ r.id=e.target.value; delete r.n; delete r.sc; onChange(); draw(); };
       const du=$('.dur',row); if(du) du.oninput=()=>{ r.dur=Math.max(0,Math.round(+du.value||0)); onChange(); };
       $('.ch',row).oninput=e=>{ r.ch=Math.max(0,+e.target.value||0); onChange(); };
       const nn=$('.n',row); if(nn) nn.oninput=()=>{ r.n=+nn.value||0; onChange(); };
+      const scs=$('.sc',row); if(scs) scs.onchange=()=>{ if(scs.value===EP_FXSCD[r.id]) delete r.sc; else r.sc=scs.value; onChange(); draw(); };
       $('.on',row).onchange=e=>{ r.on=e.target.value; onChange(); }; const wh=$('.wh',row); if(wh) wh.onchange=()=>{ r.when=wh.value; onChange(); };
       const ndc=$('.nd',row); if(ndc) ndc.onchange=()=>{ if(ndc.checked) r.nd=1; else delete r.nd; onChange(); };
       $('.x-btn',row).onclick=()=>{ arr.splice(i,1); onChange(); draw(); }; box.append(row); });
     const a=el(`<button class="btn sm epadd">＋ эффект</button>`); a.onclick=()=>{ arr.push({id:'',ch:100,dur:2,on:opts.defOn||'tgt'}); onChange(); draw(); }; box.append(a); }; draw(); }
+/* строки «стат × множитель»: урон скилла и атака пассивки */
+function epScaleRows(sc,L,ch_){ const dr=()=>{ sc.innerHTML=''; L.forEach((r,i)=>{ const row=el(`<div class="epscl">${epSel([['atk','⚔ атака'],['def','🛡 защита'],['hp','❤ макс. ХП'],['spd','💨 бонус скорости'],['eff','🔮 эффективность']],r.k,'k')}<span class="x">×</span><input class="m" type="number" step="any" value="${r.m??1}"><button class="x-btn">×</button></div>`); $('.k',row).onchange=e=>{ r.k=e.target.value; ch_(); }; $('.m',row).oninput=e=>{ r.m=+e.target.value||0; ch_(); }; $('.x-btn',row).onclick=()=>{ L.splice(i,1); ch_(); dr(); }; sc.append(row); }); const ad=el('<button class="btn sm epadd">＋ стат</button>'); ad.onclick=()=>{ L.push({k:'atk',m:1}); ch_(); dr(); }; sc.append(ad); }; dr(); }
 function epSkillEditor(box,a,ch,onChange){ const draw=()=>{ const P=a.ep||{}; const type=P.type||'atk'; const pas=type==='pas'; const tc=EP_TYPEC[type]; const sbOn=!!(P.sb&&P.sb.on);
     const fld=(lbl,html,w)=>`<div class="field" style="margin:0${w?';width:'+w+'px':''}"><label>${lbl}</label>${html}</div>`;
     box.innerHTML=`<div class="epske">
       <div class="epskhd" style="--tc:${tc}"><div class="slot" title="слот скилла">${P.slot||'—'}</div><div class="t"><input class="epnmi" value="${esc(a.name||'')}" placeholder="Название скилла — оно на кнопке в бою"><div class="epsum"></div></div><span class="tp">${(EP_TYPE.find(x=>x[0]===type)||[])[1]}</span></div>
       ${epSec('epc-main','#ffd166','⚙','Основное','',`<div class="eprow2">${fld('Слот',`<div class="epdots epslotseg">${Array.from({length:10},(_,i)=>i+1).map(i=>`<span data-v="${i}" class="${+P.slot===i?'on':''}">${i}</span>`).join('')}<span data-v="" class="${P.slot?'':'on'}" title="не участвует в бою">—</span></div>`)}${fld('Тип',`<div class="eptype">${EP_TYPE.map(([k,n])=>`<span data-v="${k}" class="${type===k?'on':''}" style="--c:${EP_TYPEC[k]}">${n}</span>`).join('')}</div>`)}${pas?'':fld('КД, ходов',`<input class="epcd" type="number" min="0" max="99" value="${+P.cd||0}">`,96)}${pas?'':fld('Цели',epSel(EP_TGT,P.tgt||(type==='atk'?'e1':'s'),'eptg'))}${pas?'':fld('Анимация',`<button class="btn sm epanb" title="Выбрать из библиотеки анимаций (наведи на карточку — проиграется)">🎬 ${esc(epAnName(P))}${P.animEl&&EP_ANEL[P.animEl]?' · '+esc(EP_ANEL[P.animEl][0]):''}</button>`)}${pas?'':fld('Звук',`<div class="epsxrow"><select class="epsx" title="Звук в момент удара. Авто — подбирается по анимации">${epSfxOptions(P.sfx||'',epSfxOf({...P,sfx:''},{cls:(ch.epic||{}).cls},null))}</select><button class="btn sm icon epsxp" title="Послушать">▶</button></div>`)}${pas?'':`<label class="row epultl" style="gap:6px;margin-bottom:6px;cursor:pointer" title="Перед скиллом — врезка на весь экран боя: портрет героя (или своя картинка), название скилла, скоростные линии; эффекты скилла ярче"><input type="checkbox" class="epult" ${P.ult?'checked':''}> ⭐ Ультимейт</label>`}</div>${P.ult&&!pas?'<div class="epultpic"></div>':''}`)}
       ${type==='atk'?epSec('epc-dmg','#ff6b5e','⚔','Урон','стат × множитель; несколько — складываются','<div class="epscale"></div>'):''}
-      ${pas?epSec('epc-trig','#c04be0','✦','Срабатывание','',`<div class="eprow2">${fld('Когда срабатывает',epSel(EP_TRIG,P.trig||'always','eptr'))}<label class="row" style="gap:6px;margin-bottom:6px"><input type="checkbox" class="eponce" ${P.once?'checked':''}> 1 раз за бой</label></div><div class="faint" style="font-size:11.5px;margin-top:6px">«Всегда» — постоянные прибавки: вкладка «🎲 Бросок и модификаторы» → ƒ модификаторы → «Эпик: …».</div>`):''}
+      ${pas?epSec('epc-trig','#c04be0','✦','Срабатывание','',`<div class="eprow2">${fld('Когда срабатывает',epSel(EP_TRIG,P.trig||'always','eptr'))}${(P.trig||'always')==='always'?'':fld('Шанс %',`<input class="eppch" type="number" min="1" max="100" value="${P.ch??100}">`,90)}<label class="row" style="gap:6px;margin-bottom:6px"><input type="checkbox" class="eponce" ${P.once?'checked':''}> 1 раз за бой</label></div><div class="faint" style="font-size:11.5px;margin-top:6px">${(P.trig||'always')==='always'?'«Всегда» — постоянные прибавки: вкладка «🎲 Бросок и модификаторы» → ƒ модификаторы → «Эпик: …».':`«На цель» в эффектах ниже — ${P.atk&&P.atk.on?'цели атаки, «на участника события» — '+(EP_TRIGO[P.trig]||'никто'):EP_TRIGO[P.trig]?EP_TRIGO[P.trig]+' (то же — «на участника события»)':'никто (работают «на себя» и «на всех»)'}.${/Half$/.test(P.trig)?' Срабатывает, когда ХП переходит через половину сверху вниз; вылечили выше половины — может сработать снова.':''}`}</div>`):''}
+      ${pas&&(P.trig||'always')!=='always'?`<div class="epc epc-patk ${P.atk&&P.atk.on?'':'off'}" style="--sc:#ff6b5e"><label class="epch" style="cursor:pointer"><span class="ic">⚔</span><b>Атака при срабатывании</b><span class="sub">сама бьёт врага; без контратак и дуо</span><input type="checkbox" class="eppaon" ${P.atk&&P.atk.on?'checked':''} style="margin-left:8px"></label>${P.atk&&P.atk.on?`<div class="epcb"><div class="eprow2">${fld('По кому',epSel(EP_PATGT,P.atk.tgt||'ctx','eppat'))}${fld('Анимация',`<button class="btn sm eppan" title="Выбрать из библиотеки анимаций (наведи на карточку — проиграется)">🎬 ${esc(epAnName({...P.atk,type:'atk'}))}${P.atk.animEl&&EP_ANEL[P.atk.animEl]?' · '+esc(EP_ANEL[P.atk.animEl][0]):''}</button>`)}${fld('Звук',`<div class="epsxrow"><select class="eppsx" title="Звук удара. Авто — подбирается по анимации">${epSfxOptions(P.atk.sfx||'',epSfxOf({...P.atk,type:'atk',sfx:''},{cls:(ch.epic||{}).cls},null))}</select></div>`)}</div><div class="field" style="margin:10px 0 0"><label>Урон: стат × множитель (несколько — складываются)</label><div class="eppscale"></div></div></div>`:''}</div>`:''}
       ${epSec('epc-fx','#4fb3ff','✨','Эффекты','<span style="color:#4fb3ff">■</span> бафф · <span style="color:#ff6b5e">■</span> дебафф · <span style="color:#ffd166">■</span> особый','<div class="epfx"></div>')}
       ${epSec('epc-res','#b48cff','👻','Ресурсы','',`<div class="eprow2">${pas?'':fld('Души команде +',`<input class="epsouls" type="number" min="0" max="99" value="${+P.souls||0}">`,156)}${fld('Боевой дух +',`<input class="epsp" type="number" min="0" max="99" value="${+P.spirit||0}">`,130)}${pas?'':fld('Нужно боевого духа',`<input class="epneed" type="number" min="0" max="999" value="${+P.need||0}">`,170)+`<label class="row" style="gap:6px;margin-bottom:6px" title="при использовании боевой дух тратится"><input type="checkbox" class="epns" ${P.needSpend?'checked':''}> тратится</label>`}</div>${pas?'':`<div class="eprow2" style="margin-top:10px">${fld('Стоимость отдельным ресурсом (полоска персонажа)',`<div class="row" style="gap:6px">${epSel([['','— нет —'],...(ch.bars||[]).map(b=>[b.name,b.name])],P.cost&&P.cost.bar||'','epcb')}<input class="epcn" type="number" min="0" step="any" value="${P.cost?+P.cost.n||0:0}" style="width:80px"></div>`)}</div>`}`)}
       ${pas?'':`<div class="epc epc-sb ${sbOn?'':'off'}" style="--sc:#ff5fd2"><label class="epch" style="cursor:pointer"><span class="ic">🔥</span><b>Соул бёрн</b><span class="sub">усилить скилл за души команды</span><input type="checkbox" class="epsbon" ${sbOn?'checked':''} style="margin-left:8px"></label>${sbOn?`<div class="epcb"><div class="eprow2">${fld('Стоит душ',`<input class="epsbc" type="number" min="0" max="999" value="${+P.sb.cost||0}">`,110)}${fld('Цели при соул бёрне',epSel([['','как обычно'],...EP_TGT],P.sb.tgt||'','epsbt'))}${type==='atk'?fld('Множитель +',`<input class="epsbm" type="number" step="any" value="${+P.sb.m||0}">`,130):''}</div><div class="field" style="margin-top:10px"><label>Доп. эффекты</label><div class="epsbfx"></div></div><div class="field" style="margin:0"><label>Описание</label><input class="epsbd" value="${esc(P.sb.desc||'')}" placeholder="Способность работает на всех союзников" style="width:100%"></div></div>`:''}</div>`}</div>`;
@@ -8809,21 +8823,30 @@ function epSkillEditor(box,a,ch,onChange){ const draw=()=>{ const P=a.ep||{}; co
     { const u=$('.epult',box); if(u) u.onchange=()=>{ if(u.checked) E().ult=1; else delete E().ult; ch_(); draw(); }; }
     { const up=$('.epultpic',box); if(up) epUltMini(up,ch,a,()=>{ ch_(); draw(); }); }
     { const sx=$('.epsx',box), cls=(ch.epic||{}).cls; if(sx) sx.onchange=()=>{ if(sx.value) E().sfx=sx.value; else delete E().sfx; ch_(); const id=epSfxOf(E(),{cls},null); if(id) epSfxTest(id); }; const sp=$('.epsxp',box); if(sp) sp.onclick=()=>{ const id=epSfxOf(E(),{cls},null); if(id) epSfxTest(id); else toast('Без звука'); }; }
-    bind('.epcd',x=>E().cd=Math.max(0,Math.round(+x.value||0))); bind('.eptg',x=>E().tgt=x.value); bind('.eptr',x=>E().trig=x.value); bind('.eponce',x=>{ if(x.checked) E().once=1; else delete E().once; });
+    bind('.epcd',x=>E().cd=Math.max(0,Math.round(+x.value||0))); bind('.eptg',x=>E().tgt=x.value); bind('.eponce',x=>{ if(x.checked) E().once=1; else delete E().once; });
+    { const t=$('.eptr',box); if(t) t.onchange=()=>{ E().trig=t.value; ch_(); draw(); }; }
+    bind('.eppch',x=>{ const v=Math.max(1,Math.min(100,Math.round(+x.value||100))); if(v>=100) delete E().ch; else E().ch=v; });
+    /* атака пассивки */ const PA=()=>(E().atk??={tgt:'ctx',scale:[{k:'atk',m:1}]});
+    { const t=$('.eppaon',box); if(t) t.onchange=()=>{ if(t.checked) PA().on=1; else if(E().atk) E().atk.on=0; ch_(); draw(); }; }
+    bind('.eppat',x=>PA().tgt=x.value);
+    { const b=$('.eppan',box); if(b) b.onclick=()=>epAnPicker(PA().anim||'',true,(id,el)=>{ if(id) PA().anim=id; else delete PA().anim; if(el) PA().animEl=el; else delete PA().animEl; ch_(); draw(); },PA().animEl||''); }
+    { const sx=$('.eppsx',box); if(sx) sx.onchange=()=>{ if(sx.value) PA().sfx=sx.value; else delete PA().sfx; ch_(); const id=epSfxOf({...PA(),type:'atk'},{cls:(ch.epic||{}).cls},null); if(id) epSfxTest(id); }; }
+    { const sc=$('.eppscale',box); if(sc){ PA().scale??=[{k:'atk',m:1}]; epScaleRows(sc,PA().scale,ch_); } }
     bind('.epsouls',x=>E().souls=Math.max(0,+x.value||0)); bind('.epsp',x=>E().spirit=Math.max(0,+x.value||0)); bind('.epneed',x=>E().need=Math.max(0,+x.value||0)); bind('.epns',x=>{ if(x.checked) E().needSpend=1; else delete E().needSpend; });
     bind('.epcb',x=>{ if(x.value){ E().cost??={n:1}; E().cost.bar=x.value; } else delete E().cost; }); bind('.epcn',x=>{ if(E().cost) E().cost.n=Math.max(0,+x.value||0); });
     const SB=()=>(E().sb??={cost:20}); { const t=$('.epsbon',box); if(t) t.onchange=()=>{ SB().on=t.checked?1:0; ch_(); draw(); }; }
     bind('.epsbc',x=>SB().cost=Math.max(0,+x.value||0)); bind('.epsbt',x=>{ if(x.value) SB().tgt=x.value; else delete SB().tgt; }); bind('.epsbm',x=>SB().m=+x.value||0); bind('.epsbd',x=>SB().desc=x.value);
-    { const sc=$('.epscale',box); if(sc){ E().scale??=[{k:'atk',m:1}]; const L=E().scale; const dr=()=>{ sc.innerHTML=''; L.forEach((r,i)=>{ const row=el(`<div class="epscl">${epSel([['atk','⚔ атака'],['def','🛡 защита'],['hp','❤ макс. ХП'],['spd','💨 бонус скорости'],['eff','🔮 эффективность']],r.k,'k')}<span class="x">×</span><input class="m" type="number" step="any" value="${r.m??1}"><button class="x-btn">×</button></div>`); $('.k',row).onchange=e=>{ r.k=e.target.value; ch_(); }; $('.m',row).oninput=e=>{ r.m=+e.target.value||0; ch_(); }; $('.x-btn',row).onclick=()=>{ L.splice(i,1); ch_(); dr(); }; sc.append(row); }); const ad=el('<button class="btn sm epadd">＋ стат</button>'); ad.onclick=()=>{ L.push({k:'atk',m:1}); ch_(); dr(); }; sc.append(ad); }; dr(); } }
-    E().fx??=[]; epFxRows($('.epfx',box),E().fx,ch_,{noWhen:type!=='atk',defOn:type==='atk'?'tgt':pas?'self':'tgt'});
+    { const sc=$('.epscale',box); if(sc){ E().scale??=[{k:'atk',m:1}]; epScaleRows(sc,E().scale,ch_); } }
+    E().fx??=[]; epFxRows($('.epfx',box),E().fx,ch_,{noWhen:type!=='atk',defOn:type==='atk'?'tgt':pas?'self':'tgt',ev:pas});
     const sbf=$('.epsbfx',box); if(sbf){ const S=SB(); S.fx??=[]; epFxRows(sbf,S.fx,ch_,{noWhen:type!=='atk'}); }
     sum(); };
   draw(); }
 /* краткая строка скилла: для карточки и редактора */
 function epSkillSummary(a){ const P=a&&a.ep; if(!P) return ''; const L=[]; const tp=P.type||'atk'; const tg=(EP_TGT.find(x=>x[0]===(P.tgt||(tp==='atk'?'e1':'s')))||[])[1];
-  if(tp==='pas') L.push('пассивка · '+((EP_TRIG.find(x=>x[0]===(P.trig||'always'))||[])[1]||'')+(P.once?' · 1 раз за бой':''));
+  if(tp==='pas'){ L.push('пассивка · '+((EP_TRIG.find(x=>x[0]===(P.trig||'always'))||[])[1]||'')+(+P.ch&&+P.ch<100?' · шанс '+P.ch+'%':'')+(P.once?' · 1 раз за бой':''));
+    if(P.atk&&P.atk.on&&(P.trig||'always')!=='always') L.push(`⚔ атака по ${esc(({ctx:'виновнику',e1:'случайному врагу',low:'самому раненому врагу',eA:'всем врагам'})[P.atk.tgt||'ctx'])}: ${(P.atk.scale||[{k:'atk',m:1}]).map(s=>'×'+(s.m??1)+' '+({atk:'атаки',def:'защиты',hp:'макс. ХП',spd:'скорости',eff:'эффективности'}[s.k]||s.k)).join(' + ')}`); }
   else { if(tp==='atk') L.push(`${tg}: ${(P.scale||[{k:'atk',m:1}]).map(s=>'×'+(s.m??1)+' '+({atk:'атаки',def:'защиты',hp:'макс. ХП',spd:'скорости',eff:'эффективности'}[s.k]||s.k)).join(' + ')}`); else L.push(tg); if(+P.cd) L.push('КД '+P.cd); }
-  for(const r of (P.fx||[])){ const f=epFx(r.id); if(f) L.push(`${f.icon} ${esc(f.name)}${f.inst?'':(r.dur??2)>=99?' до срабатывания':' '+(r.dur??2)+' х.'}${(r.ch??100)<100?' '+r.ch+'%':''}${r.nd?' 🔒':''}`); }
+  for(const r of (P.fx||[])){ const f=epFx(r.id); if(f) L.push(`${f.icon} ${esc(f.name)}${EP_FXSCD[r.id]?' '+esc(epFxScTxt(r)):''}${f.inst?'':(r.dur??2)>=99?' до срабатывания':' '+(r.dur??2)+' х.'}${(r.ch??100)<100?' '+r.ch+'%':''}${r.nd?' 🔒':''}`); }
   if(+P.souls) L.push('души +'+P.souls); if(+P.spirit) L.push('дух +'+P.spirit); if(+P.need) L.push('нужно духа '+P.need); if(P.sb&&P.sb.on) L.push('соул бёрн '+(+P.sb.cost||0));
   return L.join(' · '); }
 function epTileTags(a){ const P=a.ep; if(!P) return ''; return `<div class="abc-tags">${P.slot?`<span class="rudie mass" title="слот скилла">${'①②③④⑤⑥⑦⑧⑨⑩'[P.slot-1]||P.slot}</span>`:''}<span class="rudie" style="white-space:normal">${epSkillSummary(a)}</span></div>`; }
@@ -9009,16 +9032,23 @@ function epHurt(B,t,dmg,log,o={}){ if(t.dead) return {dealt:0}; dmg=Math.max(0,M
   if(!o.shared&&dmg>0) for(const c of epLive(B,t.side)){ if(c===t) continue; const sh=Math.min(100,(c.fx||[]).filter(e=>e.id==='share').reduce((v,e)=>v+(+e.n||0),0)); const part=Math.min(dmg,Math.round(dmg*sh/100)); if(part<=0) continue;
     dmg-=part; dx.push(`Разделение урона: ${c.nm} берёт ${sh}% = ${part} → остаётся ${dmg}`); log.push(`🔗 ${c.nm} принимает на себя ${part} урона (${t.nm})`); epHurt(B,c,part,log,{src:o.src,shared:1}); if(dmg<=0) break; }
   const cap=epGet(t,'dmgcap'); if(cap){ const was=dmg; dmg=Math.min(dmg,Math.round(epUS(t).mhp*(+cap.n||30)/100)); if(dmg<was) dx.push(`Лимит урона ${+cap.n||30}% макс. ХП → ${dmg}`); }
-  let left=dmg; if(t.bar>0){ const a=Math.min(t.bar,left); t.bar-=a; left-=a; if(a) dx.push(`Барьер поглотил ${a} → по ХП ${left}`); if(!t.bar) t.fx=(t.fx||[]).filter(e=>e.id!=='barrier'); }
+  const hp0=+t.hp||0; let left=dmg; if(t.bar>0){ const a=Math.min(t.bar,left); t.bar-=a; left-=a; if(a) dx.push(`Барьер поглотил ${a} → по ХП ${left}`); if(!t.bar) t.fx=(t.fx||[]).filter(e=>e.id!=='barrier'); }
   t.hp-=left; epFl(B,t,'−'+dmg,o.crit?'crit':'dmg');
   if(epHas(t,'sleep')){ epTake(t,'sleep'); log.push(`😴 ${t.nm} просыпается`); } if(epHas(t,'stealth')) epTake(t,'stealth');
   if(t.hp<=0){ if(!epHas(t,'immortal')) epTrig(B,t,'lethal',log,{other:o.src}); if(epHas(t,'immortal')){ t.hp=1; log.push(`♾️ ${t.nm}: бессмертие — остаётся с 1 ХП`); dx.push('Бессмертие — остаётся 1 ХП'); } else epDie(B,t,log,o.src); }
-  else if(dmg>0) epTrig(B,t,'hurt',log,{other:o.src});
+  else if(dmg>0) epTrig(B,t,'hurt',log,{other:o.src,src:o.src,dmg});
+  /* ХП перешло через половину сверху вниз */ if(!t.dead&&left>0){ const h=epUS(t).mhp/2; if(hp0>=h&&t.hp<h) epHalf(B,t,log,o.src); }
   return {dealt:dmg}; }
 function epDie(B,t,log,src){ epAn(B,{k:'die',u:t.id}); t.hp=0; t.dead=1; t.bar=0; if(epHas(t,'execute')) t.ex=1; t.fx=[]; B.queue=(B.queue||[]).filter(x=>x!==t.id); B.extra=(B.extra||[]).filter(x=>x!==t.id); log.push(`☠ ${t.nm} выбывает${t.ex?' (казнь — воскресить нельзя)':''}`);
-  if(src&&!src.dead) epTrig(B,src,'kill',log,{other:t}); for(const a of epLive(B,t.side)) epTrig(B,a,'allyDead',log,{other:t}); }
+  if(src&&!src.dead) epTrig(B,src,'kill',log,{other:t}); for(const a of epLive(B,t.side)) epTrig(B,a,'allyDead',log,{other:t,src}); for(const a of epLive(B,epFoeSide(t))) epTrig(B,a,'foeDead',log,{other:t,src}); }
+/* ХП бойца упало ниже половины: его пассивки, союзников и врагов */
+function epHalf(B,t,log,src){ epTrig(B,t,'selfHalf',log,{other:src,src}); for(const a of epLive(B,t.side)) if(a!==t) epTrig(B,a,'allyHalf',log,{other:t,src}); for(const f of epLive(B,epFoeSide(t))) epTrig(B,f,'foeHalf',log,{other:t,src}); }
+/* лечение и барьер: N единиц или N% от стата (r.sc, по умолчанию EP_FXSCD); ctx.dmg — урон скилла или события. Вручную из окна бойца лечение — в единицах */
+function epFxAmt(A,t,r,n,ctx={}){ const sc=r.sc||(r.force&&r.id==='heal'?'n':EP_FXSCD[r.id]||'n'), k=+n||0; if(sc==='n') return {v:Math.max(0,Math.round(k)),how:''};
+  const sa=A?epUS(A):{}, st=epUS(t); const base=+(sc==='mhp'?sa.mhp:sc==='atk'?sa.atk:sc==='def'?sa.def:sc==='tmhp'?st.mhp:sc==='lost'?Math.max(0,st.mhp-Math.max(0,+t.hp||0)):sc==='dmg'?ctx.dmg:0)||0;
+  return {v:Math.max(0,Math.round(base*k/100)),how:`${k}% от ${{mhp:'макс. ХП',atk:'атаки',def:'защиты',tmhp:'макс. ХП цели',lost:'недостающего ХП',dmg:'урона'}[sc]} ${Math.round(base)}`}; }
 /* наложить эффект/действие: шанс дебаффа = шанс + эффективность − резист цели против d100; иммунитет, запрет бафов, стаки ДоТов */
-function epApply(B,A,t,r,log){ const f=epFxAny(r.id); if(!f||!t) return; if(t.dead&&r.id!=='revive') return;
+function epApply(B,A,t,r,log,ctx={}){ const f=epFxAny(r.id); if(!f||!t) return; if(t.dead&&r.id!=='revive') return;
   const foe=A.side!==t.side; const kind=f.k==='lib'?(foe?'debuff':'buff'):f.k==='sp'?(r.id==='execute'?'debuff':'buff'):f.k; const n=r.n??(f.n!=null?epP(f.id,'n'):undefined);
   if(r.force){ /* вручную из окна бойца — без бросков и иммунитетов */ } else if(kind==='debuff'&&foe){ if(epHas(t,'immunity')){ log.push(`✨ ${t.nm}: иммунитет — ${f.name} не наложен`); return; } const c=(r.ch??100)+(+epUS(A).eff||0)-(+epUS(t).res||0), roll=epD100(); if(roll>c){ log.push(`🛡 ${t.nm} сопротивляется: ${f.name} (d100 ${roll} > ${Math.round(c)})`); return; } }
   else if((r.ch??100)<100){ const roll=epD100(); if(roll>(r.ch??100)){ log.push(`· ${f.name} не сработал (d100 ${roll})`); return; } }
@@ -9033,14 +9063,16 @@ function epApply(B,A,t,r,log){ const f=epFxAny(r.id); if(!f||!t) return; if(t.de
     case 'cdUpD': for(const s of (t.sk||[])) if(+s.ep.cd) t.cd[s.id]=(+t.cd[s.id]||0)+(+n||1); log.push(`⏳ ${t.nm}: КД скиллов +${n}`); break;
     case 'revive': if(!t.dead) break; if(t.ex){ log.push(`⚰️ ${t.nm}: казнён — воскресить нельзя`); break; } t.dead=0; t.fx=[]; t.hp=Math.max(1,Math.round(epUS(t).mhp*(+n||30)/100)); log.push(`🕊️ ${t.nm} воскресает с ${t.hp} ХП`); epFl(B,t,'+'+t.hp,'heal'); break;
     case 'detonate': epDetonate(B,t,log); break;
-    case 'spirit': t.sp=(+t.sp||0)+(+n||1); log.push(`🔥 ${t.nm}: боевой дух +${n}`); break; }
+    case 'spirit': t.sp=(+t.sp||0)+(+n||1); log.push(`🔥 ${t.nm}: боевой дух +${n}`); break;
+    case 'heal': { const a=epFxAmt(A,t,r,n,ctx); const h=epHeal(B,t,a.v,log); if(!epHas(t,'noheal')) log.push(`💖 ${t.nm}: лечение +${h}${a.how?' ('+a.how+')':''}${h<a.v?' — ХП полное':''}`); break; } }
     return; }
   let dur=Math.max(1,r.dur??2); { const bd=epPosCfg(A.pos).bd; if(bd&&!r.force&&kind==='buff'&&!foe&&t!==A) dur+=bd; }
   const e={i:uid(),id:r.id,k:kind,dur,src:A.id,sa:Math.round(+epUS(A).atk||0)}; if(n!=null) e.n=n; if(r.nd) e.nd=1;
   if(f.k==='lib'){ const d=effLib().find(x=>x.id===r.id.slice(4)); const mods=(d&&d.mods||[]).filter(m=>String(m.t||'').startsWith('ep:')).map(m=>({t:m.t,op:m.op,v:typeof m.v==='number'?m.v:fxNumber(m.v,null)})); if(mods.length) e.mods=mods; }
   t.fx??=[]; if(!EP_DOT.has(r.id)){ const old=t.fx.findIndex(x=>x.id===r.id); if(old>=0) t.fx.splice(old,1); }
-  t.fx.push(e); if(r.id==='barrier'){ t.bar=(+t.bar||0)+(+n||0); }
-  log.push(`${f.icon} ${t.nm}: ${f.name}${n!=null&&!['barrier'].includes(r.id)?' ('+n+')':''}${r.id==='barrier'?' +'+n:''} на ${dur} х.`); }
+  let bv=0, bh=''; if(r.id==='barrier'){ const a=epFxAmt(A,t,r,n,ctx); bv=a.v; bh=a.how; t.bar=(+t.bar||0)+bv; }
+  t.fx.push(e);
+  log.push(`${f.icon} ${t.nm}: ${f.name}${n!=null&&r.id!=='barrier'?' ('+n+')':''}${r.id==='barrier'?' +'+bv+(bh?' ('+bh+')':''):''} на ${dur} х.`); }
 function epDetonate(B,t,log){ const L=(t.fx||[]).filter(e=>EP_DOT.has(e.id)); if(!L.length){ log.push(`🧨 ${t.nm}: детонировать нечего`); return; } log.push(`🧨 Детонация на ${t.nm}`); for(const e of L){ epDotTick(B,t,e,log,true); if(t.dead) break; } t.fx=(t.fx||[]).filter(e=>e.id!=='bomb'); }
 /* тик ДоТа (в конце хода носителя) или взрыв бомбы */
 function epDotTick(B,t,e,log,boom){ const m=epUS(t).mhp; let d=0;
@@ -9049,9 +9081,9 @@ function epDotTick(B,t,e,log,boom){ const m=epUS(t).mhp; let d=0;
   log.splice(li,0,`${f.icon} ${f.name}: ${t.nm} −${Math.round(d)}`+EP_DX+[`${f.name} на ${t.nm}`,`${how} = ${Math.round(d*100)/100}`,...dx,`Итог: −${r.dealt} ХП`].join('\n'));
   if(e.id==='bomb'&&!t.dead&&epD100()<=(+epP('bomb','w')||0)){ t.fx.push({i:uid(),id:'stun',k:'debuff',dur:1,src:e.src}); log.push(`💫 ${t.nm} оглушён взрывом`); } }
 /* строки эффектов скилла: на кого */
-function epApplyRows(B,A,rows,T,log,hits){ for(const r of rows){ if(!r.id) continue; const f=epFxAny(r.id); if(!f) continue; const on=r.on||'tgt'; let L;
-    if(on==='self') L=[A]; else if(on==='aA') L=epLive(B,A.side); else if(on==='eA') L=epLive(B,epFoeSide(A)); else if(on==='a1') L=T.filter(t=>t.side===A.side).slice(0,1); else L=T;
-    for(const t of L){ const h=hits&&hits.get(t.id); if(h&&h.nul) continue; if(h&&h.miss&&t.side!==A.side&&f.k!=='buff') continue; /* промах — без отрицательных эффектов */ epApply(B,A,t,r,log); } } }
+function epApplyRows(B,A,rows,T,log,hits,ctx={}){ if(hits&&ctx.dmg==null){ let d=0; for(const h of hits.values()) d+=+(h&&h.dealt)||0; ctx={...ctx,dmg:d}; } for(const r of rows){ if(!r.id) continue; const f=epFxAny(r.id); if(!f) continue; const on=r.on||'tgt'; let L;
+    if(on==='self') L=[A]; else if(on==='ev') L=ctx.ev?[ctx.ev]:[]; else if(on==='aA') L=epLive(B,A.side); else if(on==='eA') L=epLive(B,epFoeSide(A)); else if(on==='a1') L=T.filter(t=>t.side===A.side).slice(0,1); else L=T;
+    for(const t of L){ const h=hits&&hits.get(t.id); if(h&&h.nul) continue; if(h&&h.miss&&t.side!==A.side&&f.k!=='buff') continue; /* промах — без отрицательных эффектов */ epApply(B,A,t,r,log,ctx); } } }
 /* формула урона: мастер правит её в настройках (settings.epic.dmgF); считает движок формул (fxAst/fxEval) — без eval.
    переменные [ключ, по-русски, описание]; в формуле можно писать любое из двух имён */
 const EP_DMGF_DEF='база * множитель * если(крит, 1 + крит_урон, 1) * K / (K + защита) * если(промах, 0.5, 1)';
@@ -9109,7 +9141,7 @@ async function epUse(B,A,sk,T,o={}){ const P=sk.ep||{}; const log=o.log; const t
     for(const t of T){ if(t.dead) continue; const nu=hits.get(t.id);
       /* скилл нулифаер: удар виден (анимация и звук), но скилл на цель не действует */
       if(nu&&nu.nul){ EPI=i; EPTL=t0+(i++)*.12; const an=epAnId(A,P,t); if(an){ epAn(B,{k:'atk',a:A.id,t:t.id,c:A.cls||'',an,nul:1,...(P.ult?{ult:1}:{}),...(EPI?{sub:1}:{}),...(P.animEl?{ae:P.animEl}:{}),...(P.sfx?{sx:P.sfx}:{})}); EPTL+=epAnHit(an); } else epSfxMark(B,A,t,P); epFl(B,t,'НУЛИФАЕР','misst'); tE=Math.max(tE,EPTL+.3); continue; }
-      if(nu) continue; EPI=i; EPTL=t0+(i++)*.12; const h=epStrike(B,A,t,P,{sbM:sbOn?+P.sb.m||0:0,st:(P.tgt||'e1')==='e1',depth:o.depth||0,cc:o.cc||0,ctrQ,sk},log); hits.set(t.id,h); if(h.dealt>0&&!A.dead) epTrig(B,A,'hit',log,{other:t}); tE=Math.max(tE,EPTL); } EPTL=tE; EPI=0; }
+      if(nu) continue; EPI=i; EPTL=t0+(i++)*.12; const h=epStrike(B,A,t,P,{sbM:sbOn?+P.sb.m||0:0,st:(P.tgt||'e1')==='e1',depth:o.depth||0,cc:o.cc||0,ctrQ,sk},log); hits.set(t.id,h); if(h.dealt>0&&!A.dead) epTrig(B,A,'hit',log,{other:t,dmg:h.dealt}); tE=Math.max(tE,EPTL); } EPTL=tE; EPI=0; }
   epApplyRows(B,A,rows.filter(r=>r.when!=='pre'),T,log,hits);
   if(A.side==='a'&&+P.souls){ B.souls=(+B.souls||0)+(+P.souls); log.push(`👻 Души команды +${P.souls} (${B.souls})`); }
   if(+P.spirit){ A.sp=(+A.sp||0)+(+P.spirit); log.push(`🔥 ${A.nm}: боевой дух +${P.spirit} (${A.sp})`); }
@@ -9126,9 +9158,23 @@ function epPosSp(B,A,sp,T,log,prm={}){ if(sp==='help'){ const t=T[0]; if(!t) ret
   else if(sp==='prep'){ A.lastNext=1; log.push(`⏬ ${A.nm} ходит последним в следующей фазе`); }
   else if(sp==='ritual'){ A.rit=1; A.sbFree=1; log.push(`📿 ${A.nm}: следующий соул бёрн без душ`); }
   else if(sp==='supp'){ (B.supCd??={})[A.side]=+(prm.cd??6)||0; } }
-/* пассивки по событию (печать отключает) */
-function epTrig(B,u,trig,log,ctx={}){ if((u.dead&&trig!=='lethal')||epHas(u,'seal')||(ctx.d||0)>2) return; for(const p of (u.pas||[])){ const P=p.ep||{}; if((P.trig||'always')!==trig) continue; u.once??={}; if(P.once&&u.once[p.id]) continue; if(P.once) u.once[p.id]=1;
-    log.push(`✦ ${u.nm}: «${p.name}»`); epApplyRows(B,u,P.fx||[],ctx.other?[ctx.other]:[],log,null); if(+P.spirit){ u.sp=(+u.sp||0)+(+P.spirit); log.push(`🔥 ${u.nm}: боевой дух +${P.spirit}`); } } }
+/* пассивки по событию (печать отключает); ctx.other — участник события («на цель»), ctx.src — кто нанёс урон, ctx.dmg — урон события.
+   EPTRD — глубина: пассивка от пассивки срабатывает не глубже трёх уровней, чтобы атаки пассивок не зациклились */
+let EPTRD=0;
+function epTrig(B,u,trig,log,ctx={}){ if((u.dead&&trig!=='lethal')||epHas(u,'seal')||EPTRD>2) return; for(const p of (u.pas||[])){ const P=p.ep||{}; if((P.trig||'always')!==trig) continue; u.once??={}; if(P.once&&u.once[p.id]) continue;
+    const pa=P.atk&&P.atk.on?P.atk:null, T=pa?epPasT(B,u,pa.tgt||'ctx',ctx):[]; if(pa&&!T.length&&!(P.fx||[]).length&&!+P.spirit) continue;
+    if(+P.ch&&+P.ch<100&&epD100()>+P.ch) continue; if(P.once) u.once[p.id]=1;
+    log.push(`✦ ${u.nm}: «${p.name}»`); EPTRD++;
+    try{ let hits=null, tg=ctx.other?[ctx.other]:[], dmg=+ctx.dmg||0;
+      if(T.length){ /* атака пассивки: удары как у скилла, без контратак и дуо */ const SP={type:'atk',scale:pa.scale,anim:pa.anim,animEl:pa.animEl,sfx:pa.sfx,tgt:T.length>1?'eA':'e1'}; const t0=EPTL; let tE=t0, i=0; hits=new Map(); dmg=0;
+        for(const t of T){ if(t.dead) continue; EPI=i; EPTL=t0+(i++)*.12; const h=epStrike(B,u,t,SP,{st:T.length===1,depth:3,cc:2,ctrQ:[],sk:{id:p.id,name:p.name}},log); hits.set(t.id,h); dmg+=h.dealt; tE=Math.max(tE,EPTL); } EPTL=tE; EPI=0; tg=T; }
+      epApplyRows(B,u,P.fx||[],tg,log,hits,{dmg,ev:ctx.other}); if(+P.spirit){ u.sp=(+u.sp||0)+(+P.spirit); log.push(`🔥 ${u.nm}: боевой дух +${P.spirit}`); } }
+    finally{ EPTRD--; } } }
+/* цели атаки пассивки: ctx — участник события или тот, кто нанёс урон (если это живой враг), иначе случайный враг */
+function epPasT(B,u,code,ctx){ const foes=epLive(B,epFoeSide(u)); if(!foes.length) return []; if(code==='eA') return foes;
+  if(code==='low') return [foes.slice().sort((a,b)=>a.hp/epUS(a).mhp-b.hp/epUS(b).mhp)[0]];
+  if(code==='ctx'){ const c=[ctx.other,ctx.src].find(x=>x&&foes.includes(x)); if(c) return [c]; }
+  return [foes[Math.floor(Math.random()*foes.length)]]; }
 /* ---------- ход и фазы ---------- */
 function epSortIds(B,ids){ return ids.map(id=>epU(B,id)).filter(u=>u&&!u.dead).sort((x,y)=>(+y.init||0)-(+x.init||0)||(x.side===y.side?0:x.side==='e'?-1:1)).map(u=>u.id); }
 function epResort(B){ B.queue=epSortIds(B,B.queue||[]); }
@@ -9361,7 +9407,7 @@ const EP_ANPH={proj:'go',beam:'go',chain:'go',charge:'cast',nova:'cast'};
 function epAnHitP(P){ if(P._h!=null) return P._h; let t=0; for(const [k,s] of P.st){ const ph=s.ph||EP_ANPH[k]; if(ph!=='go') continue; t=Math.max(t,k==='proj'?(s.dur||.4)+((s.n||1)>1?(s.st??0)*0:0):k==='beam'?.24:k==='chain'?.15:k==='link'?(s.dur||.4):0); }
   if(!t) t=P.lunge?(P.lunge===2?.18:.3):.22; return P._h=Math.round(((P.cast||0)+t)*100)/100; }
 const epAnHit=id=>EP_ANM[id]?epAnHitP(EP_ANM[id]):.25;
-function epAnId(A,P,t){ const a=P&&P.anim; if(a==='none') return ''; if(a&&EP_ANM[a]) return a; if(((P&&P.type)||'atk')==='atk') return EP_CLSAN[A.cls]||'st_basic'; return t&&t.side!==A.side?'db_hex':'bf_glow'; }
+function epAnId(A,P,t){ const a=P&&P.anim; if(a==='none') return ''; if(a&&EP_ANM[a]) return a; if(((P&&P.type)||'atk')==='atk') return EP_CLSAN[A.cls]||'st_basic'; return t&&t.side!==A.side?'db_hex':(P.fx||[]).some(r=>r.id==='heal')?'bf_heal':'bf_glow'; }
 function epAnName(P){ const a=P&&P.anim; if(a==='none') return 'без анимации'; if(a&&EP_ANM[a]) return EP_ANM[a].n; return ((P&&P.type)||'atk')==='atk'?'по классу':'по умолчанию'; }
 /* слой для анимаций: svg на весь слой + div-ы; ago — сколько секунд действия уже прошло (отрицательные задержки) */
 function epFxCtx(lay,ago,W,H){ const NS='http://www.w3.org/2000/svg'; const svg=document.createElementNS(NS,'svg'); svg.setAttribute('width',W); svg.setAttribute('height',H); lay.append(svg);
@@ -9605,8 +9651,8 @@ function epSfxAuto(an){ const id=String(an||''); let m;
   if((m=/^mg_(\w+?)_\d/.exec(id))) return {fire:'fire',ice:'ice',water:'water',earth:'earth',wind:'wind',light:'holy',dark:'dark',storm:'zap',poison:'poison',arcane:'magic',blood:'dark',void:'dark'}[m[1]]||'magic';
   if(/^bf_/.test(id)) return /heal|regen|revive|bless|second|song/.test(id)?'heal':/barrier|def|icearmor|immune|stone|reflect|thorns|stance/.test(id)?'shield':/invis|stealth/.test(id)?'teleport':'powerup';
   if(/^db_/.test(id)) return /poison|rot|drain/.test(id)?'poison':/curse|hex|doom|madness|fear|seal/.test(id)?'curse':/chains/.test(id)?'chains':'debuff';
-  if(/^ul_/.test(id)) return /bless|resurrect|sanctuary|aegis/.test(id)?'heal':/thunder/.test(id)?'zap':/ice/.test(id)?'ice':/tsunami/.test(id)?'water':/earthquake/.test(id)?'earth':/slash|execute|reaper|sword|dash|shadow|spear|dragoon|berserk/.test(id)?'bigslash':'boom';
-  if(/^sh_/.test(id)) return /musket|shotgun|sidesgun|snipe/.test(id)?'gun':/cannon|bomb/.test(id)?'cannon':/energy|storm|wave/.test(id)?'laser':/fire/.test(id)?'fire':/ice/.test(id)?'ice':/pois/.test(id)?'poison':/knife|knives|shuriken/.test(id)?'stab':'arrow';
+  if(/^ul_/.test(id)) return /bless|resurrect|sanctuary|aegis/.test(id)?'heal':/thunder/.test(id)?'zap':/sanzen|gun/.test(id)?'gun':/ice/.test(id)?'ice':/tsunami/.test(id)?'water':/earthquake/.test(id)?'earth':/slash|execute|reaper|sword|dash|shadow|spear|dragoon|berserk/.test(id)?'bigslash':'boom';
+  if(/^sh_/.test(id)) return /musket|mk_|shotgun|sidesgun|snipe/.test(id)?'gun':/cannon|bomb/.test(id)?'cannon':/energy|storm|wave/.test(id)?'laser':/fire/.test(id)?'fire':/ice/.test(id)?'ice':/pois/.test(id)?'poison':/knife|knives|shuriken/.test(id)?'stab':'arrow';
   if(/punch|kick|palm|combo/.test(id)) return 'punch'; if(/hammer|smash|quake/.test(id)) return 'heavy'; if(/shield/.test(id)) return 'clang';
   if(/axe|cleave|behead|reap|bloodsw/.test(id)) return 'bigslash'; if(/dagger|backstab|assassin|pierce|thrust|spear|^sp_/.test(id)) return 'stab'; return 'slash'; }
 /* id звука скилла: свой, 'none' или по анимации */
@@ -9629,7 +9675,7 @@ function epSfxPlay(B,ago){ if(!epSfxOn()) return; const ac=epAC(); if(!ac) retur
   if(ac.state==='suspended') ac.resume().catch(()=>{}); const now=ac.currentTime; EPA.out.gain.setValueAtTime(epSfxVol(),now);
   const key=B.id+':'+(B.flt||0)+':'; const at=s=>now+(s-ago)+.03, fresh=s=>s-ago>-.2; const play=(id,s,pre)=>{ if(EP_SFXM[id]&&fresh(s)) epSfxFire(id,at(s),pre!=null?at(pre):null); };
   (B.an||[]).forEach((a,i)=>{ const k=key+'a'+i; if(EPA.done.has(k)) return; EPA.done.add(k);
-    if(a.k==='atk'&&!a.sub){ const id=a.sx==='none'?'':a.sx&&EP_SFXM[a.sx]?a.sx:epSfxAuto(a.an); const P=EP_ANM[a.an]; if(id) play(id,a.d+(P?epAnHitP(P):.25),a.d); }
+    if(a.k==='atk'&&!a.sub){ const id=a.sx==='none'?'':a.sx&&EP_SFXM[a.sx]?a.sx:epSfxAuto(a.an); const P=EP_ANM[a.an]; if(id){ const h=a.d+(P?epAnHitP(P):.25); if(P&&P.sxx) for(const dt of P.sxx) play(id,h+dt,h+dt-.1); else play(id,h,a.d); } }
     else if(a.k==='sx') play(a.sx,a.d); else if(a.k==='ult') play('ult',a.d); else if(a.k==='tag') play('counter',a.d); else if(a.k==='die') play('fall',a.d+.15); });
   (B.fl||[]).forEach((f,i)=>{ const k=key+'f'+i; if(EPA.done.has(k)) return; EPA.done.add(k); if(f.c==='crit') play('crit',f.d||0); else if(f.c==='misst'&&f.v==='MISS') play('miss',f.d||0); }); }
 /* громкость звуков боя — у каждого своя */
@@ -9849,6 +9895,7 @@ function epGLStep(S,k,s,at,p,q,t,c,c2,sg,P){ const K=S.K, E=o=>epGLEmit(S,o), d0
   case 'slam': epGLSlam(S,p,q,at,t,s,c,c2); break;
   case 'blink': epGLBlink(S,p,q,t,s,c,c2); break;
   case 'volley': epGLVolley(S,p,q,t,s,c,c2,P); break;
+  case 'rifles': epGLRifles(S,p,q,t,s,c,c2); break;
   case 'blood': if(EPS().gore!==false) epGLBlood(S,at,t,sg,s.k||1,s.heavy); break;
   case 'flash': epGLFull(S,t,t+.32,s.c||c,.5,'flash'); break;
   case 'shake': epGLShake(S,t,s.k||1); break;
@@ -10227,6 +10274,197 @@ function epGLVolley(S,p,q,t,s,c,c2,P){ const dir=Math.sign(q.x-p.x)||1, stops=(E
   A('magic','mg_arcane_flank','Магический обстрел','#c78bff','#ffffff',[['volley',{pat:'sides',sh:'orb',sz:11,dur:.3,tr:1}]],{cast:.45,el:'arcane'});
   A('ult','ul_barrage','Шквальный обстрел','#ffd166','#ffffff',[['dim',{fld:1,a:.5,dur:2.2}],['volley',{pat:'dance',sh:'arrow',sz:14,dur:.22,n:7,iv:.15}],['rain',{sh:'arrow',n:10,sp:60,dl:1}]],{cast:.6});
 })();
+/* процедурные спрайты огнестрела: ствол смотрит вправо; рисуются один раз на canvas в цвете (tint белый) */
+const EP_GUNS={
+  /* танэгасима: длинный гранёный ствол, короткий наклонный приклад, латунный фитильный замок с тлеющим фитилём */
+  tane:{w:512,h:128,ax:150,ay:52,len:500,mz:[503,52],gold:0},
+  /* она же «благородный фантазм»: чёрный лак и золото */
+  taneg:{w:512,h:128,ax:150,ay:52,len:500,mz:[503,52],gold:1},
+  /* европейский кремнёвый мушкет: длинное ложе с прикладом, круглый ствол, кремнёвый замок, латунный прибор */
+  musket:{w:512,h:128,ax:150,ay:50,len:504,mz:[505,50]},
+  /* кремнёвый пистоль */
+  pistol:{w:256,h:128,ax:92,ay:40,len:250,mz:[250,40]},
+  /* мушкетон: латунный ствол с раструбом */
+  blunder:{w:512,h:128,ax:150,ay:52,len:500,mz:[500,52]}};
+function epGunDraw(kind){ const G=EP_GUNS[kind]; const c=document.createElement('canvas'); c.width=G.w; c.height=G.h; const g=c.getContext('2d');
+  const OL='#0d0806';
+  const poly=(pts,fill,ol=OL,lw=2)=>{ g.beginPath(); pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y)); g.closePath(); if(fill){ g.fillStyle=fill; g.fill(); } if(ol){ g.strokeStyle=ol; g.lineWidth=lw; g.lineJoin='round'; g.stroke(); } };
+  const path=(f,fill,ol=OL,lw=2)=>{ g.beginPath(); f(); if(fill){ g.fillStyle=fill; g.fill(); } if(ol){ g.strokeStyle=ol; g.lineWidth=lw; g.lineJoin='round'; g.stroke(); } };
+  const lin=(y0,y1,stops)=>{ const L=g.createLinearGradient(0,y0,0,y1); stops.forEach(([o,cc])=>L.addColorStop(o,cc)); return L; };
+  const linx=(x0,x1,stops)=>{ const L=g.createLinearGradient(x0,0,x1,0); stops.forEach(([o,cc])=>L.addColorStop(o,cc)); return L; };
+  const clipDo=(f,draw)=>{ g.save(); g.beginPath(); f(); g.clip(); draw(); g.restore(); };
+  const brass=(y0,y1)=>lin(y0,y1,[[0,'#fff1b8'],[.25,'#e8b84a'],[.6,'#a8741e'],[1,'#5a3a0c']]);
+  const gold=(y0,y1)=>lin(y0,y1,[[0,'#fffbe0'],[.2,'#ffd76a'],[.55,'#d08a1a'],[1,'#6a3a06']]);
+  const steel=(y0,y1)=>lin(y0,y1,[[0,'#d6dbe4'],[.18,'#8d939e'],[.5,'#4a4f59'],[.8,'#2a2d34'],[1,'#15171b']]);
+  /* древесина: вертикальный градиент + волокна */
+  const wood=(f,cols,seed=1)=>{ path(f,lin(30,110,cols),null); clipDo(f,()=>{ let s=seed; const R=()=>{ s=(s*16807)%2147483647; return (s-1)/2147483646; };
+      for(let i=0;i<34;i++){ const y=30+R()*80, a=.06+R()*.12; g.strokeStyle=R()<.5?`rgba(0,0,0,${a})`:`rgba(255,220,170,${a*.8})`; g.lineWidth=.6+R()*1.4; g.beginPath(); g.moveTo(0,y); for(let x=0;x<=G.w;x+=24) g.lineTo(x,y+Math.sin(x/(30+R()*40)+i)*2.2); g.stroke(); }
+      const sh=g.createLinearGradient(0,30,0,110); sh.addColorStop(0,'rgba(255,255,255,.18)'); sh.addColorStop(.25,'rgba(255,255,255,0)'); sh.addColorStop(.8,'rgba(0,0,0,0)'); sh.addColorStop(1,'rgba(0,0,0,.35)'); g.fillStyle=sh; g.fillRect(0,0,G.w,G.h); }); path(f,null,OL,2); };
+  const band=(x,y0,y1,w=6,fill)=>{ g.fillStyle=fill||brass(y0,y1); g.strokeStyle=OL; g.lineWidth=1.6; g.beginPath(); g.roundRect(x-w/2,y0,w,y1-y0,2); g.fill(); g.stroke(); g.fillStyle='rgba(255,255,255,.55)'; g.fillRect(x-w/2+1,y0+1,1.4,y1-y0-2); };
+  const ember=(x,y,r=5)=>{ const R=g.createRadialGradient(x,y,0,x,y,r*3); R.addColorStop(0,'rgba(255,250,220,1)'); R.addColorStop(.2,'rgba(255,170,60,.95)'); R.addColorStop(.5,'rgba(255,70,20,.5)'); R.addColorStop(1,'rgba(255,40,0,0)'); g.fillStyle=R; g.beginPath(); g.arc(x,y,r*3,0,7); g.fill(); };
+  if(kind==='tane'||kind==='taneg'){ const gd=G.gold;
+    const W=gd?[[0,'#4a3a3c'],[.35,'#241a1c'],[.75,'#140e10'],[1,'#070506']]:[[0,'#a85f34'],[.3,'#7a3c1c'],[.7,'#55260f'],[1,'#2e1206']];
+    /* ложе под стволом */
+    const stock=()=>{ g.moveTo(176,54); g.lineTo(442,55); g.quadraticCurveTo(456,57,452,64); g.lineTo(446,68); g.lineTo(330,70); g.lineTo(220,74); g.lineTo(176,77); };
+    /* приклад: короткий, вниз-назад */
+    const butt=()=>{ g.moveTo(186,54); g.lineTo(60,58); g.quadraticCurveTo(40,59,34,66); g.lineTo(26,96); g.quadraticCurveTo(26,104,36,104); g.lineTo(52,102); g.quadraticCurveTo(110,86,186,78); g.closePath(); };
+    wood(butt,W,7); wood(stock,W,3);
+    /* торец приклада */
+    poly([[34,66],[26,96],[26,100],[36,104],[44,102],[50,70],[46,62]],gd?gold(60,104):'#1a100c');
+    if(gd){ g.strokeStyle='#ffd76a'; g.lineWidth=1.6; g.beginPath(); g.moveTo(64,62); g.quadraticCurveTo(120,60,180,58); g.stroke(); g.beginPath(); g.moveTo(58,96); g.quadraticCurveTo(110,84,180,74); g.stroke();
+      /* золотой узор на прикладе */ for(const [x,y] of [[92,74],[130,70]]){ g.save(); g.translate(x,y); g.fillStyle=gold(-6,6); for(let i=0;i<5;i++){ g.rotate(Math.PI*2/5); g.beginPath(); g.ellipse(0,-4,2.2,4,0,0,7); g.fill(); } g.fillStyle='#fff3c0'; g.beginPath(); g.arc(0,0,1.8,0,7); g.fill(); g.restore(); } }
+    /* шомпол в пазу ложа */
+    g.strokeStyle=gd?'#c99a3a':'#2a1408'; g.lineWidth=2.4; g.beginPath(); g.moveTo(232,70.5); g.lineTo(440,66); g.stroke(); band(442,63,69,5,gd?gold(63,69):brass(63,69));
+    /* ствол: гранёный, к дулу сужается, у дула утолщение */
+    const barrel=()=>{ g.moveTo(170,44); g.lineTo(486,47); g.lineTo(488,45); g.lineTo(504,45); g.lineTo(504,59); g.lineTo(488,59); g.lineTo(486,57); g.lineTo(170,60); };
+    path(barrel,gd?lin(44,60,[[0,'#6a6070'],[.3,'#2a2430'],[.7,'#141018'],[1,'#060408']]):steel(44,60),null);
+    clipDo(barrel,()=>{ g.fillStyle=gd?'rgba(255,215,106,.55)':'rgba(255,255,255,.35)'; g.fillRect(170,47.2,340,1.3); g.fillStyle='rgba(0,0,0,.35)'; g.fillRect(170,53.5,340,1); g.fillStyle='rgba(0,0,0,.4)'; g.fillRect(170,57.5,340,3);
+      /* золотая насечка на стволе */ if(gd){ g.strokeStyle='#ffd76a'; g.lineWidth=1.2; for(let x=232;x<470;x+=34){ g.beginPath(); g.moveTo(x,51); g.bezierCurveTo(x+8,45,x+16,57,x+24,51); g.stroke(); g.beginPath(); g.arc(x+12,51,1.6,0,7); g.fillStyle='#fff3c0'; g.fill(); } } });
+    path(barrel,null,OL,2);
+    if(gd){ g.strokeStyle='#ffd76a'; g.lineWidth=1.2; g.beginPath(); g.moveTo(172,44.6); g.lineTo(486,47.6); g.stroke(); }
+    /* мушка и целик */ poly([[494,45],[496,41],[499,41],[500,45]],gd?gold(40,46):steel(40,46),OL,1.4); poly([[204,44],[205,39],[213,39],[214,44.3]],gd?gold(38,45):steel(38,45),OL,1.4);
+    /* кольца на стволе с ложем */ for(const x of [262,348,424]) band(x,45,x<300?73:x<400?70.5:69,6,gd?gold(44,74):brass(44,74));
+    /* замок: латунная доска, полка, курок-серпентина с фитилём */
+    poly([[176,58],[226,58],[230,62],[226,68],[180,70],[172,66]],gd?gold(58,70):brass(58,70));
+    g.fillStyle='rgba(0,0,0,.45)'; g.beginPath(); g.arc(186,63,1.6,0,7); g.arc(218,63,1.6,0,7); g.fill();
+    path(()=>{ g.ellipse(214,50,8,3.4,0,0,7); },gd?gold(46,54):brass(46,54),OL,1.4); /* полка */ poly([[205,47],[223,47],[225,45],[207,44]],gd?gold(43,48):brass(43,48),OL,1.2); /* крышка полки */
+    /* серпентина: изогнутая латунная рука от оси к полке */
+    path(()=>{ g.moveTo(188,66); g.bezierCurveTo(176,58,176,40,190,34); g.lineTo(204,30); g.lineTo(207,35); g.lineTo(194,40); g.bezierCurveTo(186,44,186,56,194,64); g.closePath(); },gd?gold(28,66):brass(28,66),OL,1.6);
+    g.fillStyle='#2a1a08'; g.beginPath(); g.arc(190,64,2.4,0,7); g.fill();
+    /* фитиль в зажиме, конец тлеет над полкой */ g.strokeStyle='#c9a46a'; g.lineWidth=3; g.lineCap='round'; g.beginPath(); g.moveTo(198,30); g.quadraticCurveTo(208,32,212,40); g.stroke(); g.strokeStyle='#3a2a1a'; g.lineWidth=1; g.beginPath(); g.moveTo(198,30); g.quadraticCurveTo(208,32,212,40); g.stroke(); ember(212,41,3.2);
+    /* моток фитиля на ложе */ for(let i=0;i<4;i++){ g.strokeStyle=i%2?'#a8875a':'#d8b98a'; g.lineWidth=3.2; g.beginPath(); g.ellipse(132+i*7,68-i*.8,4.2,11,.15,0,7); g.stroke(); } g.strokeStyle='#5a4428'; g.lineWidth=.8; for(let i=0;i<4;i++){ g.beginPath(); g.ellipse(132+i*7,68-i*.8,4.2,11,.15,0,7); g.stroke(); }
+    /* спуск */ path(()=>{ g.moveTo(196,76); g.quadraticCurveTo(194,86,188,90); g.lineTo(192,90); g.quadraticCurveTo(200,84,201,76); g.closePath(); },gd?gold(76,90):brass(76,90),OL,1.2);
+    if(gd){ /* кисть с красным шнуром у приклада */ g.strokeStyle='#c81e2a'; g.lineWidth=2.4; g.beginPath(); g.moveTo(60,66); g.quadraticCurveTo(56,82,64,94); g.stroke(); path(()=>{ g.moveTo(60,92); g.lineTo(70,92); g.lineTo(73,112); g.lineTo(57,112); g.closePath(); },lin(92,112,[[0,'#ff4a4a'],[1,'#8a0a14']]),OL,1.2); band(65,90,95,13,gold(90,95)); } }
+  else if(kind==='musket'){ const W=[[0,'#b8794a'],[.3,'#8e5428'],[.7,'#653614'],[1,'#3a1c08']];
+    const stock=()=>{ g.moveTo(10,50); g.lineTo(60,50); g.quadraticCurveTo(110,52,140,56); g.lineTo(176,52); g.lineTo(440,52); g.quadraticCurveTo(452,54,450,60); g.lineTo(440,64); g.lineTo(240,68); g.lineTo(196,72); g.quadraticCurveTo(176,74,160,70); g.quadraticCurveTo(120,74,60,100); g.lineTo(14,104); g.quadraticCurveTo(6,90,8,70); g.closePath(); };
+    wood(stock,W,11);
+    /* латунный затыльник */ poly([[8,52],[18,50],[20,104],[12,106],[6,92],[6,62]],brass(50,106),OL,1.6);
+    /* ствол */ const barrel=()=>{ g.moveTo(168,43); g.lineTo(505,45); g.lineTo(505,55); g.lineTo(168,57); };
+    path(barrel,steel(43,57),null); clipDo(barrel,()=>{ g.fillStyle='rgba(255,255,255,.45)'; g.fillRect(168,45.6,340,1.4); g.fillStyle='rgba(0,0,0,.3)'; g.fillRect(168,53,340,4); }); path(barrel,null,OL,2);
+    poly([[480,45],[482,41],[486,41],[487,45]],steel(40,46),OL,1.2);
+    /* штык-упор, шомпол, латунные трубки */ g.strokeStyle='#4a4f59'; g.lineWidth=2.6; g.beginPath(); g.moveTo(236,63); g.lineTo(500,58.5); g.stroke(); g.strokeStyle='rgba(255,255,255,.35)'; g.lineWidth=.8; g.beginPath(); g.moveTo(236,62); g.lineTo(500,57.5); g.stroke();
+    for(const x of [300,380,446]) band(x,55,x<350?67.5:64,6); band(456,44,60,5,steel(44,60));
+    /* кремнёвый замок: доска, огниво, курок с кремнём */
+    poly([[150,56],[214,55],[220,60],[214,66],[160,68],[148,62]],steel(55,68),OL,1.6);
+    path(()=>{ g.moveTo(196,54); g.lineTo(198,36); g.lineTo(206,36); g.lineTo(204,46); g.lineTo(212,52); g.lineTo(206,55); g.closePath(); },steel(36,56),OL,1.4); /* огниво */
+    path(()=>{ g.moveTo(164,62); g.bezierCurveTo(156,52,160,40,172,36); g.lineTo(186,34); g.lineTo(188,40); g.lineTo(176,42); g.bezierCurveTo(168,46,168,54,174,60); g.closePath(); },steel(34,62),OL,1.6); /* курок */
+    poly([[180,33],[192,33],[192,39],[180,39]],'#6a6f78',OL,1.2); poly([[190,34.5],[197,36],[190,38]],'#3a3a3a',OL,1); /* кремень */
+    g.fillStyle='rgba(0,0,0,.5)'; g.beginPath(); g.arc(168,60,1.8,0,7); g.fill();
+    /* скоба и спуск */ path(()=>{ g.moveTo(170,70); g.quadraticCurveTo(176,88,200,86); g.quadraticCurveTo(214,84,214,70); g.lineTo(210,70); g.quadraticCurveTo(208,80,198,81); g.quadraticCurveTo(180,82,176,70); g.closePath(); },brass(70,88),OL,1.4); poly([[190,71],[187,80],[190,80],[194,71]],steel(70,80),OL,1); }
+  else if(kind==='pistol'){ const W=[[0,'#b8794a'],[.3,'#8e5428'],[.7,'#653614'],[1,'#3a1c08']];
+    const stock=()=>{ g.moveTo(96,36); g.lineTo(200,38); g.quadraticCurveTo(208,40,206,46); g.lineTo(196,50); g.lineTo(120,52); g.quadraticCurveTo(96,56,84,72); g.quadraticCurveTo(66,96,58,112); g.lineTo(30,112); g.quadraticCurveTo(26,98,40,78); g.quadraticCurveTo(62,46,96,36); g.closePath(); };
+    wood(stock,W,5);
+    path(()=>{ g.ellipse(42,111,17,8,-.3,0,7); },brass(102,120),OL,1.6); /* латунное навершие */
+    const barrel=()=>{ g.moveTo(104,33); g.lineTo(250,35); g.lineTo(250,45); g.lineTo(104,47); }; path(barrel,steel(33,47),null); clipDo(barrel,()=>{ g.fillStyle='rgba(255,255,255,.45)'; g.fillRect(104,35.4,150,1.3); }); path(barrel,null,OL,2);
+    band(198,35,47,5); band(244,34,46,6,steel(34,46));
+    poly([[86,44],[128,43],[132,48],[128,53],[92,55],[84,50]],steel(43,55),OL,1.4);
+    path(()=>{ g.moveTo(118,42); g.lineTo(120,26); g.lineTo(127,26); g.lineTo(125,35); g.lineTo(131,40); g.lineTo(126,43); g.closePath(); },steel(26,44),OL,1.2);
+    path(()=>{ g.moveTo(94,50); g.bezierCurveTo(86,40,90,28,100,25); g.lineTo(111,23); g.lineTo(112,28); g.lineTo(103,30); g.bezierCurveTo(96,34,97,42,101,48); g.closePath(); },steel(22,50),OL,1.4);
+    path(()=>{ g.moveTo(98,56); g.quadraticCurveTo(104,72,122,70); g.quadraticCurveTo(132,68,132,56); g.lineTo(128,56); g.quadraticCurveTo(127,64,121,65); g.quadraticCurveTo(106,66,103,56); g.closePath(); },brass(56,72),OL,1.2); }
+  else if(kind==='blunder'){ const W=[[0,'#a85f34'],[.3,'#7a3c1c'],[.7,'#55260f'],[1,'#2e1206']];
+    const stock=()=>{ g.moveTo(12,52); g.lineTo(150,56); g.lineTo(176,52); g.lineTo(380,53); g.quadraticCurveTo(392,55,388,62); g.lineTo(240,68); g.lineTo(196,72); g.quadraticCurveTo(176,74,160,70); g.quadraticCurveTo(110,76,60,100); g.lineTo(16,104); g.quadraticCurveTo(8,90,10,70); g.closePath(); };
+    wood(stock,W,9); poly([[10,54],[20,52],[22,104],[14,106],[8,92],[8,62]],brass(50,106),OL,1.6);
+    const barrel=()=>{ g.moveTo(168,44); g.lineTo(420,46); g.quadraticCurveTo(470,44,500,30); g.lineTo(504,30); g.lineTo(504,74); g.lineTo(500,74); g.quadraticCurveTo(470,60,420,58); g.lineTo(168,60); };
+    path(barrel,lin(30,74,[[0,'#fff1b8'],[.2,'#e0ae44'],[.5,'#a8741e'],[.8,'#6a4410'],[1,'#3a2206']]),null); path(barrel,null,OL,2);
+    path(()=>{ g.ellipse(503,52,3,22,0,0,7); },'#140a04',OL,1.4);
+    for(const x of [240,330]) band(x,45,x<300?69:66,6,steel(44,70));
+    poly([[150,58],[214,57],[220,62],[214,68],[160,70],[148,64]],steel(57,70),OL,1.6);
+    path(()=>{ g.moveTo(196,56); g.lineTo(198,38); g.lineTo(206,38); g.lineTo(204,48); g.lineTo(212,54); g.lineTo(206,57); g.closePath(); },steel(38,58),OL,1.4);
+    path(()=>{ g.moveTo(164,64); g.bezierCurveTo(156,54,160,42,172,38); g.lineTo(186,36); g.lineTo(188,42); g.lineTo(176,44); g.bezierCurveTo(168,48,168,56,174,62); g.closePath(); },steel(36,64),OL,1.6);
+    path(()=>{ g.moveTo(170,72); g.quadraticCurveTo(176,90,200,88); g.quadraticCurveTo(214,86,214,72); g.lineTo(210,72); g.quadraticCurveTo(208,82,198,83); g.quadraticCurveTo(180,84,176,72); g.closePath(); },brass(72,90),OL,1.4); }
+  return c; }
+/* белый силуэт того же ружья — для вспышки появления и светящегося контура */
+function epGunSil(cv,grow=0){ const c=document.createElement('canvas'); c.width=cv.width+grow*2; c.height=cv.height+grow*2; const g=c.getContext('2d');
+  if(grow){ for(let a=0;a<16;a++){ const r=grow; g.drawImage(cv,grow+Math.cos(a/16*6.283)*r,grow+Math.sin(a/16*6.283)*r); } } else g.drawImage(cv,0,0);
+  g.globalCompositeOperation='source-in'; g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); return c; }
+/* ---------- огнестрел: призванные ружья и пистоли (шаг 'rifles') ---------- */
+/* текстуры ружья: цветной спрайт (не тонируется) и белый силуэт с запасом 3 px — для свечения при появлении */
+function epGunTex(S,k){ const T=S.T; T.gn??={}; if(!EP_GUNS[k]) k='musket'; if(T.gn[k]) return T.gn[k]; const cv=epGunDraw(k); return T.gn[k]={G:EP_GUNS[k],c:PIXI.Texture.from(cv),s:PIXI.Texture.from(epGunSil(cv,3))}; }
+/* где висят ружья: hold — в руках, side — рядом стопкой, duo — два пистоля, arc — веером за спиной, wall — стеной на всю свою половину поля, sky — над целью, ring — кольцом вокруг цели */
+function epGunSpots(S,form,n,p,q,dir){ const out=[], cl=o=>({...o,x:Math.max(40,Math.min(S.W-40,o.x)),y:Math.max(30,Math.min(S.H-30,o.y))}), R=i=>epRnd(i*7.13+n);
+  if(form==='hold') out.push({x:p.x+dir*26,y:p.y+14,z:1});
+  else if(form==='duo') out.push({x:p.x+dir*28,y:p.y-26,z:1},{x:p.x+dir*34,y:p.y+30,z:1});
+  else if(form==='side') for(let i=0;i<n;i++){ const u=n>1?i/(n-1)-.5:0; out.push({x:p.x+dir*(30-Math.abs(u)*36),y:p.y+u*Math.min(n,4)*44,z:1}); }
+  else if(form==='arc') for(let i=0;i<n;i++){ const u=n>1?i/(n-1)-.5:0, a=(dir>0?Math.PI:0)+u*3; out.push({x:p.x+Math.cos(a)*72,y:p.y+Math.sin(a)*112,z:.92+R(i)*.12}); }
+  else if(form==='sky') for(let i=0;i<n;i++){ const u=n>1?i/(n-1)-.5:0; out.push({x:q.x+u*Math.min(460,n*46)+(R(i)-.5)*20,y:44+(i%2)*52+R(i+3)*16,z:.85+R(i+5)*.2}); }
+  else if(form==='ring') for(let i=0;i<n;i++){ const a=i/n*6.283+.3; out.push({x:q.x+Math.cos(a)*165,y:q.y+Math.sin(a)*120,z:.9+R(i)*.15}); }
+  else { /* wall: колонки ружей во всю высоту своей половины поля; задние колонки мельче и темнее */ const cols=n>=16?3:2, m=Math.ceil(n/cols), xa=dir>0?S.W*.07:S.W*.93, xb=dir>0?S.W*.4:S.W*.6, y0=S.H*.07, y1=S.H*.93;
+    for(let j=0;j<cols;j++) for(let i=0;i<m&&out.length<n;i++){ const k=out.length, u=cols>1?j/(cols-1):1; out.push({x:xa+(xb-xa)*u+(R(k)-.5)*30,y:y0+(y1-y0)*(i+(j%2?.75:.25))/m+(R(k+9)-.5)*10,z:.78+u*.24+(R(k+4)-.5)*.06}); } }
+  return out.map(cl).sort((a,b)=>a.z-b.z); }
+/* s: gun — вид (EP_GUNS), form, n, w — волн залпа, wv — пауза между волнами, iv — шаг между ружьями в волне, L — длина ружья, sm — дым (×), bul — пуля: big | fire | pierce | ric | pellet */
+function epGLRifles(S,p,q,t,s,c,c2){ const form=s.form||'hold', GT=epGunTex(S,s.gun||'musket'), G=GT.G, dir=Math.sign(q.x-p.x)||1, E=o=>epGLEmit(S,o), small=['hold','side','duo'].includes(form);
+  const n=form==='hold'?1:form==='duo'?2:(s.n||3), W=s.w||1, dur=s.dur??(s.bul==='pellet'?.12:.08), iv=s.iv??(n>1?Math.min(.08,.45/n):0), wv=s.wv??.6, L=s.L||(s.gun==='pistol'?84:small?128:150), lead=s.lead??(small?.32:.95), sm=s.sm??1, gold=!small||s.gold, bul=s.bul||'';
+  const spots=epGunSpots(S,form,n,p,q,dir), tf0=t-dur, ord=spots.map((_,i)=>i).sort((a,b)=>epRnd(a*3.7+n)-epRnd(b*3.7+n)), last=tf0+(W-1)*wv+(n-1)*iv, te=last+(small?.3:.4);
+  /* остальные цели АОЕ: ружья уже стоят (первая цель) — по этой цели стреляет половина из них */
+  if(S.sub){ const M=S._mz||[]; M.forEach((m,i)=>{ if(i%2) return; for(let w=0;w<W;w++){ const tf=tf0+w*wv+m.o*iv+.03; epGLBullet(S,m,{x:q.x+(epRnd(i+w*5)-.5)*36,y:q.y+(epRnd(i+w*5+2)-.5)*40},tf,dur,c,c2,bul,dir,false); } }); return; }
+  S._mz=[];
+  spots.forEach((sp,i)=>{ const o=ord.indexOf(i), z=sp.z, aim={x:q.x+(n>1?(epRnd(i+2)-.5)*34:0),y:q.y+(n>1?(epRnd(i+6)-.5)*44:0)}, ang=Math.atan2(aim.y-sp.y,aim.x-sp.x), fl=Math.abs(ang)>Math.PI/2?-1:1, k0=L*z/G.len;
+    const ts=tf0-lead+(o/Math.max(1,n))*Math.min(.4,lead*.45), shots=Array.from({length:W},(_,w)=>tf0+w*wv+o*iv);
+    const mx=(G.mz[0]-G.ax)*k0, my=(G.mz[1]-G.ay)*k0*fl, M={x:sp.x+Math.cos(ang)*mx-Math.sin(ang)*my,y:sp.y+Math.sin(ang)*mx+Math.cos(ang)*my,o,a:ang}; S._mz.push(M);
+    /* отдача: откат назад и подброс ствола после каждого выстрела; лёгкое покачивание в воздухе */
+    const pose=tt=>{ let r=0; for(const f of shots){ const a=tt-f; if(a>=0&&a<.34) r=Math.max(r,a<.035?a/.035:Math.pow(1-(a-.035)/.305,2)); } const bob=small?0:Math.sin(tt*3.1+i*1.7)*2.2; return {x:sp.x-Math.cos(ang)*r*13*z,y:sp.y-Math.sin(ang)*r*13*z+bob,r:ang-fl*r*.16}; };
+    const fade=tt=>tt>te?Math.max(0,1-(tt-te)/.28):1;
+    const gs=new PIXI.Sprite(GT.s); gs.anchor.set((G.ax+3)/(G.w+6),(G.ay+3)/(G.h+6)); gs.tint=epHx(c); gs.blendMode=EP_ADD();
+    S.ob(ts,te+.3,gs,(f,ag,tt)=>{ const P=pose(tt); gs.position.set(P.x,P.y); gs.rotation=P.r; gs.scale.set(k0,k0*fl); const a=tt-ts, out=tt-te;
+      gs.alpha=out>0?Math.max(0,.9*(1-out/.28)):(a<.14?a/.14:a<.4?1-(a-.14)/.26*(gold?.72:.9):gold?.28:.1); });
+    const cs=new PIXI.Sprite(GT.c); cs.anchor.set(G.ax/G.w,G.ay/G.h); if(z<.86) cs.tint=epHx(z<.78?'#9a9aa6':'#c4c4cc');
+    S.ob(ts+.05,te+.3,cs,(f,ag,tt)=>{ const P=pose(tt), a=tt-ts-.05, g0=a<.22?.84+.16*Math.sin(Math.min(1,a/.22)*Math.PI/2):1; cs.position.set(P.x,P.y); cs.rotation=P.r; cs.scale.set(k0*g0,k0*g0*fl); cs.alpha=Math.min(1,a/.14)*fade(tt); });
+    /* появление: золотая рябь-портал поперёк ствола, языки пламени, искры; у «ружья в руках» — только вспышка силуэта */
+    if(gold){ E({x:sp.x,y:sp.y,t:ts,n:1,tx:'ring',c,sz:L*z*.5,g0:.3,g1:1.25,sx:.32,rot:ang,life:.5,sp:0,fo:.3,al:.9}); E({x:sp.x,y:sp.y,t:ts,n:1,tx:'glow',c,sz:L*z*1.1,g0:.4,g1:1,life:.32,sp:0,al:.55});
+      E({x:sp.x,y:sp.y+6,t:ts,dt:[0,.18],n:5,tx:['flame_05','flame_06','fire_01'],c:[c,c2,'#ff6a1a'],w:L*z*.7,h:16,sz:[26,46],sp:[0,20],vy:-110,life:[.35,.6],g0:.7,g1:.25,rot:true,vr:2});
+      E({x:sp.x,y:sp.y,t:ts+.05,n:6,tx:['star_04','dot'],c:[c2,'#ffffff'],w:L*z*.8,h:20,sz:[6,12],sp:[10,40],vy:-50,life:[.5,.9],g1:.4}); }
+    else E({x:M.x-Math.cos(ang)*L*.5,y:M.y-Math.sin(ang)*L*.5,t:ts,n:1,tx:'glow',c,sz:L*1.1,g0:.4,g1:.9,life:.22,sp:0,al:.5});
+    /* выстрелы */
+    shots.forEach((tf,w)=>{ const ca=Math.cos(ang), sa=Math.sin(ang), deg=ang*180/Math.PI;
+      E({x:M.x+ca*8*z,y:M.y+sa*8*z,t:tf,n:1,tx:'flare_01',c:'#ffe3a0',sz:(bul==='pellet'?130:96)*z,g0:.5,g1:1.15,life:.11,sp:0,fi:.01,fo:.2,rot:true});
+      E({x:M.x,y:M.y,t:tf,n:1,tx:'star_08',c:'#ffffff',sz:58*z,g0:.4,g1:1,life:.07,sp:0,fi:.01,rot:true});
+      epGLOne(S,'beam',bul==='fire'?'#ff7a3d':'#ffb347',tf,tf+.1,f=>({x:M.x+ca*(18+f*10)*z,y:M.y+sa*(18+f*10)*z,w:(bul==='pellet'?84:58)*z*(1+f*.6),h:(bul==='pellet'?34:22)*z*(1-f*.6),r:ang,a:1-f}));
+      E({x:M.x,y:M.y,t:tf,n:bul==='pellet'?7:4,tx:'trace_01',c:['#ffd166','#ffffff'],sz:[14,28],sp:[220,460],ang:[deg-(bul==='pellet'?30:18),deg+(bul==='pellet'?30:18)],dr:4,life:[.08,.2],align:1,sx:.3});
+      /* дым чёрного пороха: клубы вперёд и вверх, держится дольше всего */
+      if(sm>0){ E({x:M.x+ca*14,y:M.y+sa*14,t:tf+.01,n:Math.max(1,Math.round(2*sm*(small?2:1))),tx:['smoke_04','smoke_05','smoke_07','smoke_09'],c:['#e4e6ec','#c4c8d2'],bl:'n',sz:small?[44,74]:[30*z,54*z],sp:[10,60],vx:ca*(small?110:50),vy:sa*(small?110:50)-16,dr:2.4,life:[1,1.7],g0:.3,g1:2.3,al:small?[.5,.7]:[.32,.5],rot:true,vr:1.2,fi:.03,fo:.3});
+        if(small) E({x:M.x+ca*20,y:M.y+sa*20,t:tf+.01,n:Math.round(3*sm),tx:['smoke_04','smoke_05'],c:'#d6d9e2',bl:'n',sz:[56,96],sp:[30,80],vx:ca*60,vy:sa*60,dr:2,life:[.9,1.5],g0:.35,g1:2.2,al:[.55,.75],rot:true,vr:1,fi:.03,fo:.35}); }
+      const shotsN=bul==='pellet'?6:1; for(let j=0;j<shotsN;j++){ const spread=bul==='pellet'?(j-(shotsN-1)/2)*16+(epRnd(j+i*9+w)-.5)*10:0, pt={x:aim.x+(w?(epRnd(i*5+w)-.5)*30:0),y:aim.y+spread+(w?(epRnd(i*5+w+1)-.5)*30:0)};
+        epGLBullet(S,M,pt,tf+(bul==='pellet'?j*.006:0),dur,c,c2,bul,dir,o===n-1&&w===W-1&&!j); } }); });
+  /* исчезновение: силуэты вспыхивают и рассыпаются золотой пылью */
+  if(!small) spots.forEach((sp,i)=>{ E({x:sp.x,y:sp.y,t:te+.02,dt:[0,.12],n:7,tx:['star_04','dot'],c:[c,c2],w:L*sp.z*.9,h:18,sz:[6,13],sp:[10,50],vy:-70,life:[.5,.9],g1:.3}); });
+  /* конец каждой волны большого залпа — тяжёлый удар по цели */ if(!small) for(let w=0;w<W;w++){ const tw=tf0+w*wv+(n-1)*iv+dur; epGLImpact(S,q.x,q.y,dir,tw,c,1.1); E({x:q.x,y:q.y,t:tw,n:1,tx:'glow',c,sz:260,g0:.3,g1:1.1,life:.3,sp:0,al:.8}); E({x:q.x,y:q.y,t:tw,n:14,tx:['trace_01','star_04'],c:[c,'#ffffff'],sz:[20,44],sp:[220,480],dr:3,life:[.2,.4],align:1,sx:.35}); if(S.tEl) epGLRecoil(S,S.tEl,p,q,tw,1.4); }
+  if(!small||W>1) epGLPunch(S,last+dur,1.035); }
+/* пуля: трассер от дула до точки, попадание; fin — последний выстрел (сильнее) */
+function epGLBullet(S,M,pt,tf,dur,c,c2,bul,dir,fin){ const E=o=>epGLEmit(S,o); let a={x:M.x,y:M.y}, b=pt, th=tf+dur;
+  const seg=(A,B,t0,t1,w,col)=>{ const ang=Math.atan2(B.y-A.y,B.x-A.x), D=Math.hypot(B.x-A.x,B.y-A.y);
+    epGLOne(S,'beam',col,t0,t1+.07,f=>{ const T=f*(t1+.07-t0)/(t1-t0), hd=Math.min(1,T), tl=Math.max(0,T-.28), x0=A.x+(B.x-A.x)*Math.min(hd,tl), y0=A.y+(B.y-A.y)*Math.min(hd,tl); return {x:(x0+A.x+(B.x-A.x)*hd)/2,y:(y0+A.y+(B.y-A.y)*hd)/2,w:Math.max(2,D*(hd-Math.min(hd,tl)))+8,h:w,r:ang,a:T>1?Math.max(0,1-(T-1)*4):1}; });
+    epGLOne(S,'bullet',bul==='fire'?'#ffb347':'#fff3c0',t0,t1,f=>({x:A.x+(B.x-A.x)*f,y:A.y+(B.y-A.y)*f,s:.62,r:ang,a:1})); };
+  const W0=bul==='big'||bul==='pierce'?12:bul==='pellet'?5:8, col=bul==='fire'?'#ff9a4a':'#ffe9a8';
+  if(bul==='ric'){ /* рикошет от земли перед целью */ const g={x:(M.x+pt.x)/2+dir*30,y:Math.max(M.y,pt.y)+70}; seg(a,g,tf,tf+dur*.55,W0,col); E({x:g.x,y:g.y,t:tf+dur*.55,n:8,tx:'trace_01',c:['#ffd166','#ffffff'],sz:[16,30],sp:[180,380],ang:[200,340],dr:4,life:[.1,.22],align:1,sx:.3}); E({x:g.x,y:g.y,t:tf+dur*.55,n:1,tx:'star_08',c:'#ffffff',sz:50,life:.08,sp:0}); seg(g,b,tf+dur*.55,tf+dur*1.1,W0,col); th=tf+dur*1.1; }
+  else seg(a,b,tf,th,W0,col);
+  if(bul==='fire') E({x:(a.x+b.x)/2,y:(a.y+b.y)/2,w:Math.abs(b.x-a.x),h:Math.abs(b.y-a.y)+10,t:tf,dt:[0,dur],n:7,tx:['flame_05','flame_06','fire_01'],c:['#ff7a3d','#ffd166'],sz:[16,30],sp:[5,30],vy:-60,life:[.25,.45],g1:.3,rot:true});
+  if(bul==='pierce'){ /* навылет: трассер летит дальше за спину цели, сзади — брызги */ const ang=Math.atan2(b.y-a.y,b.x-a.x), far={x:b.x+Math.cos(ang)*900,y:b.y+Math.sin(ang)*900}; seg(b,far,th,th+.12,W0*.8,col);
+    if(EPS().gore!==false) E({x:b.x+Math.cos(ang)*26,y:b.y+Math.sin(ang)*26,t:th,n:16,tx:'drop',c:['#ff3b4f','#b3001b'],sz:[8,16],sp:[200,420],ang:[ang*180/Math.PI-22,ang*180/Math.PI+22],ay:500,life:[.35,.6],align:1});
+    E({x:b.x,y:b.y,t:th,n:1,tx:'ring',c,sz:20,g1:4,sx:.4,rot:ang,life:.3,sp:0}); }
+  /* попадание: искры назад к стрелку, вспышка, иногда — удар с отдачей цели */
+  const back=Math.atan2(a.y-b.y,a.x-b.x)*180/Math.PI;
+  E({x:b.x,y:b.y,t:th,n:fin?10:5,tx:'trace_01',c:['#ffd166','#ffffff',c],sz:[16,34],sp:[200,440],ang:[back-50,back+50],dr:4,life:[.1,.24],align:1,sx:.3});
+  E({x:b.x,y:b.y,t:th,n:1,tx:'star_08',c:'#ffffff',sz:fin?90:40,g0:.4,g1:1,life:.08,sp:0,rot:true}); if(fin) E({x:b.x,y:b.y,t:th,n:1,tx:'ring',c,sz:20,g1:4,life:.28,sp:0,fo:.25});
+  else E({x:b.x,y:b.y+6,t:th,n:1,tx:['smoke_04','smoke_05'],c:'#8a8f9c',bl:'n',sz:[22,34],sp:[10,30],ang:[back-40,back+40],life:[.35,.55],g0:.5,g1:1.6,al:.45,rot:true});
+  if(bul==='fire'&&S.K&&S.K.st==='fire') epGLBoom(S,b.x,b.y,fin?40:22,th,S.K,c);
+  if(fin){ epGLImpact(S,b.x,b.y,dir,th,c,bul==='big'||bul==='pellet'?.72:.5); if(EPS().gore!==false&&S.tEl&&bul!=='fire') epGLBlood(S,b,th,dir,.7); }
+  if(S.tEl&&(fin||epRnd(tf*97)<.3)) epGLRecoil(S,S.tEl,a,b,th,fin?1.1:.35); }
+/* ---------- выстрелы из мушкетов, пистолей, мушкетона; призыв ружей (стеной, веером, с неба, кольцом) ---------- */
+(()=>{ const A=(g,id,n,c,c2,st,o={})=>{ const P={id,g,n,c,c2,st,...o}; const i=EP_AN.findIndex(x=>x.id===id); if(i>=0) EP_AN[i]=P; else EP_AN.push(P); EP_ANM[id]=P;
+    /* звук выстрела на каждый залп (не больше 6 на волну): sxx — сдвиги от момента попадания */ const R=st.find(x=>x[0]==='rifles'); if(R){ const s=R[1], n=s.form==='hold'?1:s.form==='duo'?2:(s.n||3), iv=s.iv??(n>1?Math.min(.08,.45/n):0), L=[]; for(let w=0;w<(s.w||1);w++){ const k=Math.min(n,6); for(let j=0;j<k;j++) L.push(Math.round((w*(s.wv??.6)+(k>1?j/(k-1):0)*(n-1)*iv)*100)/100); } P.sxx=L; } };
+  A('shot','sh_mk_aim','Прицельный выстрел','#ffd166','#fff3c0',[['reticle',{ph:'cast',on:'q',dur:.62}],['rifles',{form:'hold',gun:'musket',bul:'big',sm:1.6}],['shake',{k:.8}]],{cast:.5});
+  A('shot','sh_mk_line','Залп шеренги','#ffd166','#fff3c0',[['rifles',{form:'side',gun:'musket',n:3,iv:.07,sm:1.4}]],{cast:.35});
+  A('shot','sh_mk_pistols','Два пистоля','#ffd166','#ffffff',[['rifles',{form:'duo',gun:'pistol',w:2,wv:.24,iv:.12,sm:.8}]],{cast:.3});
+  A('shot','sh_mk_blunder','Мушкетон','#ff9f43','#ffd166',[['rifles',{form:'hold',gun:'blunder',bul:'pellet',sm:2.2}],['shake',{k:1}]],{cast:.35});
+  A('shot','sh_mk_fire','Огненная пуля','#ff7a3d','#ffd166',[['rifles',{form:'hold',gun:'tane',bul:'fire',sm:1}]],{cast:.35,el:'fire'});
+  A('shot','sh_mk_through','Пуля навылет','#ffffff','#ff6b5e',[['rifles',{form:'hold',gun:'musket',bul:'pierce',sm:1.2}],['shake',{k:.7}]],{cast:.4});
+  A('shot','sh_mk_ricochet','Рикошет','#ffd166','#ffffff',[['rifles',{form:'hold',gun:'pistol',bul:'ric',sm:.8}]],{cast:.3});
+  A('shot','sh_mk_arc','Веер ружей','#ffb43a','#ffe9a8',[['rifles',{form:'arc',gun:'tane',n:5,iv:.09}]],{cast:.9});
+  A('shot','sh_mk_sky','Ружья с неба','#ffb43a','#ffe9a8',[['rifles',{form:'sky',gun:'tane',n:6,iv:.07}]],{cast:.9});
+  A('ult','ul_sanzen','Три тысячи миров','#ffb43a','#ffe9a8',[['dim',{fld:1,a:.55,dur:3.1}],['vign',{fld:1,c:'#8a1a04',a:.45,dur:3.1}],['rifles',{form:'wall',gun:'taneg',n:24,w:2,wv:.8,iv:.022,L:175}],['shake',{k:1.3,dl:.12}],['shake',{k:1.8,dl:.95}]],{cast:1.15});
+  A('ult','ul_gunring','Расстрельное кольцо','#ffd166','#ffffff',[['dim',{fld:1,a:.5,dur:2.5}],['rifles',{form:'ring',gun:'musket',n:10,w:2,wv:.55,iv:.03}],['shake',{k:1.5,dl:.65}]],{cast:1.05});
+  A('ult','ul_gunsky','Небесная батарея','#ffb43a','#ffe9a8',[['dim',{fld:1,a:.5,dur:2.7}],['rays',{fld:1,dur:2.3}],['rifles',{form:'sky',gun:'taneg',n:14,w:2,wv:.65,iv:.03}],['shake',{k:1.6,dl:.75}]],{cast:1.15});
+})();
 /* проиграть пресет: p — кто применяет, q — цель, d — секунда действия; o.aEl — элемент бойца для подскока */
 function epAnDraw(X,P,p,q,d,o={}){ const cast=P.cast||0, hit=epAnHitP(P), sg=q.x<p.x?-1:1; X.K=epKitOf(P); X.m=o.m||1; X.sd=(Math.floor(d*1000)*31+Math.floor(p.x)*7+Math.floor(q.y)*13)%2147483646+1;
   if(P.lunge) epLunge(X,o.aEl,p,q,d+cast,P.lunge===2?.42:.62,hit-cast);
@@ -10343,7 +10581,7 @@ function renderBattle(m){ epSubscribe(); epGLLoad(); if(epSfxOn()) epSfxLoad(); 
   { const n=$('#epName',page); if(n) n.onchange=()=>{ B.name=n.value.trim()||'Бой'; touch(B); }; }
   on('#epBg',()=>pickFiles(async files=>{ const ids=await uploadImages(files,B.id); if(ids[0]){ B.bg=ids[0]; touch(B); render(); } })); on('#epBgX',()=>{ delete B.bg; touch(B); render(); });
   on('#epResnap',()=>{ let n=0; for(const u of B.units){ const ch=byId(world.characters,u.ref); if(ch){ Object.assign(u,epSnap(ch)); n++; } } epNames(B); touch(B); render(); toast('Обновлено из листов: '+n); });
-  on('#epStart',()=>{ if(!B.units.some(u=>u.side==='a')||!B.units.some(u=>u.side==='e')){ toast('Нужен хотя бы один союзник и один враг',true); return; } for(const u of B.units){ const c=byId(world.characters,u.ref); if(c) Object.assign(u,epSnap(c)); } epNames(B); const log=[]; delete B.prev; B.fl=[]; B.an=[]; epStart(B,log); epPost(B,'начало боя',log); touch(B); render(); });
+  on('#epStart',()=>{ if(!B.units.some(u=>u.side==='a')||!B.units.some(u=>u.side==='e')){ toast('Нужен хотя бы один союзник и один враг',true); return; } for(const u of B.units){ const c=byId(world.characters,u.ref); if(c) Object.assign(u,epSnap(c)); } epNames(B); const log=[]; delete B.prev; B.fl=[]; B.an=[]; B.flt=Date.now(); EPTL=0; epStart(B,log); epPost(B,'начало боя',log); touch(B); render(); });
   if(dm&&fight) on('#epSouls',()=>{ const b=openModal(`<h2>👻 Души команды</h2><div class="field"><label>Сколько душ</label><input id="sv" type="number" min="0" value="${+B.souls||0}" style="width:120px"></div><div class="modal-actions"><button class="btn" id="cancel">Отмена</button><button class="btn primary" id="ok">Готово</button></div>`);
     const iv=$('#sv',b); iv.focus(); iv.select(); $('#cancel',b).onclick=closeModal;
     $('#ok',b).onclick=()=>{ const n=Math.max(0,Math.round(+iv.value||0)), was=+B.souls||0; closeModal(); if(n===was) return; epSavePrev(B); B.souls=n; epPost(B,'души',[`👻 Мастер: души команды ${was} → ${n}`]); touch(B); render(); }; iv.onkeydown=e=>{ if(e.key==='Enter') $('#ok',b).click(); }; });
@@ -12126,7 +12364,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{EPX,cdKwView,cdDeckTtsPlan,cdDeckTtsDlg,cdTtsDeck,cdDeckAdd,cdDeckN,cdDeckChar,cdDeckList,charTab,barTurnGain,woundGain,woundAdd,woundsHTML,woundsWire,woundTrauma,rollMod,rollAddMod,chatSend,chatRollAs,effOnApply,modTargets,fxStatCalc,sitRows,statMinRoll,rollApplyMin,barMin,effImmune,statBaseCap,statEff,radarSVG,modLabel,statKindsText,techActRun,techActs,epStrike,epHurt,epApply,epUse,epUS,epAct,epPlay,epDo,epChoose,EP_SEEN,epDmgEval,epSfxPlay,epSfxTest,EPA,EP_SFX,EP_SFXMAN,EP_SFXM,epSfxLoad,epSfxFire,epUltDlg,epRbOf,epCardHTML,chatRender,epSkillEditor,epPost,epicBlock,epJoin,epInit,epSnap,epStart,epNext,epUnitDlg,epFxRows,epTex,epEmit,epPx,epFxCtx,epAnDraw,epUlt,EP_ANM,EPG,epGLLoad,epGLScene,epGLDraw,epGLTex,wmTmplGeo,wmTmplHandles,fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdKwFind,cdKwScan,cdKwSet,cdKwFromRows,cdCsv,cdKwMerge,cdKwFetchSheet,cdKwCsv,cdRunsSig,cdUpCard,cdUpTree,cdQMatcher,cdTtsDeck,cdTtsSigs,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{EPX,cdKwView,cdDeckTtsPlan,cdDeckTtsDlg,cdTtsDeck,cdDeckAdd,cdDeckN,cdDeckChar,cdDeckList,charTab,barTurnGain,woundGain,woundAdd,woundsHTML,woundsWire,woundTrauma,rollMod,rollAddMod,chatSend,chatRollAs,effOnApply,modTargets,fxStatCalc,sitRows,statMinRoll,rollApplyMin,barMin,effImmune,statBaseCap,statEff,radarSVG,modLabel,statKindsText,techActRun,techActs,epStrike,epHurt,epApply,epApplyRows,epTrig,epEnd,epNames,epAnGallery,epUse,epUS,epAct,epPlay,epDo,epChoose,EP_SEEN,epDmgEval,epSfxPlay,epSfxTest,EPA,EP_SFX,EP_SFXMAN,EP_SFXM,epSfxLoad,epSfxFire,epUltDlg,epRbOf,epCardHTML,chatRender,epSkillEditor,epPost,epicBlock,epJoin,epInit,epSnap,epStart,epNext,epUnitDlg,epFxRows,epTex,epEmit,epPx,epFxCtx,epAnDraw,epUlt,EP_ANM,EPG,epGLLoad,epGLScene,epGLDraw,epGLTex,wmTmplGeo,wmTmplHandles,fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdKwFind,cdKwScan,cdKwSet,cdKwFromRows,cdCsv,cdKwMerge,cdKwFetchSheet,cdKwCsv,cdRunsSig,cdUpCard,cdUpTree,cdQMatcher,cdTtsDeck,cdTtsSigs,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
