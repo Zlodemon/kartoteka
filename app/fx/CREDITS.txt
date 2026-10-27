@@ -9,6 +9,22 @@ icons.json — 62 силуэта с game-icons.net (авторы: Lorc, Delapoui
 lib/pixi-7.4.2.min.js — PixiJS 7.4.2 (https://pixijs.com), лицензия MIT.
 lib/pixi-filters-5.3.0.js — pixi-filters 5.3.0 (https://github.com/pixijs/filters), лицензия MIT.
 
-sfx.webm / sfx.m4a — звуки боя: студийные звуковые эффекты Mixkit (https://mixkit.co/free-sound-effects/), лицензия Mixkit Sound Effects Free License
-  (https://mixkit.co/license/#sfxFree): можно в проектах и приложениях без указания автора; раздавать сами звуки отдельно, как библиотеку, нельзя.
-  83 звука нарезаны в один файл (обрезана тишина, выровнена громкость). Номера звуков на mixkit.co — ключи EP_SFXMAN в index.html (m2763 → mixkit.co sfx 2763).
+sfx.webm / sfx.m4a — звуки боя, 129 нарезок в одном файле (обрезана тишина, выровнена громкость):
+  • студийные звуки Mixkit, 91 шт. (https://mixkit.co/free-sound-effects/), лицензия Mixkit Sound Effects Free License
+    (https://mixkit.co/license/#sfxFree): можно в проектах и приложениях без указания автора; раздавать сами звуки отдельно, как библиотеку, нельзя.
+    Ключи EP_SFXMAN в index.html: m2763 → mixkit.co sfx 2763.
+  • звуки Pixabay, 38 шт. (https://pixabay.com/sound-effects/), лицензия Pixabay Content License (https://pixabay.com/service/license-summary/):
+    можно в приложениях без указания автора; продавать или раздавать сами звуки отдельно нельзя. Ключи EP_SFXMAN: p393847 → pixabay.com sound 393847.
+    Авторы (указаны из уважения):
+      11325622: Glass Breaking Sound Effect (240679)
+      BryanSantosBreton: Disturb - Trailer Impact, Dark, Cinematic Braam (184272), Biodynamic - Impact, Braam, Tonal, Dark (176441)
+      DavidDumaisAudio: Sword Slash and Swing (185432), Sword Slash With Metallic Impact (185435), Sword Slash With Metal Shield Impact (185433), Reverse Whoosh 04 (204488), Explosive Glass Shattering 09 (190267)
+      DRAGON-STUDIO: Sword Slice (393847), Sword Slice 2 (393845), Violent Sword Slice (393839), Violent Sword Slice 2 (393841), Violent Sword Slice (393848), Sword Unsheathing (393851), Sword Clash/Hit (393837), Lightning Spell Impact (393920)
+      floraphonic: Metal Whoosh Hit 3 (201902), Metal Whoosh Hit 4 (201906), Punch 1 (166694), Punch 2 (166695), Punch 4 (166697), Scifi Anime Whoosh 59 (205276), Scifi Anime Whoosh 24 (201456), Epic Braam 1 (171527)
+      Fronbondi_Skegs: Cinematic Short Riser to Big Hit (246008)
+      LordSonny: Cinematic Whoosh Reverse (161307), Glass Cinematic Hit (161212)
+      SoundReality: Glass Breaking (151256)
+      StudioKolomna: Whoosh Transitions SFX 01 (118227), Whoosh Transitions SFX 02 (118229), Whoosh Transitions SFX 03 (118230)
+      u_xjrmmgxfru: Hit Flesh 02 (266309), Hit Flesh 03 (266308)
+      Universfield: Knife Stab (121084), Bottle Shatter (229205), Crash Cymbal Hit (140577)
+      VIRALAUDIO: ASCENT Trailer Hit Organic (222263), DESCENT Trailer Hit - Cinematic (405918)
