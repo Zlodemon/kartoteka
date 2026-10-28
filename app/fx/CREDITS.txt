@@ -9,11 +9,11 @@ icons.json — 62 силуэта с game-icons.net (авторы: Lorc, Delapoui
 lib/pixi-7.4.2.min.js — PixiJS 7.4.2 (https://pixijs.com), лицензия MIT.
 lib/pixi-filters-5.3.0.js — pixi-filters 5.3.0 (https://github.com/pixijs/filters), лицензия MIT.
 
-sfx.webm / sfx.m4a — звуки боя, 129 нарезок в одном файле (обрезана тишина, выровнена громкость):
-  • студийные звуки Mixkit, 91 шт. (https://mixkit.co/free-sound-effects/), лицензия Mixkit Sound Effects Free License
+sfx.webm / sfx.m4a — звуки боя, 176 нарезок в одном файле (обрезана тишина, выровнена громкость):
+  • студийные звуки Mixkit, 100 шт. (https://mixkit.co/free-sound-effects/), лицензия Mixkit Sound Effects Free License
     (https://mixkit.co/license/#sfxFree): можно в проектах и приложениях без указания автора; раздавать сами звуки отдельно, как библиотеку, нельзя.
     Ключи EP_SFXMAN в index.html: m2763 → mixkit.co sfx 2763.
-  • звуки Pixabay, 38 шт. (https://pixabay.com/sound-effects/), лицензия Pixabay Content License (https://pixabay.com/service/license-summary/):
+  • звуки Pixabay, 76 шт. (https://pixabay.com/sound-effects/), лицензия Pixabay Content License (https://pixabay.com/service/license-summary/):
     можно в приложениях без указания автора; продавать или раздавать сами звуки отдельно нельзя. Ключи EP_SFXMAN: p393847 → pixabay.com sound 393847.
     Авторы (указаны из уважения):
       11325622: Glass Breaking Sound Effect (240679)
@@ -28,3 +28,17 @@ sfx.webm / sfx.m4a — звуки боя, 129 нарезок в одном фа�
       u_xjrmmgxfru: Hit Flesh 02 (266309), Hit Flesh 03 (266308)
       Universfield: Knife Stab (121084), Bottle Shatter (229205), Crash Cymbal Hit (140577)
       VIRALAUDIO: ASCENT Trailer Hit Organic (222263), DESCENT Trailer Hit - Cinematic (405918)
+    Огнестрел, бластеры, пушка (2026-10-28):
+      ajhartman42295: 50 Caliber rifle shot with shell ping (132079)
+      Alex_Jauk: Cannon Firing (193247)
+      DavidDumaisAudio: Steampunk Weapon Single Shot (188051)
+      DennisH18: sniper rifle (129927), Shotgun (146188), Machine Gun (129929)
+      freesound_community: Beretta M9 Shot (106671), 9mm pistol shoot short reverb (7152), 9mm pistol shot (6349), 071258_Revolver calibre 38 (82321), Rifle Shot (M1 Garand) (80260), Shot Rifle 39 mm (37542), Single Gunshot 5.2 (80191), Shotgun Firing (3) (14483), Musket Shot (86526), Clean Machine Gun Burst (98224), Silenced Gunshot (81063), Gun Silencer shot (39174), Silenced Sniper Rifle (105895), Bullet Hit Metal (84818), 22 caliber with ricochet (39679), 1911 Reload (6248), Pistol Cock (6014), Realistic Shotgun Cocking Sound!! (38640), revolvercock1 (6924)
+      MaxHammarbäck: Glock19 (18535)
+      RibhavAgrawal: Gun shots (230534), laser shot ingame (230500)
+      ScottishPerson: Sound Effects - Single Gun Shot (247124)
+      SOUND-WORK: Futuristic Gun Shot Sci-Fi (217154)
+      SoundReality: Auto Gun Shots (312660), Sci Fi Gun Shot (312659)
+      Sovetsky_Rastov72: Minigun Sound Effect (244784)
+      Tuomas_Data: Gun Shot 1 (176892)
+      Universfield: Pistol Shot (278821), Automatic Gunfire (191976), Gun Reload (123781), Sci-Fi Blaster Shot (229313)
