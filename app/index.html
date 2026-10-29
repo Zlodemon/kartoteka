@@ -2761,6 +2761,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-29',t:'Эпик-бой: пассивка воскрешения',items:['Пассивка «летальный урон» с «Воскрешением» (или лечением) на себя теперь спасает от смерти — раньше боец всё равно умирал.','Новый момент срабатывания «погиб сам (для воскрешения)»: пассивка срабатывает уже после смерти — боец выбывает и тут же воскресает. Поставь «один раз за бой», чтобы воскрешение было одно.']},
   {d:'2026-10-29',t:'Эпик-бой: кто в бою, фразы бойцов без каши',items:['Рядом с названием боя — кто сейчас на этой странице (как на карте): зелёная точка — в этом бою, бледные — онлайн в другом месте.','Фразы бойцов больше не накладываются: пока звучит одна, другие молчат; если несколько бойцов заговорили одновременно — звучит один случайный (гибель и добивание важнее).','Звук клика по бойцу не играет при выборе цели скилла; «Получил бафф» не звучит, когда боец баффает сам себя; бафф всем союзникам озвучивает «Дал бафф союзнику».']},
   {d:'2026-10-29',t:'Иконка вкладки',items:['Настройки → Интерфейс → «Иконка вкладки»: своя картинка или эмодзи вместо значка браузера на вкладке и в закладках — у всех участников.']},
   {d:'2026-10-29',t:'Эпик-бой: удары «для вида», кадр портрета в бою',items:['У скилла с несколькими ударами — выбор «Удары»: настоящие (каждый со своим броском) или для вида — анимация и числа идут несколько раз, а урон считается один раз и показывается частями.','Портрет бойца на экране боя теперь показывает кадр, выбранный на листе (Картинки → «кадр»), а не всю картинку.']},
@@ -8792,9 +8793,9 @@ const EP_FX=[
 const epFx=id=>{ if(!id) return null; if(String(id).startsWith('lib:')){ const d=effLib().find(x=>x.id===id.slice(4)); return d?{id,k:'lib',icon:d.icon||'✨',name:d.name,d:d.description||''}:null; } return EP_FX.find(f=>f.id===id)||null; };
 const EP_TGT=[['e1','один враг'],['e2','два врага'],['e3','три врага'],['eA','все враги'],['s','себя'],['a1','один союзник'],['aA','все союзники']];
 const EP_FXON=[['tgt','на цель скилла'],['self','на себя'],['aA','на всех союзников'],['eA','на всех врагов'],['a1','на союзника (выбор)']];
-const EP_TRIG=[['always','всегда (модификаторы)'],['start','начало боя'],['turn','начало своего хода'],['tend','конец своего хода'],['hurt','получил урон'],['lethal','летальный урон'],['hit','попал атакой'],['kill','убил врага'],['allyDead','погиб союзник'],['foeDead','умер враг (любой)'],['selfHalf','своё ХП упало ниже половины'],['allyHalf','ХП союзника упало ниже половины'],['foeHalf','ХП врага упало ниже половины']];
+const EP_TRIG=[['always','всегда (модификаторы)'],['start','начало боя'],['turn','начало своего хода'],['tend','конец своего хода'],['hurt','получил урон'],['lethal','летальный урон'],['dead','погиб сам (для воскрешения)'],['hit','попал атакой'],['kill','убил врага'],['allyDead','погиб союзник'],['foeDead','умер враг (любой)'],['selfHalf','своё ХП упало ниже половины'],['allyHalf','ХП союзника упало ниже половины'],['foeHalf','ХП врага упало ниже половины']];
 /* «на цель» в эффектах пассивки — кто это при каждом условии */
-const EP_TRIGO={hurt:'тот, кто ударил',lethal:'тот, кто ударил',hit:'тот, по кому попал',kill:'убитый враг',allyDead:'погибший союзник',foeDead:'погибший враг',selfHalf:'тот, кто ударил',allyHalf:'этот союзник',foeHalf:'этот враг'};
+const EP_TRIGO={hurt:'тот, кто ударил',lethal:'тот, кто ударил',dead:'тот, кто убил',hit:'тот, по кому попал',kill:'убитый враг',allyDead:'погибший союзник',foeDead:'погибший враг',selfHalf:'тот, кто ударил',allyHalf:'этот союзник',foeHalf:'этот враг'};
 /* атака пассивки: по кому бьёт */
 const EP_PATGT=[['ctx','виновник события (иначе случайный враг)'],['e1','случайный враг'],['low','враг с наименьшим ХП'],['eA','все враги']];
 /* лечение и барьер: от чего считается N (EP_FXSCD — по умолчанию) */
@@ -9241,13 +9242,15 @@ function epHurt(B,t,dmg,log,o={}){ if(t.dead) return {dealt:0}; dmg=Math.max(0,M
   const hp0=+t.hp||0; let left=dmg; if(t.bar>0){ const a=Math.min(t.bar,left); t.bar-=a; left-=a; if(a) dx.push(`Барьер поглотил ${a} → по ХП ${left}`); if(!t.bar) t.fx=(t.fx||[]).filter(e=>e.id!=='barrier'); }
   t.hp-=left; epFl(B,t,'−'+dmg,o.crit?'crit':'dmg',{h0:Math.max(0,hp0)}); const F=B.fl[B.fl.length-1];
   if(epHas(t,'sleep')){ epTake(t,'sleep'); log.push(`😴 ${t.nm} просыпается`); } if(epHas(t,'stealth')) epTake(t,'stealth');
-  if(t.hp<=0){ if(!epHas(t,'immortal')) epTrig(B,t,'lethal',log,{other:o.src}); if(epHas(t,'immortal')){ t.hp=1; log.push(`♾️ ${t.nm}: бессмертие — остаётся с 1 ХП`); dx.push('Бессмертие — остаётся 1 ХП'); } else epDie(B,t,log,o.src); }
+  if(t.hp<=0){ if(!epHas(t,'immortal')) epTrig(B,t,'lethal',log,{other:o.src}); /* пассивка «летальный урон» могла вылечить или воскресить — тогда боец не умирает */
+    if(t.hp>0) dx.push(`Пассивка спасла от смерти — ХП ${t.hp}`); else if(epHas(t,'immortal')){ t.hp=1; log.push(`♾️ ${t.nm}: бессмертие — остаётся с 1 ХП`); dx.push('Бессмертие — остаётся 1 ХП'); } else epDie(B,t,log,o.src); }
   else if(dmg>0){ epEv(B,t,'hurt'); epTrig(B,t,'hurt',log,{other:o.src,src:o.src,dmg}); }
   /* ХП перешло через половину сверху вниз */ if(!t.dead&&left>0){ const h=epUS(t).mhp/2; if(hp0>=h&&t.hp<h) epHalf(B,t,log,o.src); }
   F.h1=Math.max(0,+t.hp||0);
   return {dealt:dmg}; }
 function epDie(B,t,log,src){ epAn(B,{k:'die',u:t.id}); t.hp=0; t.dead=1; t.bar=0; epEvDie(B,t,src); if(epHas(t,'execute')) t.ex=1; t.fx=[]; B.queue=(B.queue||[]).filter(x=>x!==t.id); B.extra=(B.extra||[]).filter(x=>x!==t.id); log.push(`☠ ${t.nm} выбывает${t.ex?' (казнь — воскресить нельзя)':''}`);
-  if(src&&!src.dead) epTrig(B,src,'kill',log,{other:t}); for(const a of epLive(B,t.side)) epTrig(B,a,'allyDead',log,{other:t,src}); for(const a of epLive(B,epFoeSide(t))) epTrig(B,a,'foeDead',log,{other:t,src}); }
+  if(src&&!src.dead) epTrig(B,src,'kill',log,{other:t}); for(const a of epLive(B,t.side)) epTrig(B,a,'allyDead',log,{other:t,src}); for(const a of epLive(B,epFoeSide(t))) epTrig(B,a,'foeDead',log,{other:t,src});
+  /* своя пассивка «погиб сам» — срабатывает уже у мёртвого (воскрешение на себя) */ epTrig(B,t,'dead',log,{other:src,src}); }
 /* ХП бойца упало ниже половины: его пассивки, союзников и врагов */
 function epHalf(B,t,log,src){ epTrig(B,t,'selfHalf',log,{other:src,src}); for(const a of epLive(B,t.side)) if(a!==t) epTrig(B,a,'allyHalf',log,{other:t,src}); for(const f of epLive(B,epFoeSide(t))) epTrig(B,f,'foeHalf',log,{other:t,src}); }
 /* лечение и барьер: N единиц или N% от стата (r.sc, по умолчанию EP_FXSCD); ctx.dmg — урон скилла или события. Вручную из окна бойца лечение — в единицах */
@@ -9268,7 +9271,7 @@ function epApply(B,A,t,r,log,ctx={}){ const f=epFxAny(r.id); if(!f||!t) return; 
     case 'strip': { const L=(t.fx||[]).filter(e=>e.k==='buff'&&!e.nd).slice(-(+n||1)); t.fx=t.fx.filter(e=>!L.includes(e)); if(L.some(e=>e.id==='barrier')&&!epHas(t,'barrier')) t.bar=0; log.push(`🧹 ${t.nm}: снято баффов — ${L.length}`); break; }
     case 'cdreset': t.cd={}; log.push(`🔄 ${t.nm}: КД скиллов сброшены`); break;
     case 'cdUpD': for(const s of (t.sk||[])) if(+s.ep.cd) t.cd[s.id]=(+t.cd[s.id]||0)+(+n||1); log.push(`⏳ ${t.nm}: КД скиллов +${n}`); break;
-    case 'revive': if(!t.dead) break; if(t.ex){ log.push(`⚰️ ${t.nm}: казнён — воскресить нельзя`); break; } t.dead=0; t.fx=[]; t.hp=Math.max(1,Math.round(epUS(t).mhp*(+n||30)/100)); log.push(`🕊️ ${t.nm} воскресает с ${t.hp} ХП`); epFl(B,t,'+'+t.hp,'heal',{h0:0,h1:t.hp}); break;
+    case 'revive': if(!t.dead&&t.hp>0) break; /* живой с ХП ≤ 0 — пассивка «летальный урон»: воскрешение не даёт умереть */ if(t.ex){ log.push(`⚰️ ${t.nm}: казнён — воскресить нельзя`); break; } t.dead=0; t.fx=[]; t.hp=Math.max(1,Math.round(epUS(t).mhp*(+n||30)/100)); log.push(`🕊️ ${t.nm} воскресает с ${t.hp} ХП`); epFl(B,t,'+'+t.hp,'heal',{h0:0,h1:t.hp}); break;
     case 'detonate': epDetonate(B,t,log); break;
     case 'spirit': t.sp=(+t.sp||0)+(+n||1); log.push(`🔥 ${t.nm}: боевой дух +${n}`); break;
     case 'heal': { const a=epFxAmt(A,t,r,n,ctx); const h=epHeal(B,t,a.v,log); if(!epHas(t,'noheal')) log.push(`💖 ${t.nm}: лечение +${h}${a.how?' ('+a.how+')':''}${h<a.v?' — ХП полное':''}`); break; } }
@@ -9416,7 +9419,7 @@ function epPosSp(B,A,sp,T,log,prm={}){ if(sp==='help'){ const t=T[0]; if(!t) ret
 /* пассивки по событию (печать отключает); ctx.other — участник события («на цель»), ctx.src — кто нанёс урон, ctx.dmg — урон события.
    EPTRD — глубина: пассивка от пассивки срабатывает не глубже трёх уровней, чтобы атаки пассивок не зациклились */
 let EPTRD=0;
-function epTrig(B,u,trig,log,ctx={}){ if((u.dead&&trig!=='lethal')||epHas(u,'seal')||EPTRD>2) return; for(const p of (u.pas||[])){ const P=p.ep||{}; if((P.trig||'always')!==trig) continue; u.once??={}; if(P.once&&u.once[p.id]) continue;
+function epTrig(B,u,trig,log,ctx={}){ if((u.dead&&trig!=='dead')||epHas(u,'seal')||EPTRD>2) return; for(const p of (u.pas||[])){ const P=p.ep||{}; if((P.trig||'always')!==trig) continue; u.once??={}; if(P.once&&u.once[p.id]) continue;
     const pa=P.atk&&P.atk.on?P.atk:null, T=pa?epPasT(B,u,pa.tgt||'ctx',ctx):[]; if(pa&&!T.length&&!(P.fx||[]).length&&!+P.spirit) continue;
     if(+P.ch&&+P.ch<100&&epD100()>+P.ch) continue; if(P.once) u.once[p.id]=1;
     log.push(`✦ ${u.nm}: «${p.name}»`); epPasFx(B,u,P,ctx); EPTRD++;
