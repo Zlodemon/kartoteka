@@ -385,6 +385,12 @@ h1,h2,h3{margin:0;font-weight:700}
 .cdetree .t{background:var(--panel2);border-radius:6px;padding:1px 7px;font-size:11.5px;color:var(--muted);white-space:nowrap;flex:none}
 .cdetree .d{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;text-align:right;min-width:0}
 .cdetree .tb{display:flex;gap:6px;padding:6px 2px 2px;align-items:center}
+.cdetree .tr .x{background:none;border:none;color:var(--faint);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;flex:none;border-radius:6px}.cdetree .tr .x:hover{color:var(--red);background:rgba(255,92,108,.1)}
+.cdederl .tr .n{max-width:150px}.cdederf{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6}.cdederf .lnk{background:none;border:none;padding:0;color:var(--gold);cursor:pointer;font-size:12.5px}.cdederf .lnk:hover{text-decoration:underline}
+.cdeback{align-self:flex-start}
+.cdhovpv{position:fixed;z-index:1001;pointer-events:none;line-height:0;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.65)}.cdhovpv canvas{border-radius:14px}
+.ctxmenu.cdderm{width:300px;max-height:min(480px,72vh);overflow:auto;padding-top:0}.cdderm [hidden]{display:none!important}.cdderm .crow:first-child{position:sticky;top:0;z-index:1;background:rgba(12,14,22,.98);padding:8px 6px 6px}.cdderm .crow input{width:100%;padding:6px 9px;font-size:12.5px}
+.cdderm button>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.cdderm button.on{color:var(--gold)}
 .cdeR{display:flex;flex-direction:column;gap:14px;min-width:0}
 .cdectx{display:flex;align-items:center;gap:8px 10px;padding:8px 12px;border:1px solid rgba(255,209,102,.35);background:rgba(255,209,102,.05);border-radius:12px;font-size:13px;flex-wrap:wrap}.cdectx[hidden]{display:none}
 .cdectx .m{color:var(--muted)}.cdectx select{width:auto;max-width:240px;padding:4px 8px;font-size:12.5px}.cdectx .upl{width:190px;padding:5px 9px;font-size:12.5px}
@@ -521,6 +527,13 @@ h1,h2,h3{margin:0;font-weight:700}
 .cdhero .big{font-size:46px;line-height:1}.cdhero b{font-size:17px}
 #modal .box.wide.cdbox{width:960px}
 #modal .box.cdzbox{width:auto}
+.cdzwrap{display:flex;gap:18px;align-items:flex-start;justify-content:center}
+.cdzder{width:178px;flex:none;display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:14px;padding:10px;background:rgba(255,255,255,.015);max-height:calc(100vh - 140px);overflow:auto}.cdzder[hidden]{display:none}
+.cdzder .cap{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:flex;gap:6px;align-items:center;margin-top:2px}.cdzder .cdzbk{align-self:flex-start;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cdzdl{display:flex;flex-direction:column;gap:6px}.cdzdi{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;color:var(--muted);text-align:center;line-height:1.3;padding:6px 4px;border-radius:10px}.cdzdi:hover{background:var(--panel);color:var(--text)}
+.cdzdi canvas{display:block;border-radius:9px;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+.cdzdf{display:flex;flex-wrap:wrap;gap:6px}.cdzdf .q{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12.5px;cursor:pointer;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cdzdf .q:hover{color:var(--text);border-color:var(--line2)}
+@media (max-width:760px){.cdzwrap{flex-direction:column;align-items:stretch}.cdzder{width:auto;max-height:none}.cdzdl{flex-direction:row;overflow-x:auto}}
 .cdzoom canvas{display:block;margin:0 auto;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.6)}
 .cded{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start}
 .cdedL{position:sticky;top:0;display:flex;flex-direction:column;gap:10px;align-items:center}
@@ -2719,6 +2732,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-29',t:'Карточки: производные карты и колода в TTS без ошибок',items:['Производные карты: в конструкторе карты под версиями — блок «Производные» (что эта карта создаёт или призывает). «🔗 ＋ производная» — выбрать карту из библиотеки (есть поиск) или сразу создать новую. В просмотре карты такие карты видны в окне справа, клик открывает карту, «←» возвращает назад; у производной видно, какой картой она создаётся.','Колода в TTS: если карту поменяли после выгрузки сета, в колоду идёт её последняя выгруженная версия, а карты без картинки на сайте в файл не попадают — больше нет ошибки «Load image failed unsupported format» в TTS. Окно колоды пишет, каких карт не хватает; мастер может выложить их оттуда же.']},
   {d:'2026-10-28',t:'Эпик-бой: несколько фраз озвучки на одно событие',items:['В «🔊 Звуки бойца» у каждого события кнопка 🎲: можно поставить несколько фраз (звуков) — каждый раз звучит одна случайная, одна и та же два раза подряд не повторяется. Файлы можно загрузить сразу пачкой. Все в бою слышат одну и ту же фразу.','Звук клика по бойцу больше не играет, когда выбираешь цель скилла, — только на обычный клик.']},
   {d:'2026-10-28',t:'Эпик-бой: выстрелы, свои звуки, миксы, звуки бойца',items:['Новая группа звуков «🔫 Огнестрел»: пистолет, револьвер, винтовка, снайперская винтовка, дробовик, мушкет, автоматная очередь, пулемёт, глушитель, рикошет, перезарядка, затвор, взвод курка; ещё бластеры и новые варианты пушки и лазера. Мушкетные, пистолетные и снайперские анимации сами берут подходящий звук.','Свои звуки: в любой выпадашке звука — «⤒ Загрузить свой файл…» (mp3, ogg, wav, m4a…). В листе персонажа файл попадает в звуки персонажа, в настройках («Эпик-бой» → «Звуки» → «📁 Свои звуки») — в общую библиотеку мастера.','Миксы: кнопка 🎚️ рядом с полем звука — несколько звуков сразу или с задержкой, повтор N раз с шагом (пачка аниме-разрезов, очередь выстрелов), полоса времени и «▶ Послушать всё». Мастер может сохранять миксы в библиотеку под именем.','Звуки бойца: лист → «Характеристики» → «Эпик-бой» → «🔊 Звуки бойца» — свой звук или голос на первый ход, клик по бойцу, нанесённый и полученный урон, бафф и дебафф, добивание врага, гибель и гибель союзника.']},
   {d:'2026-10-27',t:'Эпик-бой: врезка ультимейта разбивается как стекло',items:['В конце врезки с портретом по экрану бегут трещины, и под звон стекла он разлетается осколками — с бликами, светящимися краями цвета стихии и стеклянной крошкой; под ними уже начинается удар ультимейта.','Так теперь по умолчанию (звук врезки «Разбитое стекло в конце» или «авто»). С другими звуками врезки лента уезжает, как раньше. Выбор — в редакторе скилла, блок «⭐ Врезка ультимейта»; там же ▶ в окне «Картинка и кадр» показывает врезку целиком.']},
@@ -11230,6 +11244,31 @@ function cdUpTree(c){ const L=cdUps(c), out=[], seen=new Set(); const walk=(from
 const cdUpDesc=(c,id)=>{ const out=[], st=[id]; while(st.length){ const x=st.pop(); for(const u of cdUps(c)) if(u.from===x&&!out.includes(u.id)){ out.push(u.id); st.push(u.id); } } return out; };
 const cdUpLabel=(c,u)=>{ const t=cdUpTag(c,u); return t?`${cdUpCard(c,u.id).name} · ${t}`:cdUpCard(c,u.id).name; };
 
+/* ============ производные карты (привязка) ============
+   card.der = [id карты, …] — что эта карта создаёт или призывает (токены, порождённые карты…); общая для всех версий, на картинку не влияет.
+   Видны в просмотре карты (окно сбоку, там же «создаётся картой…») и в конструкторе под версиями; игрок видит только карты из открытых сетов */
+const cdDerIds=c=>c&&Array.isArray(c.der)?c.der.filter(x=>x&&typeof x==='string'&&x!==c.id):[];
+const cdDer=c=>cdDerIds(c).map(id=>byId(world.cards,id)).filter(Boolean);
+const cdDerFrom=c=>c?(world.cards||[]).filter(x=>x.id!==c.id&&cdDerIds(x).includes(c.id)):[];
+function cdDerPut(c,ids){ ids=[...new Set(ids)].filter(x=>x&&x!==c.id); if(ids.length) c.der=ids; else delete c.der; touch(c); }
+/* выбор карты для привязки: поиск, карты по сетам; ✓ — уже привязана (клик — отвязать); «＋ Новая карта» — pick('+') */
+function cdDerPick(x,y,c,pick){ const have=new Set(cdDerIds(c));
+  const G=[...cdSets().map(s=>({n:s.name||'Без названия',L:cdInSet(s.id)})),{n:'Без сета',L:(world.cards||[]).filter(z=>!cdSetOf(z))}].map(g=>({...g,L:g.L.filter(z=>z.id!==c.id)})).filter(g=>g.L.length);
+  const rows=G.flatMap((g,gi)=>g.L.map(z=>({z,gi,q:cdNorm([z.name,g.n,cdTtsPlain(z.text)].join(' '))})));
+  ctxMenu(x,y,[{html:'<input class="cdderq" placeholder="Найти карту — название, сет, текст">'},{icon:'＋',label:'Новая карта — создать и привязать',onClick:()=>pick('+')},
+    ...G.flatMap(g=>[{hdr:g.n},...g.L.map(z=>({icon:have.has(z.id)?'✓':`<i class="cddot" style="--c:${esc(cdTagColor((z.tags||[])[0]||''))}"></i>`,label:z.name||'Без названия',onClick:()=>pick(z.id)}))])]);
+  const m=$$('.ctxmenu').pop(); if(!m) return; m.classList.add('cdderm'); const bs=$$('button',m).slice(1), hs=$$('.hdr',m), inp=$('.cdderq',m);
+  bs.forEach((bt,i)=>{ if(have.has(rows[i].z.id)){ bt.classList.add('on'); bt.title='Привязана — клик отвяжет'; } });
+  const r=m.getBoundingClientRect(); m.style.left=Math.max(4,Math.min(x,innerWidth-r.width-8))+'px'; m.style.top=Math.max(4,Math.min(y,innerHeight-r.height-8))+'px';
+  inp.oninput=()=>{ const q=cdNorm(inp.value); bs.forEach((bt,i)=>bt.hidden=!!q&&!rows[i].q.includes(q)); hs.forEach((h,gi)=>h.hidden=!bs.some((bt,i)=>rows[i].gi===gi&&!bt.hidden)); };
+  inp.onkeydown=e=>{ if(e.key==='Enter'){ const f=bs.find(bt=>!bt.hidden); if(f) f.click(); } };
+  inp.focus(); setTimeout(()=>{ if(inp.isConnected&&document.activeElement!==inp) inp.focus(); },20); }
+/* увеличенная карта рядом при наведении (строки производных в конструкторе) */
+function cdHoverPv(t,get){ const off=()=>$$('.cdhovpv').forEach(x=>x.remove());
+  t.addEventListener('pointerenter',e=>{ if(e.pointerType==='touch') return; off(); if(!get()) return; const w=220, h=Math.round(w*1.4), pv=el('<div class="cdhovpv"><canvas></canvas></div>'); document.body.append(pv); cdCanvas($('canvas',pv),w,get);
+    const r=t.getBoundingClientRect(); let x=r.right+14; if(x+w>innerWidth-8) x=Math.max(8,r.left-w-14); pv.style.left=x+'px'; pv.style.top=Math.max(8,Math.min(r.top+r.height/2-h/2,innerHeight-h-8))+'px'; });
+  t.addEventListener('pointerleave',off); t.addEventListener('click',off); }
+
 /* ============ кейворды в поле текста ============ */
 /* куски сырого текста: обычный {a,b} или ручная разметка {a,b,id,is} (a..b — всё «{код|…}», is — начало текста внутри) */
 function cdMkSegs(src){ src=String(src||''); const seg=[]; let i=0, p=0;
@@ -11551,8 +11590,8 @@ function cdSetMenu(s,x,y){ const L=cdSets(); const i=L.findIndex(z=>z.id===s.id)
 function cdSetPub(s,v){ s.pub=!!v; touch(s); for(const c of world.cards||[]) if(c.set===s.id&&cdPub(c)) touch(c); }
 
 /* ============ создание / удаление ============ */
-async function cdNewCard(sid){ const L=cdInSet(sid); const c={id:uid(),set:sid||'',name:'Новая карта',en:'1',ini:'1',tags:[],tgt:cdGet('tgts')[0]||'',text:'',order:L.length?Math.max(...L.map(x=>x.order||0))+10:0,_fresh:1}; cdPub(c);
-  try{ await createDoc('cards',c); }catch{ return; } render(); cdEdit(c.id); }
+async function cdNewCard(sid,noOpen){ const L=cdInSet(sid); const c={id:uid(),set:sid||'',name:'Новая карта',en:'1',ini:'1',tags:[],tgt:cdGet('tgts')[0]||'',text:'',order:L.length?Math.max(...L.map(x=>x.order||0))+10:0,_fresh:1}; cdPub(c);
+  try{ await createDoc('cards',c); }catch{ return; } render(); if(!noOpen) cdEdit(c.id); return c; }
 async function cdDup(c){ const n=JSON.parse(JSON.stringify(clean(c))); n.id=uid(); n.name=(c.name||'')+' (копия)'; n.order=(c.order||0)+5; delete n.createdAt; cdPub(n); try{ await createDoc('cards',n); }catch{ return; } render(); toast('Копия создана'); return n; }
 async function cdDelete(c,ask=true){ if(ask&&!await confirmDlg(`Удалить карту «${c.name||'без названия'}»? Её можно будет вернуть из корзины.`)) return false;
   if(!await trashMain('card_'+c.id,'cards',c,c.name,'карта',[c.art&&c.art.img])) return false; await removeDoc('cards',c); render(); return true; }
@@ -11568,8 +11607,18 @@ function cdSetDelete(s){ const cards=(world.cards||[]).filter(c=>c.set===s.id); 
 /* ============ просмотр для игроков ============ */
 /* просмотр карты; у карты с улучшениями — переключатель версий и «⇆ рядом» (все версии в ряд); переключение только на экране, в базу ничего не пишется */
 function cdZoom(id,ids,opt={}){ ids=ids&&ids.length?ids:[id]; const K=k=>{ const [c,u]=String(k).split('~'); return {c,u:u||''}; }; let i=Math.max(0,ids.indexOf(id)), up=K(ids[i]).u, side=cdUiGet('upSide','0')==='1'; const w=Math.min(440,innerWidth-60);
-  const b=openModal(`<div class="cdzoom"><div class="cdzv"></div><div class="cdzups"></div><div class="cdzdeck"></div><div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn sm" id="zp">←</button><span class="faint zn"></span><button class="btn sm" id="zn">→</button><span class="grow"></span><button class="btn sm" id="zb" title="Показать рубашку">↻ рубашка</button><button class="btn sm primary" id="zc">Закрыть</button></div></div>`);
+  const b=openModal(`<div class="cdzwrap"><div class="cdzoom"><div class="cdzv"></div><div class="cdzups"></div><div class="cdzdeck"></div><div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn sm" id="zp">←</button><span class="faint zn"></span><button class="btn sm" id="zn">→</button><span class="grow"></span><button class="btn sm" id="zb" title="Показать рубашку">↻ рубашка</button><button class="btn sm primary" id="zc">Закрыть</button></div></div><aside class="cdzder" hidden></aside></div>`);
   b.classList.add('cdzbox'); let back=false; const cur=()=>byId(world.cards,K(ids[i]).c);
+  /* окно сбоку: производные карты (что она создаёт) и откуда она сама; переходы по ним — со стеком H, «←» возвращает */
+  const H=[];
+  const jump=(L,did)=>{ const c=cur(); H.push({ids,i,up,cid:c&&c.id,name:c?c.name||'Без названия':''}); ids=L; i=Math.max(0,L.indexOf(did)); up=''; back=false; draw(); };
+  const pop=()=>{ const s=H.pop(); if(!s) return; ids=s.ids; i=s.i; up=s.up; back=false; draw(); };
+  const drawDer=()=>{ const h=$('.cdzder',b), c=cur(), last=H[H.length-1], L=back||!c?[]:cdDer(c), F=back||!c?[]:cdDerFrom(c).filter(z=>!last||z.id!==last.cid); h.hidden=!L.length&&!F.length&&!last; if(h.hidden){ h.innerHTML=''; return; }
+    h.innerHTML=(last?`<button class="btn sm cdzbk" title="Назад (Backspace)">← ${esc(last.name)}</button>`:'')
+      +(L.length?`<div class="cap">Создаёт <span class="faint">${L.length}</span></div><div class="cdzdl">${L.map(z=>`<div class="cdzdi" data-d="${esc(z.id)}" title="Открыть карту"><canvas></canvas><span>${z.pub?'':'🔒 '}${esc(z.name||'Без названия')}</span></div>`).join('')}</div>`:'')
+      +(F.length?`<div class="cap">Создаётся ${F.length>1?'картами':'картой'}</div><div class="cdzdf">${F.map(z=>`<button class="q" data-f="${esc(z.id)}">${esc(z.name||'Без названия')}</button>`).join('')}</div>`:'');
+    const dw=innerWidth<760?110:150; $$('.cdzdi',h).forEach(d=>{ cdCanvas($('canvas',d),dw,()=>byId(world.cards,d.dataset.d)); d.onclick=()=>jump(L.map(z=>z.id),d.dataset.d); });
+    $$('[data-f]',h).forEach(q=>q.onclick=()=>jump([q.dataset.f],q.dataset.f)); const bk=$('.cdzbk',h); if(bk) bk.onclick=pop; };
   const dk=()=>{ const h=$('.cdzdeck',b), c=cur(), ch=opt.ch?byId(world.characters,opt.ch):cdDeckChar(); if(!c||!ch||!canEdit(ch)||viewAs||back){ h.innerHTML=''; return; } const nm=esc(ch.name||'без имени');
     if(side&&cdUps(c).length){ h.innerHTML=`<span class="faint">🃏 Чтобы положить карту в колоду «${nm}», выбери одну версию</span>`; return; }
     const n=cdDeckN(ch,c.id,up); h.innerHTML=`<span>🃏 В колоде «<b>${nm}</b>»: <b class="n">${n}</b></span><button class="btn sm" id="zdm" ${n?'':'disabled'}>− Убрать из колоды</button><button class="btn sm" id="zda">+ Добавить в колоду</button>`;
@@ -11581,9 +11630,9 @@ function cdZoom(id,ids,opt={}){ ids=ids&&ids.length?ids:[id]; const K=k=>{ const
     else { zv.innerHTML='<canvas></canvas>'; cdCanvas($('canvas',zv),w,()=>back?cdSetOf(cur())||{}:cdUpCard(cur(),up),back); }
     const zu=$('.cdzups',b); zu.innerHTML=T.length&&!back?`<button class="q ${!up&&!side?'on':''}" data-u="">Базовая</button>`+T.map(({u,d})=>`<button class="q ${up===u.id&&!side?'on':''}" data-u="${esc(u.id)}"><i class="upa">${'⬆'.repeat(d)}</i> ${esc(cdUpLabel(c,u))}</button>`).join('')+`<button class="q ${side?'on':''}" data-side="1" title="Все версии рядом">⇆ рядом</button>`:'';
     $$('[data-u]',zu).forEach(q=>q.onclick=()=>{ up=q.dataset.u; side=false; cdUiSet('upSide','0'); draw(); }); const sd=$('[data-side]',zu); if(sd) sd.onclick=()=>{ side=!side; cdUiSet('upSide',side?'1':'0'); draw(); };
-    $('.zn',b).textContent=(i+1)+' / '+ids.length; $('#zp',b).disabled=i<=0; $('#zn',b).disabled=i>=ids.length-1; dk(); };
+    $('.zn',b).textContent=(i+1)+' / '+ids.length; $('#zp',b).disabled=i<=0; $('#zn',b).disabled=i>=ids.length-1; dk(); drawDer(); };
   $('#zp',b).onclick=()=>{ i=Math.max(0,i-1); back=false; up=K(ids[i]).u; draw(); }; $('#zn',b).onclick=()=>{ i=Math.min(ids.length-1,i+1); back=false; up=K(ids[i]).u; draw(); }; $('#zb',b).onclick=()=>{ back=!back; draw(); }; $('#zc',b).onclick=closeModal;
-  b.onkeydown=e=>{ if(e.key==='ArrowLeft') $('#zp',b).click(); if(e.key==='ArrowRight') $('#zn',b).click(); }; b.tabIndex=-1; b.focus(); draw(); }
+  b.onkeydown=e=>{ if(e.key==='ArrowLeft') $('#zp',b).click(); if(e.key==='ArrowRight') $('#zn',b).click(); if(e.key==='Backspace'&&H.length){ e.preventDefault(); pop(); } }; b.tabIndex=-1; b.focus(); draw(); }
 
 /* ============ колода персонажа ============
    ch.deck = [{c: id карты, u?: id улучшения, n: сколько копий}]; собирают хозяин персонажа и мастер — на вкладке «Карточки» выбирают персонажа,
@@ -11746,8 +11795,9 @@ function cdEdit(id,ids,opt={}){ if(!isDM()) return cdZoom(id,ids); const C=()=>b
   const acc=(k,ic,t)=>`<section class="cdacc ${cdUiGet('acc.'+k,'0')==='1'?'open':''}" data-a="${k}"><header><span class="ic">${ic}</span><b>${t}</b><span class="sum"></span><span class="lk">🔗 как у базовой</span><span class="chev">▾</span></header><div class="body"></div></section>`;
   const b=openModal(`<div class="cde">
     <div class="cdeL">
+      ${opt.back?`<button class="q cdeback" title="Вернуться к карте, из которой открыта эта">← ${esc(opt.back.name||'Без названия')}</button>`:''}
       <div class="cdepv"><figure class="ghost"><canvas class="cvg"></canvas><figcaption>Базовая</figcaption></figure><figure class="main"><canvas class="cvm"></canvas><figcaption class="cvcap"></figcaption></figure></div>
-      <div class="cdediff"></div><div class="cdever"></div>
+      <div class="cdediff"></div><div class="cdever"></div><div class="cdeder"></div>
     </div>
     <div class="cdeR">
       <div class="cdectx" hidden></div>
@@ -11767,8 +11817,8 @@ function cdEdit(id,ids,opt={}){ if(!isDM()) return cdZoom(id,ids); const C=()=>b
     <div class="modal-actions cdefoot"><button class="btn ghost danger" id="cDel" title="Удалить карту (её можно вернуть из корзины)">🗑 Удалить</button><button class="btn ghost" id="cDup">⧉ Дублировать</button><span class="cdedeck"></span><span class="grow"></span><span class="cdfst"></span><span class="grow"></span><span class="cdnav"></span><button class="btn primary" id="cOk">Готово</button></div>`,true);
   b.classList.add('cdbox','cdbox2');
   const cv=$('.cvm',b), cvg=$('.cvg',b);
-  const cleanup=()=>{ clearInterval(statT); window.removeEventListener('paste',onPaste,true); $$('.cdkwpop,.cdcpop').forEach(x=>x.remove()); };
-  const back=()=>cdEdit(id,ids,{up:UP,cmp:CMP});
+  const cleanup=()=>{ clearInterval(statT); window.removeEventListener('paste',onPaste,true); $$('.cdkwpop,.cdcpop,.cdhovpv').forEach(x=>x.remove()); };
+  const back=()=>cdEdit(id,ids,{up:UP,cmp:CMP,back:opt.back});
   const lists=t=>{ cleanup(); cdListsDlg(t,back); };
   const kwEdit=k=>{ cleanup(); cdListsDlg('kw',back,k.id); };
   const save=()=>{ const o=C(); if(!o) return; delete o._fresh; touch(o); cdRefresh(); cdFaceSched(); soon(); };
@@ -11805,6 +11855,19 @@ function cdEdit(id,ids,opt={}){ if(!isDM()) return cdZoom(id,ids); const C=()=>b
       const cm=$('.cdecmp',h); if(cm) cm.onclick=()=>{ CMP=!CMP; drawPv(); drawVer(); }; }
     $('.cdeadd',h).onclick=e=>{ const TT=cdUpTree(C()); if(!TT.length) return addUp(''); const r=e.currentTarget.getBoundingClientRect();
       ctxMenu(r.left,r.bottom+4,[{hdr:'Что улучшить'},{icon:'⬆',label:'Базовую карту'+(TT.some(z=>!z.u.from)?' — ещё вариант на выбор':''),onClick:()=>addUp('')},...TT.map(({u,d})=>({icon:'⬆'.repeat(Math.min(d+1,3)),label:'«'+cdUpLabel(C(),u)+'» — следующий ранг',onClick:()=>addUp(u.id)}))]); }; };
+  /* производные: что создаёт эта карта (общие для всех версий); клик — конструктор той карты с кнопкой «← назад» сюда */
+  const openDer=did=>{ const o=C(); leave(); const L=cdDerIds(o); cdEdit(did,L.includes(did)?L:[did],{back:{id,ids,up:UP,cmp:CMP,name:o?o.name:'',back:opt.back}}); };
+  const drawDer=()=>{ const o=C(), h=$('.cdeder',b); if(!o) return; $$('.cdhovpv').forEach(x=>x.remove()); const L=cdDer(o), F=cdDerFrom(o);
+    const fh=F.length?`<div class="cdederf">Создаётся ${F.length>1?'картами':'картой'} ${F.map(z=>`<button class="lnk" data-f="${esc(z.id)}">«${esc(z.name||'Без названия')}»</button>`).join(', ')}</div>`:'';
+    if(!L.length) h.innerHTML=`<div class="cdeaddw"><button class="q dash cdederadd" title="Карты, которые эта карта создаёт или призывает, — их видно рядом с ней при просмотре">🔗 ＋ производная</button><span class="faint">что создаёт эта карта</span></div>${fh}`;
+    else { h.innerHTML=`<div class="cap">Производные <span class="faint" style="text-transform:none;letter-spacing:0">что создаёт эта карта · клик — открыть</span></div><div class="cdetree cdederl">${L.map(z=>`<div class="tr" data-d="${esc(z.id)}"><canvas></canvas><span class="n">${esc(z.name||'Без названия')}</span>${z.pub?'':'<span class="t" title="Игроки эту карту не видят — она в скрытом сете или скрыта">🔒</span>'}<span class="d">${cdRunsHtml(cdRuns(String(z.text||'').split('\n').find(l=>l.trim())||''))}</span><button class="x" title="Отвязать (сама карта останется)">×</button></div>`).join('')}
+        <div class="tb"><button class="q dash cdederadd">🔗 ＋ производная</button></div></div>${fh}`;
+      $$('.tr',h).forEach(r=>{ const did=r.dataset.d, get=()=>byId(world.cards,did); cdCanvas($('canvas',r),30,get); cdHoverPv(r,get); r.onclick=()=>openDer(did);
+        $('.x',r).onclick=e=>{ e.stopPropagation(); const o2=C(); cdDerPut(o2,cdDerIds(o2).filter(x=>x!==did)); drawDer(); }; }); }
+    $$('[data-f]',h).forEach(x=>x.onclick=()=>{ leave(); cdEdit(x.dataset.f); });
+    $('.cdederadd',h).onclick=e=>{ const r=e.currentTarget.getBoundingClientRect(); cdDerPick(r.left,r.bottom+4,C(),async pid=>{ const o2=C(); if(!o2) return;
+      if(pid==='+'){ const n=await cdNewCard(o2.set||'',true); if(n){ cdDerPut(o2,[...cdDerIds(o2),n.id]); openDer(n.id); } return; }
+      const L2=cdDerIds(o2); cdDerPut(o2,L2.includes(pid)?L2.filter(x=>x!==pid):[...L2,pid]); drawDer(); }); }; };
   /* плашка версии: ранг, из чего, метка, удалить */
   const drawCtx=()=>{ const h=$('.cdectx',b), o=C(), u=U(); b.classList.toggle('cdvarm',!!u); if(!u){ h.hidden=true; h.innerHTML=''; return; } h.hidden=false;
     const T=cdUpTree(o), d=depth(), sib=cdUps(o).filter(z=>(z.from||'')===(u.from||'')).length, bad=new Set([u.id,...cdUpDesc(o,u.id)]), tag=cdUpTag(o,u);
@@ -11936,7 +11999,7 @@ function cdEdit(id,ids,opt={}){ if(!isDM()) return cdZoom(id,ids); const C=()=>b
     drawCtx(); drawUpo(); $('#cName',b).value=V.name||''; drawCost(); drawTgt(); drawTags();
     if(RAW) ta.value=V.text||''; else RT.reset(V.text||''); drawRaw();
     if(fv){ fv.value=V.flav||''; fv.placeholder=UP?'как у базовой — пусто':'Пусто — места на карте не занимает'; }
-    drawSet(); drawLook(); drawArt(); drawSums(); drawVer(); drawPv(); drawNav(); drawDeck(); stat(); };
+    drawSet(); drawLook(); drawArt(); drawSums(); drawVer(); drawDer(); drawPv(); drawNav(); drawDeck(); stat(); };
   /* превью: клик по элементу — к его полю; арт — мышью и колесом */
   const toCard=e=>{ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)*CD_W/r.width,y:(e.clientY-r.top)*CD_H/r.height}; };
   const inArt=p=>{ const A=cdArtBoxOf(C()); return p.x>=A.x&&p.x<=A.x+A.w&&p.y>=A.y&&p.y<=A.y+A.h; };
@@ -11957,7 +12020,8 @@ function cdEdit(id,ids,opt={}){ if(!isDM()) return cdZoom(id,ids); const C=()=>b
   window.addEventListener('paste',onPaste,true);
   /* навигация и закрытие: пустая новая карта (не тронутая) удаляется */
   const leave=()=>{ cleanup(); const o=C(); if(o&&o._fresh&&o.name==='Новая карта'&&!o.text&&!o.art){ removeDoc('cards',o).then(render); } };
-  const go=d=>{ const i=ids.indexOf(id)+d; if(i<0||i>=ids.length) return; leave(); cdEdit(ids[i],ids); };
+  const go=d=>{ const i=ids.indexOf(id)+d; if(i<0||i>=ids.length) return; leave(); cdEdit(ids[i],ids,{back:opt.back}); };
+  const bk=$('.cdeback',b); if(bk) bk.onclick=()=>{ const B=opt.back; leave(); cdEdit(B.id,B.ids,{up:B.up,cmp:B.cmp,back:B.back}); };
   $('#cOk',b).onclick=()=>{ leave(); closeModal(); render(); };
   $('#cDup',b).onclick=async()=>{ const n=await cdDup(C()); if(n){ cleanup(); cdEdit(n.id,cdInSet(n.set||'').map(x=>x.id)); } };
   $('#cDel',b).onclick=async()=>{ cleanup(); const o=C(); const i=ids.indexOf(id); if(await cdDelete(o)){ const rest=ids.filter(x=>x!==id&&byId(world.cards,x)); if(rest.length) cdEdit(rest[Math.min(i,rest.length-1)],rest); } else cdEdit(id,ids,{up:UP,cmp:CMP}); };
@@ -12092,7 +12156,9 @@ async function cdImport(data,prog){ const P=t=>{ const p=$('.iprog'); if(p) p.te
   touch(world.settings);
   const sm=new Map(); let ord=Math.max(0,...(world.cardsets||[]).map(s=>s.order||0)); n=0;
   for(const s of data.sets||[]){ const ns=JSON.parse(JSON.stringify(s)); ns.id=uid(); ns.order=(ord+=10); delete ns.createdAt; delete ns.owner; if(ns.back&&ns.back.img) ns.back.img=idm.get(ns.back.img)||''; for(const k of ['fstyle','bstyle']) if(ns[k]){ if(stm.has(ns[k])) ns[k]=stm.get(ns[k]); else delete ns[k]; } sm.set(s.id,ns.id); try{ await createDoc('cardsets',ns); }catch{} }
-  for(const c of data.cards||[]){ P(`Карты ${++n}/${(data.cards||[]).length}…`); const nc=JSON.parse(JSON.stringify(c)); nc.id=uid(); nc.set=sm.get(c.set)||''; delete nc.createdAt; delete nc.owner; delete nc.pub; if(nc.art&&nc.art.img) nc.art.img=idm.get(nc.art.img)||''; if(nc.art&&!nc.art.img) delete nc.art; if(nc.style){ if(stm.has(nc.style)) nc.style=stm.get(nc.style); else delete nc.style; } cdPub(nc); try{ await createDoc('cards',nc); }catch{} }
+  const cm=new Map((data.cards||[]).map(c=>[c.id,uid()])); // новые id заранее — производные (der) ссылаются на карты из того же файла
+  for(const c of data.cards||[]){ P(`Карты ${++n}/${(data.cards||[]).length}…`); const nc=JSON.parse(JSON.stringify(c)); nc.id=cm.get(c.id); nc.set=sm.get(c.set)||'';
+    if(Array.isArray(nc.der)){ nc.der=nc.der.map(x=>cm.get(x)||(byId(world.cards,x)?x:'')).filter(Boolean); if(!nc.der.length) delete nc.der; } delete nc.createdAt; delete nc.owner; delete nc.pub; if(nc.art&&nc.art.img) nc.art.img=idm.get(nc.art.img)||''; if(nc.art&&!nc.art.img) delete nc.art; if(nc.style){ if(stm.has(nc.style)) nc.style=stm.get(nc.style); else delete nc.style; } cdPub(nc); try{ await createDoc('cards',nc); }catch{} }
   P('Готово'); setStatus('синхронизировано'); toast(`Импортировано: ${sm.size} ${plural(sm.size,'сет','сета','сетов')}, ${n} карт`); render(); cdFaceSched(); }
 
 /* вкладка в настройках */
@@ -12361,38 +12427,59 @@ function cdTtsOne(c,face,back,k,lbl){ const v=x=>String(x??'').trim()||'—';
       CustomDeck:{[k]:{FaceURL:face,BackURL:back,NumWidth:1,NumHeight:1,BackIsHidden:true,UniqueBack:false,Type:0}}}); }
 
 /* --- колода персонажа в TTS (может и игрок): картинки берутся с сайта картинок мастера (адрес = подпись картинки),
-   сама колода — одним объектом Deck: копии карты, у карты с улучшениями — стейты (выбранная версия сверху) --- */
-function cdDeckTtsPlan(ch){ const url=cdTtsUrl(), D=cdDeckList(ch), need=new Map(), noset=[]; let k=0, total=0, first=null; const ids=[], objs=[], CD={};
-  for(const {e,c} of D.L){ const st=cdSetOf(c); if(!st){ noset.push(c); continue; } const bsig=cdSigBack(st), back=url+'b-'+bsig+'.jpg'; need.set(back,st.id); first??=st;
-    const vs=['',...cdUpTree(c).map(z=>z.u.id)], tpl=vs.map(vid=>{ const cc=vid?cdUpCard(c,vid):c, f=url+'f-'+cdSigCard(cc)+'.jpg'; need.set(f,st.id); ++k; return {cc,f,k,lbl:vid?cdUpTag(c,cdUpOf(c,vid))||true:''}; });
-    const cur=Math.max(0,vs.indexOf(e.u||''));
+   сама колода — одним объектом Deck: копии карты, у карты с улучшениями — стейты (выбранная версия сверху).
+   ok — что уже проверено на сайте картинок (адрес → есть/нет), unk — адреса, которые ещё надо проверить. В файл идут только адреса, которые есть:
+   битый адрес TTS не прощает («Load image failed unsupported format»). Нет картинки с нынешней подписью (карту меняли после выгрузки) —
+   берём ту, с которой мастер последний раз выгружал сет (сет.tts), карта будет в прежнем виде; нет и её — карта в файл не идёт --- */
+function cdDeckTtsPlan(ch,ok=new Map()){ const url=cdTtsUrl(), D=cdDeckList(ch), unk=new Set(), sets=new Set(), noset=[], old=[], miss=[], part=[]; let k=0, total=0, first=null; const ids=[], objs=[], CD={};
+  /* первый адрес из списка, который есть на сайте; undefined — ещё не проверен, null — нет ни одного */
+  const pick=L=>{ for(const u of L){ if(!u) continue; if(!ok.has(u)){ unk.add(u); return undefined; } if(ok.get(u)) return u; } return null; };
+  for(const {e,c} of D.L){ const st=cdSetOf(c); if(!st){ noset.push(c); continue; } const was=st.tts||{}, wc=was.cards||{}, bsig=cdSigBack(st);
+    const back=pick([url+'b-'+bsig+'.jpg',was.b&&was.b!==bsig?url+'b-'+was.b+'.jpg':'']);
+    const vs=['',...cdUpTree(c).map(z=>z.u.id)], tpl=vs.map(vid=>{ const cc=vid?cdUpCard(c,vid):c, sig=cdSigCard(cc), w=wc[vid?c.id+'~'+vid:c.id], f=pick([url+'f-'+sig+'.jpg',w&&w!==sig?url+'f-'+w+'.jpg':'']); ++k;
+      return {cc,f,old:!!f&&f!==url+'f-'+sig+'.jpg',k,lbl:vid?cdUpTag(c,cdUpOf(c,vid))||true:''}; });
+    if(back===undefined||tpl.some(t=>t.f===undefined)) continue;
+    const cur=Math.max(0,vs.indexOf(e.u||'')), has=vs.map((_,j)=>j).filter(j=>tpl[j].f);
+    if(!back||!tpl[cur].f){ miss.push(tpl[cur].cc); sets.add(st.id); continue; }
+    if(has.length<vs.length){ part.push(c); sets.add(st.id); } if(has.some(j=>tpl[j].old)){ old.push(c); sets.add(st.id); } first??=st;
+    /* стейты нумеруются подряд только из тех версий, у которых есть картинка */
     for(let n=0;n<(+e.n||0);n++){ const mk=j=>cdTtsOne(tpl[j].cc,tpl[j].f,back,tpl[j].k,tpl[j].lbl), o=mk(cur);
-      if(vs.length>1){ o.States={}; vs.forEach((_,j)=>{ if(j!==cur) o.States[j+1]=mk(j); }); }
+      if(has.length>1){ o.States={}; has.forEach((j,x)=>{ if(j!==cur) o.States[x+1]=mk(j); }); }
       objs.push(o); ids.push(o.CardID); Object.assign(CD,o.CustomDeck); total++; } }
   const nm='Колода — '+(ch.name||'персонаж');
   const obj=objs.length===1?{...objs[0],Transform:cdTtsT()}:{GUID:cdTtsGuid(),Name:'Deck',Transform:cdTtsT(),Nickname:nm,Description:`Картотека: ${total} ${plural(total,'карта','карты','карт')}`,GMNotes:JSON.stringify({kartoteka:'deck:'+ch.id}),Tags:[],...CD_TTS_COMMON,Hands:false,DeckIDs:ids,CustomDeck:CD,ContainedObjects:objs};
-  return {nm,json:objs.length?cdTtsSave(nm,obj):null,need,noset,total,hid:D.hid,first}; }
-/* есть ли картинка на сайте картинок (без CORS — грузим как <img>) */
-function cdImgThere(u){ return new Promise(r=>{ const i=new Image(); const t=setTimeout(()=>r(false),15000); i.onload=()=>{ clearTimeout(t); r(true); }; i.onerror=()=>{ clearTimeout(t); r(false); }; i.src=u; }); }
+  return {nm,json:objs.length&&!unk.size?cdTtsSave(nm,obj):null,unk,sets,noset,old,miss,part,total,hid:D.hid,first}; }
+/* план колоды с проверенными картинками: проверяет на сайте всё, что плану нужно, пока не останется непроверенных */
+async function cdDeckTtsResolve(ch,ok){ let p=cdDeckTtsPlan(ch,ok); for(let i=0;p.unk.size&&i<5;i++){ const L=[...p.unk], r=await Promise.all(L.map(u=>cdImgThere(u,true))); L.forEach((u,j)=>ok.set(u,r[j])); p=cdDeckTtsPlan(ch,ok); } return p; }
+/* есть ли картинка на сайте картинок (без CORS — грузим как <img>); fresh — мимо кэша браузера: 404 сайт отдаёт с кэшем на сутки */
+function cdImgThere(u,fresh){ return new Promise(r=>{ const i=new Image(); const t=setTimeout(()=>r(false),15000); i.onload=()=>{ clearTimeout(t); r(true); }; i.onerror=()=>{ clearTimeout(t); r(false); }; i.src=fresh?u+'?v='+Date.now():u; }); }
 async function cdDeckTtsDlg(ch){ if(!ch) return; const b=openModal(`<h2>🎲 Колода «${esc(ch.name||'без имени')}» в Tabletop Simulator</h2><div class="cdttsst"></div><div class="cdttsimg"></div><div class="faint cdhint cdttsp"></div>
     <div class="faint cdhint">В TTS колода появится в <b>Объекты → Сохранённые объекты → Картотека</b> под именем «Колода — ${esc(ch.name||'')}». Поменял колоду на сайте — сохрани ещё раз и возьми её из меню заново (на столе сама не обновится).</div>
     <div class="modal-actions"><span class="grow"></span><button class="btn" id="dNo">Закрыть</button><button class="btn primary" id="dGo" disabled>⬇ Сохранить в TTS</button></div>`,true);
-  b.classList.add('cdbox','cdlbox'); const P=t=>{ const p=$('.cdttsp',b); if(p) p.textContent=t; }; let plan=null, miss=[];
+  b.classList.add('cdbox','cdlbox'); const P=t=>{ const p=$('.cdttsp',b); if(p) p.textContent=t; }; let plan=null; const OK=new Map();
   const drawSt=async()=>{ const h=$('.cdttsst',b); if(!h) return; const dir=await cdTtsDir(false), saved=dir||CD_TTS.dir||await cdIdb(true).catch(()=>null);
     h.innerHTML=`<div class="cdttsrow"><span class="ic">${dir?'✅':saved?'🔓':'📁'}</span><span class="grow"><b>Папка TTS:</b> ${dir?esc(dir.name)+' → Картотека':saved?'выбрана, браузер спросит разрешение при сохранении':window.showDirectoryPicker?'не выбрана — файл скачается, его надо будет положить в папку самому':'этот браузер не пишет в папки — файл колоды скачается'}<br><span class="faint">Документы → My Games → Tabletop Simulator → Saves → Saved Objects (можно выбрать любую из этих папок).</span></span>${window.showDirectoryPicker?`<button class="btn sm" id="tDir">${saved?'Другая папка…':'Выбрать папку…'}</button>`:''}</div>`;
     const d=$('#tDir',h); if(d) d.onclick=async()=>{ await cdTtsPick(); drawSt(); }; };
-  const check=async()=>{ const h=$('.cdttsimg',b); if(!h) return; plan=cdDeckTtsPlan(ch);
-    if(!plan.json){ h.innerHTML='<div class="cdttsrow"><span class="ic">∅</span><span class="grow">В колоде нет карт, которые можно выгрузить.</span></div>'; $('#dGo',b).disabled=true; return; }
+  /* проверка картинок: в файл пойдут только карты, чьи картинки есть на сайте картинок мастера */
+  const check=async()=>{ const h=$('.cdttsimg',b); if(!h) return; $('#dGo',b).disabled=true; OK.clear();
+    if(!cdDeckList(ch).L.length){ h.innerHTML='<div class="cdttsrow"><span class="ic">∅</span><span class="grow">В колоде нет карт, которые можно выгрузить.</span></div>'; return; }
     h.innerHTML=`<div class="cdttsrow"><span class="ic">⏳</span><span class="grow">Проверяю картинки карт на ${esc(cdTtsSiteId())}.web.app…</span></div>`;
-    const urls=[...plan.need.keys()], ok=await Promise.all(urls.map(cdImgThere)); miss=urls.filter((u,i)=>!ok[i]); if(!$('.cdttsimg',b)) return;
-    const msets=[...new Set(miss.map(u=>plan.need.get(u)))].map(id=>byId(world.cardsets,id)).filter(Boolean);
-    const extra=(plan.noset.length?`<br><span class="faint">Без сета (не выгружаются): ${plan.noset.map(c=>esc(c.name||'')).join(', ')}</span>`:'')+(plan.hid?`<br><span class="faint">Ещё ${plan.hid} ${plural(plan.hid,'карта','карты','карт')} тебе не видны — их в файле не будет.</span>`:'');
-    h.innerHTML=miss.length?`<div class="cdttsrow"><span class="ic">⚠</span><span class="grow"><b>${miss.length} ${plural(miss.length,'картинки','картинок','картинок')} ещё нет на сайте картинок</b> — ${isDM()?'выгрузи эти сеты в TTS (картинки выложатся), потом сохрани колоду':'мастер ещё не выгружал в TTS свежие версии этих карт. Попроси его нажать «🎲 В TTS» в «Карточках»'}: ${msets.map(x=>'«'+esc(x.name||'Без названия')+'»').join(', ')}.<br><span class="faint">Можно сохранить и сейчас — эти карты в TTS будут без картинки, пока мастер их не выложит (потом просто возьми колоду заново).</span>${extra}</span>${isDM()&&msets.length?'<button class="btn sm primary" id="dSets">⬆ Выгрузить сеты</button>':''}</div>`
-      :`<div class="cdttsrow"><span class="ic">✅</span><span class="grow"><b>${plan.total} ${plural(plan.total,'карта','карты','карт')}</b> — все картинки на месте.${extra}</span></div>`;
-    $('#dGo',b).disabled=false;
+    plan=await cdDeckTtsResolve(ch,OK); if(!$('.cdttsimg',b)) return;
+    const msets=[...plan.sets].map(id=>byId(world.cardsets,id)).filter(Boolean), nms=L=>[...new Set(L.map(c=>'«'+esc(c.name||'Без названия')+'»'))].join(', '), n=x=>`${x} ${plural(x,'карта','карты','карт')}`;
+    const extra=(plan.noset.length?`<br><span class="faint">Без сета (не выгружаются): ${plan.noset.map(c=>esc(c.name||'')).join(', ')}</span>`:'')+(plan.hid?`<br><span class="faint">Ещё ${n(plan.hid)} тебе не видны — их в файле не будет.</span>`:'');
+    const ask=isDM()?`выгрузи ${msets.length>1?'эти сеты':'этот сет'} в TTS (${msets.map(x=>'«'+esc(x.name||'Без названия')+'»').join(', ')}) — картинки выложатся, потом сохрани колоду ещё раз`:`мастер ещё не выкладывал их картинки. Попроси его нажать «🎲 В TTS» в «Карточках» (${msets.map(x=>'«'+esc(x.name||'Без названия')+'»').join(', ')}), потом сохрани колоду ещё раз`;
+    const rows=[];
+    const bad=plan.miss.length||plan.part.length||plan.old.length;
+    if(plan.total) rows.push(`<div class="cdttsrow"><span class="ic">${bad?'🃏':'✅'}</span><span class="grow"><b>${plan.total} ${plural(plan.total,'карта пойдёт','карты пойдут','карт пойдут')} в файл</b>${bad?'':' — все картинки на месте'}.${extra}</span></div>`);
+    if(plan.old.length) rows.push(`<div class="cdttsrow"><span class="ic">↺</span><span class="grow"><b>${plan.old.length} ${plural(plan.old.length,'карта будет','карты будут','карт будут')} в TTS в прежнем виде</b> — ${plan.old.length>1?'их':'её'} меняли после выгрузки: ${nms(plan.old)}.<br><span class="faint">Новый вид появится, когда ${isDM()?'ты выгрузишь':'мастер выгрузит'} сет в TTS — тогда сохрани колоду ещё раз.</span></span></div>`);
+    if(plan.miss.length||plan.part.length) rows.push(`<div class="cdttsrow"><span class="ic">⚠</span><span class="grow"><b>Картинок нет на сайте картинок</b> — ${[plan.miss.length?`не попадут в файл: ${nms(plan.miss)}`:'',plan.part.length?`без части улучшений: ${nms(plan.part)}`:''].filter(Boolean).join('; ')}.<br><span class="faint">${ask}.</span>${plan.total?'':extra}</span></div>`);
+    /* мастер может выложить картинки прямо отсюда — кнопка в последней строке с предупреждением */
+    if(isDM()&&msets.length&&rows.length) rows[rows.length-1]=rows[rows.length-1].replace(/<\/div>$/,`<button class="btn sm primary" id="dSets">⬆ Выгрузить ${msets.length>1?'сеты':'сет'}</button></div>`);
+    h.innerHTML=rows.join('')||'<div class="cdttsrow"><span class="ic">∅</span><span class="grow">В колоде нет карт, которые можно выгрузить.</span></div>';
+    $('#dGo',b).disabled=!plan.json;
     const ds=$('#dSets',h); if(ds) ds.onclick=async()=>{ if(!cdTokOk()){ try{ await cdTtsLogin(); }catch(e){ toast('Вход не удался: '+(e.code||e.message),true); return; } } ds.disabled=true; await cdTtsExport(msets.map(x=>x.id),P); check(); }; };
   $('#dNo',b).onclick=closeModal;
-  $('#dGo',b).onclick=async()=>{ const go=$('#dGo',b); go.disabled=true; try{ plan=cdDeckTtsPlan(ch); if(!plan.json) return; const name=cdTtsName({name:plan.nm}), json=JSON.stringify(plan.json,null,2);
+  $('#dGo',b).onclick=async()=>{ const go=$('#dGo',b); go.disabled=true; try{ plan=await cdDeckTtsResolve(ch,OK); if(!plan.json){ toast('В файле не осталось карт с картинками',true); return; } const name=cdTtsName({name:plan.nm}), json=JSON.stringify(plan.json,null,2);
       let dir=await cdTtsDir(true), sub=null; if(dir){ try{ sub=await dir.getDirectoryHandle('Картотека',{create:true}); }catch(e){ console.error(e); } }
       if(sub){ await cdWriteFile(sub,name+'.json',json); try{ const st=plan.first;
           if(st){ const th=await cdJpeg((x,w)=>cdDrawBack(x,st,w,true),[cdBackImg(cdBackOf(st))],cdBackFonts(cdBackOf(st)),256,358); await cdWriteFile(sub,name+'.png',await cdBlob(th)); } }catch(e){ console.warn('deck thumb',e); }
@@ -12648,7 +12735,7 @@ async function importLocal(file){
   for(const r of (w.relations||[])) await DB.set('relations',r.id,clean({...r,owner,shared:false}));
   toast(`Импортировано записей: ${n}`);
 }
-if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{epSndOk,epSndRnd,epSndOne,epRndDlg,epEvClick,epSndFire,epSndTest,epSndUpload,epSndWav,epSndLoadFile,epSndNeed,epSndName,epSndLib,epSndLibDraw,epMixDlg,epSxOpts,epSxWire,epEv,epEvRef,epEvBlock,EP_EV,epSfxOf,epSfxAuto,EPX,EP_SFXV,EP_SFXG,EP_ULTSX,epSfxAuto,epSfxFin,epUltGlass,epUlt,epUltShatter,epUltSrcOf,epFxCtx,epSfxOff,EPS,epUltMini,cdKwView,cdDeckTtsPlan,cdDeckTtsDlg,cdTtsDeck,cdDeckAdd,cdDeckN,cdDeckChar,cdDeckList,charTab,barTurnGain,woundGain,woundAdd,woundsHTML,woundsWire,woundTrauma,rollMod,rollAddMod,chatSend,chatRollAs,effOnApply,modTargets,fxStatCalc,sitRows,statMinRoll,rollApplyMin,barMin,effImmune,statBaseCap,statEff,radarSVG,modLabel,statKindsText,techActRun,techActs,epStrike,epHurt,epApply,epApplyRows,epTrig,epEnd,epNames,epAnGallery,epUse,epUS,epAct,epPlay,epDo,epChoose,EP_SEEN,epDmgEval,epSfxPlay,epSfxTest,EPA,EP_SFX,EP_SFXMAN,EP_SFXM,epSfxLoad,epSfxFire,epUltDlg,epRbOf,epCardHTML,chatRender,epSkillEditor,epPost,epicBlock,epJoin,epInit,epSnap,epStart,epNext,epUnitDlg,epFxRows,epTex,epEmit,epPx,epFxCtx,epAnDraw,epUlt,EP_ANM,EPG,epGLLoad,epGLScene,epGLDraw,epGLTex,wmTmplGeo,wmTmplHandles,fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdKwFind,cdKwScan,cdKwSet,cdKwFromRows,cdCsv,cdKwMerge,cdKwFetchSheet,cdKwCsv,cdRunsSig,cdUpCard,cdUpTree,cdQMatcher,cdTtsDeck,cdTtsSigs,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
+if(MOCK||window.LOCAL_BACKEND) Object.assign(window,{epSndOk,epSndRnd,epSndOne,epRndDlg,epEvClick,epSndFire,epSndTest,epSndUpload,epSndWav,epSndLoadFile,epSndNeed,epSndName,epSndLib,epSndLibDraw,epMixDlg,epSxOpts,epSxWire,epEv,epEvRef,epEvBlock,EP_EV,epSfxOf,epSfxAuto,EPX,EP_SFXV,EP_SFXG,EP_ULTSX,epSfxAuto,epSfxFin,epUltGlass,epUlt,epUltShatter,epUltSrcOf,epFxCtx,epSfxOff,EPS,epUltMini,cdKwView,cdDeckTtsPlan,cdDeckTtsResolve,cdImgThere,cdDer,cdDerIds,cdDerFrom,cdDerPut,cdDerPick,cdDeckTtsDlg,cdTtsDeck,cdDeckAdd,cdDeckN,cdDeckChar,cdDeckList,charTab,barTurnGain,woundGain,woundAdd,woundsHTML,woundsWire,woundTrauma,rollMod,rollAddMod,chatSend,chatRollAs,effOnApply,modTargets,fxStatCalc,sitRows,statMinRoll,rollApplyMin,barMin,effImmune,statBaseCap,statEff,radarSVG,modLabel,statKindsText,techActRun,techActs,epStrike,epHurt,epApply,epApplyRows,epTrig,epEnd,epNames,epAnGallery,epUse,epUS,epAct,epPlay,epDo,epChoose,EP_SEEN,epDmgEval,epSfxPlay,epSfxTest,EPA,EP_SFX,EP_SFXMAN,EP_SFXM,epSfxLoad,epSfxFire,epUltDlg,epRbOf,epCardHTML,chatRender,epSkillEditor,epPost,epicBlock,epJoin,epInit,epSnap,epStart,epNext,epUnitDlg,epFxRows,epTex,epEmit,epPx,epFxCtx,epAnDraw,epUlt,EP_ANM,EPG,epGLLoad,epGLScene,epGLDraw,epGLTex,wmTmplGeo,wmTmplHandles,fsCount,fsStatHTML,wmSubMap,logSub,WMSUB,cdImport,cdKwFind,cdKwScan,cdKwSet,cdKwFromRows,cdCsv,cdKwMerge,cdKwFetchSheet,cdKwCsv,cdRunsSig,cdUpCard,cdUpTree,cdQMatcher,cdTtsDeck,cdTtsSigs,cdEdit,cdSetEdit,cdListsDlg,cdNewCard,cdNewSet,cdZoom,cdRuns,cdFaceRun,cdSigCard,cdSigBack,cdSheetDownload,cdTtsDlg,cdTtsExport,cdTtsState,cdStylesDlg,cdAssignSets,cdAssignCards,cdStylesInit,cdStyle,__camp:()=>CAMP,snapshots,pending,flush,wmItems,wmTmplGeo,wmTmplHandles,wmAreaUse,areaSummary,techEditor,G,docPlace,docEditDialog,docView,docDrop,canEditDoc,newDocument,mapEdgeDialog,editRelDialog,editEdgeDialog,mapHidEdges,world,WM,LIVE,STAT,ruRoll,ruExpand,ruConsume,ruPayCost,ruSpeedTotal,ruSpeedBase,ruPassives,fxMods,effTurn,ruInstantOf,ruPlayInstant,ruSingleton,ruLightBar,ruSpeedDie,ruFxPlay,RU_FX,ruSpeedRoll,ruResetFight,ruOverDialog,ruDeckDialog,ruDiceRows,ruCondOk,ruFire,ruEmoUp,ruDamage,ruEmoTierOf,wmMakeClone,wmSweepClones,isClone,ruEmoOnFor,ruCostBarFor,ruDealFor,ruPageAllowed,ruMarkUsed,ruUsesLeft,ruTypeChip,wmCopyMap,fxRun,fxCheck,chatFxAs,fxRollAs,fxApplyOps,statusDefs,techItems,techRank,techStatus,techNextCost,techLearn,techUnlearn,prog,fxSyncBars,fxBarMax,fxMods,fxStat,fxParse,fxSerialize,fxDerived,applyEffectDef,effTurn,statusPicker,effectDialog,ruRequest,ruAnswer,ruFinish,ruResolve,ruAttack,ruClashDialog,ruPayCost,ruSeedEffects,RU_TPL,ruTplAdd,ruTplHas,ruFlag,ruClash,ruOneSided,ruCoin,ruColorLines,ruSceneStart,ruSceneResolve,ruDeckBuild,ruDraw,chatAll,newWorldMap,findEntity,wmSettings,wmDist,wmInFog,BK_COLLS,fullRestore,fullBackup,confirmDlg,newCharacter,newOrg,newLocation,createDoc,go,render,touch,uid,DB,AUTH,uploadImages,get me(){return me;},__role:()=>myRole,__me:()=>me,__viewAs:()=>viewAs});
 </script>
 </body>
 </html>
