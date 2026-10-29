@@ -2732,7 +2732,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
-  {d:'2026-10-29',t:'Карточки: производные карты и колода в TTS без ошибок',items:['Производные карты: в конструкторе карты под версиями — блок «Производные» (что эта карта создаёт или призывает). «🔗 ＋ производная» — выбрать карту из библиотеки (есть поиск) или сразу создать новую. В просмотре карты такие карты видны в окне справа, клик открывает карту, «←» возвращает назад; у производной видно, какой картой она создаётся.','Колода в TTS: если карту поменяли после выгрузки сета, в колоду идёт её последняя выгруженная версия, а карты без картинки на сайте в файл не попадают — больше нет ошибки «Load image failed unsupported format» в TTS. Окно колоды пишет, каких карт не хватает; мастер может выложить их оттуда же.']},
+  {d:'2026-10-29',t:'Карточки: производные карты и колода в TTS без ошибок',items:['Производные карты: в конструкторе карты под версиями — блок «Производные» (что эта карта создаёт или призывает). «🔗 ＋ производная» — выбрать карту из библиотеки (есть поиск) или сразу создать новую. В просмотре карты такие карты видны в окне справа, клик открывает карту, «←» возвращает назад; у производной видно, какой картой она создаётся. В TTS в описании такой карты последняя строка «Создаёт: …» (только карты, которые видят игроки); после привязки сет помечается «изменено» — выгрузи его ещё раз.','Колода в TTS: если карту поменяли после выгрузки сета, в колоду идёт её последняя выгруженная версия, а карты без картинки на сайте в файл не попадают — больше нет ошибки «Load image failed unsupported format» в TTS. Окно колоды пишет, каких карт не хватает; мастер может выложить их оттуда же.']},
   {d:'2026-10-28',t:'Эпик-бой: несколько фраз озвучки на одно событие',items:['В «🔊 Звуки бойца» у каждого события кнопка 🎲: можно поставить несколько фраз (звуков) — каждый раз звучит одна случайная, одна и та же два раза подряд не повторяется. Файлы можно загрузить сразу пачкой. Все в бою слышат одну и ту же фразу.','Звук клика по бойцу больше не играет, когда выбираешь цель скилла, — только на обычный клик.']},
   {d:'2026-10-28',t:'Эпик-бой: выстрелы, свои звуки, миксы, звуки бойца',items:['Новая группа звуков «🔫 Огнестрел»: пистолет, револьвер, винтовка, снайперская винтовка, дробовик, мушкет, автоматная очередь, пулемёт, глушитель, рикошет, перезарядка, затвор, взвод курка; ещё бластеры и новые варианты пушки и лазера. Мушкетные, пистолетные и снайперские анимации сами берут подходящий звук.','Свои звуки: в любой выпадашке звука — «⤒ Загрузить свой файл…» (mp3, ogg, wav, m4a…). В листе персонажа файл попадает в звуки персонажа, в настройках («Эпик-бой» → «Звуки» → «📁 Свои звуки») — в общую библиотеку мастера.','Миксы: кнопка 🎚️ рядом с полем звука — несколько звуков сразу или с задержкой, повтор N раз с шагом (пачка аниме-разрезов, очередь выстрелов), полоса времени и «▶ Послушать всё». Мастер может сохранять миксы в библиотеку под именем.','Звуки бойца: лист → «Характеристики» → «Эпик-бой» → «🔊 Звуки бойца» — свой звук или голос на первый ход, клик по бойцу, нанесённый и полученный урон, бафф и дебафф, добивание врага, гибель и гибель союзника.']},
   {d:'2026-10-27',t:'Эпик-бой: врезка ультимейта разбивается как стекло',items:['В конце врезки с портретом по экрану бегут трещины, и под звон стекла он разлетается осколками — с бликами, светящимися краями цвета стихии и стеклянной крошкой; под ними уже начинается удар ультимейта.','Так теперь по умолчанию (звук врезки «Разбитое стекло в конце» или «авто»). С другими звуками врезки лента уезжает, как раньше. Выбор — в редакторе скилла, блок «⭐ Врезка ультимейта»; там же ▶ в окне «Картинка и кадр» показывает врезку целиком.']},
@@ -11982,7 +11982,7 @@ function cdEdit(id,ids,opt={}){ if(!isDM()) return cdZoom(id,ids); const C=()=>b
     const s=cdSetOf(o); sum('set',`${s?s.name||'Без названия':'без сета'} · ${o.pub?'видят игроки':'игроки не видят'}`); };
   /* нижняя панель: сохранение, состояние в TTS, соседние карты */
   const stat=()=>{ if(!b.isConnected||!$('.cdfst',b)){ clearInterval(statT); return; } const o=C(); if(!o) return; const s=cdSetOf(o), t=s&&s.tts; let tts='';
-    if(s){ if(!t) tts='<span class="tts">🎲 сет ещё не выгружался в TTS</span>'; else { const now=cdTtsSigs([o]), old=t.cards||{}, same=Object.entries(now).every(([k,v])=>old[k]===v)&&!Object.keys(old).some(k=>k.startsWith(o.id+'~')&&!(k in now));
+    if(s){ if(!t) tts='<span class="tts">🎲 сет ещё не выгружался в TTS</span>'; else { const now=cdTtsSigs([o]), old=t.cards||{}, same=Object.entries(now).every(([k,v])=>old[k]===v)&&!Object.keys(old).some(k=>k.startsWith(o.id+'~')&&!(k in now))&&!cdTtsDerChg(o,t);
       tts=same?'<span class="tts ok">🎲 в TTS актуальна</span>':'<span class="tts warn">🎲 TTS: изменена после выгрузки <button class="lnk ttsgo">выгрузить…</button></span>'; } }
     const h=$('.cdfst',b), html=(pending.has(o.id)?'<span class="sv">⏳ Сохраняю…</span>':'<span class="sv ok">✓ Сохранено</span>')+(tts?'<span class="sep">·</span>'+tts:'');
     if(h._h!==html){ h._h=html; h.innerHTML=html; const g=$('.ttsgo',h); if(g) g.onclick=()=>{ cleanup(); cdTtsDlg(s.id); }; } };
@@ -12420,9 +12420,14 @@ function cdTtsDeck(s,cards,url,bsig,sigs){ const back=url+'b-'+bsig+'.jpg'; let 
   const obj=objs.length===1?{...objs[0],Transform:cdTtsT()}:{GUID:cdTtsGuid(),Name:'Deck',Transform:cdTtsT(),Nickname:s.name||'Сет',Description:`Картотека: ${cards.length} ${plural(cards.length,'карта','карты','карт')}${s.pub?'':' · скрытый сет'}`,GMNotes:JSON.stringify({kartoteka:s.id}),Tags:[],...CD_TTS_COMMON,Hands:false,DeckIDs:objs.map((o,i)=>(i+1)*100),CustomDeck:Object.assign({},...objs.map(o=>o.CustomDeck)),ContainedObjects:objs};
   return cdTtsSave(s.name||'Сет',obj); }
 const cdTtsSave=(name,obj)=>({SaveName:name,Date:'',VersionNumber:'',GameMode:'',GameType:'',GameComplexity:'',Tags:[],Gravity:0.5,PlayArea:0.5,Table:'',Sky:'',Note:'',TabStates:{},LuaScript:'',LuaScriptState:'',XmlUI:'',ObjectStates:[obj]});
+/* производные в описании карты TTS: «Создаёт: Волк, Вожак стаи» — только карты, которые видят игроки (описание в TTS видно всем за столом) */
+const cdTtsDerTxt=c=>{ const L=cdDer(c).filter(z=>z.pub).map(z=>String(z.name||'').trim()||'Без названия'); return L.length?'Создаёт: '+L.join(', '):''; };
+/* что из производных было в выгрузке сета: {id карты: строка} (только у карт со строкой) */
+const cdTtsDerMap=cards=>Object.fromEntries(cards.map(c=>[c.id,cdTtsDerTxt(c)]).filter(x=>x[1]));
+const cdTtsDerChg=(c,t)=>((t&&t.der||{})[c.id]||'')!==cdTtsDerTxt(c);
 /* одна карта TTS (CardCustom 1×1) с лицом face и рубашкой back (полные адреса), k — номер в CustomDeck */
-function cdTtsOne(c,face,back,k,lbl){ const v=x=>String(x??'').trim()||'—';
-  return ({GUID:cdTtsGuid(),Name:'CardCustom',Transform:cdTtsT(),Nickname:c.name||'',Description:[lbl?`⬆ Улучшение${lbl===true?'':': '+lbl}`:'',`Энергия ${v(c.en)} · Инициатива ${v(c.ini)}`,[(c.tags||[]).join(', '),c.tgt].filter(Boolean).join(' · '),'',cdTtsPlain(c.text),cdFlav(c)?'\n«'+cdFlav(c)+'»':''].filter((x,i)=>i||x).join('\n').trim(),
+function cdTtsOne(c,face,back,k,lbl){ const v=x=>String(x??'').trim()||'—', der=cdTtsDerTxt(c);
+  return ({GUID:cdTtsGuid(),Name:'CardCustom',Transform:cdTtsT(),Nickname:c.name||'',Description:[lbl?`⬆ Улучшение${lbl===true?'':': '+lbl}`:'',`Энергия ${v(c.en)} · Инициатива ${v(c.ini)}`,[(c.tags||[]).join(', '),c.tgt].filter(Boolean).join(' · '),'',cdTtsPlain(c.text),cdFlav(c)?'\n«'+cdFlav(c)+'»':'',der?'\n'+der:''].filter((x,i)=>(i&&i<4)||x).join('\n').trim(),
       GMNotes:JSON.stringify({kartoteka:c.id,...(c._up?{up:c._up}:{}),en:c.en??'',ini:c.ini??'',tags:c.tags||[],tgt:c.tgt||''}),Tags:(c.tags||[]).filter(Boolean).map(String),...CD_TTS_COMMON,CardID:k*100,
       CustomDeck:{[k]:{FaceURL:face,BackURL:back,NumWidth:1,NumHeight:1,BackIsHidden:true,UniqueBack:false,Type:0}}}); }
 
@@ -12495,7 +12500,7 @@ const cdBlob=u=>fetch(u).then(r=>r.blob());
 /* --- что поменялось с прошлой выгрузки --- */
 function cdTtsState(s){ const cards=cdInSet(s.id), t=s.tts; if(!cards.length) return {k:'empty',t:'пусто',n:0};
   if(!t) return {k:'new',t:'не выгружался',n:cards.length};
-  const old=t.cards||{}, changed=cards.filter(c=>{ const now=cdTtsSigs([c]); return Object.entries(now).some(([k,v])=>old[k]!==v)||Object.keys(old).some(k=>k.startsWith(c.id+'~')&&!(k in now)); }).length,
+  const old=t.cards||{}, changed=cards.filter(c=>{ const now=cdTtsSigs([c]); return Object.entries(now).some(([k,v])=>old[k]!==v)||Object.keys(old).some(k=>k.startsWith(c.id+'~')&&!(k in now))||cdTtsDerChg(c,t); }).length,
     removed=Object.keys(old).filter(id=>!id.includes('~')&&!cards.some(c=>c.id===id)).length, back=t.b!==cdSigBack(s);
   const sc=(t.sc||'1.5,1,1.5')!==cdTtsScKey();
   if(!changed&&!removed&&!back&&!sc&&t.file===cdTtsName(s)+'.json') return {k:'ok',t:'✓ в TTS',n:0};
@@ -12519,7 +12524,7 @@ async function cdTtsExport(ids,P){ if(CD_TTS.busy) return; CD_TTS.busy=true; P=P
       if(sub){ await cdWriteFile(sub,name+'.json',json); const th=await cdJpeg((x,w)=>cdDrawBack(x,p.s,w,true),[cdBackImg(cdBackOf(p.s))],cdBackFonts(cdBackOf(p.s)),256,358); await cdWriteFile(sub,name+'.png',await cdBlob(th));
         const old=p.s.tts&&p.s.tts.file; if(old&&old!==name+'.json'){ for(const f of [old,old.replace(/\.json$/,'.png')]) await sub.removeEntry(f).catch(()=>{}); } }
       else { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([json],{type:'application/json'})); a.download=name+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
-      const o=byId(world.cardsets,p.s.id); if(o){ o.tts={at:Date.now(),cards:p.sigs,b:p.b,file:name+'.json',sc:cdTtsScKey()}; touch(o); } }
+      const o=byId(world.cardsets,p.s.id); if(o){ const der=cdTtsDerMap(p.cards); o.tts={at:Date.now(),cards:p.sigs,b:p.b,file:name+'.json',sc:cdTtsScKey(),...(Object.keys(der).length?{der}:{})}; touch(o); } }
     setStatus('синхронизировано');
     toast(sub?`Готово: ${plan.length} ${plural(plan.length,'колода','колоды','колод')} в TTS → «Сохранённые объекты → Картотека»`:`Готово: файлы колод скачаны — положи их в «Документы\\My Games\\Tabletop Simulator\\Saves\\Saved Objects»`);
     return true; }
