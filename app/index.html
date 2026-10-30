@@ -2761,6 +2761,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-10-31',t:'Страница больше не прыгает наверх',items:['Когда кто-то правит базу (полоски, эффекты, другие персонажи), открытая страница обновляется — раньше при длинной предыстории или описании её при этом выбрасывало в самый верх. Теперь место чтения сохраняется.']},
   {d:'2026-10-31',t:'Инвентарь: длинный текст читается',items:['Ячейки инвентаря на листе растут вниз под текст (перенос строк, Enter — новая строка) и ничего не обрезают, в том числе при узком окне.','Ширина столбцов подстраивается под текст: описанию больше места, пустым столбцам — меньше.']},
   {d:'2026-10-31',t:'Кнопки техник: «сколько?», отказ, цена с возвратом',items:['Кнопке техники можно задать «спросить число»: перед выполнением откроется окно «Сколько?», ответ в формуле — переменная «число» (например, сколько токенов вложить).','Новые функции формул: отказ("почему") — ничего не делать и показать причину (в чат не уходит); заплатить("ключ", 4) и вернуть("ключ", 4) — цена, которая возвращается, если отменить в тот же ход (ход берётся из трекера инициативы); оплачено("ключ"); наложить_стаки("Эффект", n).','Полоска может считать текущее значение формулой (ƒ у полоски → «Текущее по формуле»): тогда она только показывает число, руками не меняется, а при максимуме 0 не видна на карте.']},
   {d:'2026-10-29',t:'Эпик-бой: пассивка воскрешения',items:['Пассивка «летальный урон» с «Воскрешением» (или лечением) на себя теперь спасает от смерти — раньше боец всё равно умирал.','Новый момент срабатывания «погиб сам (для воскрешения)»: пассивка срабатывает уже после смерти — боец выбывает и тут же воскресает. Поставь «один раз за бой», чтобы воскрешение было одно.','Эффекты в той же пассивке (стелс, сброс КД и т. п.) вешаются после воскрешения при любом порядке строк; на «летальном уроне» воскрешение не снимает уже висящие эффекты.']},
@@ -2955,7 +2956,7 @@ function renderPage(){
   const m=$('#main');
   /* сохранить фокус */
   const act=document.activeElement; let fi=null, sel=null; if(act&&m.contains(act)&&/INPUT|TEXTAREA|SELECT/.test(act.tagName)){ fi={i:$$('input,textarea,select',m).indexOf(act),tag:act.tagName}; try{ sel=[act.selectionStart,act.selectionEnd]; }catch{} }
-  const st=m.scrollTop;
+  const st=m.scrollTop, H0=m.scrollHeight, key0=state.view+'/'+(state.id||''); const se=document.scrollingElement||document.documentElement, dst=se.scrollTop;
   applyNav(); $$('.nav').forEach(n=>n.classList.toggle('active',n.dataset.view===state.view)); document.body.classList.toggle('onmap',state.view==='wmap'&&!!state.id); if(state.view!=='wmap'){ dockOff(); document.body.classList.remove('wmBarOn'); const c=$('#chat'); if(c){ c.style.top=''; c.style.bottom=''; } WM.fitChat=null; };
   updateCounts(); document.onpaste=null; m.innerHTML=''; techHideTip();
   if(viewAs){ const b=el(`<div id="viewas">👁 Режим просмотра: ты видишь картотеку как <b>${esc(viewAs.name)}</b> (${roleName(viewAs.role)}). Изменения отключены.<span class="grow"></span><button class="btn sm">Вернуться к себе</button></div>`); $('.btn',b).onclick=stopViewAs; m.append(b); }
@@ -2980,7 +2981,13 @@ function renderPage(){
   else renderList(m,'c');
   if(v==='wmap'&&state.id&&CHAT.mapAuto&&!CHAT.open&&!PHONE()&&$('#chatBtn').style.display!=='none') chatOpen(true);
   hydrate(m);
-  m.scrollTop=st;
+  /* та же страница перерисована (чужая правка в базе и т.п.): поля с длинным текстом (предыстория, описание…) подгоняют высоту в setTimeout —
+     до этого страница короче, и прокрутка упёрлась бы вверх. Держим прежнюю высоту распоркой, пока поля не выросли, потом убираем */
+  const same=key0===state.view+'/'+(state.id||''); let sp=null;
+  /* якорение прокрутки браузера на это время выключено: иначе, пока поле растёт над распоркой, оно само уводит прокрутку вниз */
+  if(same&&st>0&&m.scrollHeight<H0){ sp=document.createElement('div'); sp.className='rpspacer'; sp.style.cssText='height:'+(H0-m.scrollHeight)+'px;pointer-events:none'; m.append(sp); m.style.overflowAnchor='none'; }
+  m.scrollTop=st; if(same&&dst&&se.scrollTop!==dst) se.scrollTop=dst;
+  if(sp) setTimeout(()=>{ requestAnimationFrame(()=>{ if(sp.isConnected){ m.scrollTop=st; sp.remove(); m.scrollTop=st; } m.style.overflowAnchor=''; }); },0);
   if(fi){ const e=$$('input,textarea,select',m)[fi.i]; if(e&&e.tagName===fi.tag){ e.focus({preventScroll:true}); if(sel&&sel[0]!=null) try{ e.setSelectionRange(sel[0],sel[1]); }catch{} } }
 }
 
