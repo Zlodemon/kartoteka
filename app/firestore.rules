@@ -130,8 +130,11 @@ service cloud.firestore {
       match /cards/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow create: if (isDM()) && syncC(); allow update: if (isDM()) && syncU('cards', id); allow delete: if (isDM()) && syncD('cards', id); }
       match /cardsets/{id} { allow read: if isDM() || (signedIn() && resource.data.get('pub', false) == true); allow create: if (isDM()) && syncC(); allow update: if (isDM()) && syncU('cardsets', id); allow delete: if (isDM()) && syncD('cardsets', id); }
       // картинки карт для TTS: рисует браузер мастера, забирает программа 4_KARTY_V_TTS
-      // ===== «Эпик-бой»: документ боя. Ходы пишет тот, кто действует (мастер или игрок), создаёт и удаляет мастер
-      match /battles/{id} { allow read: if signedIn(); allow create, delete: if isDM(); allow update: if isDM() || isPlayer(); }
+      // ===== «Эпик-бой»: документ боя. Ходы пишет тот, кто действует (мастер или игрок), создаёт и удаляет мастер; игрок — только свой тестовый бой (test: 1, owner — он)
+      match /battles/{id} { allow read: if signedIn();
+        allow create: if isDM() || (isPlayer() && request.resource.data.get('test', 0) == 1 && request.resource.data.get('owner', '') == uid());
+        allow delete: if isDM() || (isPlayer() && resource.data.get('test', 0) == 1 && resource.data.get('owner', '') == uid());
+        allow update: if isDM() || isPlayer(); }
       match /cardfaces/{id} { allow read, write: if isDM(); }
 
       // ===== картинки
