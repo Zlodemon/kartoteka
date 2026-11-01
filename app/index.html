@@ -789,7 +789,7 @@ body.fight #fightBtn{background:rgba(255,209,102,.2);border-color:rgba(255,209,1
 .epsndlib{margin:2px 0 12px;padding:10px 12px;border-radius:10px;border:1px dashed rgba(142,247,193,.35);background:rgba(142,247,193,.04)}.epsndlib .hd{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:12.5px;margin-bottom:6px;line-height:1.5}
 .epsndr{display:flex;gap:6px;align-items:center;margin:4px 0}.epsndr .n{flex:1;max-width:280px;padding:3px 8px}.epsndr .k{width:18px;text-align:center}
 .epevd{margin-top:10px;border-top:1px solid var(--line2);padding-top:8px}.epevd>summary{cursor:pointer;font-weight:600;font-size:13px}.epevd>summary .faint{font-weight:400;font-size:12px}
-.epevh{font-size:12px;line-height:1.5;margin:6px 0 8px}.epevr{display:flex;gap:8px;align-items:center;margin:4px 0;flex-wrap:wrap}.epevr .ic{width:20px;text-align:center}.epevr .nm{flex:1 1 150px;font-size:12.5px;min-width:0}.epevr .nm i{font-style:normal;font-size:11px}
+.epevh{font-size:12px;line-height:1.5;margin:6px 0 8px}.epevr{display:flex;gap:8px;align-items:center;margin:4px 0;flex-wrap:wrap}.epevr .ic{width:20px;text-align:center}.epevr .nm{flex:1 1 150px;font-size:12.5px;min-width:0}.epevr .nm i{font-style:normal;font-size:11px}.epevv{padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.04);margin-bottom:8px}.epevv input[type=range]{flex:1 1 140px;max-width:240px}.epevv .evvv{min-width:44px;text-align:right;font-size:12.5px}
 .epevf{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:12px}.epevf .epchip b{cursor:pointer;font-weight:500}.epevf .epchip i{font-style:normal;margin-left:4px}
 .rsb{position:relative;height:11px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:3px}.rsb i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,color-mix(in srgb,var(--rc) 70%,#000),var(--rc));transition:width .4s}.rsb.rseg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(100% / var(--n) - 1.5px),rgba(10,14,24,.7) calc(100% / var(--n) - 1.5px) calc(100% / var(--n)))}.rsb span{position:absolute;inset:0;font-size:9.5px;line-height:11px;font-weight:700;text-shadow:0 1px 2px #000;z-index:1;letter-spacing:.2px}
 #epDmgF{width:100%;margin-top:6px;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.45;resize:vertical;min-height:44px}.epdmgst{font-size:12px;margin-top:4px}.epdmgst .bad{color:#ff6b5e}.epdmgst .ok{color:#8ef7c1}.epdmgv{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.epdmgv .epchip{cursor:pointer;font-size:11.5px;font-family:ui-monospace,Consolas,monospace}.epdmgv .epchip:hover{border-color:var(--gold)}
@@ -2171,7 +2171,7 @@ function campPanel(p){ const box=$('.camplist',p), ask=$('#campAskOn',p); const 
   $('#campNew',p).onclick=campNewDialog; }
 /* ===== подписки по требованию — лишнее не читаем из суточного лимита Firestore =====
    токены и рисунки карт — только открытой карты (и 2 недавних); листы-документы на картах (рисунки t:'note') — всегда: по ним раздел «Документы» знает, что лежит на картах;
-   журнал — последние 30 записей (счётчик новых), полностью — при открытии «Журнала»; карточки — при открытии раздела «Карточки» */
+   журнал — только пока открыт «Журнал» (ушёл со страницы — отписка; каждая правка любого игрока иначе стоила бы чтение); карточки — при открытии раздела «Карточки» */
 const WMSUB=new Map();
 const wmAlias=key=>{ const m=/^_(wmarkers|wmdraw)_(.+)$/.exec(key); return m?{coll:m[1],map:m[2]==='notes'?null:m[2],notes:m[2]==='notes'}:null; };
 function wmMerge(coll){ const out=[], seen=new Set(); const add=L=>{ for(const d of L||[]) if(!seen.has(d.id)){ seen.add(d.id); out.push(d); } };
@@ -2184,6 +2184,7 @@ function wmSubMap(id){ if(!id||!me) return Promise.resolve(); let s=WMSUB.get(id
   for(const [k,v] of [...WMSUB.entries()].filter(([k])=>k!==id&&k!==state.id).sort((a,b)=>b[1].at-a[1].at).slice(2)){ v.un.forEach(f=>{ try{ f(); }catch{} }); WMSUB.delete(k); delete world['_wmarkers_'+k]; delete world['_wmdraw_'+k]; }
   wmMerge('wmarkers'); wmMerge('wmdraw'); return s.ready; }
 let LOGSUB=null;
+function logUnsub(){ if(LOGSUB){ try{ LOGSUB.un(); }catch{} LOGSUB=null; updateCounts(); } }
 function logSub(n){ if(!realDM()||!me) return; if(LOGSUB&&LOGSUB.n>=n) return; if(LOGSUB) try{ LOGSUB.un(); }catch{} LOGSUB={n,un:DB.subscribe('log',{orderBy:'at',limit:n},docs=>applyDocs('log','log',docs))}; }
 let CDSUB=null, EPSUB=null; const CD_LOADED={cards:false,sets:false}; // пришли ли карты и сеты из базы (до этого не переводим оформление на стили)
 function cdSubscribe(){ if(CDSUB||!me) return; const o=realDM()?null:{where:[['pub','==',true]]}; CDSUB=[DB.subscribe('cards',o,docs=>{ CD_LOADED.cards=true; applyDocs('cards','cards',docs); }),DB.subscribe('cardsets',o,docs=>{ CD_LOADED.sets=true; applyDocs('cardsets','cardsets',docs); })]; }
@@ -2199,7 +2200,7 @@ function subscribeAll(){ lazyReset(); DB.syncResume&&DB.syncResume();
   world._chat=[]; sub('chat','_chat',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); if(realDM()){ world._chatdm=[]; sub('chatdm','_chatdm',{where:[['day','>=',dayId(Date.now()-2*86400e3)]]},chatRender); }
   if(realDM()) sub('docs','docs');
   else { world._docsA=[]; world._docsB=[]; world._docsC=[]; const md=()=>mergeSrc('docs'); sub('docs','_docsA',{where:[['pub','==',true]]},md); sub('docs','_docsB',{where:[['given','array-contains',me.uid]]},md); if(myRole==='player') sub('docs','_docsC',{where:[['owner','==',me.uid]]},md); }
-  if(realDM()){ sub('characters','characters'); sub('orgs','orgs'); sub('locations','locations'); sub('relations','relations'); sub('maps','maps'); logSub(state.view==='log'?200:30);
+  if(realDM()){ sub('characters','characters'); sub('orgs','orgs'); sub('locations','locations'); sub('relations','relations'); sub('maps','maps'); if(state.view==='log') logSub(200);
     sub('wmaps','wmaps'); sub('wmpriv','wmpriv',null,()=>{ for(const d of world.wmpriv) if(!Array.isArray(d.uids)&&d.uid&&!pending.has(d.id)){ d.uids=[d.uid]; touch(d); } });
     sub('dm','_dm',null,()=>{ const t=world._dm.find(x=>x.id==='dmtimeline'); if(!pending.has('dmtimeline')) world.dmTimeline=t?t:{id:'dmtimeline',nodes:[]}; for(const d of world._dm) if(d.id.startsWith('wm_')&&!pending.has(d.id)) WM.secrets.set(d.id.slice(3),d); }); }
   else {
@@ -2953,7 +2954,7 @@ function phoneInit(){ document.body.classList.toggle('phone',PHONE()); try{ PHON
 function renderMe(){ const m=$('#me'); const nm=viewAs?viewAs.name:me.name, role=effRole(); m.innerHTML=`${!viewAs&&me.photo?`<img src="${esc(me.photo)}" referrerpolicy="no-referrer">`:`<div class="av">${viewAs?'👁':esc(initials(me.name))}</div>`}<div class="grow"><div class="nm" title="${esc(me.email)}">${esc(nm)}</div><span class="badge ${role}">${roleName(role)}</span></div><button class="out" title="${viewAs?'Выйти из режима просмотра':'Выйти'}">${viewAs?'✕':'⏻'}</button>`; $('.out',m).onclick=()=>viewAs?stopViewAs():AUTH.signOut(); $$('.dmonly').forEach(n=>n.style.display=isDM()?'':'none'); }
 function startViewAs(u){ if(!realDM()) return; viewAs={uid:u.id,role:u.role||'observer',name:u.name||u.email}; G.sel=null; renderMe(); go('characters'); toast(`Смотришь как «${viewAs.name}» (${roleName(viewAs.role)})`); }
 function stopViewAs(){ viewAs=null; G.sel=null; renderMe(); go('users'); }
-function updateCounts(){ { const nd=$('#nDocs'); if(nd) nd.textContent=world.docs.length||''; } { const n=$('#nEff'); if(n) n.textContent=(world.settings&&world.settings.effectLib||[]).length||''; const ne=$('#nEmo'); if(ne){ ne.textContent=(world.settings&&world.settings.effectLib||[]).filter(d=>d.emo).length||''; const nav=ne.closest('.nav'); if(nav) nav.style.display=(isDM()&&ruOn())?'':'none'; } } $('#nWmaps').textContent=world.wmaps.filter(mp=>isDM()||mp.visibility!=='hidden').length||''; $('#nMaps').textContent=world.maps.filter(mp=>isDM()||mp.owner===effUid()||mp.shared).length||''; $('#nChars').textContent=V.chars().length||''; $('#nOrgs').textContent=V.orgs().length||''; $('#nLocs').textContent=V.locs().length||''; $('#nUsers').textContent=world.users.length||''; const nl=world.log.filter(x=>!x.seen).length; const e=$('#nLog'); e.textContent=nl||''; e.classList.toggle('alert',nl>0); }
+function updateCounts(){ { const nd=$('#nDocs'); if(nd) nd.textContent=world.docs.length||''; } { const n=$('#nEff'); if(n) n.textContent=(world.settings&&world.settings.effectLib||[]).length||''; const ne=$('#nEmo'); if(ne){ ne.textContent=(world.settings&&world.settings.effectLib||[]).filter(d=>d.emo).length||''; const nav=ne.closest('.nav'); if(nav) nav.style.display=(isDM()&&ruOn())?'':'none'; } } $('#nWmaps').textContent=world.wmaps.filter(mp=>isDM()||mp.visibility!=='hidden').length||''; $('#nMaps').textContent=world.maps.filter(mp=>isDM()||mp.owner===effUid()||mp.shared).length||''; $('#nChars').textContent=V.chars().length||''; $('#nOrgs').textContent=V.orgs().length||''; $('#nLocs').textContent=V.locs().length||''; $('#nUsers').textContent=world.users.length||''; const nl=LOGSUB?world.log.filter(x=>!x.seen).length:0; const e=$('#nLog'); e.textContent=nl||''; e.classList.toggle('alert',nl>0); }
 
 /* обёртка: адрес страницы (переход по ссылке, адрес после отрисовки) + сама отрисовка */
 let RENDER_KEY='';
@@ -2971,6 +2972,7 @@ function renderPage(){
   updateCounts(); document.onpaste=null; m.innerHTML=''; techHideTip();
   if(viewAs){ const b=el(`<div id="viewas">👁 Режим просмотра: ты видишь картотеку как <b>${esc(viewAs.name)}</b> (${roleName(viewAs.role)}). Изменения отключены.<span class="grow"></span><button class="btn sm">Вернуться к себе</button></div>`); $('.btn',b).onclick=stopViewAs; m.append(b); }
   if(state.view!=='settings') SET_TAB=null;
+  if(state.view!=='log') logUnsub();
   let v=state.view; if(!sectionOn(v)){ v='characters'; state.view='characters'; state.id=null; }
   if(v==='characters') state.id? renderCharacter(m,byId(world.characters,state.id)) : renderList(m,'c');
   else if(v==='orgs') state.id? renderOrg(m,byId(world.orgs,state.id)) : renderList(m,'o');
@@ -8846,7 +8848,7 @@ const EP_FX=[
   {id:'vigor',k:'buff',icon:'💪',name:'Вигор',d:'атака +{v}%, защита +{w}%'},
   {id:'extra',k:'buff',icon:'⏩',name:'Экстра ход',d:'сразу ещё один ход вне инициативы',inst:1},
   {id:'advance',k:'buff',icon:'⏫',name:'Продвижение',d:'+N к инициативе',inst:1,n:2,nl:'к инициативе'},
-  {id:'cleanse',k:'buff',icon:'🧼',name:'Очищение',d:'снимает N дебаффов',inst:1,n:1,nl:'дебаффов'},
+  {id:'cleanse',k:'buff',icon:'🧼',name:'Очищение',d:'снимает N дебаффов, первым — Запрет бафов',inst:1,n:1,nl:'дебаффов'},
   {id:'cdreset',k:'buff',icon:'🔄',name:'Ресет КД',d:'убирает КД со скиллов',inst:1},
   {id:'atkDown',k:'debuff',icon:'📉',name:'Понижение атаки',d:'атака −{v}%'},
   {id:'defDown',k:'debuff',icon:'🪓',name:'Пробитие защиты',d:'защита −{v}%'},
@@ -8856,7 +8858,7 @@ const EP_FX=[
   {id:'silence',k:'debuff',icon:'🤐',name:'Немота',d:'можно использовать только 1-й скилл'},
   {id:'seal',k:'debuff',icon:'🔏',name:'Печать',d:'пассивки не работают'},
   {id:'nocounter',k:'debuff',icon:'🚷',name:'Запрет контр атак',d:'не может контратаковать'},
-  {id:'nobuff',k:'debuff',icon:'⛔',name:'Запрет бафов',d:'на цель не накладываются баффы'},
+  {id:'nobuff',k:'debuff',icon:'⛔',name:'Запрет бафов',d:'на цель не накладываются баффы (кроме Очищения и Продвижения)'},
   {id:'noheal',k:'debuff',icon:'💔',name:'Запрет лечения',d:'цель не лечится'},
   {id:'poison',k:'debuff',icon:'🧪',name:'Отравление',d:'в конце хода урон {v}% макс. ХП; складывается',dot:1},
   {id:'toxin',k:'debuff',icon:'☠️',name:'ЯД',d:'в конце хода урон {v}% макс. ХП; складывается',dot:1},
@@ -8864,7 +8866,7 @@ const EP_FX=[
   {id:'burn',k:'debuff',icon:'♨️',name:'Горение',d:'в конце хода урон {v} атаки наложившего сквозь броню; складывается',dot:1},
   {id:'bomb',k:'debuff',icon:'💣',name:'Бомба',d:'в конце срока урон {v} атаки наложившего сквозь броню и {w}% стан; складывается',dot:1},
   {id:'stun',k:'debuff',icon:'💫',name:'Стан',d:'пропускает ход'},
-  {id:'strip',k:'debuff',icon:'🧹',name:'Снятие бафов',d:'снимает N баффов',inst:1,n:1,nl:'баффов'},
+  {id:'strip',k:'debuff',icon:'🧹',name:'Снятие бафов',d:'снимает N баффов: первым Иммунитет, дальше — с наименьшей длительностью',inst:1,n:1,nl:'баффов'},
   {id:'taunt',k:'debuff',icon:'🤬',name:'Провокация',d:'атакует наложившего 1-м скиллом'},
   {id:'restrict',k:'debuff',icon:'⛓️',name:'Рестрикт',d:'цель нельзя продвигать по инициативе'},
   {id:'push',k:'debuff',icon:'⏬',name:'Отталкивание',d:'−N к инициативе',inst:1,n:2,nl:'от инициативы'},
@@ -9268,7 +9270,7 @@ function epSnap(ch){ const S=epStats(ch); const s={}; for(const k in S) s[k]=S[k
   const pas=(ch.abilities||[]).filter(a=>a.ep&&a.ep.type==='pas'&&(a.ep.trig||'always')!=='always').map(a=>({id:a.id,name:a.name||'пассивка',ep:cp(a.ep)}));
   const psk=(ch.abilities||[]).filter(a=>a.ep&&a.ep.type==='pas'&&+a.ep.slot).map(a=>({id:a.id,name:a.name||'Пассивка '+a.ep.slot,img:(a.images||[])[0]||null,ep:cp(a.ep)})); // пассивки со слотом — на панели боя рядом со скиллами
   const rs={}; for(const b of (ch.bars||[])) if(b.name) rs[b.name]=+b.max||0;
-  return {nm:ch.name||'без имени',nm0:ch.name||'без имени',img:ch.mainImage||null,crop:cropOf(ch)||null,col:ch.color||null,el:E.el||null,cls:E.cls||null,st:+E.stars||0,s,sk,pas,psk,ssp:epSetsOn(ch).filter(x=>x.sp).map(x=>({sp:x.sp,v:+x.spv||0,t:x.times})),rs,rs0:cp(rs),rb:epRbOf(ch),ev:E.ev?cp(E.ev):null}; }
+  return {nm:ch.name||'без имени',nm0:ch.name||'без имени',img:ch.mainImage||null,crop:cropOf(ch)||null,col:ch.color||null,el:E.el||null,cls:E.cls||null,st:+E.stars||0,s,sk,pas,psk,ssp:epSetsOn(ch).filter(x=>x.sp).map(x=>({sp:x.sp,v:+x.spv||0,t:x.times})),rs,rs0:cp(rs),rb:epRbOf(ch),ev:E.ev?cp(E.ev):null,evVol:E.evVol??null}; }
 /* полоска под ХП в бою: боевой дух или полоска персонажа (ресурс скиллов). ch.epic.rb = {k:'sp'|'bar:<имя>'|'none', max} — пусто = авто */
 function epRbOf(ch){ const R=(ch.epic&&ch.epic.rb)||{}; const abs=(ch.abilities||[]).filter(a=>a.ep); let k=R.k||'';
   if(!k){ if(abs.some(a=>+a.ep.need>0||+a.ep.spirit>0)) k='sp'; else { const c=abs.find(a=>a.ep.cost&&a.ep.cost.bar); k=c?'bar:'+c.ep.cost.bar:'none'; } }
@@ -9370,6 +9372,10 @@ function epHalf(B,t,log,src){ epTrig(B,t,'selfHalf',log,{other:src,src}); for(co
 function epFxAmt(A,t,r,n,ctx={}){ const sc=r.sc||(r.force&&r.id==='heal'?'n':EP_FXSCD[r.id]||'n'), k=+n||0; if(sc==='n') return {v:Math.max(0,Math.round(k)),how:''};
   const sa=A?epUS(A):{}, st=epUS(t); const base=+(sc==='mhp'?sa.mhp:sc==='atk'?sa.atk:sc==='def'?sa.def:sc==='tmhp'?st.mhp:sc==='lost'?Math.max(0,st.mhp-Math.max(0,+t.hp||0)):sc==='dmg'?ctx.dmg:0)||0;
   return {v:Math.max(0,Math.round(base*k/100)),how:`${k}% от ${{mhp:'макс. ХП',atk:'атаки',def:'защиты',tmhp:'макс. ХП цели',lost:'недостающего ХП',dmg:'урона'}[sc]} ${Math.round(base)}`}; }
+/* Запрет бафов не мешает очиститься и продвинуться по инициативе */
+const EP_NOBUFF_OK=new Set(['cleanse','advance']);
+/* что снимать первым (очищение, развеивание): по ключу key(e) по возрастанию, при равенстве — наложенное позже; «нельзя развеять» не снимается */
+function epRmOrder(t,k,key){ return (t.fx||[]).filter(e=>e.k===k&&!e.nd).reverse().map((e,i)=>[e,+key(e)||0,i]).sort((a,b)=>a[1]-b[1]||a[2]-b[2]).map(x=>x[0]); }
 /* наложить эффект/действие: шанс дебаффа = шанс + эффективность − резист цели против d100; иммунитет, запрет бафов, стаки ДоТов */
 function epApply(B,A,t,r,log,ctx={}){ const f=epFxAny(r.id); if(!f||!t) return; if(t.dead&&r.id!=='revive') return;
   const foe=A.side!==t.side; const kind=f.k==='lib'?(foe?'debuff':'buff'):f.k==='sp'?(r.id==='execute'?'debuff':'buff'):f.k; const n=r.n??(f.n!=null?epP(f.id,'n'):undefined);
@@ -9377,13 +9383,13 @@ function epApply(B,A,t,r,log,ctx={}){ const f=epFxAny(r.id); if(!f||!t) return; 
     if(epHas(t,'immunity')){ if(r.rb!=='imm'){ log.push(`✨ ${t.nm}: иммунитет — ${f.name} не наложен`); return; } log.push(`✨ ${t.nm}: иммунитет пробит — ${f.name}`); }
     const res=r.rb?0:(+epUS(t).res||0), c=(r.ch??100)+(+epUS(A).eff||0)-res, roll=epD100(); if(roll>c){ log.push(`🛡 ${t.nm} сопротивляется: ${f.name} (d100 ${roll} > ${Math.round(c)}${r.rb?', резист цели не учтён':''})`); return; } }
   else if((r.ch??100)<100){ const roll=epD100(); if(roll>(r.ch??100)){ log.push(`· ${f.name} не сработал (d100 ${roll})`); return; } }
-  if(!r.force&&kind==='buff'&&epHas(t,'nobuff')){ log.push(`⛔ ${t.nm}: баффы запрещены — ${f.name} не наложен`); return; }
+  if(!r.force&&kind==='buff'&&epHas(t,'nobuff')&&!EP_NOBUFF_OK.has(r.id)){ log.push(`⛔ ${t.nm}: баффы запрещены — ${f.name} не наложен`); return; }
   if(f.inst){ switch(r.id){
     case 'extra': (B.extra??=[]).unshift(t.id); log.push(`⏩ ${t.nm} получает экстра ход`); break;
     case 'advance': if(epHas(t,'restrict')) log.push(`⛓️ ${t.nm}: рестрикт — продвинуть нельзя`); else { t.init=(+t.init||0)+(+n||0); epResort(B); log.push(`⏫ ${t.nm}: инициатива +${n}`); } break;
     case 'push': t.init=(+t.init||0)-(+n||0); epResort(B); log.push(`⏬ ${t.nm}: инициатива −${n}`); break;
-    case 'cleanse': { const L=(t.fx||[]).filter(e=>e.k==='debuff'&&!e.nd).slice(-(+n||1)); t.fx=t.fx.filter(e=>!L.includes(e)); log.push(`🧼 ${t.nm}: снято дебаффов — ${L.length}`); break; }
-    case 'strip': { const L=(t.fx||[]).filter(e=>e.k==='buff'&&!e.nd).slice(-(+n||1)); t.fx=t.fx.filter(e=>!L.includes(e)); if(L.some(e=>e.id==='barrier')&&!epHas(t,'barrier')) t.bar=0; log.push(`🧹 ${t.nm}: снято баффов — ${L.length}`); break; }
+    case 'cleanse': { const L=epRmOrder(t,'debuff',e=>e.id==='nobuff'?0:1).slice(0,+n||1); t.fx=t.fx.filter(e=>!L.includes(e)); log.push(`🧼 ${t.nm}: снято дебаффов — ${L.length}${L.length?' ('+L.map(e=>(epFxAny(e.id)||{name:e.id}).name).join(', ')+')':''}`); break; }
+    case 'strip': { const L=epRmOrder(t,'buff',e=>e.id==='immunity'?-1:e.dur).slice(0,+n||1); t.fx=t.fx.filter(e=>!L.includes(e)); if(L.some(e=>e.id==='barrier')&&!epHas(t,'barrier')) t.bar=0; log.push(`🧹 ${t.nm}: снято баффов — ${L.length}${L.length?' ('+L.map(e=>(epFxAny(e.id)||{name:e.id}).name).join(', ')+')':''}`); break; }
     case 'cdreset': t.cd={}; log.push(`🔄 ${t.nm}: КД скиллов сброшены`); break;
     case 'cdUpD': for(const s of (t.sk||[])) if(+s.ep.cd) t.cd[s.id]=(+t.cd[s.id]||0)+(+n||1); log.push(`⏳ ${t.nm}: КД скиллов +${n}`); break;
     case 'revive': if(!t.dead&&t.hp>0) break; /* живой с ХП ≤ 0 — пассивка «летальный урон»: воскрешение не даёт умереть */ if(t.ex){ log.push(`⚰️ ${t.nm}: казнён — воскресить нельзя`); break; } if(t.dead) t.fx=[]; t.dead=0; t.hp=Math.max(1,Math.round(epUS(t).mhp*(+n||30)/100)); log.push(`🕊️ ${t.nm} воскресает с ${t.hp} ХП`); epFl(B,t,'+'+t.hp,'heal',{h0:0,h1:t.hp}); break;
@@ -10210,10 +10216,10 @@ function epSndFire(r,tHit,tPre,g=1,on=false,dp=0){ if(!r||r==='none'||dp>3) retu
   if(typeof r!=='string') return; if(r.startsWith('x:')){ const m=epSndMix(r.slice(2)); if(m) epSndFire(m.L,tHit,tPre,g,on,dp+1); return; }
   if(r.startsWith('f:')){ epSndFile(r.slice(2),tHit,g,on); return; } epSfxFire(r,tHit,tPre,g); }
 /* прослушать (галерея, редакторы, клик по бойцу): запуск слышен сразу, удар — после него; vol — громкость (по умолчанию не тише 25%) */
-function epSndTest(r,on,vol){ r=epSndOne(r); if(!epSndOk(r)) return; const ac=epAC(); if(!ac) return; if(ac.state==='suspended') ac.resume().catch(()=>{});
+function epSndTest(r,on,vol,g=1){ r=epSndOne(r); if(!epSndOk(r)) return; const ac=epAC(); if(!ac) return; if(ac.state==='suspended') ac.resume().catch(()=>{});
   Promise.all([epSfxLoad(),...[...epSndFiles(r)].map(epSndLoadFile)]).then(([ok])=>{ if(!ok&&!EPA.buf&&!epSndFiles(r).size){ toast('Звуки не загрузились',true); return; }
     const T=ac.currentTime+100, D=[]; EPA.dry=D; try{ epSndFire(r,T,T-.45,1,on); } finally{ EPA.dry=null; } if(!D.length) return;
-    const sh=ac.currentTime+.05-Math.min(...D); EPA.out.gain.setValueAtTime(vol??Math.max(.25,epSfxVol()),ac.currentTime); epSndFire(r,T+sh,T-.45+sh,1,on); }); }
+    const sh=ac.currentTime+.05-Math.min(...D); EPA.out.gain.setValueAtTime(vol??Math.max(.25,epSfxVol()),ac.currentTime); epSndFire(r,T+sh,T-.45+sh,g,on); }); }
 function epSfxTest(id){ epSndTest(id); }
 /* прослушать один вариант звука (настройки) */
 function epSfxClip(c){ const M=EP_SFXMAN[c]; const ac=epAC(); if(!M||!ac) return; if(ac.state==='suspended') ac.resume().catch(()=>{}); epSfxLoad().then(ok=>{ if(!ok) return; const t=ac.currentTime+.03, s=ac.createBufferSource(); EPA.out.gain.setValueAtTime(Math.max(.25,epSfxVol()),t); s.buffer=EPA.buf; s.connect(EPA.out); s.start(t,M[0],M[1]); }); }
@@ -10224,13 +10230,13 @@ function epSfxPlay(B,ago){ if(!epSfxOn()) return; const ac=epAC(); if(!ac) retur
   /* свои файлы этого действия, которых ещё нет: сначала загрузить, потом играть с учётом прошедшего времени */
   { const R=[]; (B.an||[]).forEach((a,i)=>{ if(!EPA.done.has(key+'a'+i)) R.push(a.sx,a.uh); }); const need=epSndNeed(R.filter(Boolean)); if(need.length){ const t0=performance.now(); Promise.all(need.map(epSndLoadFile)).then(()=>epSfxPlay(B,ago+(performance.now()-t0)/1000)); return; } }
   if(ac.state==='suspended') ac.resume().catch(()=>{}); const now=ac.currentTime; EPA.out.gain.setValueAtTime(epSfxVol(),now);
-  const at=s=>now+(s-ago)+.03, fresh=s=>s-ago>-.2; const play=(id,s,pre,on)=>{ if(fresh(s)&&epSndOk(id)) epSndFire(id,at(s),pre!=null?at(pre):null,1,on); };
+  const at=s=>now+(s-ago)+.03, fresh=s=>s-ago>-.2; const play=(id,s,pre,on,g=1)=>{ if(fresh(s)&&epSndOk(id)) epSndFire(id,at(s),pre!=null?at(pre):null,g,on); };
   (B.an||[]).forEach((a,i)=>{ const k=key+'a'+i; if(EPA.done.has(k)) return; EPA.done.add(k);
     if(a.k==='atk'&&!a.sub){ const id=a.sx==='none'?'':epSndOk(a.sx)?a.sx:epSfxAuto(a.an); const P=EP_ANM[a.an], h=a.d+(P?epAnHitP(P):.25); if(id){ if(P&&P.sxx) for(const dt of P.sxx) play(id,h+dt,h+dt-.1); else play(id,h,a.d); }
       /* добивание ультимейта — один раз за действие, поверх звука первого удара */
       if(a.ult&&!EPA.done.has(key+'fin')){ EPA.done.add(key+'fin'); const ue=(B.an||[]).find(x=>x.k==='ult'); const f=a.uh==='none'?'':epSndOk(a.uh)?a.uh:epSfxFin(a.an,!!ue&&epUltGlass(ue.sx)); if(f) play(f,h); } }
     else if(a.k==='sx') play(a.sx,a.d,a.p); else if(a.k==='ult'){ const id=a.sx==='none'?'':epSndOk(a.sx)?a.sx:EP_ULTSX; if(id) play(id,a.d); }
-    else if(a.k==='ev'){ if(fresh(a.d)&&epSndOk(a.sx)&&epVoOk(at(a.d),a.sx)) play(a.sx,a.d,null,true); }
+    else if(a.k==='ev'){ const g=epEvVol(epU(B,a.u)); if(g>0&&fresh(a.d)&&epSndOk(a.sx)&&epVoOk(at(a.d),a.sx)) play(a.sx,a.d,null,true,g); }
     else if(a.k==='tag') play('counter',a.d); else if(a.k==='die') play('fall',a.d+.15); else if(a.k==='win') play(a.w==='a'?'win':'lose',a.d+.3); });
   (B.fl||[]).forEach((f,i)=>{ const k=key+'f'+i; if(EPA.done.has(k)) return; EPA.done.add(k); if(f.c==='crit') play('crit',f.d||0); else if(f.c==='misst'&&f.v==='MISS') play('miss',f.d||0); }); }
 /* громкость звуков боя — у каждого своя */
@@ -10260,11 +10266,11 @@ function epSxHTML(cls,v,o={}){ return `<span class="epsxw ${cls}"><select class=
 function epSxWire(w,o){ if(!w) return; const sel=$('.sxs',w); const opt=()=>({auto:o.auto?o.auto():undefined,noAuto:o.noAuto,rnd:o.rnd,ch:o.ch,gs:o.gs});
   const redraw=()=>{ sel.innerHTML=epSxOpts(o.get(),opt()); };
   const cur=()=>{ const v=o.get(); return v==='none'?'':epSndOk(v)?v:(o.auto?o.auto():''); };
-  const put=v=>{ o.set(v); redraw(); const c=cur(); if(c) epSndTest(c,o.on); };
+  const gn=()=>o.g?o.g():1; const put=v=>{ o.set(v); redraw(); const c=cur(); if(c) epSndTest(c,o.on,undefined,gn()); };
   const mix=()=>{ const v=o.get(); const a=o.auto?o.auto():''; epMixDlg(Array.isArray(v)?v:typeof v==='string'&&v!=='none'&&epSndOk(v)?[{s:v}]:a&&!Array.isArray(a)?[{s:a}]:Array.isArray(a)?a:[],{title:o.title,ch:o.ch,on:o.on,onSave:R=>put(R.length?R:'')}); };
   const rnd=()=>{ const v=o.get(); epRndDlg(epSndRnd(v)?v.rnd:typeof v==='string'&&epSndOk(v)?[v]:[],{title:o.title,ch:o.ch,on:o.on,onSave:R=>put(R.length>1?{rnd:R}:R[0]||'')}); };
   sel.onchange=()=>{ const v=sel.value; if(v==='__mix'||v==='__rnd') return; if(v==='__new'){ redraw(); mix(); return; } if(v==='__rndnew'){ redraw(); rnd(); return; } if(v==='__up'){ redraw(); epSndPick(o.ch,r=>put(r)); return; } put(v); };
-  $('.sxp',w).onclick=()=>{ const c=cur(); if(c) epSndTest(c,o.on); else toast('Без звука'); };
+  $('.sxp',w).onclick=()=>{ const c=cur(); if(c) epSndTest(c,o.on,undefined,gn()); else toast('Без звука'); };
   const m=$('.sxm',w); if(m) m.onclick=mix; const rb=$('.sxr',w); if(rb) rb.onclick=rnd; }
 /* выбрать файлы и загрузить: в файлы персонажа (если его можно править) или в библиотеку мастера; cb('f:<id>') — первый загруженный */
 function epSndPick(ch,cb,multi){ $$('input.epsndfi').forEach(x=>x.remove()); const fi=el('<input type="file" class="epsndfi" accept="audio/*,.mp3,.ogg,.oga,.opus,.wav,.m4a,.aac,.webm,.flac" hidden>'); if(multi) fi.multiple=true; document.body.append(fi);
@@ -10351,6 +10357,8 @@ function epSndLibDraw(box){ const S=world.settings, lib=epSndLib();
    Одно событие — один раз за действие; если у бойца почти одновременно (0.6 с) несколько событий, звучит важнейшее (EP_EVP) ===== */
 const EP_EV=[['first','🚩','Первый ход в бою'],['click','🖱','Клик по бойцу','слышит тот, кто кликнул'],['hit','⚔','Нанёс урон'],['kill','🗡','Добил врага'],['hurt','💢','Получил урон'],['buff','✨','Получил бафф'],['buffGive','🤝','Дал бафф союзнику'],['debuff','🕸','Получил дебафф'],['die','💀','Погиб'],['allyDie','🕯','Погиб союзник','у одного случайного живого союзника']];
 const EP_EVP={die:9,kill:8,allyDie:7,first:6,hurt:5,hit:4,debuff:3,buff:2,buffGive:1,click:0};
+/* громкость голоса бойца: ch.epic.evVol — проценты (нет — 100), в бою из листа, иначе из снимка */
+function epEvVol(u){ if(!u) return 1; const ch=u.ref?byId(world.characters,u.ref):null; const v=ch&&ch.epic?ch.epic.evVol:u.evVol; return v==null||v===''?1:Math.max(0,Math.min(3,(+v||0)/100)); }
 function epEvRef(u,e){ if(!u) return null; const ch=u.ref?byId(world.characters,u.ref):null; const ev=(ch&&ch.epic?ch.epic.ev:u.ev)||{}; const r=ev[e]; return r&&epSndOk(r)?r:null; }
 /* почти одновременно (0.6 с) звучит одна фраза на всех: у одного бойца — важнейшее событие; между бойцами — случайный боец (nc — сколько бойцов претендовало),
    но гибель/добивание/смерть союзника важнее остального, а «дал бафф» — важнее «получил бафф» (бафф всем союзникам озвучивает тот, кто баффает) */
@@ -10367,7 +10375,7 @@ function epEvFx(B,A,t,kind){ if(kind==='buff'){ const self=A&&A.id===t.id; if(!s
 function epEvDie(B,t,src){ epEv(B,t,'die'); if(src&&!src.dead&&src.side!==t.side) epEv(B,src,'kill'); const al=epLive(B,t.side).filter(a=>a!==t&&epEvRef(a,'allyDie')); if(al.length) epEv(B,al[Math.floor(Math.random()*al.length)],'allyDie'); }
 /* клик по бойцу: не звучит во время действия и сразу после выбора цели (второй клик / «призрачный» клик тача по уже перерисованной сцене) */
 function epEvClick(u){ if(!epSfxOn()||EPBUSY) return; const t=Date.now(); if(t<EPA.noClk) return; const r=epEvRef(u,'click'); if(!r) return; if(t-(EPA.clk||0)<300) return;
-  const x=epSndOne(r), ac=epAC(); if(!x||ac&&!epVoOk(ac.currentTime,x)) return; EPA.clk=t; epSndTest(x,1,epSfxVol()); }
+  const g=epEvVol(u); if(!g) return; const x=epSndOne(r), ac=epAC(); if(!x||ac&&!epVoOk(ac.currentTime,x)) return; EPA.clk=t; epSndTest(x,1,epSfxVol(),g); }
 /* фразы бойцов не накладываются: пока звучит одна (EPA.vo — когда она кончится, время AudioContext), следующие молчат */
 function epVoOk(t,r){ const ac=EPA.ac; if(ac) t=Math.max(t,ac.currentTime); if(t<EPA.vo-.05) return false; EPA.vo=t+epSndDur(r); return true; }
 /* длина звука по ссылке, сек (свой файл, ещё не загруженный, — 1.5 с) */
@@ -10381,9 +10389,12 @@ function epEvBlock(det,ch,ed){ if(!det) return; const EV=()=>(ch.epic&&ch.epic.e
   try{ det.open=localStorage.getItem('ep.evOpen')==='1'; }catch{} det.ontoggle=()=>{ try{ localStorage.setItem('ep.evOpen',det.open?'1':''); }catch{} };
   const upd=()=>{ const n=Object.keys(EV()).length; $('summary .faint',det).textContent=n?'— настроено: '+n:'— голос или звук на события боя'; };
   const draw=()=>{ L.innerHTML=`<div class="faint epevh">Файл с компьютера, звук из библиотеки, 🎲 несколько фраз (каждый раз случайная) или микс 🎚️. Пусто — тишина. Если у бойца почти одновременно несколько событий, звучит важнейшее: гибель › добивание › гибель союзника › первый ход › урон…</div>`
+      +`<div class="epevr epevv" title="Громкость всех фраз этого бойца — для всех, кто в бою. Тихо записанные фразы можно сделать громче (до 200%)"><span class="ic">🔉</span><span class="nm">Громкость голоса</span><input type="range" class="evv" min="0" max="200" step="5" value="${Math.round(epEvVol({ref:ch.id})*100)}" ${ed?'':'disabled'} data-nopal><b class="evvv">${Math.round(epEvVol({ref:ch.id})*100)}%</b></div>`
       +EP_EV.map(([k,ic,n,h])=>`<div class="epevr"><span class="ic">${ic}</span><span class="nm">${esc(n)}${h?`<i class="faint"> · ${esc(h)}</i>`:''}</span>${epSxHTML('ev-'+k,EV()[k]||'',{noAuto:1,rnd:1,ch,dis:!ed})}</div>`).join('')
       +`<div class="epevf"><span class="faint">📎 Файлы персонажа:</span>${files().map((f,i)=>`<span class="epchip" data-i="${i}"><b class="p" title="Послушать">▶ ${esc(f.n||'звук')}</b>${f.d?`<i class="faint">${f.d} с</i>`:''}${ed?'<button class="x-btn" title="Удалить файл">×</button>':''}</span>`).join('')||'<span class="faint">нет</span>'}${ed?'<button class="btn sm up">⤒ Загрузить</button>':''}</div>`;
-    EP_EV.forEach(([k,,n])=>epSxWire($('.ev-'+k,L),{get:()=>EV()[k]||'',set:v=>{ const E=(ch.epic??={}), ev=(E.ev??={}); if(!v) delete ev[k]; else ev[k]=v; if(!Object.keys(ev).length) delete E.ev; touch(ch); draw(); },noAuto:1,rnd:1,ch,on:1,title:(ch.name||'Боец')+' — '+n.toLowerCase()}));
+    EP_EV.forEach(([k,,n])=>epSxWire($('.ev-'+k,L),{get:()=>EV()[k]||'',set:v=>{ const E=(ch.epic??={}), ev=(E.ev??={}); if(!v) delete ev[k]; else ev[k]=v; if(!Object.keys(ev).length) delete E.ev; touch(ch); draw(); },noAuto:1,rnd:1,ch,on:1,g:()=>epEvVol({ref:ch.id}),title:(ch.name||'Боец')+' — '+n.toLowerCase()}));
+    { const vi=$('.evv',L); vi.oninput=()=>{ $('.evvv',L).textContent=vi.value+'%'; const E=(ch.epic??={}); if(+vi.value===100) delete E.evVol; else E.evVol=+vi.value; touch(ch); };
+      vi.onchange=()=>{ const r=EP_EV.map(([k])=>EV()[k]).find(Boolean); if(r&&+vi.value) epSndTest(r,1,undefined,epEvVol({ref:ch.id})); }; }
     $$('.epevf .epchip',L).forEach(c=>{ const f=files()[+c.dataset.i]; $('.p',c).onclick=()=>epSndTest('f:'+f.id,1); const x=$('.x-btn',c);
       if(x) x.onclick=async()=>{ if(!await confirmDlg(`Удалить файл «${f.n||'звук'}»? Где он выбран, станет тихо.`,'Удалить')) return; ch.epic.snd=files().filter(y=>y!==f); if(!ch.epic.snd.length) delete ch.epic.snd; DB.delete('images',f.id).catch(()=>{}); touch(ch); draw(); }; });
     const up=$('.up',L); if(up) up.onclick=()=>epSndPick(ch,()=>draw(),true); upd(); };
