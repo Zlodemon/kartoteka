@@ -62,6 +62,11 @@ function Find-Project($name) {
   if (-not $p) { $p = $projects | Where-Object { $_.displayName -eq $name } | Select-Object -First 1 }
   if ($p) { return $p.projectId } return $null
 }
+# облачный проект Google есть, но Firebase к нему не подключён (projects:create создал проект и упал на подключении) — подключаем
+function Add-Firebase($id) {
+  Say "  Подключаю Firebase к проекту $id…"
+  return (FB projects:addfirebase $id)
+}
 if ($cfg.projectId -and $null -ne $projects -and -not (Find-Project $cfg.projectId)) {
   Warn "Проект $($cfg.projectId) из прошлого запуска не найден в аккаунте $acc — выберем заново."
   $cfg.projectId = ''
@@ -81,6 +86,7 @@ if (-not $cfg.projectId) {
     if ($id -notmatch '^[a-z][a-z0-9-]{5,29}$') { Bad 'Имя не подходит: начните с буквы, 6–30 символов, только a-z, 0-9 и «-».'; continue }
     if (YesNo "У вас УЖЕ есть проект Firebase с именем $id и вы хотите использовать его?" 'нет') {
       if ($null -eq $projects) { $cfg.projectId = $id; break }
+      if (Add-Firebase $id) { $cfg.projectId = $id; Ok "Firebase подключён к проекту $id"; break }
       Bad "В аккаунте $acc нет проекта с ID или названием «$id»."
       if ($projects.Count) {
         Say '  Ваши проекты (вводите ID — левую колонку):' Yellow
@@ -90,6 +96,7 @@ if (-not $cfg.projectId) {
     }
     Say '  Создаю проект… (до пары минут)'
     if (FB projects:create $id -n 'DnD Kartoteka') { $cfg.projectId = $id; Ok "Проект $id создан" }
+    elseif (Add-Firebase $id) { $cfg.projectId = $id; Ok "Проект $id создан" }   # облачный проект создался, а Firebase не подключился
     else {
       Bad 'Создать проект не получилось. Частые причины:'
       Say '   • имя занято — попробуйте другое;' Yellow
@@ -107,6 +114,8 @@ $P = $cfg.projectId
 # ---------- 5. Веб-приложение и ключи ----------
 Step 5 'Регистрирую сайт в проекте и получаю ключи'
 $apps = FBJson apps:list WEB --project $P
+# список не получен — чаще всего Firebase не подключён к облачному проекту («Firebase project … not found»)
+if (-not ($apps -and $apps.result) -and (Add-Firebase $P)) { $apps = FBJson apps:list WEB --project $P }
 $appId = if ($apps -and $apps.result -and @($apps.result).Count) { @($apps.result)[0].appId } else { $null }
 if (-not $appId) { $r = FBJson apps:create WEB 'Kartoteka' --project $P; if ($r -and $r.result) { $appId = $r.result.appId } }
 if (-not $appId) {
@@ -114,7 +123,8 @@ if (-not $appId) {
   $err = if ($r -and $r.error) { $r.error } elseif ($apps -and $apps.error) { $apps.error } else { '' }
   if ($err) { Say "  Ответ Firebase: $err" Yellow }
   Say "  Частые причины: проект $P принадлежит другому Google-аккаунту (вы вошли как $acc)," Yellow
-  Say '  или введено название проекта, а не его ID (ID виден в консоли Firebase под названием проекта).' Yellow
+  Say '  или введено название проекта, а не его ID (ID виден в консоли Firebase под названием проекта),' Yellow
+  Say '  или не приняты условия Firebase: откройте https://console.firebase.google.com тем же аккаунтом и примите их.' Yellow
   $cfg.projectId = ''; Save-Settings $cfg
   Say '  Запустите 1_USTANOVKA.cmd ещё раз — скрипт снова спросит проект.' Yellow
   Pause-Enter 'Enter — закрыть'; exit 1
