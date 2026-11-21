@@ -2011,6 +2011,18 @@ if(MOCK){
     syncModeSet(v){ v=SYNC_MODES.includes(v)?v:'shadow'; try{ localStorage.setItem('fsSyncMode',v); }catch{} if(v==='off'&&SYNC_MODE==='on'&&SYNC_STAT.live&&reloadOk()) location.reload(); },
     set:(coll,id,data)=>{ STAT.w++; const go=d=>wSet(coll,id,clean(d)); return TH_COLLS.has(coll)?thOut(coll,id,clean(data),true).then(go):go(data); },
     update:(coll,id,part)=>{ STAT.w++; const go=p=>wUpd(coll,id,p); return TH_COLLS.has(coll)?thOut(coll,id,{...part},false).then(go):go(part); },
+    /* несколько записей одной пачкой — локально и у других применяется целиком. ops [{coll,id,data}] — документ целиком (как set), [{coll,id,part}] — поля (как update).
+       Метки _t и надгробия — как у одиночных записей (wSet/wUpd); пачка не прошла — не записалось ничего */
+    async batch(ops){ ops=await Promise.all(ops.map(async o=>!TH_COLLS.has(o.coll)?o:o.data?{...o,data:await thOut(o.coll,o.id,clean(o.data),true)}:{...o,part:await thOut(o.coll,o.id,{...o.part},false)}));
+      const b=F.writeBatch(db), tr=[];
+      for(const o of ops){ const r=F.doc(db,...cpath(o.coll),o.id); STAT.w++;
+        const d=o.data?clean(o.data):Object.fromEntries(Object.entries(o.part).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]));
+        if(!isSync(o.coll)){ o.data?b.set(r,d):b.update(r,d); continue; }
+        const k=skey(o.coll,o.id), g=syncGone(k,o.data?d:o.part,!!o.data), st=syncStamp(k), keys=[k];
+        o.data?b.set(r,{...d,...st}):b.update(r,{...d,...st});
+        if(g){ const gk=gkey(o.coll,o.id); SK.set(gk,{t:st._t}); b.set(F.doc(db,gk),{coll:cbase(o.coll),id:o.id,_t:st._t,by:me.uid,kind:'vis'}); STAT.w++; STAT.gone=(STAT.gone||0)+1; keys.push(gk); }
+        tr.push([keys,st._t]); }
+      const p=b.commit(); for(const [keys,t] of tr) syncTrack(p,keys,t).catch(()=>{}); return p; },
     /* запись с чтением свежей версии: fn(текущее на сервере) → поля для записи. Если документ успели поменять между чтением и записью, Firestore повторит сам */
     mergeUpdate:(coll,id,fn)=>F.runTransaction(db,async t=>{ const ref=F.doc(db,...cpath(coll),id); const s=await t.get(ref); STAT.r++; if(!s.exists()) throw Object.assign(new Error('not-found'),{code:'not-found'}); const cur=s.data(); const part=fn(JSON.parse(JSON.stringify(cur))); STAT.w++; const upd=Object.fromEntries(Object.entries(part).map(([k,v])=>[k,v===DB.DEL?F.deleteField():clean(v)]));
       if(isSync(coll)){ const k=skey(coll,id); syncSeen(coll,id,cur); const g=syncGone(k,part,false), st=syncStamp(k); Object.assign(upd,st);
@@ -2398,7 +2410,8 @@ async function flush(){
   if(saving){ clearTimeout(saveTimer); saveTimer=setTimeout(flush,400); return; } saving=true;
   /* запись не ждёт ответа сервера: Firestore сам держит очередь (в облаке — ещё и в IndexedDB, она переживает перезагрузку),
      поэтому одна медленная или «повисшая» без сети запись больше не задерживает остальные; ошибки ловит saveFail */
-  const items=[...pending.entries()]; const ws=[];
+  const items=[...pending.entries()]; const ws=[], plain=[];
+  const track=(w,coll,docId,id)=>{ inflight++; const tk={t:Date.now()}; INFL.add(tk); ws.push(w.catch(e=>saveFail(e,coll,docId,id)).finally(()=>{ inflight--; INFL.delete(tk); saveStatus(); })); };
   for(const [id,{coll,obj}] of items){
     let born=false; if(obj._draft){ if(isBlankDraft(obj,obj._draft)){ pending.delete(id); continue; } delete obj._draft; obj.createdAt=Date.now(); born=true; } /* черновик уходит в базу, только когда в нём появилось что-то непустое */
     const data=clean(obj); const docId=(coll==='meta'||coll==='dm')?(obj.id||'settings'):id;
@@ -2408,9 +2421,18 @@ async function flush(){
     if(coll==='wmaps'||coll==='dm'){ wmUndoMarkDoc(coll,docId,baseS,data); WM_UNDO_FL.set(docId,Date.now()); }
     pending.delete(id); snapshots.set(docId,stableStr(data));
     const baseO=baseS&&part?JSON.parse(baseS):null; const arrK=baseO?Object.keys(part).filter(k=>part[k]!==DB.DEL&&idArrLike(data[k])&&idArrLike(baseO[k])):[];
-    const w=baseS?(part?(arrK.length&&DB.mergeUpdate&&!('thumb' in part)&&!('thumbRef' in part)?txWrite(coll,docId,part,baseO,arrK,data):Promise.resolve().then(()=>DB.update(coll,docId,part)).catch(e=>{ if(e.code==='not-found') return DB.set(coll,docId,data); throw e; })):null):Promise.resolve().then(()=>DB.set(coll,docId,data));
-    if(!w) continue; inflight++; const tk={t:Date.now()}; INFL.add(tk); ws.push(w.catch(e=>saveFail(e,coll,docId,id)).finally(()=>{ inflight--; INFL.delete(tk); saveStatus(); }));
+    if(baseS&&!part) continue;
+    if(part&&arrK.length&&DB.mergeUpdate&&!('thumb' in part)&&!('thumbRef' in part)){ track(txWrite(coll,docId,part,baseO,arrK,data),coll,docId,id); continue; }
+    const one=()=>part?Promise.resolve().then(()=>DB.update(coll,docId,part)).catch(e=>{ if(e.code==='not-found') return DB.set(coll,docId,data); throw e; }):Promise.resolve().then(()=>DB.set(coll,docId,data));
+    plain.push({coll,docId,id,part,data,one});
   }
+  /* несколько документов — одной пачкой: Firestore применяет её у себя и у других целиком. По одному он показывал промежуточные снимки, где часть
+     документов ещё старая, — их принимали за чужую правку, и перестановка карт в библиотеке откатывалась и доезжала по одной карте.
+     Пачка не прошла (документа нет, нет прав на один из них) — не записалось ничего, пишем по одному, как раньше */
+  if(plain.length>1&&DB.batch) for(let i=0;i<plain.length;i+=200){ const ch=plain.slice(i,i+200);
+    const bp=Promise.resolve().then(()=>DB.batch(ch.map(x=>x.part?{coll:x.coll,id:x.docId,part:x.part}:{coll:x.coll,id:x.docId,data:x.data}))); bp.catch(e=>console.warn('пачка не записалась, пишу по одному:',e.code||e.message));
+    for(const x of ch) track(bp.catch(()=>x.one()),x.coll,x.docId,x.id); }
+  else for(const x of plain) track(x.one(),x.coll,x.docId,x.id);
   saving=false; if(pending.size) saveTimer=setTimeout(flush,200); saveStatus();
   await Promise.all(ws);
 }
