@@ -2034,7 +2034,7 @@ if(MOCK){
     onChange(cb){ A.onAuthStateChanged(auth,u=>cb(u?{uid:u.uid,email:u.email,name:u.displayName||u.email,photo:u.photoURL||''}:null)); },
     async signIn(){ if(LOCAL){ const email=($('#lemail').value||'').trim().toLowerCase(), name=($('#lname').value||'').trim(); if(!email.includes('@')){ throw new Error('введи почту, под которой ты входил в облако'); } const sub='local_'+btoa(unescape(encodeURIComponent(email))).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_'); localStorage.setItem('localLogin',JSON.stringify({email,name})); await A.signInWithCredential(auth,A.GoogleAuthProvider.credential(JSON.stringify({sub,email,email_verified:true,name:name||email}))); return; }
       const p=new A.GoogleAuthProvider(); try{ await A.signInWithPopup(auth,p); }catch(e){ if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment') await A.signInWithRedirect(auth,p); else throw e; } },
-    async googleToken(scopes){ const p=new A.GoogleAuthProvider(); for(const s of scopes) p.addScope(s); if(me&&me.email) p.setCustomParameters({login_hint:me.email}); const u=auth.currentUser; const r=u?await A.reauthenticateWithPopup(u,p):await A.signInWithPopup(auth,p); const c=A.GoogleAuthProvider.credentialFromResult(r); if(!c||!c.accessToken) throw new Error('Google не выдал доступ'); return c.accessToken; },
+    async googleToken(scopes,opt={}){ const p=new A.GoogleAuthProvider(); for(const s of scopes) p.addScope(s); const cp={}; if(me&&me.email) cp.login_hint=me.email; if(opt.prompt) cp.prompt=opt.prompt; p.setCustomParameters(cp); const u=auth.currentUser; const r=u?await A.reauthenticateWithPopup(u,p):await A.signInWithPopup(auth,p); const c=A.GoogleAuthProvider.credentialFromResult(r); if(!c||!c.accessToken) throw new Error('Google не выдал доступ'); return c.accessToken; },
     signOut:()=>A.signOut(auth),
   };
 }
@@ -13355,14 +13355,27 @@ const cdTtsUrl=()=>`https://${cdTtsSiteId()}.web.app/`;
 const cdSleep=ms=>new Promise(r=>setTimeout(r,ms));
 const cdTokOk=()=>!!(CD_TTS.tok&&CD_TTS.exp>Date.now()+60000);
 /* вход Google с правом выкладки на Hosting — только по нажатию (окно входа браузер иначе заблокирует) */
-async function cdTtsLogin(){ const t=await AUTH.googleToken(['https://www.googleapis.com/auth/firebase']); CD_TTS.tok=t; CD_TTS.exp=Date.now()+55*60e3; return t; }
+/* prompt:consent — Google каждый раз показывает окно с правами: иначе он молча отдаёт токен по старому разрешению,
+   в котором права «Firebase» может не быть (галочку когда-то не отметили) — и выкладка падает, хотя «вход есть».
+   После входа спрашиваем у Google, что за токен: аккаунт, права, срок */
+async function cdTtsLogin(){ CD_TTS.tok=null; CD_TTS.email='';
+  const t=await AUTH.googleToken(['https://www.googleapis.com/auth/firebase'],{prompt:'consent'}); let exp=Date.now()+55*60e3, email='';
+  let ti=null; try{ const r=await fetch('https://oauth2.googleapis.com/tokeninfo?access_token='+encodeURIComponent(t)); if(r.ok) ti=await r.json(); }catch(e){ console.warn('tokeninfo',e); }
+  if(ti){ email=ti.email||''; if(+ti.expires_in>0) exp=Date.now()+(+ti.expires_in-120)*1000;
+    const sc=String(ti.scope||'').split(/\s+/); if(!sc.some(s=>/\/auth\/(firebase|cloud-platform)$/.test(s))) throw Object.assign(new Error(`Google вошёл${email?' как '+email:''}, но без права «Firebase». Нажми «Войти Google» ещё раз и в окне Google отметь галочку про Firebase`),{code:'scope'}); }
+  CD_TTS.tok=t; CD_TTS.exp=exp; CD_TTS.email=email; return t; }
+const cdTtsLogout=()=>{ CD_TTS.tok=null; CD_TTS.exp=0; };
+const cdLoginErr=e=>'Вход не удался: '+(['scope','perm'].includes(e&&e.code)?e.message:(e&&(e.code||e.message))||e);
+/* 403 от Hosting: токен не того аккаунта или без нужного права — выбрасываем его, чтобы снова появилась кнопка входа */
+const cdPermErr=msg=>Object.assign(new Error(`Google не пустил выкладывать картинки${CD_TTS.email?' аккаунту '+CD_TTS.email:''} (${msg}). Нужен аккаунт владельца проекта ${cdProj()} или с ролью «Редактор»: войди Google заново и в окне Google отметь все галочки`),{code:'perm',status:403});
 async function cdH(url,opt={}){ if(!cdTokOk()) throw Object.assign(new Error('Нужен вход Google для выкладки картинок'),{code:'login'});
   const r=await fetch(url.startsWith('http')?url:CD_HOST+url,{...opt,headers:{authorization:'Bearer '+CD_TTS.tok,'content-type':'application/json',...(opt.headers||{})}});
   const t=await r.text(); let j=null; try{ j=t?JSON.parse(t):null; }catch{}
-  if(!r.ok){ if(r.status===401){ CD_TTS.tok=null; } const e=new Error((j&&j.error&&j.error.message)||('HTTP '+r.status)); e.status=r.status; if(r.status===401) e.code='login'; throw e; } return j; }
+  if(!r.ok){ const m=(j&&j.error&&j.error.message)||('HTTP '+r.status); if(r.status===401||r.status===403&&!opt.soft403) cdTtsLogout();
+    if(r.status===403&&!opt.soft403) throw cdPermErr(m); const e=new Error(m); e.status=r.status; if(r.status===401) e.code='login'; throw e; } return j; }
 /* сайт для картинок: есть — берём, нет — создаём (адрес занят кем-то чужим — добавляем хвост и запоминаем в настройках) */
 async function cdTtsSite(){ let id=cdTtsSiteId();
-  try{ await cdH(`projects/${cdProj()}/sites/${id}`); return id; }catch(e){ if(e.status!==404&&e.status!==403) throw e; }
+  try{ await cdH(`projects/${cdProj()}/sites/${id}`,{soft403:true}); return id; }catch(e){ if(e.status!==404&&e.status!==403) throw e; }
   for(let i=0;i<3;i++){ try{ await cdH(`projects/${cdProj()}/sites?siteId=${id}`,{method:'POST',body:'{}'}); break; }
     catch(e){ if(e.status===409||/already|taken|exists/i.test(e.message)){ id=(cdProj()+'-tts').slice(0,24)+'-'+Math.random().toString(36).slice(2,6); continue; } throw e; } }
   await cdH(`sites/${id}/config?update_mask=maxVersions`,{method:'PATCH',body:JSON.stringify({maxVersions:5})}).catch(()=>{}); // старые версии не копятся
@@ -13490,7 +13503,7 @@ async function cdDeckTtsDlg(ch){ if(!ch) return; const b=openModal(`<h2>🎲 К�
     if(isDM()&&msets.length&&rows.length) rows[rows.length-1]=rows[rows.length-1].replace(/<\/div>$/,`<button class="btn sm primary" id="dSets">⬆ Выгрузить ${msets.length>1?'сеты':'сет'}</button></div>`);
     h.innerHTML=rows.join('')||'<div class="cdttsrow"><span class="ic">∅</span><span class="grow">В колоде нет карт, которые можно выгрузить.</span></div>';
     $('#dGo',b).disabled=!plan.json;
-    const ds=$('#dSets',h); if(ds) ds.onclick=async()=>{ if(!cdTokOk()){ try{ await cdTtsLogin(); }catch(e){ toast('Вход не удался: '+(e.code||e.message),true); return; } } ds.disabled=true; await cdTtsExport(msets.map(x=>x.id),P); check(); }; };
+    const ds=$('#dSets',h); if(ds) ds.onclick=async()=>{ if(!cdTokOk()){ try{ await cdTtsLogin(); }catch(e){ toast(cdLoginErr(e),true); return; } } ds.disabled=true; await cdTtsExport(msets.map(x=>x.id),P); check(); }; };
   $('#dNo',b).onclick=closeModal;
   $('#dGo',b).onclick=async()=>{ const go=$('#dGo',b); go.disabled=true; try{ plan=await cdDeckTtsResolve(ch,OK,DO()); if(!plan.json){ toast('В файле не осталось карт с картинками',true); return; } const name=cdTtsName({name:plan.nm}), json=JSON.stringify(plan.json,null,2);
       let dir=await cdTtsDir(true), sub=null; if(dir){ try{ sub=await dir.getDirectoryHandle('Картотека',{create:true}); }catch(e){ console.error(e); } }
@@ -13546,15 +13559,15 @@ async function cdTtsDlg(pre){ if(!isDM()) return; const sel=new Set(pre?[pre]:cd
     <div class="modal-actions"><button class="btn sm" id="tChg">Отметить изменённые</button><span class="grow"></span><button class="btn" id="tNo">Закрыть</button><button class="btn primary" id="tGo">⬆ Выгрузить выбранные</button></div>`,true);
   b.classList.add('cdbox','cdlbox'); const P=t=>{ const p=$('.cdttsp',b); if(p) p.textContent=t; };
   const drawSt=async()=>{ const h=$('.cdttsst',b); if(!h) return; const dir=await cdTtsDir(false), saved=dir||CD_TTS.dir||await cdIdb(true).catch(()=>null);
-    h.innerHTML=`<div class="cdttsrow"><span class="ic">${cdTokOk()?'✅':'🔑'}</span><span class="grow"><b>Картинки</b> выкладываются на <a href="${esc(cdTtsUrl())}" target="_blank">${esc(cdTtsSiteId())}.web.app</a> — отдельный сайт твоего проекта, основной не меняется.<br><span class="faint">${cdTokOk()?'Вход есть до '+new Date(CD_TTS.exp).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):'Нужен вход Google с правом выкладки (раз в час). Google может предупредить, что приложение не проверено: «Дополнительно → Перейти» — это твой же сайт.'}</span></span>${cdTokOk()?'':'<button class="btn sm primary" id="tLog">Войти Google</button>'}</div>
+    h.innerHTML=`<div class="cdttsrow"><span class="ic">${cdTokOk()?'✅':'🔑'}</span><span class="grow"><b>Картинки</b> выкладываются на <a href="${esc(cdTtsUrl())}" target="_blank">${esc(cdTtsSiteId())}.web.app</a> — отдельный сайт твоего проекта, основной не меняется.<br><span class="faint">${cdTokOk()?'Вход есть'+(CD_TTS.email?' ('+esc(CD_TTS.email)+')':'')+' до '+new Date(CD_TTS.exp).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):'Нужен вход Google с правом выкладки (раз в час). В окне Google отметь все галочки. Google может предупредить, что приложение не проверено: «Дополнительно → Перейти» — это твой же сайт.'}</span></span>${cdTokOk()?'<button class="btn sm" id="tLog" title="Выйти и войти Google ещё раз">Войти заново</button>':'<button class="btn sm primary" id="tLog">Войти Google</button>'}</div>
       <div class="cdttsrow"><span class="ic">${dir?'✅':saved?'🔓':'📁'}</span><span class="grow"><b>Папка TTS:</b> ${dir?esc(dir.name)+' → Картотека':saved?'выбрана, браузер спросит разрешение при выгрузке':window.showDirectoryPicker?'не выбрана':'этот браузер не пишет в папки — колоды будут скачиваться файлами'}<br><span class="faint">Документы → My Games → Tabletop Simulator → Saves → Saved Objects (можно выбрать любую из этих папок).</span></span>${window.showDirectoryPicker?`<button class="btn sm" id="tDir">${saved?'Другая папка…':'Выбрать папку…'}</button>`:''}</div>`;
-    const l=$('#tLog',h); if(l) l.onclick=async()=>{ try{ await cdTtsLogin(); }catch(e){ console.error(e); toast('Вход не удался: '+(e.code||e.message),true); } drawSt(); };
+    const l=$('#tLog',h); if(l) l.onclick=async()=>{ try{ await cdTtsLogin(); }catch(e){ console.error(e); toast(cdLoginErr(e),true); } drawSt(); };
     const d=$('#tDir',h); if(d) d.onclick=async()=>{ await cdTtsPick(); drawSt(); }; };
   const drawL=()=>{ const h=$('.cdttsl',b); if(!h) return; const sets=cdSets();
     h.innerHTML=sets.length?`<table class="cdttst"><tr><th></th><th>Сет</th><th>Карт</th><th>Состояние</th></tr>${sets.map(s=>{ const st=cdTtsState(s); return `<tr data-s="${esc(s.id)}"><td><input type="checkbox" ${sel.has(s.id)?'checked':''} ${st.k==='empty'?'disabled':''}></td><td><b>${esc(s.name||'Без названия')}</b>${s.pub?'':' <span class="faint" title="Скрытый сет">🔒</span>'}</td><td>${cdInSet(s.id).length}</td><td><span class="cdst ${st.k}">${esc(st.t)}</span>${s.tts?`<span class="faint"> · ${new Date(s.tts.at).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>`:''}</td></tr>`; }).join('')}</table>`:'<div class="faint">Сетов пока нет.</div>';
     $$('tr[data-s] input',h).forEach(cb=>cb.onchange=()=>{ const id=cb.closest('tr').dataset.s; cb.checked?sel.add(id):sel.delete(id); $('#tGo',b).disabled=!sel.size; }); $('#tGo',b).disabled=!sel.size; };
   $('#tNo',b).onclick=closeModal; $('#tChg',b).onclick=()=>{ sel.clear(); for(const s of cdSets()) if(['new','chg'].includes(cdTtsState(s).k)) sel.add(s.id); drawL(); };
-  $('#tGo',b).onclick=async()=>{ if(!cdTokOk()){ try{ await cdTtsLogin(); }catch(e){ toast('Вход не удался: '+(e.code||e.message),true); drawSt(); return; } drawSt(); toast('Вход есть — нажми «Выгрузить» ещё раз'); return; }
+  $('#tGo',b).onclick=async()=>{ if(!cdTokOk()){ try{ await cdTtsLogin(); }catch(e){ toast(cdLoginErr(e),true); drawSt(); return; } drawSt(); toast('Вход есть — нажми «Выгрузить» ещё раз'); return; }
     if(!await cdTtsDir(true)&&(CD_TTS.dir||await cdIdb(true).catch(()=>null))) toast('Без разрешения на папку колоды скачаются файлами',true);
     const go=$('#tGo',b); go.disabled=true; const ok=await cdTtsExport([...sel],P); if($('#tGo',b)){ go.disabled=false; if(ok){ sel.clear(); P('Готово. Возьми колоды в TTS: Объекты → Сохранённые объекты → Картотека.'); } drawL(); drawSt(); } };
   /* скейл: общий для всех колод; поменяли — сеты помечаются «изменено» и выбираются для выгрузки */
