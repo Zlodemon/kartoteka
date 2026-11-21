@@ -44,8 +44,12 @@ function fields(f) { const o = {}; for (const k of Object.keys(f)) o[k] = val(f[
   const EMU = process.env.FIRESTORE_EMULATOR_HOST;
   const base = (EMU ? `http://${EMU}/v1/` : 'https://firestore.googleapis.com/v1/') + `projects/${project}/databases/(default)/documents`;
   let tok = EMU ? 'owner' : await accessToken();
-  const api = async (url, opts = {}) => { for (let i = 0; ; i++) { const r = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), authorization: 'Bearer ' + tok } });
-      if (r.ok) return r.json(); const txt = await r.text(); if (r.status === 401 && i === 0 && !EMU) { tok = await accessToken(); continue; }
+  // у каждого запроса — предел 90 с вместе с телом ответа: 19–21.11.2026 запрос повисал без ответа и ошибки, и бэкап стоял до следующего запуска (.part)
+  const api = async (url, opts = {}) => { for (let i = 0; ; i++) { let r, txt;
+      try { r = await fetch(url, { ...opts, signal: AbortSignal.timeout(90000), headers: { ...(opts.headers || {}), authorization: 'Bearer ' + tok } });
+        if (r.ok) return await r.json(); txt = await r.text(); }
+      catch (e) { if (i < 4) { console.warn(`  запрос не удался (${e.name === 'TimeoutError' ? 'нет ответа 90 с' : e.message}) — повтор ${i + 1}/4`); await new Promise(res => setTimeout(res, 3000 * (i + 1))); continue; } throw e; }
+      if (r.status === 401 && i === 0 && !EMU) { tok = await accessToken(); continue; }
       // суточный бесплатный лимит базы (тариф Spark) кончился: REST закрыт до сброса, повторять бессмысленно — дальше читаем каналом сайта (sdkOpen)
       if (r.status === 429 && /"Quota exceeded\."/.test(txt)) throw Object.assign(new Error('закончился суточный бесплатный лимит базы Firebase (HTTP 429 «Quota exceeded», тариф Spark). Он сбрасывается в полночь по Калифорнии — 10:00 по Москве (с 1 ноября — 11:00). Сайт можно выложить и сейчас, без бэкапа: выкладка базу не читает'), { quota: true });
       if ((r.status === 429 || r.status >= 500) && i < 4) { await new Promise(res => setTimeout(res, 1500 * (i + 1))); continue; }

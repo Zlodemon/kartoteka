@@ -2013,6 +2013,8 @@ if(MOCK){
     DEL:Symbol('del'),
     delete:(coll,id)=>{ STAT.w++; const r=F.doc(db,...cpath(coll),id); if(!isSync(coll)) return F.deleteDoc(r); const k=skey(coll,id), s=SK.get(k); SK.set(k,{t:s?s.t:0}); return syncWrite(coll,id,true,b=>b.delete(r),true,false); },
     /* записи, не подтверждённые сервером в прошлый заход (вкладку закрыли без сети): SDK отправит их сам, после этого — свежая метка */
+    /* переоткрыть соединение с базой (повисший без ошибки канал): неподтверждённые записи SDK отправит заново, подписки продолжат по меткам возобновления */
+    kick:async()=>{ await F.disableNetwork(db); await F.enableNetwork(db); },
     syncResume(){ if(!UNACK_OLD.length) return; const ks=UNACK_OLD.splice(0); F.waitForPendingWrites(db).then(()=>{ for(const k of ks){ UNACK.delete(k); syncRestamp(k); } unackSave(); }).catch(()=>{}); },
     async get(coll,id){ const s=await F.getDoc(F.doc(db,...cpath(coll),id)); if(!s.metadata.fromCache) fsCount(coll,1); if(!s.exists()) return null; syncSeen(coll,s.id,s.data()); const d={...s.data(),id:s.id}; if(TH_COLLS.has(coll)) thAttach(coll,[d]); return d; },
     async getImg(coll,id){ try{ const s=await F.getDocFromCache(F.doc(db,...cpath(coll),id)); if(s.exists()) return {...s.data(),id:s.id}; }catch{} return DB.get(coll,id); },
@@ -2311,12 +2313,25 @@ const TXB=new Map(), TXQ=new Map();
 const idArrLike=v=>Array.isArray(v)&&v.every(x=>x&&typeof x==='object'&&!Array.isArray(x)&&x.id!=null);
 /* поле-массив элементов с id (элементы карты, полоски, статусы, эффекты…) пишем не «как у меня», а слив с тем, что сейчас на сервере:
    иначе двое, двигающие разные элементы одной карты, затирают друг друга (побеждает последняя запись) */
+/* Транзакция — отдельные HTTP-запросы (чтение + запись) с таймаутом 15 с и до 5 повторов, а записи одного документа идут строго друг за другом.
+   При плохой связи или кончившемся суточном лимите базы каждая правка карты/техник ждала минуты («сохраняю…» не уходит, у других пусто),
+   а закрытая за это время вкладка теряла правку: транзакции нет в очереди Firestore. Теперь у транзакции TX_MS: не успела — пишем обычной записью
+   (очередь Firestore, переживает перезагрузку) и TX_SLOW_MS (при «нет квоты» — TX_QUOTA_MS) пишем так сразу, без транзакций */
+const TX_MS=6000, TX_SLOW_MS=60e3, TX_QUOTA_MS=30*60e3; let TX_SLOW=0;
 function txWrite(coll,docId,part,base,keys,data){
   const tb=TXB.get(docId); if(tb) tb.n++; else TXB.set(docId,{n:1,base});
   const prev=TXQ.get(docId)||Promise.resolve();
-  const run=prev.catch(()=>{}).then(()=>DB.mergeUpdate(coll,docId,cur=>{ const p={...part}; for(const k of keys){ const r=cur[k]; if(idArrLike(r)) p[k]=mergeIdArrays(JSON.parse(JSON.stringify(data[k])),base[k],r); } return p; }))
-    .then(nx=>{ const t=TXB.get(docId); if(t&&--t.n<=0){ TXB.delete(docId); if(!pending.has(docId)) snapshots.set(docId,stableStr(clean(nx))); } })
-    .catch(e=>{ const t=TXB.get(docId); if(t&&--t.n<=0) TXB.delete(docId); if(e.code==='not-found') return DB.set(coll,docId,data); if(e.code==='permission-denied') throw e; return DB.update(coll,docId,part); /* нет сети и т.п. — пишем как раньше, Firestore доставит из очереди */ });
+  const dec=()=>{ const t=TXB.get(docId); if(t&&--t.n<=0){ TXB.delete(docId); return true; } return false; };
+  const plain=e=>{ if(e&&e.code==='not-found') return DB.set(coll,docId,data); if(e&&e.code==='permission-denied') throw e; return DB.update(coll,docId,part).catch(e2=>{ if(e2.code==='not-found') return DB.set(coll,docId,data); throw e2; }); }; /* нет сети и т.п. — пишем как раньше, Firestore доставит из очереди */
+  const run=prev.catch(()=>{}).then(()=>{
+    if(Date.now()<TX_SLOW){ dec(); return plain(null); }
+    let over=false, timer=0;
+    const tx=DB.mergeUpdate(coll,docId,cur=>{ if(over) throw Object.assign(new Error('транзакция отменена: долго'),{code:'tx-late'}); /* ответ на чтение пришёл после отказа — не пишем */
+        const p={...part}; for(const k of keys){ const r=cur[k]; if(idArrLike(r)) p[k]=mergeIdArrays(JSON.parse(JSON.stringify(data[k])),base[k],r); } return p; })
+      .then(nx=>{ if(over) return; clearTimeout(timer); if(dec()&&!pending.has(docId)) snapshots.set(docId,stableStr(clean(nx))); },
+            e=>{ if(over) return; clearTimeout(timer); if(e&&e.code==='resource-exhausted') TX_SLOW=Date.now()+TX_QUOTA_MS; dec(); return plain(e); });
+    const late=new Promise(res=>{ timer=setTimeout(()=>{ over=true; TX_SLOW=Math.max(TX_SLOW,Date.now()+TX_SLOW_MS); console.warn('запись со слиянием дольше',TX_MS/1000,'с — пишу обычной записью:',coll,docId); dec(); res(plain(null)); },TX_MS); });
+    return Promise.race([tx,late]); });
   TXQ.set(docId,run); run.finally(()=>{ if(TXQ.get(docId)===run) TXQ.delete(docId); }); return run; }
 /* ---- параллельная работа: трёхстороннее слияние (база = последняя известная версия сервера) ---- */
 const SYNC_META=new Set(['updatedAt','updatedBy','_pending']);
@@ -2368,13 +2383,17 @@ async function flush(){
     pending.delete(id); snapshots.set(docId,stableStr(data));
     const baseO=baseS&&part?JSON.parse(baseS):null; const arrK=baseO?Object.keys(part).filter(k=>part[k]!==DB.DEL&&idArrLike(data[k])&&idArrLike(baseO[k])):[];
     const w=baseS?(part?(arrK.length&&DB.mergeUpdate&&!('thumb' in part)&&!('thumbRef' in part)?txWrite(coll,docId,part,baseO,arrK,data):Promise.resolve().then(()=>DB.update(coll,docId,part)).catch(e=>{ if(e.code==='not-found') return DB.set(coll,docId,data); throw e; })):null):Promise.resolve().then(()=>DB.set(coll,docId,data));
-    if(!w) continue; inflight++; ws.push(w.catch(e=>saveFail(e,coll,docId,id)).finally(()=>{ inflight--; saveStatus(); }));
+    if(!w) continue; inflight++; const tk={t:Date.now()}; INFL.add(tk); ws.push(w.catch(e=>saveFail(e,coll,docId,id)).finally(()=>{ inflight--; INFL.delete(tk); saveStatus(); }));
   }
   saving=false; if(pending.size) saveTimer=setTimeout(flush,200); saveStatus();
   await Promise.all(ws);
 }
-let inflight=0;
-function saveStatus(){ if(pending.size) return; if(inflight) setStatus(navigator.onLine===false?'нет сети — сохранится, когда появится':'сохраняю…','dirty'); else setStatus('синхронизировано'); }
+let inflight=0; const INFL=new Set(); /* записи в полёте: {t — когда ушла} */
+const inflAge=()=>{ let m=0; for(const x of INFL) m=Math.max(m,Date.now()-x.t); return m; };
+function saveStatus(){ if(pending.size) return; if(inflight) setStatus(navigator.onLine===false?'нет сети — сохранится, когда появится':inflAge()>15e3?'сохраняю… связь медленная, не закрывай вкладку':'сохраняю…','dirty'); else setStatus('синхронизировано'); }
+/* сторож: запись не подтверждена сервером дольше 25 с при «есть сеть» — соединение с базой, скорее всего, повисло (обрыв без ошибки).
+   Переоткрываем его (не чаще раза в минуту): Firestore заново отправит всё неподтверждённое из своей очереди, подписки продолжат с места */
+let KICK_AT=0; setInterval(()=>{ if(!inflight) return; const a=inflAge(); if(a>15e3) saveStatus(); if(a>25e3&&navigator.onLine!==false&&Date.now()-KICK_AT>60e3&&DB.kick){ KICK_AT=Date.now(); console.warn('запись висит',Math.round(a/1000),'с — переподключаюсь к базе'); DB.kick().catch(e=>console.warn('kick',e)); } },5000);
 async function saveFail(e,coll,docId,id){ console.error(e); toast(e.code==='permission-denied'?'Нет прав на это изменение — откатываю':'Ошибка сохранения: '+(e.code||e.message),true); const fresh=await DB.get(coll,docId).catch(()=>null); if(fresh){ snapshots.set(docId,stableStr(clean(fresh))); const arr=world[Object.keys(COLLMAP).find(k=>COLLMAP[k]===coll)]; const i=arr?arr.findIndex(x=>x.id===id):-1; if(i>=0){ arr[i]=fresh; } } render(); }
 window.addEventListener('offline',saveStatus); window.addEventListener('online',saveStatus);
 const COLLMAP={characters:'characters',orgs:'orgs',locations:'locations',memberships:'memberships',locLinks:'locLinks',relations:'relations',maps:'maps',wmaps:'wmaps',wmarkers:'wmarkers',wmdraw:'wmdraw',wmpriv:'wmpriv',docs:'docs',cards:'cards',cardsets:'cardsets',battles:'battles'};
@@ -2812,6 +2831,7 @@ function open(id){ if(!visibleEnt(findEntity(id))) return; const t=typeOf(id); i
 $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.view)); $('#gsBtn').onclick=()=>gsOpen(); $('#helpBtn').onclick=()=>helpOpen();
 /* ===== С4: справка — первые шаги (для игрока и для мастера), клавиши и мышь, что нового. Открывается ❔ в меню или клавишей ? ===== */
 const APP_NEWS=[
+  {d:'2026-11-21',t:'Правки больше не застревают на «сохраняю…»',items:['При плохой связи с базой правки карты, техник, полосок и статусов могли ждать минутами (надпись «сохраняю…» не уходила, у других ничего не появлялось), а если закрыть вкладку в это время — пропадали. Теперь такая правка через несколько секунд уходит обычной записью: доходит до всех и не теряется при перезагрузке.','Если запись долго не подтверждается, сайт сам переподключается к базе, а внизу пишет «связь медленная, не закрывай вкладку».']},
   {d:'2026-11-08',t:'Эпик-бой: панель скиллов в чужой ход, кнопки звуков, правила баффов',items:['«📋 Скиллы» в шапке боя: в чужой ход видны скиллы и КД своего бойца; клик по союзнику — его скиллы и КД. Кнопка включает и выключает эту панель (только у тебя).','«🔊 Звуки» под панелью: загруженные звуки своего бойца — нажал, и слышат все в бою.','Новые фразы бойца: «Вызвал дуо атаку» и «Сменил позицию». В «Несколько звуков» у каждой фразы теперь есть 🎚️ — склеить её из нескольких звуков.','«Повышение атаки» и «БОЛЬШОЕ повышение атаки» не складываются — работает больший. Метки не складываются: новая заменяет старую и обновляет длительность.','Базовый крит урон — 0.5 (крит ×1.5). «Разделение урона» учитывает защиту того, на кого переносится урон.']},
   {d:'2026-11-03',t:'Эпик-бой: без промаха, вызов дуо, свои ресурсы',items:['Атака может не промахиваться: «Урон» → «Промах» — никогда или только от слабости по элементу (огонь по воде всё ещё может промахнуться). То же — баффами «Не может промахнуться» и «Не промахивается (кроме элемента)». Дебафф «Промах» мажет всегда.','Скилл может вызывать дуо атаку союзника (на выбор или случайного). Контратаки и дуо атаки дуо больше не вызывают, а от любой дуо атаки можно отказаться кнопкой «Не делать».','Свои ресурсы, как боевой дух: лист → «Эпик-бой» → «Свои ресурсы» (название, значок, цвет, максимум, сколько в начале). Скиллы их дают, требуют и тратят; в бою — своя полоска под ХП. Боевой дух и ресурсы больше не поднимаются выше максимума (можно разрешить).','Пассивки: «Затем скилл» (скилл может платить ресурсами), «1 раз за скилл» — чтобы АоЕ не срабатывало её много раз, порог «ХП ниже X%» вместо половины, «КД не меняют эффекты».','Новые цели: «все союзники, кроме себя». Несколько звуков на один скилл — по очереди или случайно (🎲 у поля звука).']},
   {d:'2026-11-02',t:'Броски NPC — только мастеру',items:['В карточке персонажа, за которым не закреплён ни один игрок, в панели «Игроки» появилась галочка «🎲 броски — только мастеру».','С ней броски характеристик, техник, формул и инициативы этого персонажа и его карточки техник уходят в чат только мастеру (с пометкой «мастеру»). Обычные реплики от его лица видны всем, как раньше.','Если персонажа закрепить за игроком, галочка перестаёт действовать.']},
