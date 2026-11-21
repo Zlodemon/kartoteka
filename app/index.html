@@ -13457,7 +13457,16 @@ async function cdTtsPick(){ if(!window.showDirectoryPicker){ toast('Этот б�
 /* папка с разрешением на запись; ask — можно спросить разрешение (только из нажатия) */
 async function cdTtsDir(ask,log){ if(window.__cdDir) return window.__cdDir; let d=CD_TTS.dir||await cdIdb(true).catch(e=>{ if(log) cdTlErr('IndexedDB с папкой не читается',e); return null; });
   if(!d){ if(log) cdTl('Папка TTS не выбрана в этом браузере'); return null; } CD_TTS.dir=d;
-  try{ let p=await d.queryPermission({mode:'readwrite'}), p0=p; if(p!=='granted'&&ask) p=await d.requestPermission({mode:'readwrite'}); if(log) cdTl('Папка «'+d.name+'»: разрешение '+p0+(p!==p0?' → '+p:''),undefined,p==='granted'?'':'warn'); return p==='granted'?d:null; }
+  /* браузер может так и не ответить на запрос разрешения (окно не показалось, сохранённая папка сломана) — тогда выгрузка висела
+     навсегда, ещё до первого шага (отчёт 2026-11-21: после «Выгрузить» — тишина). Ждём ограниченно, потом забываем папку: её выбирают заново */
+  const TO=(pr,ms)=>Promise.race([pr,new Promise(r=>setTimeout(()=>r('timeout'),ms))]);
+  try{ if(log) cdTl('Папка «'+d.name+'»: спрашиваю разрешение у браузера…');
+    let p=await TO(d.queryPermission({mode:'readwrite'}),4000), p0=p;
+    if(p!=='granted'&&p!=='timeout'&&ask){ if(log) cdTl('Папка «'+d.name+'»: прошу разрешение на запись (браузер должен показать окно «Разрешить изменять файлы?»)'); p=await TO(d.requestPermission({mode:'readwrite'}),45000); }
+    if(log) cdTl('Папка «'+d.name+'»: разрешение '+p0+(p!==p0?' → '+p:''),undefined,p==='granted'?'':'warn');
+    if(p==='timeout'){ cdTl('Браузер не ответил про папку «'+d.name+'» — забываю её, надо выбрать папку заново',undefined,'err'); CD_TTS.dir=null; await cdIdb(false,null).catch(()=>{});
+      if(ask) toast('Браузер не дал доступ к сохранённой папке TTS. Выбери её заново кнопкой «Выбрать папку…» — а сейчас колоды скачаются файлами.',true); return null; }
+    return p==='granted'?d:null; }
   catch(e){ if(log) cdTlErr('Папка «'+d.name+'»: ошибка разрешения',e); return null; } }
 async function cdWriteFile(dir,name,data){ try{ const f=await dir.getFileHandle(name,{create:true}); const w=await f.createWritable(); await w.write(data); await w.close();
     let sz='?'; try{ sz=(await f.getFile()).size; }catch{} cdTl('Записан файл '+dir.name+'/'+name+' ('+sz+' б)'); }
