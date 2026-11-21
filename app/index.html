@@ -1682,7 +1682,7 @@ let AUTH_SEEN=false; setTimeout(()=>{ const m=$('#bootMsg'); if(m) m.textContent
    AUTH.onChange(cb(user|null)) AUTH.signIn() AUTH.signOut()
    ============================================================ */
 let DB, AUTH, LIVE; // LIVE — эфемерные сигналы (линейка, пинги, следы, присутствие, перетаскивание): Realtime Database
-const STAT={w:0,r:0,by:{}}; // расход Firestore за сессию: записи / чтения с сервера (по коллекциям)
+const STAT={w:0,r:0,by:{},subs:{},recon:0,full:0}; // расход Firestore за сессию: записи / чтения с сервера (по коллекциям)
 /* кэш базы в браузере (IndexedDB). Без него каждый заход и каждый F5 читает всю базу заново из суточного лимита; с ним повторный заход в пределах ~30 минут
    стоит единицы чтений. on: null — ещё не проверено, false — не работает (why — причина). Проверка: cacheProbe() после входа */
 const CACHE={on:null,why:''};
@@ -1699,7 +1699,7 @@ const FS_RESYNC_MS=30*60e3, FS_LIVE=new Set(); let FS_TICK=Date.now();
 function fsLiveGet(k){ try{ return +localStorage.getItem('fsLive.'+k)||0; }catch{ return 0; } }
 function fsLiveSet(k,t){ try{ localStorage.setItem('fsLive.'+k,String(t)); }catch{} }
 function fsResync(L,snap,ch){ const now=Date.now(), srv=!snap.metadata.fromCache;
-  if(srv){ let n=ch.filter(c=>!c.doc.metadata.hasPendingWrites).length; if(!L.on&&now-fsLiveGet(L.key)>FS_RESYNC_MS){ n=Math.max(n,snap.size,1); L.full=now; }
+  if(srv){ let n=ch.filter(c=>!c.doc.metadata.hasPendingWrites).length; if(!L.on) STAT.recon++; if(!L.on&&now-fsLiveGet(L.key)>FS_RESYNC_MS){ n=Math.max(n,snap.size,1); L.full=now; STAT.full++; }
     fsCount(L.coll,n); fsLiveSet(L.key,now); }
   L.on=srv; L.n=snap.size; }
 /* раз в минуту отмечаем подписки, которые в связи. Пропуск больше 30 мин — компьютер спал или браузер заморозил вкладку: сервер перечитает
@@ -1721,9 +1721,19 @@ function fsPastHTML(){ let L=[]; try{ const today='fsStat.'+fsDayId(); L=Object.
   return `<div style="margin-top:10px"><b>Прошлые дни (этот браузер):</b>${L.map(d=>`<div style="font-size:12.5px;margin-top:3px">${esc(d.d)} — <b>${d.r}</b>${d.loads?` за ${d.loads} ${plural(d.loads,'заход','захода','заходов')}`:''}: ${Object.entries(d.by||{}).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>esc(FS_NAMES[k]||k)+' '+v).join(', ')}</div>`).join('')}</div>`; }
 /* заходы: сколько чтений ушло за первые 20 с после входа (загрузка всего, что открыто сразу). С рабочим кэшем повторный заход — единицы, без кэша — вся база */
 function fsDayGet(){ const d=fsDayId(); if(!FS_DAY||FS_DAY.d!==d) try{ FS_DAY=JSON.parse(localStorage.getItem('fsStat.'+d)||'null')||{d,r:0,by:{}}; }catch{ FS_DAY={d,r:0,by:{}}; } return FS_DAY; }
-function fsLoadMark(){ if(MOCK) return; const day=fsDayGet(); day.loads=(day.loads||0)+1; (day.lr??=[]).push(STAT.r); if(day.lr.length>60) day.lr.shift(); try{ localStorage.setItem('fsStat.'+day.d,JSON.stringify(day)); }catch{} }
+function fsLoadMark(){ if(MOCK) return; setTimeout(()=>readsReport('load'),0); const day=fsDayGet(); day.loads=(day.loads||0)+1; (day.lr??=[]).push(STAT.r); if(day.lr.length>60) day.lr.shift(); try{ localStorage.setItem('fsStat.'+day.d,JSON.stringify(day)); }catch{} }
 function fsLoadsHTML(){ const day=fsDayGet(), lr=day.lr||[]; const c=CACHE.on===false?`<b style="color:var(--red,#ff6b6b)">⚠ не работает</b> <span class="faint">(${esc(CACHE.why)})</span> — каждый заход и F5 читает всю базу заново`:CACHE.on?'✔ работает':(MOCK||window.LOCAL_BACKEND)?'не используется (резервный сервер)':'проверяется…';
   return `<div style="margin-top:8px">Кэш базы в этом браузере: ${c}</div>${day.loads?`<div style="margin-top:4px">Заходов сегодня в этом браузере: <b>${day.loads}</b>; чтений за первые 20 с каждого: ${lr.slice(-12).join(', ')}${lr.length>12?' …':''}</div>`:''}`; }
+/* отчёт о чтениях этой вкладки (syncdiag, kind 'reads'; читает только мастер, например скриптом). 2026-11-21 проект читал 60–118 тыс. документов в сутки
+   при бесплатном лимите 50 тыс., а браузер мастера — сотни: смотрим, чьи вкладки и на что читают. Через 20 с после входа, потом раз в 30 мин, если что-то изменилось,
+   и при уходе со страницы; не больше 80 отчётов за вкладку. subs — сколько раз открывали подписку на коллекцию, recon — подписка снова в связи с сервером,
+   full — из них с полным перечитыванием (перерыв больше 30 мин) */
+const RS={tab:Math.random().toString(36).slice(2,8),t0:Date.now(),n:0,last:''};
+const uaShort=()=>{ const u=navigator.userAgent||''; return (/Mobi|Android|iPhone|iPad/.test(u)?'mob ':'pc ')+(/YaBrowser/.test(u)?'yandex':u.includes('Edg/')?'edge':u.includes('OPR/')?'opera':/Firefox/.test(u)?'firefox':/Chrome/.test(u)?'chrome':/Safari/.test(u)?'safari':'other'); };
+function readsReport(why){ try{ if(MOCK||!me||!DB.readsReport||RS.n>=80) return; const sig=STAT.r+'|'+STAT.w+'|'+JSON.stringify(STAT.subs)+'|'+STAT.recon; if(sig===RS.last) return; RS.last=sig; RS.n++;
+  const day=fsDayGet(); let rl=0; try{ rl=JSON.parse(sessionStorage.getItem('reloads')||'[]').length; }catch{}
+  DB.readsReport({tab:RS.tab,t0:RS.t0,why,r:STAT.r,w:STAT.w,by:STAT.by,subs:STAT.subs,recon:STAT.recon,full:STAT.full,vis:document.visibilityState,view:state.view,cache:CACHE.on,loads:day.loads||0,dayR:day.r||0,ua:uaShort(),rl,role:myRole}); }catch(e){ console.warn('readsReport',e); } }
+setInterval(()=>readsReport('30m'),30*60e3); addEventListener('pagehide',()=>readsReport('hide'));
 /* ---- индикатор «кэш не работает» под названием сайта (только если правда не работает) ---- */
 function cacheOff(why){ if(CACHE.on===false) return; CACHE.on=false; CACHE.why=why||'причина неизвестна'; try{ cacheShow(); }catch{} }
 async function cacheProbe(){ if(MOCK||window.LOCAL_BACKEND) return; if(CACHE.on!==false){ try{ if(!window.indexedDB) return cacheOff('браузер не даёт сайту хранилище IndexedDB');
@@ -1946,7 +1956,7 @@ if(MOCK){
   function syncPlain(coll,q,key,emit,shadow){ let fired=false, first=true, truth=null, Sh=null, sv=0;
     const conv=snap=>snap.docs.map(d=>({...d.data(),id:d.id,_pending:d.metadata.hasPendingWrites}));
     /* includeMetadataChanges — чтобы видеть, когда подписка снова в связи с сервером (fsResync, дочитывание); такие события без изменений в приложение не идут */
-    const L={coll,key,n:0,on:false,full:0}; FS_LIVE.add(L);
+    const L={coll,key,n:0,on:false,full:0}; FS_LIVE.add(L); { const c=cbase(coll); STAT.subs[c]=(STAT.subs[c]||0)+1; }
     const un=F.onSnapshot(q,{includeMetadataChanges:true}, snap=>{ const ch=snap.docChanges(); try{ fsResync(L,snap,ch); if(isSync(coll)) for(const c of ch) if(c.type!=='removed') syncSeen(coll,c.doc.id,c.doc.data()); }catch{}
         if(first){ first=false; if(shadow&&snap.metadata.fromCache) try{ Sh=syncShadow(coll,q,key,snap,()=>truth); }catch(e){ console.warn('дочитывание',e); } }
         truth=snap; if(isSync(coll)&&!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites){ clearTimeout(sv); const xs=clkNow()-SYNC_T0; sv=setTimeout(()=>syncPut(key,{x:xs,n:snap.size,full:Date.now(),at:Date.now()}),1500); }
@@ -2015,6 +2025,7 @@ if(MOCK){
     /* записи, не подтверждённые сервером в прошлый заход (вкладку закрыли без сети): SDK отправит их сам, после этого — свежая метка */
     /* переоткрыть соединение с базой (повисший без ошибки канал): неподтверждённые записи SDK отправит заново, подписки продолжат по меткам возобновления */
     kick:async()=>{ await F.disableNetwork(db); await F.enableNetwork(db); },
+    readsReport(info){ if(!me) return; STAT.w++; F.setDoc(F.doc(F.collection(db,...cpath('syncdiag'))),{by:me.uid,at:Date.now(),kind:'reads',coll:'*',mode:SYNC_MODE,info:JSON.stringify(info).slice(0,4000)}).catch(()=>{}); },
     syncResume(){ if(!UNACK_OLD.length) return; const ks=UNACK_OLD.splice(0); F.waitForPendingWrites(db).then(()=>{ for(const k of ks){ UNACK.delete(k); syncRestamp(k); } unackSave(); }).catch(()=>{}); },
     async get(coll,id){ const s=await F.getDoc(F.doc(db,...cpath(coll),id)); if(!s.metadata.fromCache) fsCount(coll,1); if(!s.exists()) return null; syncSeen(coll,s.id,s.data()); const d={...s.data(),id:s.id}; if(TH_COLLS.has(coll)) thAttach(coll,[d]); return d; },
     async getImg(coll,id){ try{ const s=await F.getDocFromCache(F.doc(db,...cpath(coll),id)); if(s.exists()) return {...s.data(),id:s.id}; }catch{} return DB.get(coll,id); },
