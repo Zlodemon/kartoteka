@@ -3,14 +3,16 @@
 // Запуск:  node backup-data.js <id проекта Firebase> [папка для бэкапов] [--keep N]
 //   --daily  — имя файла kartoteka-daily-… (ежедневный бэкап из Планировщика, tools/backup-task.ps1); обычные бэкапы — kartoteka-full-…
 //   --keep N — оставить только N последних бэкапов с тем же началом имени (daily или full); другие файлы не трогаются
+//   --trim-log N — после удачного бэкапа удалить из журнала (log) записи старше N дней; в этом и прежних бэкапах они остаются. Без флага в базу ничего не пишет
 //   --sdk    — читать сразу каналом сайта (Firebase SDK). Без флага скрипт переходит на него сам, если REST закрыт суточным лимитом (429 Quota exceeded)
-// Вход берётся из Firebase CLI (тот же, что для firebase deploy); только чтение, в базу ничего не пишет.
+// Вход берётся из Firebase CLI (тот же, что для firebase deploy); только чтение (кроме --trim-log).
 // Коллекции берутся из самой базы (listCollectionIds), так что новые коллекции попадают в бэкап без правки скрипта.
 // Игры (campaigns/<id>/…): основная — в data (как раньше), остальные — в camps.<id>.data.
 const fs = require('fs'), path = require('path'), os = require('os');
 
 const argv = process.argv.slice(2), ki = argv.indexOf('--keep'), keep = ki >= 0 ? Math.max(1, parseInt(argv[ki + 1], 10) || 30) : 0, daily = argv.includes('--daily');
-const pos = argv.filter((a, i) => !a.startsWith('--') && !(ki >= 0 && i === ki + 1));
+const ti = argv.indexOf('--trim-log'), trimDays = ti >= 0 ? Math.max(1, parseInt(argv[ti + 1], 10) || 30) : 0;
+const pos = argv.filter((a, i) => !a.startsWith('--') && !(ki >= 0 && i === ki + 1) && !(ti >= 0 && i === ti + 1));
 const project = pos[0], outDir = path.resolve(pos[1] || 'backups');
 if (!project) { console.error('Укажите id проекта: node backup-data.js <projectId> [папка]'); process.exit(2); }
 
@@ -119,6 +121,15 @@ function fields(f) { const o = {}; for (const k of Object.keys(f)) o[k] = val(f[
   for (const [id, cc] of Object.entries(campCounts)) for (const [c, n] of Object.entries(cc)) if ((chk.camps[id].data[c] || []).length !== n) throw new Error(`проверка не сошлась на ${id}/${c}`);
   fs.renameSync(tmp, file);
   const mb = (fs.statSync(file).size / 1048576).toFixed(1);
+  /* журнал: записи старше trimDays дней удаляем из базы — только уже лежащие в проверенном бэкапе (ids из него же, лишних чтений нет).
+     Журнал растёт на сотни записей в день, а каждый бэкап читает его целиком: к 2026-11-21 это 6 900 из 7 400 чтений бэкапа */
+  async function trimLog() { if (!trimDays || SDK) return; const cut = Date.now() - trimDays * 864e5;
+    const sets = [[camps ? 'campaigns/main/log' : 'log', chk.data.log || []], ...Object.entries(chk.camps || {}).map(([id, c]) => [`campaigns/${id}/log`, c.data.log || []])];
+    for (const [p, docs] of sets) { const old = docs.filter(d => typeof d.at === 'number' && d.at < cut); if (!old.length) continue; let k = 0;
+      for (let i = 0; i < old.length; i += 400) { const writes = old.slice(i, i + 400).map(d => ({ delete: `projects/${project}/databases/(default)/documents/${p}/${d.id}` }));
+        await api(base + ':commit', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ writes }) }); k += writes.length; }
+      console.log(`журнал ${p}: удалено ${k} записей старше ${trimDays} дн.`); } }
+  try { await trimLog(); } catch (e) { console.error('журнал не урезан: ' + e.message); }
   console.log(`OK ${total} документов${camps ? `, игр: ${1 + Object.keys(campCounts).length}` : ''}, ${mb} МБ → ${file}`);
   if (keep) { // старые бэкапы этого проекта сверх N последних — удалить (имя содержит дату, поэтому сортировка по имени = по времени)
     const mine = fs.readdirSync(outDir).filter(f => f.startsWith(prefix) && f.endsWith('.json')).sort().reverse();

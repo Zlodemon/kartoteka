@@ -2449,7 +2449,9 @@ const SKIP_FIELDS=new Set(['updatedAt','updatedBy','pos','thumb','createdAt','ow
 async function logDiff(coll,docId,obj,data){
   const prevS=snapshots.get(docId); if(!prevS) return; const prev=JSON.parse(prevS);
   const entries=[]; const name=entityLabel(coll,obj);
-  const fmt=v=>v==null?'':(typeof v==='object'?JSON.stringify(v):String(v));
+  /* stableStr — с упорядоченными ключами: снимок в snapshots уже упорядочен, а data — нет. С JSON.stringify одинаковые объекты с другим порядком полей
+     считались изменением: к 2026-11-21 половина журнала (3 479 из 6 862) — пустые «столбцы инвентаря», «crop», «точка энергии», где до = после */
+  const fmt=v=>v==null?'':(typeof v==='object'?stableStr(v):String(v));
   for(const k of new Set([...Object.keys(prev),...Object.keys(data)])){
     if(SKIP_FIELDS.has(k)||k==='deck') continue; /* колоду не журналим: каждый клик «+/−» был бы ещё одной записью в базу, а колоду и так видно всем */
     if(k==='stats'){ const a=prev.stats||{}, b=data.stats||{}; for(const sk of new Set([...Object.keys(a),...Object.keys(b)])) if(a[sk]!==b[sk]) entries.push({path:'stats.'+sk,label:'характеристика «'+(byId(world.settings.stats,sk)?.name||sk)+'»',before:a[sk]??null,after:b[sk]??null}); continue; }
