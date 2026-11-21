@@ -4,6 +4,7 @@
 //   --daily  — имя файла kartoteka-daily-… (ежедневный бэкап из Планировщика, tools/backup-task.ps1); обычные бэкапы — kartoteka-full-…
 //   --keep N — оставить только N последних бэкапов с тем же началом имени (daily или full); другие файлы не трогаются
 //   --trim-log N — после удачного бэкапа удалить из журнала (log) записи старше N дней; в этом и прежних бэкапах они остаются. Без флага в базу ничего не пишет
+//   Журнал игры, где мастер его выключил (settings.logOff), не читается и в бэкап не попадает (его старые записи остаются в базе)
 //   --sdk    — читать сразу каналом сайта (Firebase SDK). Без флага скрипт переходит на него сам, если REST закрыт суточным лимитом (429 Quota exceeded)
 // Вход берётся из Firebase CLI (тот же, что для firebase deploy); только чтение (кроме --trim-log).
 // Коллекции берутся из самой базы (listCollectionIds), так что новые коллекции попадают в бэкап без правки скрипта.
@@ -98,6 +99,11 @@ function fields(f) { const o = {}; for (const k of Object.keys(f)) o[k] = val(f[
       for (const d of (j.documents || [])) put({ ...fields(d.fields || {}), id: d.name.split('/').pop() });
       page = j.nextPageToken; process.stdout.write(`\r  ${label}: ${n}        `); } while (page);
     w(']'); total += n; process.stdout.write('\n'); return n; }
+  /* журнал выключен мастером в этой игре (meta/settings.logOff, Настройки → Общие → «Данные») — коллекцию log не читаем совсем (1 чтение на проверку).
+     Не удалось прочитать настройки — журнал читаем как раньше */
+  async function logOffAt(prefix) { try { if (SDK) { const d = await SDK.F.getDocFromServer(SDK.F.doc(SDK.db, prefix + 'meta/settings')); return !!(d.exists() && d.data().logOff); }
+      const j = await api(`${base}/${enc(prefix + 'meta/settings')}`); return !!fields(j.fields || {}).logOff; } catch (e) { if (e.quota) throw e; return false; } }
+  async function dropLog(list, prefix, label) { if (!list.some(([k]) => k === 'log') || !await logOffAt(prefix)) return list; console.log(`  журнал (${label}) выключен в настройках — не читаю`); return list.filter(([k]) => k !== 'log'); }
   async function block(list) { const counts = {}; w('{'); for (let i = 0; i < list.length; i++) { const [key, src] = list[i]; w((i ? ',' : '') + JSON.stringify(key) + ':'); counts[key] = await dump(src, src); } w('}'); return counts; }
   async function run() { out = fs.openSync(tmp, 'w'); total = 0; regDocs = {}; campCounts = {};
     const rootColls = await collIds('');
@@ -105,10 +111,10 @@ function fields(f) { const o = {}; for (const k of Object.keys(f)) o[k] = val(f[
     camps = mainColls.length;
     const at = Date.now(); w(`{"v":1,"at":${at},"from":"cloud","project":${JSON.stringify(project)},` + (camps ? '"camp":{"id":"main"},' : '') + '"data":');
     const mainList = camps ? [...GLOBAL.filter(c => rootColls.includes(c)).map(c => [c, c]), ...mainColls.map(c => [c, 'campaigns/main/' + c])] : rootColls.map(c => [c, c]);
-    counts = await block(mainList);
+    counts = await block(await dropLog(mainList, camps ? 'campaigns/main/' : '', 'основная игра'));
     if (camps) { w(',"camps":{'); let k = 0;
       for (const id of Object.keys(regDocs).filter(x => x !== 'main').sort()) { const cc = await collIds('campaigns/' + id); if (!cc.length) continue;
-        w((k++ ? ',' : '') + JSON.stringify(id) + ':{"name":' + JSON.stringify(regDocs[id].name || '') + ',"data":'); campCounts[id] = await block(cc.map(c => [c, `campaigns/${id}/${c}`])); w(',"counts":' + JSON.stringify(campCounts[id]) + '}'); }
+        w((k++ ? ',' : '') + JSON.stringify(id) + ':{"name":' + JSON.stringify(regDocs[id].name || '') + ',"data":'); campCounts[id] = await block(await dropLog(cc.map(c => [c, `campaigns/${id}/${c}`]), `campaigns/${id}/`, regDocs[id].name || id)); w(',"counts":' + JSON.stringify(campCounts[id]) + '}'); }
       w('}'); }
     w(`,"counts":${JSON.stringify(counts)}}`); fs.closeSync(out); }
   try { await run(); }
