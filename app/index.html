@@ -2275,7 +2275,7 @@ function lazyReset(){ for(const v of WMSUB.values()) v.un.forEach(f=>{ try{ f();
   if(LOGSUB){ try{ LOGSUB.un(); }catch{} LOGSUB=null; } if(CDSUB){ CDSUB.forEach(f=>{ try{ f(); }catch{} }); CDSUB=null; } CD_LOADED.cards=CD_LOADED.sets=false; world.cards=[]; world.cardsets=[]; if(EPSUB){ try{ EPSUB(); }catch{} EPSUB=null; } EP_LOADED=false; world.battles=[]; }
 function subscribeAll(){ lazyReset(); DB.syncResume&&DB.syncResume();
   const sub=(coll,key,opts,post)=>unsubs.push(DB.subscribe(coll,opts,docs=>{ applyDocs(key,coll,docs,post); }));
-  sub('meta','_settings',null,()=>{ const s=world._settings.find(x=>x.id==='settings'); const fresh=s?{...defaultSettings(),...s}:{...defaultSettings(),id:'settings'}; if(!world.settings) world.settings=fresh; else if(!pending.has('settings')&&!(s&&s.updatedAt&&s.updatedAt===world.settings.updatedAt)){ for(const k of Object.keys(world.settings)) if(!(k in fresh)) delete world.settings[k]; Object.assign(world.settings,fresh); } const t=world._settings.find(x=>x.id==='timeline'); if(!pending.has('timeline')&&!(t&&world.timeline&&t.updatedAt&&t.updatedAt===world.timeline.updatedAt)) world.timeline=t?t:{id:'timeline',nodes:[]}; const tc=world._settings.find(x=>x.id==='techniques'); if(!pending.has('techniques')&&!(tc&&world.techniques&&tc.updatedAt&&tc.updatedAt===world.techniques.updatedAt)){ world.techniques=tc?tc:(realDM()?techBaseCatalog():{id:'techniques',branches:[],groups:[]}); techLayoutCache={}; } applySiteName(); logOffSync(); });
+  sub('meta','_settings',null,()=>{ const s=world._settings.find(x=>x.id==='settings'); const fresh=s?{...defaultSettings(),...s}:{...defaultSettings(),id:'settings'}; if(!world.settings) world.settings=fresh; else if(!pending.has('settings')&&!(s&&s.updatedAt&&s.updatedAt===world.settings.updatedAt)){ for(const k of Object.keys(world.settings)) if(!(k in fresh)) delete world.settings[k]; Object.assign(world.settings,fresh); } const t=world._settings.find(x=>x.id==='timeline'); if(!pending.has('timeline')&&!(t&&world.timeline&&t.updatedAt&&t.updatedAt===world.timeline.updatedAt)) world.timeline=t?t:{id:'timeline',nodes:[]}; const tc=world._settings.find(x=>x.id==='techniques'); if(!pending.has('techniques')&&!(tc&&world.techniques&&tc.updatedAt&&tc.updatedAt===world.techniques.updatedAt)){ world.techniques=tc?tc:(realDM()?techBaseCatalog():{id:'techniques',branches:[],groups:[]}); } applySiteName(); logOffSync(); });
   CW.site=CW.camps=CW.users=false; world.campaigns=[]; world._site=[];
   sub('site','_site',null,()=>{ SITE=world._site.find(x=>x.id==='main')||null; CW.site=true; DB.syncModeSet&&DB.syncModeSet(SITE&&SITE.sync); campCheck(); }); sub('campaigns','campaigns',null,()=>{ CW.camps=true; campCheck(); });
   sub('memberships','memberships'); sub('locLinks','locLinks'); sub('users','users',null,()=>{ CW.users=true; campCheck(); }); sub('wmdraw','_wmdraw_notes',{where:[['t','==','note']]},()=>wmMerge('wmdraw')); if(state.view==='wmap'&&state.id) setTimeout(()=>wmSubMap(state.id),0);
@@ -6409,20 +6409,23 @@ function renderSkills(m){
   if(TK.view==='sky') techRenderSky(body,ch); else techRenderTiers(body,ch);
 }
 /* созвездие */
-let techLayoutCache={};
+const techLayoutCache=new WeakMap();
 function techLayout(b){
-  if(techLayoutCache[b.id]) return techLayoutCache[b.id];
-  const W=1400,H=820; const pos={}; const main=b.items.filter(i=>i.main).sort((a,c)=>(a.order||0)-(c.order||0)); const extra=b.items.filter(i=>!i.main);
+  // Синхронизация может изменить состав ветки на месте между отрисовками.
+  const key=JSON.stringify(b.items.map(({id,main,order,pos,req})=>[id,main,order,pos,req]));
+  const cached=techLayoutCache.get(b);
+  if(cached?.key===key) return cached.layout;
+  const W=1400,H=820; const pos=Object.create(null); const main=b.items.filter(i=>i.main).sort((a,c)=>(a.order||0)-(c.order||0)); const extra=b.items.filter(i=>!i.main);
   main.forEach((it,i)=>{ const t=main.length>1?i/(main.length-1):.5; pos[it.id]=it.pos?{...it.pos,fixed:true}:{x:200+t*(W-400),y:H/2+Math.sin(t*Math.PI)*-120,fixed:true}; });
   let seed=7; const rnd=()=>{ seed=(seed*9301+49297)%233280; return seed/233280; };
   extra.forEach(it=>{ if(it.pos){ pos[it.id]={...it.pos,fixed:true}; return; } const r=it.req?.[0]; const p=r&&pos[r]?pos[r]:null; const ang=rnd()*Math.PI*2; const rad=150+rnd()*80; pos[it.id]=p?{x:p.x+Math.cos(ang)*rad,y:p.y+Math.sin(ang)*rad}:{x:120+rnd()*(W-240),y:120+rnd()*(H-240)}; });
   const ids=Object.keys(pos); const P=ids.map(id=>({id,...pos[id],vx:0,vy:0})); const map=Object.fromEntries(P.map(p=>[p.id,p]));
-  const edges=[]; for(const it of b.items) for(const r of it.req||[]) if(map[r]&&map[it.id]) edges.push([r,it.id]);
+  const edges=[]; for(const it of b.items) for(const r of it.req||[]) if(Object.hasOwn(map,r)) edges.push([r,it.id]);
   for(let k=0;k<500;k++){ const T=1-k/500;
     for(let i=0;i<P.length;i++) for(let j=i+1;j<P.length;j++){ const a=P[i],c=P[j]; let dx=c.x-a.x,dy=c.y-a.y; const d2=dx*dx+dy*dy+1; const d=Math.sqrt(d2); const f=(a.fixed&&c.fixed)?0:9000/d2; dx/=d;dy/=d; if(!a.fixed){a.vx-=dx*f;a.vy-=dy*f;} if(!c.fixed){c.vx+=dx*f;c.vy+=dy*f;} }
     for(const [x,y] of edges){ const a=map[x],c=map[y]; let dx=c.x-a.x,dy=c.y-a.y; const d=Math.sqrt(dx*dx+dy*dy)+.01; const f=(d-170)*.03; if(!a.fixed){a.vx+=dx/d*f;a.vy+=dy/d*f;} if(!c.fixed){c.vx-=dx/d*f;c.vy-=dy/d*f;} }
     for(const p of P){ if(p.fixed) continue; p.vx+=(W/2-p.x)*.002; p.vy+=(H/2-p.y)*.004; p.x+=p.vx*T*.6; p.y+=p.vy*T*.6; p.vx*=.5; p.vy*=.5; p.x=Math.max(70,Math.min(W-70,p.x)); p.y=Math.max(60,Math.min(H-60,p.y)); } }
-  const out={W,H,pos:Object.fromEntries(P.map(p=>[p.id,{x:p.x,y:p.y}])),edges}; techLayoutCache[b.id]=out; return out;
+  const out={W,H,pos:Object.fromEntries(P.map(p=>[p.id,{x:p.x,y:p.y}])),edges}; techLayoutCache.set(b,{key,layout:out}); return out;
 }
 function techBranchBar(ch){ const cat=techCat(); const bar=el(`<div class="branchbar" style="padding:12px 22px 0">${cat.branches.filter(b=>isDM()||!b.hidden).map(x=>{ const vis=x.items.filter(i=>techVisible(i,ch)); const n=ch?vis.filter(i=>techLearned(ch,i)).length:0; return `<span class="bch ${TK.branch===x.id?'on':''}" data-b="${x.id}" style="--c:${x.color}"><span class="d"></span>${esc(x.name)}${x.hidden?' <span class="faint" style="font-size:11px">скрыта</span>':''}<span class="cnt">${ch?n+'/':''}${vis.length}</span></span>`; }).join('')}<span class="faint" style="margin-left:auto;font-size:12px">${ch&&canEdit(ch)?'клик — изучить · ПКМ — карточка (там же откат)':'ПКМ — карточка'}${isDM()?' · узлы можно двигать':''}</span></div>`); $$('.bch',bar).forEach(c=>c.onclick=()=>{ TK.branch=c.dataset.b; render(); }); return bar; }
 function techRenderSky(v,ch){
@@ -6488,7 +6491,7 @@ function skillsBlock(ch){
 let techEd={mode:'list',id:null,q:'',branch:'all'};
 function techEditor(id){ if(!isDM()||viewAs) return; techEd={...techEd,mode:id?'form':'list',id:id||null}; $('#techdrawer').classList.add('on'); techDrawEditor(); }
 function techCloseEditor(){ $('#techdrawer').classList.remove('on'); }
-function techSave(){ techLayoutCache={}; touch(techCat()); render(); }
+function techSave(){ touch(techCat()); render(); }
 function techDrawEditor(){ const d=$('#techdbody'); if(!d) return; d.innerHTML=''; const cat=techCat();
   const top=el(`<div class="dh"><h3>Редактор техник</h3><span class="grow"></span><button class="btn sm" id="tExport">экспорт</button><button class="btn sm" id="tImport">импорт</button><button class="btn sm" id="tBase" title="Загрузить набор из старой таблицы (заменит каталог)">из таблицы</button><button class="btn sm" id="tClose">✕</button></div>`);
   $('#tClose',top).onclick=techCloseEditor;
