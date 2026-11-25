@@ -2009,7 +2009,7 @@ if(MOCK){
     syncInfo:()=>({mode:SYNC_MODE,...SYNC_STAT}),
     /* режим из site/main.sync; действует со следующего захода. Выключение при работающем дочитывании — сразу (перезагрузка) */
     syncModeSet(v){ v=SYNC_MODES.includes(v)?v:'shadow'; try{ localStorage.setItem('fsSyncMode',v); }catch{} if(v==='off'&&SYNC_MODE==='on'&&SYNC_STAT.live&&reloadOk()) location.reload(); },
-    set:(coll,id,data)=>{ STAT.w++; const go=d=>wSet(coll,id,clean(d)); return TH_COLLS.has(coll)?thOut(coll,id,clean(data),true).then(go):go(data); },
+    set:(coll,id,data)=>{ STAT.w++; const d=cbase(coll)==='meta'&&id==='techniques'?techNormalizeGroups(data):data; const go=v=>wSet(coll,id,clean(v)); return TH_COLLS.has(coll)?thOut(coll,id,clean(d),true).then(go):go(d); },
     update:(coll,id,part)=>{ STAT.w++; const go=p=>wUpd(coll,id,p); return TH_COLLS.has(coll)?thOut(coll,id,{...part},false).then(go):go(part); },
     /* несколько записей одной пачкой — локально и у других применяется целиком. ops [{coll,id,data}] — документ целиком (как set), [{coll,id,part}] — поля (как update).
        Метки _t и надгробия — как у одиночных записей (wSet/wUpd); пачка не прошла — не записалось ничего */
@@ -2360,7 +2360,7 @@ function txWrite(coll,docId,part,base,keys,data){
   const tb=TXB.get(docId); if(tb) tb.n++; else TXB.set(docId,{n:1,base});
   const prev=TXQ.get(docId)||Promise.resolve();
   const dec=()=>{ const t=TXB.get(docId); if(t&&--t.n<=0){ TXB.delete(docId); return true; } return false; };
-  const plain=e=>{ if(e&&e.code==='not-found') return DB.set(coll,docId,data); if(e&&e.code==='permission-denied') throw e; return DB.update(coll,docId,part).catch(e2=>{ if(e2.code==='not-found') return DB.set(coll,docId,data); throw e2; }); }; /* нет сети и т.п. — пишем как раньше, Firestore доставит из очереди */
+  const plain=async e=>{ if(e&&e.code==='not-found') return DB.set(coll,docId,data); if(e&&e.code==='permission-denied') throw e; try{ return await DB.update(coll,docId,part); }catch(e2){ if(e2.code==='not-found') return DB.set(coll,docId,data); throw e2; } }; /* нет сети и т.п. — пишем как раньше, Firestore доставит из очереди */
   const run=prev.catch(()=>{}).then(()=>{
     if(Date.now()<TX_SLOW){ dec(); return plain(null); }
     let over=false, timer=0;
@@ -2370,7 +2370,7 @@ function txWrite(coll,docId,part,base,keys,data){
             e=>{ if(over) return; clearTimeout(timer); if(e&&e.code==='resource-exhausted') TX_SLOW=Date.now()+TX_QUOTA_MS; dec(); return plain(e); });
     const late=new Promise(res=>{ timer=setTimeout(()=>{ over=true; TX_SLOW=Math.max(TX_SLOW,Date.now()+TX_SLOW_MS); console.warn('запись со слиянием дольше',TX_MS/1000,'с — пишу обычной записью:',coll,docId); dec(); res(plain(null)); },TX_MS); });
     return Promise.race([tx,late]); });
-  TXQ.set(docId,run); run.finally(()=>{ if(TXQ.get(docId)===run) TXQ.delete(docId); }); return run; }
+  const queued=run.finally(()=>{ if(TXQ.get(docId)===queued) TXQ.delete(docId); }); TXQ.set(docId,queued); return queued; }
 /* ---- параллельная работа: трёхстороннее слияние (база = последняя известная версия сервера) ---- */
 const SYNC_META=new Set(['updatedAt','updatedBy','_pending']);
 const isObj=v=>v&&typeof v==='object'&&!Array.isArray(v);
@@ -6263,10 +6263,12 @@ function techBaseCatalog(){ const B=window.TECH_BASE||{branches:[],mastery:{item
     if(r&&!/^нет$/i.test(r)){ const parts=r.split(/\s*\/\s*|\s+или\s+/i).map(x=>x.trim().toLowerCase()).filter(Boolean); const ids=parts.map(p=>byN.get(p)).filter(Boolean); if(ids.length){ it.req=ids; it.reqAny=parts.length>1; } else it.special=r; }
     const inc=(it.incText||'').trim(); it.inc=[]; if(inc&&!/один из вариантов/i.test(inc)){ const id=byN.get(inc.toLowerCase()); if(id) it.inc.push(id); } delete it.reqText; delete it.incText; }
   for(const it of all) for(const o of it.inc){ const other=all.find(x=>x.id===o); if(other&&!other.inc.includes(it.id)) other.inc.push(it.id); }
-  const groups=[['Эгоцентризм','Воплощение духа','Своя территория'],['Позитивная энергия','Негативная энергия']].map(g=>g.map(n=>byN.get(n.toLowerCase())).filter(Boolean));
+  const groups=[['Эгоцентризм','Воплощение духа','Своя территория'],['Позитивная энергия','Негативная энергия']].map(g=>({ids:g.map(n=>byN.get(n.toLowerCase())).filter(Boolean)}));
   return {id:'techniques',branches:brs,groups,defaultPools:{common:14,mast:8}};
 }
-const techCat=()=>{ const c=world.techniques||(world.techniques={id:'techniques',branches:[],groups:[],defaultPools:{common:14}}); for(const b of c.branches||[]) for(const i of b.items||[]) i.branch=b.id; return c; };
+// Старый JSON и локальные каталоги могли хранить группу массивом внутри массива.
+function techNormalizeGroups(cat){ if(!Array.isArray(cat.groups)||!cat.groups.some(Array.isArray)) return cat; return {...cat,groups:cat.groups.map(g=>Array.isArray(g)?{ids:g}:g)}; }
+const techCat=()=>{ const c=world.techniques||(world.techniques={id:'techniques',branches:[],groups:[],defaultPools:{common:14}}); const normalized=techNormalizeGroups(c); if(normalized!==c) c.groups=normalized.groups; for(const b of c.branches||[]) for(const i of b.items||[]) i.branch=b.id; return c; };
 const techItems=()=>techCat().branches.flatMap(b=>b.items.map(i=>(i.branch=b.id,i)));
 /* кнопки действий техники: it.acts=[{id,label,f,back?,n?,max?}] — f выполняется по клику (карточка в чат «применил технику»), back — «−» (отмена шага),
    n — формула счётчика на кнопке (n/max), max 1 — переключатель (подсвечен, когда n>0). Видны изученным в «Моём» и на листе */
@@ -6322,7 +6324,7 @@ const techLearned=(ch,it)=>techRank(ch,it)>0;
 /* видимость техники для текущего зрителя: скрытую видит дм; остальные — только если персонаж её изучил */
 function techVisible(it,ch){ if(isDM()) return true; const b=techBranch(it.branch); if(b?.hidden&&!(ch&&techLearned(ch,it))) return false; return !it.hidden||(ch&&techLearned(ch,it)); }
 function techReqOk(ch,it){ if(it.special) return !!prog(ch).special[it.id]; if(!it.req?.length) return true; const ok=it.req.map(id=>prog(ch).learned[id]>0); return it.reqAny?ok.some(Boolean):ok.every(Boolean); }
-function techBlockedBy(ch,it){ const L=prog(ch).learned; const b=(it.inc||[]).filter(id=>L[id]>0); for(const g of techCat().groups||[]) if(g.includes(it.id)) for(const id of g) if(id!==it.id&&L[id]>0&&!b.includes(id)) b.push(id); return b; }
+function techBlockedBy(ch,it){ const L=prog(ch).learned; const b=(it.inc||[]).filter(id=>L[id]>0); for(const {ids} of techCat().groups||[]) if(ids.includes(it.id)) for(const id of ids) if(id!==it.id&&L[id]>0&&!b.includes(id)) b.push(id); return b; }
 function techNextCost(ch,it){ const r=techRank(ch,it); if(r>=techRanks(it)) return null; return techRankCost(it,r+1); }
 const techCanPay=(ch,it,c)=>(prog(ch).pools[it.branch]||0)+(prog(ch).pools.common||0)>=c;
 function techStatus(ch,it){ if(!ch) return 'none'; const r=techRank(ch,it); if(r>=techRanks(it)) return 'learned'; if(r>0){ const c=techNextCost(ch,it); if(c==null) return 'learned'; return techCanPay(ch,it,c)?'up':'uppoor'; } if(techBlockedBy(ch,it).length) return 'blocked'; if(!techReqOk(ch,it)) return 'locked'; const c=techNextCost(ch,it); if(c==null) return 'locked'; return techCanPay(ch,it,c)?'avail':'poor'; }
@@ -6345,7 +6347,7 @@ function techUnlearn(ch,it){
   prog(ch).pools[it.branch]=(prog(ch).pools[it.branch]||0)+refund; if(r>1) prog(ch).learned[it.id]=r-1; else delete prog(ch).learned[it.id]; techLog(ch,`откатил технику «${it.name}»${r>1?` до ранга ${r-1}`:''}, +${refund} в ${techBranch(it.branch)?.short||it.branch}`,before); toast(`Откачено «${it.name}»${r>1?` до ранга ${r-1}`:''}: +${refund} в ${techBranch(it.branch)?.short||''}`); touch(ch); render(); }
 const TECH_ST={learned:'<span style="color:var(--gold)">✓ изучено</span>',up:'<span style="color:var(--mint)">▲ клик — повысить ранг</span>',uppoor:'<span style="color:var(--gold)">▲ ранг выше — не хватает очков</span>',avail:'<span style="color:var(--mint)">● доступно — клик, чтобы изучить</span>',poor:'<span style="color:var(--gold)">◌ не хватает очков</span>',locked:'<span class="faint">🔒 закрыто</span>',blocked:'<span style="color:var(--red)">✕ несовместимо с изученным</span>',none:'<span class="faint">справочник</span>'};
 let techTipItem=null, techTipChar=null;
-function techTipHtml(it,ch){ const st=techStatus(ch,it); const c=ch?techNextCost(ch,it):null; const b=techBranch(it.branch); const inc=[...new Set([...(it.inc||[]),...(techCat().groups||[]).filter(g=>g.includes(it.id)).flat().filter(id=>id!==it.id)])].filter(id=>techById(id)&&techVisible(techById(id),ch)); const ed=ch&&canEdit(ch);
+function techTipHtml(it,ch){ const st=techStatus(ch,it); const c=ch?techNextCost(ch,it):null; const b=techBranch(it.branch); const inc=[...new Set([...(it.inc||[]),...(techCat().groups||[]).flatMap(({ids})=>ids.includes(it.id)?ids:[]).filter(id=>id!==it.id)])].filter(id=>techById(id)&&techVisible(techById(id),ch)); const ed=ch&&canEdit(ch);
   return `<h4><span style="color:${b?.color||'#fff'}">${it.main?'◆':'●'}</span>${esc(it.name)}${it.hidden&&isDM()?'<span class="faint" style="font-size:11px;font-weight:400">· скрыта</span>':''}${it.tag?`<span class="faint" style="font-size:11px;font-weight:400">· ${esc(it.tag)}</span>`:''}<span class="cost">${ch&&techRanks(it)>1?`ранг ${techRank(ch,it)}/${techRanks(it)} · `:''}${(()=>{ const c=ch?techNextCost(ch,it):techCost(it); return c!=null?c+' очк.':(ch&&techRank(ch,it)?'макс.':esc(it.cost||'?')); })()}</span></h4>${it.roll?`<div class="sec"><b>Бросок</b><code style="font-size:12px">${esc(it.roll)}</code></div>`:''}
    <div class="muted" style="font-size:12.5px">${rich(it.desc)}</div>
    ${it.effect?`<div class="sec"><b>Эффект</b><span class="eff">${rich(it.effect)}</span></div>`:''}
@@ -6490,7 +6492,7 @@ function techSave(){ techLayoutCache={}; touch(techCat()); render(); }
 function techDrawEditor(){ const d=$('#techdbody'); if(!d) return; d.innerHTML=''; const cat=techCat();
   const top=el(`<div class="dh"><h3>Редактор техник</h3><span class="grow"></span><button class="btn sm" id="tExport">экспорт</button><button class="btn sm" id="tImport">импорт</button><button class="btn sm" id="tBase" title="Загрузить набор из старой таблицы (заменит каталог)">из таблицы</button><button class="btn sm" id="tClose">✕</button></div>`);
   $('#tClose',top).onclick=techCloseEditor;
-  $('#tExport',top).onclick=()=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(cat,null,2)],{type:'application/json'})); a.download='techniques.json'; a.click(); };
+  $('#tExport',top).onclick=()=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({...cat,groups:cat.groups?.map(g=>g.ids)},null,2)],{type:'application/json'})); a.download='techniques.json'; a.click(); };
   $('#tImport',top).onclick=()=>{ const f=$('#jsonIn'); f.value=''; f.onchange=async()=>{ try{ const c=JSON.parse(await f.files[0].text()); if(!c.branches) throw 0; world.techniques={...c,id:'techniques'}; techSave(); techDrawEditor(); toast('Каталог импортирован'); }catch{ toast('Не удалось прочитать файл',true); } }; f.click(); };
   $('#tBase',top).onclick=async()=>{ if(!await confirmDlg('Заменить каталог набором из старой таблицы? Текущие правки пропадут.','Заменить')) return; world.techniques=techBaseCatalog(); techSave(); techDrawEditor(); };
   d.append(top); const wrap=el('<div class="dbody"><aside class="dlist"></aside><section class="dmain"></section></div>'); d.append(wrap); const side=$('.dlist',wrap), body=$('.dmain',wrap);
